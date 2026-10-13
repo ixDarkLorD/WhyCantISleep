@@ -35,7 +35,8 @@ public final class MindStatus {
     private static final int SHEET_HEIGHT = 18;
     // A gauge: a medal with the icon on it, and a track running out from under its right side for the bar.
     private static final int TRACK_X = HudStyle.MEDAL_SIZE - 4;
-    private static final int TRACK_Y = (HudStyle.MEDAL_SIZE - HudStyle.TRACK_HEIGHT) / 2;
+    // The bar itself is 11 tall, centered on the medal.
+    private static final int TRACK_Y = (HudStyle.MEDAL_SIZE - 11) / 2;
     // Where the color runs along the track, and where a bar ends for laying the two out (lucidity's point pokes on).
     private static final int FILL_X = TRACK_X + 2;
     private static final int FILL_WIDTH = HudStyle.GAUGE_FILL_WIDTH;

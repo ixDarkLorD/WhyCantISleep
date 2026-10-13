@@ -26,10 +26,10 @@ public final class HudStyle {
     public static final Identifier LUCIDITY_MEDAL = WhyCantISleep.id("hud/lucidity_medal");
     public static final Identifier LUCIDITY_TRACK = WhyCantISleep.id("hud/lucidity_track");
     public static final Identifier LUCIDITY_FRAME = WhyCantISleep.id("hud/lucidity_frame");
-    /** A medal's size, and a track's: they are drawn as they are, never stretched. */
+    /** A medal's size, and a track's (the bar, and a pixel more each way for its shadow): drawn as they are, never stretched. */
     public static final int MEDAL_SIZE = 19;
-    public static final int TRACK_WIDTH = 72;
-    public static final int TRACK_HEIGHT = 11;
+    public static final int TRACK_WIDTH = 73;
+    public static final int TRACK_HEIGHT = 12;
     /** A gauge's fill: it runs along the track from 2 in, 1 down, eight blocks of 8 long. */
     public static final int GAUGE_FILL_WIDTH = 64;
     public static final int GAUGE_FILL_HEIGHT = 9;
