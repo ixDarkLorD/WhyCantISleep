@@ -29,6 +29,18 @@
       { "name": "minecraft:entity.phantom.hurt", "type": "event" }
     ]
   },
+  "lurker.lure": {
+    "subtitle": "subtitles.whycantisleep.lurker.lure",
+    "sounds": [
+      { "name": "minecraft:entity.warden.listening_angry", "type": "event" }
+    ]
+  },
+  "lurker.notice": {
+    "subtitle": "subtitles.whycantisleep.lurker.notice",
+    "sounds": [
+      { "name": "minecraft:entity.warden.roar", "type": "event" }
+    ]
+  },
   "lurker.vanish": {
     "subtitle": "subtitles.whycantisleep.lurker.vanish",
     "sounds": [

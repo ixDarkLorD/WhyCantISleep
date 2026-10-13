@@ -16,6 +16,8 @@ import net.ixdarklord.whycantisleep.client.highlight.Highlights;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotice;
 import net.ixdarklord.whycantisleep.config.WCISClientConfig;
 import net.ixdarklord.whycantisleep.config.WCISConfigs;
+import net.ixdarklord.whycantisleep.lurker.LurkerEntity;
+import net.ixdarklord.whycantisleep.lurker.LurkerPalette;
 import net.ixdarklord.whycantisleep.sound.WCISSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -37,27 +39,37 @@ public final class SleepEffects {
     // The client ticks, after the monsters were pointed out, at which a whisper comes.
     private static final int[] WHISPER_TICKS = {8, 34};
 
-    // Two points of light for a second: eyes, the cold violet of the Lurker's.
+    // Two points of light for a second: eyes, the rose of the Lurker's.
     private static final ParticleSpec EYE = ParticleSpec.builder(VfxMaterial.additive(VfxMaterial.GLOW))
             .lifetime(26, 30)
             .size(Curve.of(0.0F, 0.07F, 0.0F).easing(Easing.EXPO_OUT, Easing.EXPO_IN))
             .opacity(Curve.of(0.0F, 1.0F, 0.0F).easing(Easing.EXPO_OUT, Easing.SINE_IN))
-            .color(0xC9A6FF, 0x4A1AD0)
+            .color(LurkerPalette.BLUSH, LurkerPalette.VIOLET)
             .build();
     // A mote of the same light, drifting up from the Lurker's eyes and thinning away.
     private static final ParticleSpec EYE_MOTE = ParticleSpec.builder(VfxMaterial.additive(VfxMaterial.GLOW))
             .lifetime(14, 24)
             .size(Curve.of(0.05F, 0.035F, 0.0F))
             .opacity(Curve.of(0.0F, 0.8F, 0.0F))
-            .color(0xD8C2FF, 0x3A12B8)
+            .color(LurkerPalette.BLUSH, LurkerPalette.VIOLET)
             .drag(0.96F)
             .build();
-    // Darkness pouring out from under the bed.
+    // A crackle of pale light off the Lurker as it hunts: a short bright streak, gone in a few ticks.
+    private static final ParticleSpec ARC = ParticleSpec.builder(VfxMaterial.additive(VfxMaterial.STREAK))
+            .shape(ParticleSpec.Shape.SPARK)
+            .lifetime(3, 7)
+            .size(Curve.of(0.035F, 0.02F, 0.0F))
+            .opacity(Curve.of(1.0F, 0.9F, 0.0F))
+            .color(LurkerPalette.BLUSH, LurkerPalette.MAUVE)
+            .stretch(3.5F)
+            .drag(0.8F)
+            .build();
+    // Darkness pouring out from under the bed, storm-dark with a little plum in it.
     private static final ParticleSpec SHADOW = ParticleSpec.builder(VfxMaterial.alpha(VfxMaterial.SMOKE))
             .lifetime(24, 44)
             .size(Curve.of(0.15F, 0.55F, 0.7F).easing(Easing.EXPO_OUT, Easing.LINEAR))
             .opacity(Curve.of(0.0F, 0.85F, 0.0F))
-            .color(0x08060C)
+            .color(0x1B161F)
             .randomRoll()
             .drag(0.9F)
             .build();
@@ -143,7 +155,17 @@ public final class SleepEffects {
     /** What hangs about the Lurker: darkness clinging to its body, and motes of cold light bleeding up from its eyes. */
     public static void lurkerAura(Entity entity) {
         shadowTrail(entity);
-        if (!(entity instanceof net.minecraft.world.entity.LivingEntity living) || entity.tickCount % 3 != 0) return;
+        if (!(entity instanceof LurkerEntity living)) return;
+        // Hunting, it crackles: arcs leap off its body, thick and fast as the hunt begins and steadily after.
+        if (living.isHunting()) {
+            AABB box = entity.getBoundingBox();
+            int arcs = living.huntAmount(1.0F) < 0.6F ? 5 : (entity.tickCount % 2 == 0 ? 1 : 0);
+            for (int i = 0; i < arcs; i++) {
+                WorldParticles.spawn(ARC, box.minX + RANDOM.nextDouble() * box.getXsize(), box.minY + RANDOM.nextDouble() * box.getYsize() * 1.3, box.minZ + RANDOM.nextDouble() * box.getZsize(),
+                        (RANDOM.nextDouble() - 0.5) * 0.5, (RANDOM.nextDouble() - 0.2) * 0.4, (RANDOM.nextDouble() - 0.5) * 0.5);
+            }
+        }
+        if (entity.tickCount % 3 != 0) return;
         // The eyes sit at the front of its head, either side of the way it faces.
         float yaw = living.yHeadRot * Mth.DEG_TO_RAD;
         Vec3 forward = new Vec3(-Mth.sin(yaw), 0.0, Mth.cos(yaw));

@@ -16,6 +16,7 @@ import net.ixdarklord.whycantisleep.sound.WCISSounds;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -53,11 +54,16 @@ public final class LurkerServer {
     // Once hunted, each second it has this chance in one to come.
     private static final int SUMMON_ODDS = 15;
     private static final int DREAD_AFTER_DEATH = 30;
+    // Ignored, it stays away this long before it tries again.
+    private static final int RETURN_TICKS = 20 * 40;
 
     // Players who asked for no scary content, each player's last bed, and the creature out for each.
     private static final Set<UUID> OPTED_OUT = new HashSet<>();
     private static final Map<UUID, Bed> LAST_BED = new HashMap<>();
     private static final Map<UUID, LurkerEntity> ACTIVE = new HashMap<>();
+    // How many times in a row each player ignored it, and the server tick before which it won't come back for them.
+    private static final Map<UUID, Integer> IGNORED = new HashMap<>();
+    private static final Map<UUID, Integer> NOT_BEFORE = new HashMap<>();
 
     private LurkerServer() {
     }
@@ -69,14 +75,24 @@ public final class LurkerServer {
         PlayerEvents.LEAVE.register(player -> {
             OPTED_OUT.remove(player.getUUID());
             LAST_BED.remove(player.getUUID());
+            IGNORED.remove(player.getUUID());
+            NOT_BEFORE.remove(player.getUUID());
         });
         ServerLifecycleEvents.STOPPED.register(server -> {
             OPTED_OUT.clear();
             LAST_BED.clear();
             ACTIVE.clear();
+            IGNORED.clear();
+            NOT_BEFORE.clear();
         });
         CommandEvents.REGISTER.register((dispatcher, context, selection) -> dispatcher.register(Commands.literal(WhyCantISleep.MOD_ID)
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .then(Commands.literal("ignored").then(Commands.argument("times", IntegerArgumentType.integer(0, 9)).executes(ctx -> {
+                    int times = IntegerArgumentType.getInteger(ctx, "times");
+                    IGNORED.put(ctx.getSource().getPlayerOrException().getUUID(), times);
+                    ctx.getSource().sendSuccess(() -> Component.translatable("commands.whycantisleep.ignored.set", times), true);
+                    return times;
+                })))
                 .then(Commands.literal("summon").executes(ctx -> {
                     ServerPlayer player = ctx.getSource().getPlayerOrException();
                     boolean came = summon(player);
@@ -109,10 +125,10 @@ public final class LurkerServer {
         }
     }
 
-    /** Whether the creature may trouble this player at all. */
+    /** Whether the creature may trouble this player at all. Never in Peaceful, where the game lets nothing hunt a player. */
     public static boolean troubles(ServerPlayer player) {
         return WCISServerConfig.BED_CREATURE.get() && !OPTED_OUT.contains(player.getUUID()) && WCISNetwork.hasMod(player)
-                && !player.isCreative() && !player.isSpectator();
+                && !player.isCreative() && !player.isSpectator() && player.level().getDifficulty() != Difficulty.PEACEFUL;
     }
 
     /** A player lay down to sleep ({@code ServerPlayerMixin}): in the dark it feeds the dread, in the light it eases it. */
@@ -142,6 +158,7 @@ public final class LurkerServer {
         // It comes in the dark: at night, or wherever the light doesn't reach.
         ServerLevel level = player.level();
         if (Dread.stage(player) == Dread.Stage.HUNTED && !ACTIVE.containsKey(player.getUUID())
+                && level.getServer().getTickCount() >= NOT_BEFORE.getOrDefault(player.getUUID(), 0)
                 && (level.isDarkOutside() || level.getMaxLocalRawBrightness(player.blockPosition()) < DARK_LIGHT)
                 && player.getRandom().nextInt(SUMMON_ODDS) == 0) {
             summon(player);
@@ -167,6 +184,7 @@ public final class LurkerServer {
         if (lurker == null) return false;
         lurker.snapTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, player.getRandom().nextFloat() * 360.0F, 0.0F);
         lurker.setVictim(player.getUUID());
+        lurker.setLure(IGNORED.getOrDefault(player.getUUID(), 0));
         if (!level.addFreshEntity(lurker)) return false;
         ACTIVE.put(player.getUUID(), lurker);
         level.playSound(null, spot, WCISSounds.LURKER_EMERGE, SoundSource.HOSTILE, 0.8F, 1.0F);
@@ -186,6 +204,26 @@ public final class LurkerServer {
             }
         }
         return null;
+    }
+
+    /** Its player never looked at it, and it left: it will be back, and less patient. */
+    static void onIgnored(LurkerEntity lurker) {
+        UUID victim = lurker.victim();
+        if (victim == null || lurker.level().getServer() == null) return;
+        IGNORED.merge(victim, 1, Integer::sum);
+        NOT_BEFORE.put(victim, lurker.level().getServer().getTickCount() + RETURN_TICKS);
+    }
+
+    /** Its player outran it: it lets them go, for now. */
+    static void onEscaped(LurkerEntity lurker) {
+        UUID victim = lurker.victim();
+        if (victim == null || lurker.level().getServer() == null) return;
+        NOT_BEFORE.put(victim, lurker.level().getServer().getTickCount() + RETURN_TICKS);
+    }
+
+    /** Its player looked at it: being ignored is over. */
+    static void onHuntStarted(LurkerEntity lurker) {
+        if (lurker.victim() != null) IGNORED.remove(lurker.victim());
     }
 
     /** The creature was killed: its player's dread is over. */

@@ -28,6 +28,10 @@ public final class WCISSounds {
     public static final SoundEvent LURKER_DEATH = sound("lurker.death");
     /** The Lurker coming out into the world. */
     public static final SoundEvent LURKER_EMERGE = sound("lurker.emerge");
+    /** The Lurker, ignored before, calling to be looked at. */
+    public static final SoundEvent LURKER_LURE = sound("lurker.lure");
+    /** The Lurker seen, and starting its hunt. */
+    public static final SoundEvent LURKER_NOTICE = sound("lurker.notice");
     /** The Lurker gone: at daylight, or with its player out of reach. */
     public static final SoundEvent LURKER_VANISH = sound("lurker.vanish");
 
