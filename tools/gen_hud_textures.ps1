@@ -62,7 +62,9 @@ function Depth($width, $height, $inside) {
             $edge = $false
             for ($dy = -1; $dy -le 1 -and -not $edge; $dy++) { for ($dx = -1; $dx -le 1; $dx++) {
                 $nx = $x + $dx; $ny = $y + $dy
-                if ($nx -lt 0 -or $ny -lt 0 -or $nx -ge $width -or $ny -ge $height -or $depth[$nx, $ny] -lt $ring -and $depth[$nx, $ny] -ne 99) { $edge = $true; break }
+                # Off the picture counts as outside. (Checked on its own: a negative index would wrap round to the far side.)
+                if ($nx -lt 0 -or $ny -lt 0 -or $nx -ge $width -or $ny -ge $height) { $edge = $true; break }
+                if ($depth[$nx, $ny] -lt $ring) { $edge = $true; break }
             } }
             if ($edge) { $found += , @($x, $y) }
         } }
