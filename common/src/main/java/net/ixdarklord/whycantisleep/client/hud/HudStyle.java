@@ -22,7 +22,7 @@ public final class HudStyle {
     public static final Identifier MOOD_MEDAL = WhyCantISleep.id("hud/mood_medal");
     public static final Identifier MOOD_TRACK = WhyCantISleep.id("hud/mood_track");
     public static final Identifier MOOD_FRAME = WhyCantISleep.id("hud/mood_frame");
-    /** The lucidity gauge: a rose diamond for its icon, and a capsule that runs on into a lit point. */
+    /** The lucidity gauge: a rose diamond for its icon, and a capsule that runs on into a point. */
     public static final Identifier LUCIDITY_MEDAL = WhyCantISleep.id("hud/lucidity_medal");
     public static final Identifier LUCIDITY_TRACK = WhyCantISleep.id("hud/lucidity_track");
     public static final Identifier LUCIDITY_FRAME = WhyCantISleep.id("hud/lucidity_frame");
