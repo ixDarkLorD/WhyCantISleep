@@ -69,9 +69,10 @@ public final class MindStatus {
         int y = top - RISE;
         int lucidityX = x + GAUGE_WIDTH + BETWEEN;
         float time = Util.getMillis() / 50.0F;
-        gauge(graphics, HudStyle.MOOD_TRACK, HudStyle.MOOD_FRAME, HudStyle.MOOD_MEDAL, HudStyle.MOOD_FILL, x, y, mind.mood(), mind.moodCeiling(), time);
+        gauge(graphics, HudStyle.MOOD_TRACK, HudStyle.MOOD_FRAME, HudStyle.MOOD_MEDAL, HudStyle.MOOD_FILL, HudStyle.MOOD_LIMIT, x, y, mind.mood(), mind.moodCeiling(), time);
         moodIcon(graphics, mind.moodLevel(), x + HudStyle.MEDAL_INSET, y + HudStyle.MEDAL_INSET, 1.0F);
-        gauge(graphics, HudStyle.LUCIDITY_TRACK, HudStyle.LUCIDITY_FRAME, HudStyle.LUCIDITY_MEDAL, HudStyle.LUCIDITY_FILL, lucidityX, y, mind.lucidity(), mind.lucidityCeiling(),
+        gauge(graphics, HudStyle.LUCIDITY_TRACK, HudStyle.LUCIDITY_FRAME, HudStyle.LUCIDITY_MEDAL, HudStyle.LUCIDITY_FILL, HudStyle.LUCIDITY_LIMIT, lucidityX, y, mind.lucidity(),
+                mind.lucidityCeiling(),
                 time + GLINT_EVERY / 2.0F);
         lucidityIcon(graphics, mind.stage(), lucidityX + HudStyle.MEDAL_INSET, y + HudStyle.MEDAL_INSET, 1.0F);
         if (mouseY >= y && mouseY < y + HudStyle.MEDAL_SIZE) {
@@ -82,10 +83,10 @@ public final class MindStatus {
     }
 
     // One gauge: the track with its empty blocks, the color up to the value with a glint passing over it, what the
-    // other bar closes off dimmed at the far end with a bright stop where it begins, the frame over all of that (it
+    // other bar closes off striped at the far end behind a limiter line, the frame over all of that (it
     // rounds the color's ends off and cuts it into blocks), then the medal over the bar's near end.
-    private static void gauge(GuiGraphicsExtractor graphics, Identifier track, Identifier frame, Identifier medal, Identifier fill, int x, int y, float value,
-                              float ceiling, float time) {
+    private static void gauge(GuiGraphicsExtractor graphics, Identifier track, Identifier frame, Identifier medal, Identifier fill, Identifier limit, int x, int y,
+                              float value, float ceiling, float time) {
         int fillX = x + FILL_X;
         int trackY = y + TRACK_Y;
         int top = trackY + 1;
@@ -105,9 +106,12 @@ public final class MindStatus {
 
         int closed = Math.round(FILL_WIDTH * (1.0F - Mth.clamp(ceiling / Mind.MAX, 0.0F, 1.0F)));
         if (closed > 0) {
+            // The limiter: a bright line where the bar stops, with a dark one behind it so it shows against the color,
+            // and from there to the bar's end the stripes.
             int from = fillX + FILL_WIDTH - closed;
-            graphics.fill(from, top, fillX + FILL_WIDTH, bottom, 0x96101014);
-            graphics.fill(from - 1, top, from, bottom, 0xDCFFFFFF);
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, limit, from, top, closed, HudStyle.GAUGE_FILL_HEIGHT);
+            graphics.fill(from - 1, top, from, bottom, 0xFF101014);
+            graphics.fill(from, top, from + 1, bottom, 0xFFFFFFFF);
         }
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, frame, x + TRACK_X, trackY, HudStyle.TRACK_WIDTH, HudStyle.TRACK_HEIGHT);
         HudStyle.medal(graphics, medal, x, y, 1.0F);

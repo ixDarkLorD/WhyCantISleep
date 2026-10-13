@@ -3,6 +3,7 @@
 #   card.png          the message card and the sleep board: dusk plum, outlined and shaded like the bars
 #   mood_medal.png, mood_track.png, mood_frame.png              the mood gauge: a gold coin and a round capsule of blocks
 #   lucidity_medal.png, lucidity_track.png, lucidity_frame.png  the lucidity gauge: a rose diamond and a pointed one
+#   mood_limit.png, lucidity_limit.png  the stripes over the part of a gauge the other bar closes off
 #   bar_back.png      the empty track of a status bar
 #   sleep_fill.png    what fills it on the sleep board: green
 #   mood_fill.png, lucidity_fill.png   what fills the gauges: bright gold, and rose
@@ -170,6 +171,20 @@ function GaugeFill($name, $light, $base, $shade, $deep) {
 }
 GaugeFill "mood_fill" 0xFFE27A 0xFFC02E 0xE09A1E 0xB87616
 GaugeFill "lucidity_fill" 0xF4C6CC 0xD992B0 0xA86488 0x8A4E7C
+# What lies over the part of a gauge the other bar closes off: diagonal stripes in two dim tones of the bar's own
+# color, as on a barrier. It tiles along the bar (the stripes repeat every 4 pixels, the picture every 8).
+function GaugeLimit($name, $stripe, $between) {
+    $b = New-Object System.Drawing.Bitmap 8, 9
+    for ($y = 0; $y -lt 9; $y++) { for ($x = 0; $x -lt 8; $x++) {
+        $b.SetPixel($x, $y, (Argb 255 $(if ((($x + $y) % 4) -lt 2) { $stripe } else { $between })))
+    } }
+    $b.Save((Join-Path $dir "$name.png"), [System.Drawing.Imaging.ImageFormat]::Png)
+    $b.Dispose()
+    $meta = "{`n  `"gui`": {`n    `"scaling`": {`n      `"type`": `"tile`",`n      `"width`": 8,`n      `"height`": 9`n    }`n  }`n}`n"
+    [IO.File]::WriteAllText((Join-Path $dir "$name.png.mcmeta"), $meta, $utf8)
+}
+GaugeLimit "mood_limit" 0x7A5616 0x3A280C
+GaugeLimit "lucidity_limit" 0x6A4266 0x33203A
 # A bar's empty track: an outline and a dark groove.
 $b = New-Object System.Drawing.Bitmap 8, 5
 for ($y = 0; $y -lt 5; $y++) { for ($x = 0; $x -lt 8; $x++) {
