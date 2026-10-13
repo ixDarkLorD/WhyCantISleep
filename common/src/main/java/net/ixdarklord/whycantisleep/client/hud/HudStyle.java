@@ -15,10 +15,10 @@ import net.minecraft.util.Mth;
 public final class HudStyle {
     /** The message card and the sleep board: slate. */
     public static final Identifier CARD = WhyCantISleep.id("hud/card");
-    /** The mood gauge: a gold coin for its icon, and the riveted track its bar runs in. */
+    /** The mood gauge: a gold coin for its icon, and the round-ended track its bar runs in. */
     public static final Identifier MOOD_MEDAL = WhyCantISleep.id("hud/mood_medal");
     public static final Identifier MOOD_TRACK = WhyCantISleep.id("hud/mood_track");
-    /** The lucidity gauge: a rose diamond for its icon, and the notched, pointed track its bar runs in. */
+    /** The lucidity gauge: a rose diamond for its icon, and the pointed track its bar runs in. */
     public static final Identifier LUCIDITY_MEDAL = WhyCantISleep.id("hud/lucidity_medal");
     public static final Identifier LUCIDITY_TRACK = WhyCantISleep.id("hud/lucidity_track");
     /** A medal's size, and a track's: they are drawn as they are, never stretched. */
