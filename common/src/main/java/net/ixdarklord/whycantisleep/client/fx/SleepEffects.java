@@ -39,37 +39,37 @@ public final class SleepEffects {
     // The client ticks, after the monsters were pointed out, at which a whisper comes.
     private static final int[] WHISPER_TICKS = {8, 34};
 
-    // Two points of light for a second: eyes, the rose of the Lurker's.
+    // Two points of light for a second: eyes, the red of the Lurker's.
     private static final ParticleSpec EYE = ParticleSpec.builder(VfxMaterial.additive(VfxMaterial.GLOW))
             .lifetime(26, 30)
             .size(Curve.of(0.0F, 0.07F, 0.0F).easing(Easing.EXPO_OUT, Easing.EXPO_IN))
             .opacity(Curve.of(0.0F, 1.0F, 0.0F).easing(Easing.EXPO_OUT, Easing.SINE_IN))
-            .color(LurkerPalette.BLUSH, LurkerPalette.VIOLET)
+            .color(LurkerPalette.RED, LurkerPalette.CRIMSON)
             .build();
     // A mote of the same light, drifting up from the Lurker's eyes and thinning away.
     private static final ParticleSpec EYE_MOTE = ParticleSpec.builder(VfxMaterial.additive(VfxMaterial.GLOW))
             .lifetime(14, 24)
             .size(Curve.of(0.05F, 0.035F, 0.0F))
             .opacity(Curve.of(0.0F, 0.8F, 0.0F))
-            .color(LurkerPalette.BLUSH, LurkerPalette.VIOLET)
+            .color(LurkerPalette.RED, LurkerPalette.CRIMSON)
             .drag(0.96F)
             .build();
-    // A crackle of pale light off the Lurker as it hunts: a short bright streak, gone in a few ticks.
+    // A crackle of red light off the Lurker as it hunts: a short bright streak, gone in a few ticks.
     private static final ParticleSpec ARC = ParticleSpec.builder(VfxMaterial.additive(VfxMaterial.STREAK))
             .shape(ParticleSpec.Shape.SPARK)
             .lifetime(3, 7)
             .size(Curve.of(0.035F, 0.02F, 0.0F))
             .opacity(Curve.of(1.0F, 0.9F, 0.0F))
-            .color(LurkerPalette.BLUSH, LurkerPalette.MAUVE)
+            .color(LurkerPalette.RED, LurkerPalette.MAROON)
             .stretch(3.5F)
             .drag(0.8F)
             .build();
-    // Darkness pouring out from under the bed, storm-dark with a little plum in it.
+    // Darkness pouring out from under the bed, night-dark with a little navy in it.
     private static final ParticleSpec SHADOW = ParticleSpec.builder(VfxMaterial.alpha(VfxMaterial.SMOKE))
             .lifetime(24, 44)
             .size(Curve.of(0.15F, 0.55F, 0.7F).easing(Easing.EXPO_OUT, Easing.LINEAR))
             .opacity(Curve.of(0.0F, 0.85F, 0.0F))
-            .color(0x1B161F)
+            .color(0x15171F)
             .randomRoll()
             .drag(0.9F)
             .build();

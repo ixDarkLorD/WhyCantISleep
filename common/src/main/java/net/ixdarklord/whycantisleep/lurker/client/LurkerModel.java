@@ -11,8 +11,8 @@ import net.minecraft.util.Mth;
 
 /**
  * The thing under the bed: a ribbed chest and a thin belly slung low between four jointed, clawed limbs whose spurred
- * knees stand above its back, like a spider's, a lashing bladed tail, and a wide head with swept-back horns and a jaw
- * that drops open when it strikes. The parts' places on the skin (laid out on 64 by 64, drawn at twice that) are shared
+ * knees stand above its back, like a spider's, a lashing bladed tail, and a wide head with swept-back horns, a jaw
+ * that drops open when it strikes, and two eyes that follow what it is looking at and blink. The parts' places on the skin (laid out on 64 by 64, drawn at twice that) are shared
  * with {@code tools/gen_lurker_textures.ps1}.
  * <p>
  * It has three ways of holding itself, eased from one to the next: rising out of the ground as it appears, crouched
@@ -34,6 +34,8 @@ public class LurkerModel extends EntityModel<LurkerRenderState> {
     private final ModelPart[] upper = new ModelPart[4];
     private final ModelPart[] lower = new ModelPart[4];
     private final ModelPart[] tail = new ModelPart[TAIL_PARTS];
+    private final ModelPart[] pupils = new ModelPart[2];
+    private final ModelPart[] lids = new ModelPart[2];
 
     public LurkerModel(ModelPart root) {
         super(root);
@@ -41,6 +43,12 @@ public class LurkerModel extends EntityModel<LurkerRenderState> {
         this.belly = this.chest.getChild("belly");
         this.head = root.getChild("head");
         this.jaw = this.head.getChild("jaw");
+        String[] eyes = {"right_eye", "left_eye"};
+        for (int i = 0; i < eyes.length; i++) {
+            ModelPart eye = this.head.getChild(eyes[i]);
+            this.pupils[i] = eye.getChild("pupil");
+            this.lids[i] = eye.getChild("lid");
+        }
         ModelPart tailParent = this.belly;
         for (int i = 0; i < TAIL_PARTS; i++) {
             this.tail[i] = tailParent.getChild("tail");
@@ -87,6 +95,8 @@ public class LurkerModel extends EntityModel<LurkerRenderState> {
         // Two horns swept back over its skull, each in two lengths so they curve.
         horn(head, "right_horn", -2.5F, -0.3F);
         horn(head, "left_horn", 2.5F, 0.3F);
+        eye(head, "right_eye", -1.5F);
+        eye(head, "left_eye", 1.5F);
         // Hinged at the back of the head, so it drops open at the front.
         head.addOrReplaceChild("jaw",
                 CubeListBuilder.create().texOffs(0, 11).addBox(-3.5F, 0.0F, -6.0F, 7.0F, 2.0F, 6.0F), PartPose.offset(0.0F, 2.0F, 0.0F));
@@ -104,6 +114,17 @@ public class LurkerModel extends EntityModel<LurkerRenderState> {
                 PartPose.offsetAndRotation(x, -3.0F, -3.0F, 0.6F, yaw, 0.0F));
         horn.addOrReplaceChild("tip", CubeListBuilder.create().texOffs(48, 10).addBox(-0.5F, -0.5F, 0.0F, 1.0F, 1.0F, 3.0F),
                 PartPose.offsetAndRotation(0.0F, 0.0F, 4.0F, 0.55F, 0.0F, 0.0F));
+    }
+
+    // An eye, set in its socket on the face: the ball (which glows), a slit pupil standing just proud of it so it can
+    // slide about, and a lid hinged along the top that comes down over both. The lid is as tall as the eye; how much
+    // of it shows is its yScale.
+    private static void eye(PartDefinition head, String name, float x) {
+        PartDefinition eye = head.addOrReplaceChild(name, CubeListBuilder.create().texOffs(0, 46).addBox(-1.0F, -1.0F, -0.35F, 2.0F, 2.0F, 1.0F),
+                PartPose.offset(x, -1.0F, -6.0F));
+        eye.addOrReplaceChild("pupil", CubeListBuilder.create().texOffs(8, 46).addBox(-0.3F, -0.8F, -0.5F, 0.6F, 1.6F, 1.0F), PartPose.ZERO);
+        eye.addOrReplaceChild("lid", CubeListBuilder.create().texOffs(14, 46).addBox(-1.1F, 0.0F, -0.65F, 2.2F, 2.2F, 1.0F),
+                PartPose.offset(0.0F, -1.1F, 0.0F));
     }
 
     private static void limb(PartDefinition root, String name, float x, float z) {
@@ -146,6 +167,18 @@ public class LurkerModel extends EntityModel<LurkerRenderState> {
         this.head.z -= strike * 3.0F + hunt * 1.0F;
         // Its jaw hangs a little open, works as it breathes, gapes while it hunts and drops wide as it strikes.
         this.jaw.xRot = 0.1F + Mth.sin(age * 0.2F) * 0.06F + hunt * (0.35F + Mth.sin(age * 0.9F) * 0.12F) + strike * 0.75F;
+
+        // Its pupils slide towards what it is looking at, as far as the eye allows; its lids hang low while it
+        // watches, draw right back while it hunts, and come down together when it blinks.
+        float lid = Mth.clamp(watch * 0.34F + hunt * 0.08F + state.blink, 0.08F, 1.0F);
+        for (int i = 0; i < 2; i++) {
+            // A positive turn of the head swings its face towards -x, and a positive tilt towards +y: so do these.
+            this.pupils[i].x += -state.lookX * 0.65F;
+            this.pupils[i].y += state.lookY * 0.3F + lid * 0.25F;
+            // Narrow slits while it hunts.
+            this.pupils[i].xScale = 1.0F - hunt * 0.35F;
+            this.lids[i].yScale = lid;
+        }
 
         this.chest.y += crouch + sunk + breath * 0.4F;
         // Hunting, its shoulders roll with each stride.

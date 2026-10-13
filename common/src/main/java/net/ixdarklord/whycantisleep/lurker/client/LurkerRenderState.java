@@ -10,4 +10,9 @@ public class LurkerRenderState extends LivingEntityRenderState {
     public boolean hallucination;
     /** How far into its hunting stance it is: 0 crouched and watching, 1 reared up and coming. */
     public float huntAmount;
+    /** Where its pupils sit: -1 to 1, towards its own right and up, 0 straight ahead. */
+    public float lookX;
+    public float lookY;
+    /** How far its lids are closed by a blink: 0 not blinking, 1 shut. */
+    public float blink;
 }
