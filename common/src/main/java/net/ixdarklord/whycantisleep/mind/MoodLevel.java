@@ -6,9 +6,9 @@ import java.util.Locale;
 public enum MoodLevel {
     MISERABLE(25.0F),
     GLOOMY(40.0F),
-    /** Neither here nor there: sanity holds. */
+    /** Neither here nor there: lucidity holds. */
     FLAT(55.0F),
-    /** From here up, sanity recovers. */
+    /** From here up, lucidity recovers. */
     CONTENT(75.0F),
     CHEERFUL(Float.MAX_VALUE);
 
@@ -22,7 +22,7 @@ public enum MoodLevel {
         return this.below;
     }
 
-    /** Whether this mood isn't holding sanity up any more: flat or worse, when the HUD shows its badge. */
+    /** Whether this mood isn't holding lucidity up any more: flat or worse, when the HUD shows its badge. */
     public boolean isUnstable() {
         return this.ordinal() <= FLAT.ordinal();
     }

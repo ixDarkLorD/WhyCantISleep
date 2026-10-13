@@ -15,13 +15,19 @@ import net.minecraft.util.Mth;
 public final class HudStyle {
     /** The message card and the sleep board: slate. */
     public static final Identifier CARD = WhyCantISleep.id("hud/card");
-    /** The mood status: warm wood with a gold rim. */
-    public static final Identifier MOOD_PANEL = WhyCantISleep.id("hud/mood_panel");
-    /** The sanity status: storm plum with a rose rim. */
-    public static final Identifier SANITY_PANEL = WhyCantISleep.id("hud/sanity_panel");
+    /** The mood gauge: a gold coin for its icon, and the riveted track its bar runs in. */
+    public static final Identifier MOOD_MEDAL = WhyCantISleep.id("hud/mood_medal");
+    public static final Identifier MOOD_TRACK = WhyCantISleep.id("hud/mood_track");
+    /** The lucidity gauge: a rose diamond for its icon, and the notched, pointed track its bar runs in. */
+    public static final Identifier LUCIDITY_MEDAL = WhyCantISleep.id("hud/lucidity_medal");
+    public static final Identifier LUCIDITY_TRACK = WhyCantISleep.id("hud/lucidity_track");
+    /** A medal's size, and a track's: they are drawn as they are, never stretched. */
+    public static final int MEDAL_SIZE = 15;
+    public static final int TRACK_WIDTH = 66;
+    public static final int TRACK_HEIGHT = 9;
     private static final Identifier BAR_BACK = WhyCantISleep.id("hud/bar_back");
     public static final Identifier MOOD_FILL = WhyCantISleep.id("hud/mood_fill");
-    public static final Identifier SANITY_FILL = WhyCantISleep.id("hud/sanity_fill");
+    public static final Identifier LUCIDITY_FILL = WhyCantISleep.id("hud/lucidity_fill");
     public static final Identifier SLEEP_FILL = WhyCantISleep.id("hud/sleep_fill");
     /** How far a panel reaches beyond what it holds: its border, and a pixel of air inside it. */
     public static final int PANEL_PADDING = 5;
@@ -55,6 +61,11 @@ public final class HudStyle {
     /** The slate card around a content area. */
     public static void box(GuiGraphicsExtractor graphics, int x, int y, int width, int height, float alpha) {
         panel(graphics, CARD, x, y, width, height, alpha);
+    }
+
+    /** A medal, to hold a 9 by 9 icon at 3 pixels in from its corner. */
+    public static void medal(GuiGraphicsExtractor graphics, Identifier sprite, int x, int y, float alpha) {
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, y, MEDAL_SIZE, MEDAL_SIZE, ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F)));
     }
 
     /** A bar of a width, {@link #BAR_HEIGHT} tall, filled to a share with one of the fills. */
