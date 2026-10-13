@@ -9,4 +9,6 @@ This file is for listing all the changes to this project
 - **Action bar info**: the game's "monsters nearby" line becomes "3 monsters nearby - closest: Zombie, 6 blocks below".
 - **Sleep explanations**: every failed sleep says why and what to do: monsters nearby, the wrong time, too far from the bed, an obstructed or occupied bed, a night that can't be skipped, and how many more players must sleep.
 - **Dimension warning**: the first use of a bed where beds explode (the Nether, the End) only warns; using it again within three seconds goes through.
+- **Sleep board** (needs the mod on the server): while you're in bed, a panel lists who is still awake and why (awake, mining, fighting, AFK, in another dimension) with the progress toward the `playersSleepingPercentage` rule.
+- **Nudges**: click an awake player on the board to send them a bell and a message, with a cooldown. Players without the mod get them too.
 - Client and server configs, with client options locked while the server turns their feature off.
