@@ -1,0 +1,16 @@
+plugins {
+    alias libs.plugins.architectury.loom.noremap apply false
+    alias libs.plugins.architectury.plugin apply false
+    alias libs.plugins.shadow apply false
+    alias libs.plugins.modpublisher apply false
+}
+
+// Every project's Java, jar, resource and publishing setup.
+apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v4/main.gradle"
+
+subprojects {
+    // Every jar carries the mod's license (MPL-2.0).
+    tasks.withType(Jar).configureEach {
+        from(rootProject.file("LICENSE"))
+    }
+}
