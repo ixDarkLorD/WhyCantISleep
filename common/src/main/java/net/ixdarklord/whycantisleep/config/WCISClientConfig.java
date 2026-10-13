@@ -64,6 +64,14 @@ public final class WCISClientConfig {
             .comment("Shakes the screen during a scare.").enabledWhen(UNDER_THE_BED_SCARES).build();
     static {
         BUILDER.pop();
+        BUILDER.push("mind", "Mood and sanity.");
+    }
+    public static final ConfigValue<Boolean> STATUS_INDICATORS = BUILDER.bool("statusIndicators", true)
+            .comment("Shows an icon beside the hotbar, and a word of warning, when your mood or your sanity is low.").enabledWhen(WCISServerConfig.MIND_SYSTEM).build();
+    public static final ConfigValue<Boolean> INVENTORY_STATUS = BUILDER.bool("inventoryStatus", true)
+            .comment("Shows your mood and your sanity as bars above your inventory.").enabledWhen(WCISServerConfig.MIND_SYSTEM).build();
+    static {
+        BUILDER.pop();
     }
 
     public static final Config CONFIG = BUILDER.build();

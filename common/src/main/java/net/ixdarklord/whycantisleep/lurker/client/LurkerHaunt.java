@@ -7,7 +7,8 @@ import net.ixdarklord.coolcatcore.api.network.Network;
 import net.ixdarklord.whycantisleep.client.fx.SleepEffects;
 import net.ixdarklord.whycantisleep.config.WCISClientConfig;
 import net.ixdarklord.whycantisleep.config.WCISServerConfig;
-import net.ixdarklord.whycantisleep.lurker.Dread;
+import net.ixdarklord.whycantisleep.mind.Mind;
+import net.ixdarklord.whycantisleep.mind.SanityStage;
 import net.ixdarklord.whycantisleep.lurker.LurkerEntity;
 import net.ixdarklord.whycantisleep.lurker.LurkerServer;
 import net.ixdarklord.whycantisleep.lurker.WCISEntities;
@@ -27,8 +28,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * What a player's own dread shows them, and nobody else: eyes under dark beds and whispers once they are
- * {@linkplain Dread.Stage#WATCHED watched}, and once {@linkplain Dread.Stage#HAUNTED haunted} the creature itself, out
+ * What a player's own failing sanity shows them, and nobody else: eyes under dark beds and whispers once they are
+ * {@linkplain SanityStage#UNEASY uneasy}, and once {@linkplain SanityStage#SHAKEN shaken} the creature itself, out
  * in the dark around them or crawling from under the bed they lie down in, gone as soon as it is looked at. That
  * figure is a real {@link LurkerEntity} the server never hears of, added to the client's level only.
  * <p>
@@ -82,9 +83,9 @@ public final class LurkerHaunt {
             return;
         }
         tickGhost(level, player);
-        Dread.Stage stage = Dread.stage(player);
+        SanityStage stage = Mind.get(player).stage();
 
-        if (stage.reached(Dread.Stage.WATCHED) && --eyesWait <= 0) {
+        if (stage.reached(SanityStage.UNEASY) && --eyesWait <= 0) {
             eyesWait = 160 + RANDOM.nextInt(240);
             BlockPos bed = darkBedNear(level, player);
             if (bed != null) {
@@ -93,7 +94,7 @@ public final class LurkerHaunt {
             }
         }
         // It only shows itself where it is dark.
-        if (stage.reached(Dread.Stage.HAUNTED) && ghost == null && --ghostWait <= 0) {
+        if (stage.reached(SanityStage.SHAKEN) && ghost == null && --ghostWait <= 0) {
             ghostWait = 400 + RANDOM.nextInt(500);
             if (level.getMaxLocalRawBrightness(player.blockPosition()) < 8) appearAround(level, player);
         }
@@ -106,7 +107,7 @@ public final class LurkerHaunt {
     public static void onBedUsed(BlockPos bed) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null || minecraft.level == null || !enabled()) return;
-        if (!Dread.stage(minecraft.player).reached(Dread.Stage.HAUNTED) || !LurkerServer.isDark(minecraft.level, bed) || ghost != null) return;
+        if (!Mind.get(minecraft.player).stage().reached(SanityStage.SHAKEN) || !LurkerServer.isDark(minecraft.level, bed) || ghost != null) return;
         // Out at the side of the bed away from the player.
         Vec3 center = Vec3.atBottomCenterOf(bed);
         Vec3 away = center.subtract(minecraft.player.position()).multiply(1.0, 0.0, 1.0);

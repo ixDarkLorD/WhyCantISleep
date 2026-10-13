@@ -24,7 +24,9 @@ public record SleepNotice(Kind kind, Component title, @Nullable Component hint) 
         PLAYERS_AWAKE(HudStyle.AQUA, () -> Items.PLAYER_HEAD),
         NOT_POSSIBLE(HudStyle.WHITE, () -> Items.BARRIER),
         DANGER(HudStyle.RED, () -> Items.TNT),
-        NUDGE(HudStyle.GREEN, () -> Items.BELL);
+        NUDGE(HudStyle.GREEN, () -> Items.BELL),
+        MOOD(HudStyle.YELLOW, () -> Items.SUNFLOWER),
+        SANITY(HudStyle.LIGHT_PURPLE, () -> Items.ENDER_EYE);
 
         private final int color;
         private final Supplier<Item> item;

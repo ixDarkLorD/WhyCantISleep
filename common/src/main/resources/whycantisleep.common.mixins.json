@@ -4,12 +4,16 @@
   "compatibilityLevel": "JAVA_17",
   "package": "net.ixdarklord.whycantisleep.mixin",
   "mixins": [
+    "AnimalMixin",
+    "FoodPropertiesMixin",
+    "LivingEntityMixin",
     "ServerPlayerMixin"
   ],
   "client": [
     "client.ChatScreenMixin",
     "client.EntityMixin",
     "client.GuiMixin",
+    "client.InventoryScreenMixin",
     "client.MinecraftMixin",
     "client.MultiPlayerGameModeMixin"
   ],
