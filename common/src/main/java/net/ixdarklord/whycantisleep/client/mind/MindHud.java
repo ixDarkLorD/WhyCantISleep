@@ -15,22 +15,31 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * The heads-up for a mood or a lucidity that isn't holding. Nothing shows while the player is fine. While mood is flat
- * or worse, or lucidity is anything short of steady, its badge sits beside the hotbar, beating faster the worse it is; and
- * the moment either drops to a low level, a card says so, with what is behind it and what would help.
+ * or worse, or lucidity is anything short of lucid, its badge sits just under the crosshair, where the player is
+ * already looking: it swells in when things get worse, then rests faint enough to see past, beating faster the worse
+ * it is. The moment either drops to a low level, a card says so too, with what is behind it and what would help.
  */
 public final class MindHud {
-    // To the right of the hotbar, which is 182 wide.
-    private static final int HOTBAR_HALF = 91;
-    private static final int MARGIN = 5;
-
+    // How far under the crosshair, which reaches 7 down from the screen's middle.
+    private static final int BELOW_CROSSHAIR = 13;
+    private static final int BETWEEN = 3;
+    // A badge that has just appeared or got worse swells in over this long, then settles.
+    private static final int POP_TICKS = 50;
+    private static final float POP_SCALE = 0.7F;
+    // How solid a badge rests: the mild levels faint, the bad ones plain.
+    private static final float REST_ALPHA = 0.55F;
     private static @Nullable MoodLevel lastMood;
     private static @Nullable LucidityStage lastStage;
     private static long tick;
+    // When each badge last appeared or got worse; long ago, to begin with.
+    private static long moodPop = -POP_TICKS;
+    private static long lucidityPop = -POP_TICKS;
 
     private MindHud() {
     }
@@ -55,6 +64,8 @@ public final class MindHud {
         Mind mind = Mind.get(minecraft.player);
         MoodLevel mood = mind.moodLevel();
         LucidityStage stage = mind.stage();
+        if (lastMood != null && mood.ordinal() < lastMood.ordinal() && mood.isUnstable()) moodPop = tick;
+        if (lastStage != null && stage.ordinal() < lastStage.ordinal()) lucidityPop = tick;
         if (isShown(minecraft)) {
             if (lastStage != null && stage.ordinal() < lastStage.ordinal()) {
                 String key = "gui.whycantisleep.mind.notice.lucidity." + stage.key();
@@ -80,22 +91,49 @@ public final class MindHud {
         if (minecraft.options.hideGui || !isShown(minecraft)) return;
         Mind mind = Mind.get(minecraft.player);
         float time = tick + delta.getGameTimeDeltaPartialTick(true);
-        // Each is its gauge's medal with its icon on it.
-        int x = graphics.guiWidth() / 2 + HOTBAR_HALF + MARGIN;
-        int y = graphics.guiHeight() - 19;
         MoodLevel mood = mind.moodLevel();
-        if (mood.isUnstable()) {
-            float alpha = beat(time, mood == MoodLevel.MISERABLE ? 0.25F : mood == MoodLevel.GLOOMY ? 0.12F : 0.0F);
-            HudStyle.medal(graphics, HudStyle.MOOD_MEDAL, x, y, alpha);
-            MindStatus.moodIcon(graphics, mood, x + 3, y + 3, alpha);
-            x += HudStyle.MEDAL_SIZE + 2;
-        }
         LucidityStage stage = mind.stage();
-        if (stage != LucidityStage.STEADY) {
-            float alpha = beat(time, stage == LucidityStage.BREAKING ? 0.35F : stage == LucidityStage.SHAKEN ? 0.2F : 0.0F);
-            HudStyle.medal(graphics, HudStyle.LUCIDITY_MEDAL, x, y, alpha);
-            MindStatus.lucidityIcon(graphics, stage, x + 3, y + 3, alpha);
+        boolean showMood = mood.isUnstable();
+        boolean showLucidity = stage != LucidityStage.STEADY;
+        if (!showMood && !showLucidity) return;
+        // Each is its gauge's medal with its icon on it; the two share the middle.
+        int width = showMood && showLucidity ? HudStyle.MEDAL_SIZE * 2 + BETWEEN : HudStyle.MEDAL_SIZE;
+        int x = (graphics.guiWidth() - width) / 2;
+        int y = graphics.guiHeight() / 2 + BELOW_CROSSHAIR;
+        if (showMood) {
+            boolean bad = mood.isLow();
+            float pop = pop(time, moodPop);
+            float alpha = Mth.lerp(pop, bad ? 1.0F : REST_ALPHA, 1.0F) * beat(time, mood == MoodLevel.MISERABLE ? 0.25F : bad ? 0.12F : 0.0F);
+            badge(graphics, HudStyle.MOOD_MEDAL, x, y, pop, alpha);
+            MindStatus.moodIcon(graphics, mood, HudStyle.MEDAL_INSET, HudStyle.MEDAL_INSET, alpha);
+            graphics.pose().popMatrix();
+            x += HudStyle.MEDAL_SIZE + BETWEEN;
         }
+        if (showLucidity) {
+            boolean bad = stage.ordinal() <= LucidityStage.SHAKEN.ordinal();
+            float pop = pop(time, lucidityPop);
+            float alpha = Mth.lerp(pop, bad ? 1.0F : REST_ALPHA, 1.0F) * beat(time, stage == LucidityStage.BREAKING ? 0.35F : bad ? 0.2F : 0.0F);
+            badge(graphics, HudStyle.LUCIDITY_MEDAL, x, y, pop, alpha);
+            MindStatus.lucidityIcon(graphics, stage, HudStyle.MEDAL_INSET, HudStyle.MEDAL_INSET, alpha);
+            graphics.pose().popMatrix();
+        }
+    }
+
+    // How far into its swell a badge is: 1 the moment it appears or worsens, easing down to 0.
+    private static float pop(float time, long since) {
+        float left = 1.0F - (time - since) / POP_TICKS;
+        return left <= 0.0F ? 0.0F : left * left;
+    }
+
+    // Draws a medal swollen about its middle, and leaves the matrix in place for its icon; the caller pops it.
+    private static void badge(GuiGraphicsExtractor graphics, Identifier medal, int x, int y, float pop, float alpha) {
+        float half = HudStyle.MEDAL_SIZE / 2.0F;
+        float scale = 1.0F + POP_SCALE * pop;
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(x + half, y + half);
+        graphics.pose().scale(scale, scale);
+        graphics.pose().translate(-half, -half);
+        HudStyle.medal(graphics, medal, 0, 0, alpha);
     }
     // A badge's opacity, rising and falling at a pace: the worse things are, the faster. Merely unsteady, it holds still.
     private static float beat(float time, float pace) {
