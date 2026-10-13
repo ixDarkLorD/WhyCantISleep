@@ -7,4 +7,6 @@ This file is for listing all the changes to this project
 - **Monster highlights**: when monsters keep you from sleeping, exactly the ones that blocked it (the game's own check range) glow for a few seconds, colored by the kind of threat or in one color. Only you see it; a server can also show it to players without the mod through the game's glowing effect.
 - **Off-screen arrows**: arrows around the crosshair point to the blocking monsters you can't see, those outside your view and those behind blocks, in the same colors as their highlights and in three sizes. A solid arrow is a monster outside your view, a hollow one a monster behind blocks; nearer monsters get larger arrows, and arrows that would overlap fan apart.
 - **Action bar info**: the game's "monsters nearby" line becomes "3 monsters nearby - closest: Zombie, 6 blocks below".
+- **Sleep explanations**: every failed sleep says why and what to do: monsters nearby, the wrong time, too far from the bed, an obstructed or occupied bed, a night that can't be skipped, and how many more players must sleep.
+- **Dimension warning**: the first use of a bed where beds explode (the Nether, the End) only warns; using it again within three seconds goes through.
 - Client and server configs, with client options locked while the server turns their feature off.

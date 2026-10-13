@@ -41,5 +41,14 @@
   "gui.whycantisleep.blockers.below": "%s blocks below",
   "gui.whycantisleep.blockers.below.one": "%s block below",
   "gui.whycantisleep.blockers.many": "%s monsters nearby - closest: %s, %s",
-  "gui.whycantisleep.blockers.one": "1 monster nearby: %s, %s"
+  "gui.whycantisleep.blockers.one": "1 monster nearby: %s, %s",
+  "gui.whycantisleep.dimension_warning": "Beds explode here! Use it again to do it anyway",
+  "gui.whycantisleep.explain.monsters": "Monsters are nearby - defeat them, or block them out and light the area",
+  "gui.whycantisleep.explain.not_possible": "Sleeping can't skip this night - the world has it turned off",
+  "gui.whycantisleep.explain.obstructed": "The bed is obstructed - clear the blocks right above it",
+  "gui.whycantisleep.explain.occupied": "Someone is already in this bed - use another one",
+  "gui.whycantisleep.explain.players_awake": "%s of %s players asleep - %s more must sleep to skip the night",
+  "gui.whycantisleep.explain.players_awake.one": "%s of %s players asleep - %s more must sleep to skip the night",
+  "gui.whycantisleep.explain.too_far": "You're too far from the bed - stand next to it",
+  "gui.whycantisleep.explain.wrong_time": "It's not time to sleep - beds work at night and during thunderstorms"
 }
