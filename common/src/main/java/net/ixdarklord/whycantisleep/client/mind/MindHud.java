@@ -3,6 +3,7 @@ package net.ixdarklord.whycantisleep.client.mind;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientGuiEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientPlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
+import net.ixdarklord.whycantisleep.client.hud.HudStyle;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotice;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotices;
 import net.ixdarklord.whycantisleep.config.WCISClientConfig;
@@ -18,9 +19,9 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * The heads-up for a mood or a sanity gone low. Nothing shows while the player is fine. When either is low its icon
- * sits beside the hotbar, beating faster the worse it is; and the moment either drops a level, a card says so, with
- * what is behind it and what would help.
+ * The heads-up for a mood or a sanity that isn't holding. Nothing shows while the player is fine. While mood is flat
+ * or worse, or sanity is anything short of steady, its badge sits beside the hotbar, beating faster the worse it is; and
+ * the moment either drops to a low level, a card says so, with what is behind it and what would help.
  */
 public final class MindHud {
     // To the right of the hotbar, which is 182 wide.
@@ -79,21 +80,26 @@ public final class MindHud {
         if (minecraft.options.hideGui || !isShown(minecraft)) return;
         Mind mind = Mind.get(minecraft.player);
         float time = tick + delta.getGameTimeDeltaPartialTick(true);
-        int x = graphics.guiWidth() / 2 + HOTBAR_HALF + MARGIN;
-        int y = graphics.guiHeight() - 15;
+        // Each is a badge the size of a hotbar slot's inside: its own panel with its icon on it.
+        int x = graphics.guiWidth() / 2 + HOTBAR_HALF + MARGIN + HudStyle.PANEL_PADDING;
+        int y = graphics.guiHeight() - 16;
         MoodLevel mood = mind.moodLevel();
-        if (mood.isLow()) {
-            MindStatus.moodIcon(graphics, mood, x, y, beat(time, mood == MoodLevel.MISERABLE ? 0.25F : 0.1F));
-            x += MindStatus.ICON_SIZE + 2;
+        if (mood.isUnstable()) {
+            float alpha = beat(time, mood == MoodLevel.MISERABLE ? 0.25F : mood == MoodLevel.GLOOMY ? 0.12F : 0.0F);
+            HudStyle.panel(graphics, HudStyle.MOOD_PANEL, x, y, MindStatus.ICON_SIZE, MindStatus.ICON_SIZE, alpha);
+            MindStatus.moodIcon(graphics, mood, x, y, alpha);
+            x += MindStatus.ICON_SIZE + HudStyle.PANEL_PADDING * 2 + 1;
         }
         SanityStage stage = mind.stage();
         if (stage != SanityStage.STEADY) {
-            MindStatus.sanityIcon(graphics, stage, x, y, beat(time, stage == SanityStage.BREAKING ? 0.35F : stage == SanityStage.SHAKEN ? 0.2F : 0.08F));
+            float alpha = beat(time, stage == SanityStage.BREAKING ? 0.35F : stage == SanityStage.SHAKEN ? 0.2F : 0.0F);
+            HudStyle.panel(graphics, HudStyle.SANITY_PANEL, x, y, MindStatus.ICON_SIZE, MindStatus.ICON_SIZE, alpha);
+            MindStatus.sanityIcon(graphics, stage, x, y, alpha);
         }
     }
 
-    // An icon's opacity, rising and falling at a pace: the worse things are, the faster.
+    // A badge's opacity, rising and falling at a pace: the worse things are, the faster. Merely unsteady, it holds still.
     private static float beat(float time, float pace) {
-        return 0.7F + 0.3F * Mth.sin(time * pace);
+        return pace <= 0.0F ? 1.0F : 0.75F + 0.25F * Mth.sin(time * pace);
     }
 }

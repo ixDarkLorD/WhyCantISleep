@@ -22,7 +22,7 @@ import java.util.List;
 
 /**
  * The player's mood and sanity as the game shows any status: an icon and a bar for each. It is drawn above the
- * inventory ({@code InventoryScreenMixin}), in the game's tooltip box; pointing at either one says in words how the
+ * inventory ({@code InventoryScreenMixin}), each on a panel of its own; pointing at either one says in words how the
  * player feels and what is behind it. The icons are also what {@link MindHud} puts beside the hotbar.
  */
 public final class MindStatus {
@@ -31,20 +31,14 @@ public final class MindStatus {
     public static final int ICON_SIZE = 9;
     private static final int SHEET_WIDTH = 36;
     private static final int SHEET_HEIGHT = 18;
-    // The game's boss bars, of which a bar here is the left end and the last pixel.
-    private static final Identifier BAR_BACKGROUND = Identifier.withDefaultNamespace("boss_bar/white_background");
-    private static final Identifier MOOD_BAR = Identifier.withDefaultNamespace("boss_bar/yellow_progress");
-    private static final Identifier SANITY_BAR = Identifier.withDefaultNamespace("boss_bar/purple_progress");
-    private static final int BOSS_BAR_WIDTH = 182;
-    private static final int BAR_WIDTH = 64;
-    private static final int BAR_HEIGHT = 5;
+    private static final int BAR_WIDTH = 60;
     private static final int GAP = 3;
-    // The inventory's own width; the status sits centered over it.
+    // The inventory's own width; the two panels sit side by side, centered over it.
     private static final int INVENTORY_WIDTH = 176;
     private static final int PART_WIDTH = ICON_SIZE + GAP + BAR_WIDTH;
-    private static final int WIDTH = PART_WIDTH * 2 + 10;
-    private static final int RISE = 17;
-
+    private static final int BETWEEN = HudStyle.PANEL_PADDING * 2 + 4;
+    private static final int WIDTH = PART_WIDTH * 2 + BETWEEN;
+    private static final int RISE = 16;
     private MindStatus() {
     }
 
@@ -61,21 +55,25 @@ public final class MindStatus {
         Mind mind = Mind.get(minecraft.player);
         int x = left + (INVENTORY_WIDTH - WIDTH) / 2;
         int y = top - RISE;
-        HudStyle.box(graphics, x, y, WIDTH, ICON_SIZE, 1.0F);
+        int sanityX = x + PART_WIDTH + BETWEEN;
+        // Each on a panel of its own: mood's warm, sanity's the color of the storm.
+        HudStyle.panel(graphics, HudStyle.MOOD_PANEL, x, y, PART_WIDTH, ICON_SIZE, 1.0F);
+        HudStyle.panel(graphics, HudStyle.SANITY_PANEL, sanityX, y, PART_WIDTH, ICON_SIZE, 1.0F);
 
-        int sanityX = x + PART_WIDTH + 10;
         moodIcon(graphics, mind.moodLevel(), x, y, 1.0F);
-        bar(graphics, MOOD_BAR, x + ICON_SIZE + GAP, y + 2, mind.mood() / Mind.MAX);
+        HudStyle.bar(graphics, HudStyle.MOOD_FILL, x + ICON_SIZE + GAP, y + 2, BAR_WIDTH, mind.mood() / Mind.MAX, 1.0F);
         sanityIcon(graphics, mind.stage(), sanityX, y, 1.0F);
-        bar(graphics, SANITY_BAR, sanityX + ICON_SIZE + GAP, y + 2, mind.sanity() / Mind.MAX);
-        // Guilt shows as the part of the sanity bar that can't be won back: a dark notch from its far end.
-        int lost = Math.round(BAR_WIDTH * (1.0F - mind.sanityCap() / Mind.MAX));
-        if (lost > 0) graphics.fill(sanityX + ICON_SIZE + GAP + BAR_WIDTH - lost, y + 3, sanityX + ICON_SIZE + GAP + BAR_WIDTH - 1, y + 6, 0xB0000000);
-
-        if (mouseY >= y - 2 && mouseY < y + ICON_SIZE + 2) {
+        HudStyle.bar(graphics, HudStyle.SANITY_FILL, sanityX + ICON_SIZE + GAP, y + 2, BAR_WIDTH, mind.sanity() / Mind.MAX, 1.0F);
+        // Guilt shows as the part of the sanity bar that can't be won back: hatched off from its far end.
+        int lost = Math.round((BAR_WIDTH - 2) * (1.0F - mind.sanityCap() / Mind.MAX));
+        for (int i = 0; i < lost; i++) {
+            int column = sanityX + ICON_SIZE + GAP + BAR_WIDTH - 2 - i;
+            graphics.fill(column, y + 3, column + 1, y + 6, i % 2 == 0 ? 0xE0101014 : 0x70101014);
+        }
+        if (mouseY >= y - HudStyle.PANEL_PADDING && mouseY < y + ICON_SIZE + HudStyle.PANEL_PADDING) {
             Font font = minecraft.font;
-            if (mouseX >= x - 2 && mouseX < x + PART_WIDTH + 4) graphics.setComponentTooltipForNextFrame(font, moodLines(mind), mouseX, mouseY);
-            else if (mouseX >= sanityX - 4 && mouseX < sanityX + PART_WIDTH + 2) graphics.setComponentTooltipForNextFrame(font, sanityLines(mind), mouseX, mouseY);
+            if (mouseX >= x - HudStyle.PANEL_PADDING && mouseX < x + PART_WIDTH + HudStyle.PANEL_PADDING) graphics.setComponentTooltipForNextFrame(font, moodLines(mind), mouseX, mouseY);
+            else if (mouseX >= sanityX - HudStyle.PANEL_PADDING && mouseX < sanityX + PART_WIDTH + HudStyle.PANEL_PADDING) graphics.setComponentTooltipForNextFrame(font, sanityLines(mind), mouseX, mouseY);
         }
     }
 
@@ -96,14 +94,6 @@ public final class MindStatus {
     private static void icon(GuiGraphicsExtractor graphics, int column, int row, int x, int y, float alpha) {
         graphics.blit(RenderPipelines.GUI_TEXTURED, ICONS, x, y, column * ICON_SIZE, row * ICON_SIZE, ICON_SIZE, ICON_SIZE, SHEET_WIDTH, SHEET_HEIGHT,
                 ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F)));
-    }
-
-    private static void bar(GuiGraphicsExtractor graphics, Identifier progress, int x, int y, float filled) {
-        // The left end of the game's bar, closed off with its last pixel.
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BAR_BACKGROUND, BOSS_BAR_WIDTH, BAR_HEIGHT, 0, 0, x, y, BAR_WIDTH - 1, BAR_HEIGHT);
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BAR_BACKGROUND, BOSS_BAR_WIDTH, BAR_HEIGHT, BOSS_BAR_WIDTH - 1, 0, x + BAR_WIDTH - 1, y, 1, BAR_HEIGHT);
-        int width = Mth.lerpDiscrete(Mth.clamp(filled, 0.0F, 1.0F), 0, BAR_WIDTH);
-        if (width > 0) graphics.blitSprite(RenderPipelines.GUI_TEXTURED, progress, BOSS_BAR_WIDTH, BAR_HEIGHT, 0, 0, x, y, width, BAR_HEIGHT);
     }
 
     // "Mood: Content", then each need in a word, then what is lifting or weighing on it just now.

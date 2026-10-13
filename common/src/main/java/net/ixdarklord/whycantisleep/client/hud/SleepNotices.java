@@ -12,7 +12,7 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * The sleep HUD's message card, above the hotbar where the game's own line would be: in the game's tooltip box, an
+ * The sleep HUD's message card, above the hotbar where the game's own line would be: on a slate card of its own, an
  * item for an icon, what happened in the color of its kind, and what to do about it in gray. One card shows at a
  * time; a new one takes the place of the last.
  */
