@@ -35,6 +35,9 @@ public final class HudStyle {
     public static final int GAUGE_FILL_HEIGHT = 9;
     /** How far in from a medal's corner its 9 by 9 icon sits. */
     public static final int MEDAL_INSET = 5;
+    /** The sunk slot a card's icon sits in: {@link #SLOT_SIZE} square, for a 16 by 16 item 2 in from its corner. */
+    public static final Identifier SLOT = WhyCantISleep.id("hud/slot");
+    public static final int SLOT_SIZE = 20;
     private static final Identifier BAR_BACK = WhyCantISleep.id("hud/bar_back");
     /** What covers the part of a gauge the other bar closes off: dim diagonal stripes, tiled along it. */
     public static final Identifier MOOD_LIMIT = WhyCantISleep.id("hud/mood_limit");
@@ -81,6 +84,11 @@ public final class HudStyle {
     public static void medal(GuiGraphicsExtractor graphics, Identifier sprite, int x, int y, float alpha) {
         // The picture is a pixel bigger each way than the medal, for the shadow it casts.
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, y, MEDAL_SIZE + 1, MEDAL_SIZE + 1, ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F)));
+    }
+
+    /** An icon's slot, drawn as it is. */
+    public static void slot(GuiGraphicsExtractor graphics, int x, int y, float alpha) {
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT, x, y, SLOT_SIZE, SLOT_SIZE, ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F)));
     }
 
     /** A bar of a width, {@link #BAR_HEIGHT} tall, filled to a share with one of the fills. */
