@@ -92,9 +92,9 @@ function Box($u, $v, $w, $h, $d, $base, $grain, $pattern = "", $period = 4, [boo
 # is crimson; on the glowing layer it is red along its whole length, hotter at a knot now and then, with a dim red
 # spilling onto the hide on either side of it so the light looks like it comes from under the skin.
 function Veins($u, $v, $w, $h, $count) {
-    $veinGlow = Rgb 235 24 34
-    $knotGlow = Rgb 255 92 70
-    $spill = Rgb 46 2 6
+    $veinGlow = Rgb 160 14 22
+    $knotGlow = Rgb 214 52 44
+    $spill = Rgb 28 1 4
     for ($i = 0; $i -lt $count; $i++) {
         $x = ($u + 0.5 + $random.NextDouble() * ($w - 1)) * $scale; $y = $v * $scale
         while ($y -lt ($v + $h) * $scale) {
@@ -105,7 +105,7 @@ function Veins($u, $v, $w, $h, $count) {
                 # The spill only ever lights the hide: it leaves a neighboring vein's own light alone.
                 if ($sx -ge $u * $scale -and $sx -lt ($u + $w) * $scale -and $eyes.GetPixel($sx, $ty).A -eq 0) { $eyes.SetPixel($sx, $ty, $spill) }
             }
-            Dot $tx $ty $(if ($knot) { Shade $red 0.8 } else { Shade $crimson 0.95 }) $(if ($knot) { $knotGlow } else { $veinGlow })
+            Dot $tx $ty $(if ($knot) { Shade $red 0.6 } else { Shade $crimson 0.75 }) $(if ($knot) { $knotGlow } else { $veinGlow })
             # Mostly straight down, with a step to one side now and then.
             if ($random.Next(0, 3) -eq 0) { $x += $random.Next(-1, 2) }
             $y += 1
