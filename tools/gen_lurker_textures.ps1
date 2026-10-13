@@ -1,11 +1,10 @@
 # Draws the Lurker's two textures under assets/whycantisleep/textures/entity/lurker/:
 #   lurker.png       its skin: night-dark armor in overlapping plates, every face shaded for where it points (lit from
-#                    above, dark beneath, dimmed along its edges), veins of maroon through it, ribs showing crimson,
+#                    above, dark beneath, dimmed along its edges), veins of crimson through it, ribs showing crimson,
 #                    navy horn for its horns, claws, spurs, ridge and tail blade, a mouth full of teeth, two sockets,
 #                    and the eyes that sit in them (an eyeball, a slit pupil and a lid each)
 #   lurker_eyes.png  what glows, drawn over the skin (LurkerRenderer's glow layer, which pulses): the eyeballs, red
-#                    with a hotter heart; stretches of the veins; the embers down its back and in the cracks of its
-#                    knees
+#                    with a hotter heart; every vein, red; the embers down its back and in the cracks of its knees
 # The colors are the author's sunset palette (LurkerPalette.java has the same five).
 # LurkerModel lays its parts out on a 64x64 sheet (texOffs and box sizes); the textures are drawn at twice that, so
 # every model pixel is 2x2 texels. Coordinates below are the model's unless they say "texel". Change both together.
@@ -33,11 +32,12 @@ $red = @(255, 45, 70)
 # Horn: the navy of the palette, lifted so it stands off the hide.
 $bone = @(58, 78, 118)
 
-# One texel of the skin, in texel coordinates; with a glow, the same texel of the glowing layer too.
+# One texel of the skin, in texel coordinates, and the same texel of the glowing layer: lit with a glow, and put
+# out without one, so a detail painted over a vein (a tooth, a socket) does not go on glowing like the vein.
 function Dot($tx, $ty, $color, $glow = $null) {
     if ($tx -lt 0 -or $ty -lt 0 -or $tx -ge $size -or $ty -ge $size) { return }
     $skin.SetPixel($tx, $ty, $color)
-    if ($glow -ne $null) { $eyes.SetPixel($tx, $ty, $glow) }
+    $eyes.SetPixel($tx, $ty, $(if ($glow -ne $null) { $glow } else { $clear }))
 }
 
 # A box's six faces, unwrapped from its texOffs (u, v) for a box w wide, h high and d deep. Each face is painted for
@@ -88,20 +88,24 @@ function Box($u, $v, $w, $h, $d, $base, $grain, $pattern = "", $period = 4, [boo
     }
 }
 
-# Thin wandering lines down an area, in model coordinates: veins. Each is maroon under the skin and, for stretches
-# of its length, lit: crimson, with now and then a bright knot.
+# Thin wandering lines down an area, in model coordinates: veins, and every one of them glows. On the skin a vein
+# is crimson; on the glowing layer it is red along its whole length, hotter at a knot now and then, with a dim red
+# spilling onto the hide on either side of it so the light looks like it comes from under the skin.
 function Veins($u, $v, $w, $h, $count) {
+    $veinGlow = Rgb 235 24 34
+    $knotGlow = Rgb 255 92 70
+    $spill = Rgb 46 2 6
     for ($i = 0; $i -lt $count; $i++) {
         $x = ($u + 0.5 + $random.NextDouble() * ($w - 1)) * $scale; $y = $v * $scale
-        $lit = $random.Next(0, 2) -eq 0
         while ($y -lt ($v + $h) * $scale) {
-            if ($random.Next(0, 7) -eq 0) { $lit = -not $lit }
-            if ($lit) {
-                $knot = $random.Next(0, 9) -eq 0
-                Dot ([int]$x) ([int]$y) (Shade $crimson 0.85) $(if ($knot) { Shade $red 0.9 } else { Shade $crimson 0.7 })
-            } else {
-                Dot ([int]$x) ([int]$y) (Shade $maroon 0.7)
+            $tx = [int]$x; $ty = [int]$y
+            $knot = $random.Next(0, 8) -eq 0
+            foreach ($side in @(-1, 1)) {
+                $sx = $tx + $side
+                # The spill only ever lights the hide: it leaves a neighboring vein's own light alone.
+                if ($sx -ge $u * $scale -and $sx -lt ($u + $w) * $scale -and $eyes.GetPixel($sx, $ty).A -eq 0) { $eyes.SetPixel($sx, $ty, $spill) }
             }
+            Dot $tx $ty $(if ($knot) { Shade $red 0.8 } else { Shade $crimson 0.95 }) $(if ($knot) { $knotGlow } else { $veinGlow })
             # Mostly straight down, with a step to one side now and then.
             if ($random.Next(0, 3) -eq 0) { $x += $random.Next(-1, 2) }
             $y += 1
@@ -126,11 +130,17 @@ Box 34 44 7 1 2 @(18, 18, 21) 2                 # its brow
 Box 34 48 1 2 1 @(186, 168, 174) 6              # fangs: bone, duller than the teeth behind them
 Box 40 50 3 3 3 @(20, 20, 24) 3                 # knee joints
 
-Veins 0 27 32 5 7     # chest sides, front and back
-Veins 0 39 26 4 4     # belly
-Veins 0 6 26 5 4      # head
-Veins 40 2 8 15 3     # lower limbs
-Veins 32 2 8 7 2      # upper limbs
+# Enough of them to map its body, few enough that the dark hide between them still reads: a limb takes two.
+Veins 0 27 32 5 8     # chest sides, front and back
+Veins 8 19 8 8 2      # chest top, where it shows round the armor
+Veins 7 52 9 7 3      # across the shoulder armor
+Veins 0 39 26 4 5     # belly sides
+Veins 7 32 6 7 2      # belly top
+Veins 0 6 6 5 2       # head: one side,
+Veins 13 6 13 5 3     # the other side and the back (its face is left clear),
+Veins 6 0 7 6 2       # and the top of its skull
+Veins 40 2 8 15 2     # lower limbs
+Veins 32 2 8 7 1      # upper limbs
 Veins 28 37 14 2 2    # tail
 
 # Embers down the middle of the shoulder armor (its top face is at (7, 52), 9 wide and 7 deep), one to a plate.
