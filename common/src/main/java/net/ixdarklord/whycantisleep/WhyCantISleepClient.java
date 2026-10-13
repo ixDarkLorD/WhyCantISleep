@@ -4,7 +4,9 @@ import net.ixdarklord.coolcatcore.api.core.ClientModConstructor;
 import net.ixdarklord.whycantisleep.client.SleepClient;
 import net.ixdarklord.whycantisleep.client.Blockers;
 import net.ixdarklord.whycantisleep.client.board.SleepBoard;
+import net.ixdarklord.whycantisleep.client.fx.SleepEffects;
 import net.ixdarklord.whycantisleep.client.hud.BlockerArrows;
+import net.ixdarklord.whycantisleep.client.hud.SleepNotices;
 
 /**
  * Client mod constructor (CoolCatLib: Core): highlights, HUD layers and other client-only setup.
@@ -16,6 +18,8 @@ public final class WhyCantISleepClient implements ClientModConstructor {
         SleepClient.init();
         Blockers.init();
         BlockerArrows.init();
+        SleepNotices.init();
         SleepBoard.init();
+        SleepEffects.init();
     }
 }

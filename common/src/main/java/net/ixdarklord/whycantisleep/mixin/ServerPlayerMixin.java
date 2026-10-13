@@ -17,7 +17,10 @@ public abstract class ServerPlayerMixin {
     @Inject(method = "startSleepInBed", at = @At("RETURN"))
     private void whycantisleep$onSleepResult(BlockPos pos, CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir) {
         cir.getReturnValue().ifLeft(problem -> {
-            if (problem == Player.BedSleepingProblem.NOT_SAFE) SleepServer.onBlockedByMonsters((ServerPlayer) (Object) this, pos);
+            ServerPlayer player = (ServerPlayer) (Object) this;
+            if (problem == Player.BedSleepingProblem.NOT_SAFE) SleepServer.onBlockedByMonsters(player, pos);
+            // "Other problem" is a player already asleep or dead, not a sleep that failed.
+            if (problem != Player.BedSleepingProblem.OTHER_PROBLEM) SleepServer.onSleepFailed(player, pos);
         });
     }
 }

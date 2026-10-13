@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > Find out what's keeping you awake at night. Highlights the monsters blocking your sleep, explains every failed sleep, and adds a little bedtime fear.
 
-A multiloader mod built on the author's library **CoolCatLib: Core** (`coolcatcore`, package `net.ixdarklord.coolcatcore`). The repository is private until the first release.
+A multiloader mod built on the author's libraries **CoolCatLib: Core** (`coolcatcore`, package `net.ixdarklord.coolcatcore`) and **CoolCatLib: Canvas** (`coolcatcanvas`, package `net.ixdarklord.coolcatcanvas`; required since 2026-10-13, at the author's request, for the visuals). The repository is private until the first release.
 
 ### Rules for every session
 
@@ -17,6 +17,7 @@ A multiloader mod built on the author's library **CoolCatLib: Core** (`coolcatco
 - **Build every loader before committing** (`gradlew build`), and fix errors before moving on.
 - **Keep config names and defaults in sync with the mod page** (the list under "Config" below is the page's). Renaming or re-defaulting an option is a mod page change: ask first.
 - Shared logic goes in `common`; loader modules hold only loader glue.
+- **Register nothing in a game registry** (no items, entity types, sound events, data components, and so no `AttachmentRegistry`): a client with the mod must be able to join a server without it, and a server with it must accept clients without it. Sounds are unregistered `SoundEvent`s played on the client (`client/fx/WCISSounds` + `sounds.json`, which points at the game's own sounds); per-player server data goes in a `SavedData`.
 - Commits follow the user's `github-commit` skill: their identity only, no Claude attribution, and push only when asked.
 
 ## Versions
@@ -73,7 +74,7 @@ Loader-specific needs, in order: a CoolCatLib: Core API; else a **common** mixin
 
 ## CoolCatLib
 
-Source on this machine, one checkout per Minecraft version: `../CoolCatLib-26.1.2` (branch `26.1.2`), `../CoolCatLib-1.21` (1.21.1), `../CoolCatLib-1.20.1`. Core is `core/{common,fabric,neoforge[,forge]}`; the public API is `core/common/src/main/java/net/ixdarklord/coolcatcore/api`. The API differs between versions (1.20.1 has its own `network.codec` and `CustomPacketPayload`, `ClientGuiEvents.RenderHud` takes `GuiGraphics, float`...), so read the checkout for the version being worked on. Canvas (`coolcatcanvas`) is **not** a dependency of this mod.
+Source on this machine, one checkout per Minecraft version: `../CoolCatLib-26.1.2` (branch `26.1.2`), `../CoolCatLib-1.21` (1.21.1), `../CoolCatLib-1.20.1`. Core is `core/{common,fabric,neoforge[,forge]}`; the public API is `core/common/src/main/java/net/ixdarklord/coolcatcore/api`. The API differs between versions (1.20.1 has its own `network.codec` and `CustomPacketPayload`, `ClientGuiEvents.RenderHud` takes `GuiGraphics, float`...), so read the checkout for the version being worked on. Canvas (`coolcatcanvas`, `canvas/` in the same checkouts, API under `canvas/common/.../coolcatcanvas/api`) is required too: `ScreenEffects.tint`, `CameraShake`, `WorldParticles` / `ParticleSpec` / `VfxMaterial` / `Curve` and `Easing`, all used from `client/fx/SleepEffects` and the HUD. Its camera shake and world particles exist on 26.1.2 only so far: check the 1.21.1 and 1.20.1 checkouts before backporting.
 
 APIs this mod uses (`net.ixdarklord.coolcatcore.api.*`):
 
@@ -81,7 +82,7 @@ APIs this mod uses (`net.ixdarklord.coolcatcore.api.*`):
 - `config.*`: `Config.builder(MOD_ID, ConfigScope.CLIENT | SERVER)`, values as static `ConfigValue` fields, groups with `push`/`pop` in static blocks, `enumValue` (enums implement `EnumType.Displayable`), `color`, `intValue().range().slider()`, `enabledWhen`. A `SERVER` config is synced to clients on join and on change (`Config.isRemote()`, `ConfigEvents.SYNCED`). Names are translated as `config.whycantisleep.<client|server>.<group>.<key>` (`.title` for the config); tooltips fall back to the `comment`. Screens come from Glazed Menu when installed (`config.client.ConfigScreens`); Core has none of its own.
 - `network.Network`: `registerClientbound` / `registerServerbound` (record payloads can derive their codec through `PayloadCodecs`), `sendToPlayer`, `sendToServer`, and `canPlayerReceive(player, type)`, which is how the server tells who has the mod. Clientbound handlers must be lambdas into a `client` package class so a dedicated server never loads it.
 - `event.v2.common`: `PlayerEvents` (`JOIN`, `LEAVE`, `START_TICK`, `END_TICK`), `ServerTickEvents`, `ServerLifecycleEvents`, `BlockEvents.BREAK`, `EntityEvents.LOAD`. `event.v2.client`: `ClientTickEvents`, `ClientGuiEvents.RENDER_HUD`, `ClientPlayerEvents`. Each is an `EventInvoker` (`X.END.register(...)`).
-- `attachment.AttachmentRegistry` (persistent per-player counters), `platform.Platform`.
+- `platform.Platform`. (Not `attachment.AttachmentRegistry`: it registers a data component; see the rules.)
 
 ## Sides and sync
 
@@ -92,6 +93,10 @@ The mod must work in three installs, and neither side may require the other:
 - **Server only**: players without the mod get the vanilla glowing effect when "Show to everyone" is on, and nudges (a vanilla sound and message).
 
 Config gating: every client option a server setting controls is declared `enabledWhen(<server value>)` in `WCISClientConfig`. Glazed Menu evaluates dependencies across configs, so the entry shows greyed out ("Depends on …") while the server has it off: that is the "locked" state. Code must read such options through `WCISConfigs.isEnabled(option)`, which walks the same dependency chain, never through `option.get()` alone.
+
+## The sleep HUD
+
+Sleep messages are not shown on the game's action bar. `GuiMixin` cancels the game's sleep lines (recognised by translation key in `client/hud/Explanations`) and `client/hud/SleepNotices` shows a card instead: a `SleepNotice` (kind, title, hint), whose kind gives the accent color, the icon (a vanilla item) and the sound and screen effect (`SleepEffects.onNotice`). The sleep board (`client/board/SleepBoard`) and the cards share `client/hud/HudStyle`. The option is still named "Action bar info" on the mod page: it now decides whether a blocked sleep's card names the count and the closest monster.
 
 ## Config (the names and defaults on the mod page)
 

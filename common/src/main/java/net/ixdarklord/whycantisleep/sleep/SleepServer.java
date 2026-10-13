@@ -1,6 +1,7 @@
 package net.ixdarklord.whycantisleep.sleep;
 
 import net.ixdarklord.whycantisleep.config.WCISServerConfig;
+import net.ixdarklord.whycantisleep.network.ScarePayload;
 import net.ixdarklord.whycantisleep.network.SleepBlockedPayload;
 import net.ixdarklord.whycantisleep.network.WCISNetwork;
 import net.minecraft.core.BlockPos;
@@ -15,6 +16,11 @@ import java.util.List;
 /** The server's side of a failed sleep: it knows exactly which monsters blocked it, and tells the player. */
 public final class SleepServer {
     private SleepServer() {
+    }
+
+    /** Called when the game refused a sleep for any reason: now and then, something under the bed makes itself known. */
+    public static void onSleepFailed(ServerPlayer player, BlockPos bed) {
+        if (player.getRandom().nextInt(100) < WCISServerConfig.SCARE_CHANCE.get()) WCISNetwork.sendToPlayer(player, new ScarePayload(bed));
     }
 
     /** Called when the game refused a sleep with "monsters nearby" ({@code ServerPlayerMixin}). */
