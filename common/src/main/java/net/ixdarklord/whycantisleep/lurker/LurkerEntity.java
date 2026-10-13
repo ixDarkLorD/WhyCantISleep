@@ -43,6 +43,7 @@ public class LurkerEntity extends Monster {
 
     private @Nullable UUID victim;
     private int lostTicks;
+    private boolean hallucination;
 
     public LurkerEntity(EntityType<? extends LurkerEntity> type, Level level) {
         super(type, level);
@@ -71,6 +72,15 @@ public class LurkerEntity extends Monster {
 
     public void setVictim(UUID victim) {
         this.victim = victim;
+    }
+
+    /** Client side: whether this one is only in its player's head, and so drawn as something not quite there. */
+    public boolean isHallucination() {
+        return this.hallucination;
+    }
+
+    public void setHallucination(boolean hallucination) {
+        this.hallucination = hallucination;
     }
 
     /** It turns on nobody but its own player, whoever strikes it. */

@@ -53,7 +53,8 @@ public final class LurkerHaunt {
 
     public static void init() {
         EntityRendererRegistry.register(WCISEntities.LURKER, LurkerRenderer::new);
-        LurkerEntity.clientTick = SleepEffects::shadowTrail;
+        LurkerEntity.clientTick = SleepEffects::lurkerAura;
+        LurkerPresence.init();
         ClientTickEvents.END.register(LurkerHaunt::tick);
         ClientPlayerEvents.JOIN.register(player -> sendPreference());
         ClientPlayerEvents.LEAVE.register(player -> ghost = null);
@@ -134,6 +135,7 @@ public final class LurkerHaunt {
         lurker.snapTo(at.x, at.y, at.z, yaw, 0.0F);
         lurker.yBodyRot = lurker.yBodyRotO = yaw;
         lurker.yHeadRot = lurker.yHeadRotO = yaw;
+        lurker.setHallucination(true);
         lurker.setNoAi(true);
         lurker.setSilent(true);
         level.addEntity(lurker);
