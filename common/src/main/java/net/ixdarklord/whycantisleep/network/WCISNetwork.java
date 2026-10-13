@@ -2,6 +2,8 @@ package net.ixdarklord.whycantisleep.network;
 
 import net.ixdarklord.coolcatcore.api.network.Network;
 import net.ixdarklord.whycantisleep.client.SleepClient;
+import net.ixdarklord.whycantisleep.client.board.SleepBoard;
+import net.ixdarklord.whycantisleep.sleep.SleepBoardServer;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -15,6 +17,10 @@ public final class WCISNetwork {
 
     public static void register() {
         Network.registerClientbound(SleepBlockedPayload.class, (payload, context) -> context.queue(() -> SleepClient.onBlockedByServer(payload)));
+        Network.registerClientbound(SleepBoardPayload.class, (payload, context) -> context.queue(() -> SleepBoard.onBoard(payload)));
+        Network.registerServerbound(NudgePayload.class, (payload, context) -> context.queue(() -> {
+            if (context.getPlayer() instanceof ServerPlayer player) SleepBoardServer.onNudge(player, payload);
+        }));
     }
 
     /** Whether the player's client has the mod: it accepts the mod's payloads. */

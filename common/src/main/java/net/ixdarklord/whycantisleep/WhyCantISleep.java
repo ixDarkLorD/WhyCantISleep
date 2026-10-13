@@ -4,6 +4,7 @@ import net.ixdarklord.coolcatcore.api.core.ModConstructor;
 import net.ixdarklord.coolcatcore.api.platform.Platform;
 import net.ixdarklord.whycantisleep.config.WCISConfigs;
 import net.ixdarklord.whycantisleep.network.WCISNetwork;
+import net.ixdarklord.whycantisleep.sleep.SleepBoardServer;
 import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ public final class WhyCantISleep implements ModConstructor {
 
         WCISConfigs.register();
         WCISNetwork.register();
+        SleepBoardServer.init();
     }
 
     public static Identifier id(String path) {

@@ -3,6 +3,7 @@ package net.ixdarklord.whycantisleep;
 import net.ixdarklord.coolcatcore.api.core.ClientModConstructor;
 import net.ixdarklord.whycantisleep.client.SleepClient;
 import net.ixdarklord.whycantisleep.client.Blockers;
+import net.ixdarklord.whycantisleep.client.board.SleepBoard;
 import net.ixdarklord.whycantisleep.client.hud.BlockerArrows;
 
 /**
@@ -15,5 +16,6 @@ public final class WhyCantISleepClient implements ClientModConstructor {
         SleepClient.init();
         Blockers.init();
         BlockerArrows.init();
+        SleepBoard.init();
     }
 }
