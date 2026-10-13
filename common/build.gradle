@@ -3,6 +3,8 @@ apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/grad
 dependencies {
     // CoolCatLib: Core (common): mod constructors, events, networking, configs, attachments, platform checks
     compileOnly "net.ixdarklord.coolcatlib:coolcatlib-core-common:${coolcatlib_version}"
+    // CoolCatLib: Canvas (common): screen effects, camera shake and world particles
+    compileOnly "net.ixdarklord.coolcatlib:coolcatlib-canvas-common:${coolcatcanvas_version}"
 }
 
 // The shared main.gradle publishes every subproject's shadowJar. For common it must be a plain jar of this

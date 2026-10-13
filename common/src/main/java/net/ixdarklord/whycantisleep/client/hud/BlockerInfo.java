@@ -7,13 +7,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
-/** The line above the hotbar after a sleep blocked by monsters: how many there are and where the closest one is. */
+/** The notice after a sleep blocked by monsters: how many there are and where the closest one is. */
 public final class BlockerInfo {
     private BlockerInfo() {
     }
 
-    /** "3 monsters nearby - closest: Zombie, 6 blocks below", or null when no monster is known. */
-    public static @Nullable Component describe(Player player, Collection<? extends Entity> blockers) {
+    /** "3 monsters nearby" over "Closest: Zombie, 6 blocks below", or null when no monster is known. */
+    public static @Nullable SleepNotice describe(Player player, Collection<? extends Entity> blockers) {
         Entity closest = null;
         double closestDistance = Double.MAX_VALUE;
         for (Entity blocker : blockers) {
@@ -24,10 +24,11 @@ public final class BlockerInfo {
             }
         }
         if (closest == null) return null;
-        Component where = where(player, closest);
-        return blockers.size() == 1
-                ? Component.translatable("gui.whycantisleep.blockers.one", closest.getName(), where)
-                : Component.translatable("gui.whycantisleep.blockers.many", blockers.size(), closest.getName(), where);
+        Component title = blockers.size() == 1
+                ? Component.translatable("gui.whycantisleep.blockers.one")
+                : Component.translatable("gui.whycantisleep.blockers.many", blockers.size());
+        return new SleepNotice(SleepNotice.Kind.MONSTERS, title,
+                Component.translatable("gui.whycantisleep.blockers.closest", closest.getName(), where(player, closest)));
     }
 
     // "6 blocks below" for a monster more under (or over) the player than beside them, else "6 blocks away".

@@ -2,12 +2,15 @@ package net.ixdarklord.whycantisleep.client;
 
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientPlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
+import net.ixdarklord.whycantisleep.client.fx.SleepEffects;
 import net.ixdarklord.whycantisleep.client.hud.BlockerInfo;
 import net.ixdarklord.whycantisleep.client.hud.Explanations;
+import net.ixdarklord.whycantisleep.client.hud.SleepNotice;
+import net.ixdarklord.whycantisleep.client.hud.SleepNotices;
 import net.ixdarklord.whycantisleep.config.WCISClientConfig;
+import net.ixdarklord.whycantisleep.config.WCISServerConfig;
 import net.ixdarklord.whycantisleep.network.SleepBlockedPayload;
 import net.ixdarklord.whycantisleep.sleep.SleepChecks;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -26,13 +29,15 @@ import java.util.List;
 /**
  * The client's side of a failed sleep. A server with the mod reports the exact monsters ({@link #onBlockedByServer});
  * on a server without it the client notices the game's own message and repeats the check with the monsters it can see
- * ({@link #onOverlayMessage}). It also stops the first use of a bed that would explode ({@link #onUseBlock}).
+ * ({@link #onOverlayMessage}). Either way the game's line above the hotbar gives way to the sleep HUD's card. It also
+ * stops the first use of a bed that would explode ({@link #onUseBlock}).
  */
 public final class SleepClient {
     // A server with the mod sends its report just before the game's message, so a report this recent covers it.
     private static final int REPORT_TICKS = 20;
     // How long after the warning a second use of the bed goes through.
     private static final int WARNING_TICKS = 60;
+    private static final String NUDGE_KEYS = "gui.whycantisleep.nudge.";
 
     private static long tick;
     private static long lastReport = Long.MIN_VALUE;
@@ -81,7 +86,7 @@ public final class SleepClient {
         warnedBed = bed;
         warnedAt = tick;
         releasedSinceWarning = false;
-        Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("gui.whycantisleep.dimension_warning").withStyle(ChatFormatting.RED), false);
+        SleepNotices.show(Explanations.notice(SleepNotice.Kind.DANGER, "explodes"), WARNING_TICKS);
         return true;
     }
 
@@ -100,22 +105,37 @@ public final class SleepClient {
 
     /**
      * A message is about to be put above the hotbar ({@code GuiMixin}). One of the game's sleep messages is a failed
-     * sleep: "monsters nearby" also points the monsters out. Returns the message to show in its place.
+     * sleep: "monsters nearby" also points the monsters out. Returns true when the sleep HUD shows it instead.
      */
-    public static Component onOverlayMessage(Component message) {
-        if (!(message.getContents() instanceof TranslatableContents contents)) return message;
+    public static boolean onOverlayMessage(Component message) {
+        if (!(message.getContents() instanceof TranslatableContents contents)) return false;
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.level == null || minecraft.player == null) return message;
-        if (contents.getKey().equals(Explanations.NOT_SAFE)) {
+        if (minecraft.level == null || minecraft.player == null) return false;
+        String key = contents.getKey();
+        // The server's answers to a nudge are the mod's own, and always belong on its HUD.
+        if (key.startsWith(NUDGE_KEYS)) {
+            SleepNotices.show(new SleepNotice(SleepNotice.Kind.NUDGE, message, null));
+            return true;
+        }
+
+        SleepNotice notice = null;
+        int ticks = SleepNotices.DEFAULT_TICKS;
+        if (key.equals(Explanations.NOT_SAFE)) {
             // No recent report: the server doesn't have the mod, so look for the monsters from here.
             if (tick - lastReport > REPORT_TICKS && lastBed != null) {
                 Blockers.set(SleepChecks.blockersOnClient(minecraft.level, minecraft.player, lastBed));
             }
-            if (WCISClientConfig.ACTION_BAR_INFO.get()) {
-                Component info = BlockerInfo.describe(minecraft.player, Blockers.entities());
-                if (info != null) return info;
-            }
+            if (WCISClientConfig.ACTION_BAR_INFO.get()) notice = BlockerInfo.describe(minecraft.player, Blockers.entities());
+            ticks = Math.max(ticks, WCISServerConfig.HIGHLIGHT_DURATION.get() * 20);
         }
-        return Explanations.explain(message);
+        if (notice == null && WCISClientConfig.SLEEP_EXPLANATIONS.get()) notice = Explanations.explain(contents);
+        if (notice == null) return false;
+        SleepNotices.show(notice, ticks);
+        // On a server without the mod nobody rolls for the scare, so the client does, by its own server settings.
+        if (lastBed != null && !minecraft.hasSingleplayerServer() && !WCISServerConfig.CONFIG.isRemote() && notice.kind() != SleepNotice.Kind.PLAYERS_AWAKE
+                && minecraft.level.getRandom().nextInt(100) < WCISServerConfig.SCARE_CHANCE.get()) {
+            SleepEffects.scare(lastBed);
+        }
+        return true;
     }
 }

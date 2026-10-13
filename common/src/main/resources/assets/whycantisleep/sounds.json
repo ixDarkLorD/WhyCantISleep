@@ -1,0 +1,32 @@
+{
+  "blocked": {
+    "subtitle": "subtitles.whycantisleep.blocked",
+    "sounds": [
+      { "name": "minecraft:entity.warden.heartbeat", "type": "event" }
+    ]
+  },
+  "notice": {
+    "sounds": [
+      { "name": "minecraft:ui.toast.in", "type": "event" }
+    ]
+  },
+  "scare": {
+    "subtitle": "subtitles.whycantisleep.scare",
+    "sounds": [
+      { "name": "minecraft:entity.enderman.stare", "type": "event" },
+      { "name": "minecraft:block.sculk_shrieker.shriek", "type": "event" }
+    ]
+  },
+  "warning": {
+    "subtitle": "subtitles.whycantisleep.warning",
+    "sounds": [
+      { "name": "minecraft:block.note_block.bass", "type": "event" }
+    ]
+  },
+  "whisper": {
+    "subtitle": "subtitles.whycantisleep.whisper",
+    "sounds": [
+      { "name": "minecraft:particle.soul_escape", "type": "event" }
+    ]
+  }
+}
