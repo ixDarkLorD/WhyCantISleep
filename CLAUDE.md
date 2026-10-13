@@ -96,7 +96,7 @@ Config gating: every client option a server setting controls is declared `enable
 
 ## The sleep HUD
 
-Sleep messages are not shown on the game's action bar. `GuiMixin` cancels the game's sleep lines (recognised by translation key in `client/hud/Explanations`) and `client/hud/SleepNotices` shows a card instead: a `SleepNotice` (kind, title, hint), whose kind gives the accent color, the icon (a vanilla item) and the sound and screen effect (`SleepEffects.onNotice`). The sleep board (`client/board/SleepBoard`) and the cards share `client/hud/HudStyle`. The option is still named "Action bar info" on the mod page: it now decides whether a blocked sleep's card names the count and the closest monster.
+Sleep messages are not shown on the game's action bar. `GuiMixin` cancels the game's sleep lines (recognised by translation key in `client/hud/Explanations`) and `client/hud/SleepNotices` shows a card instead: a `SleepNotice` (kind, title, hint), whose kind gives the accent color, the icon (a vanilla item) and the sound and screen effect (`SleepEffects.onNotice`). The sleep board (`client/board/SleepBoard`) and the cards share `client/hud/HudStyle`, which is the game's own UI on purpose (the author asked for a clean HUD on theme with Minecraft's): the tooltip's box and frame sprites, the boss bar sprites for progress, the chat's colors for text, vanilla items for icons and `PlayerFaceExtractor` for players. Don't add custom panel art or gradients to it. The option is still named "Action bar info" on the mod page: it now decides whether a blocked sleep's card names the count and the closest monster.
 
 ## Config (the names and defaults on the mod page)
 

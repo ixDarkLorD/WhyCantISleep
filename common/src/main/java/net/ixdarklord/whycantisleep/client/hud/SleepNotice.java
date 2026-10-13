@@ -14,17 +14,17 @@ import java.util.function.Supplier;
  * @param hint the second line, or null for a message of one line
  */
 public record SleepNotice(Kind kind, Component title, @Nullable Component hint) {
-    /** What a notice is about, which gives it its color and its icon (one of the game's own items). */
+    /** What a notice is about, which gives it its color (one of the chat's) and its icon (one of the game's own items). */
     public enum Kind {
-        MONSTERS(0xFF5555, () -> Items.ZOMBIE_HEAD),
-        WRONG_TIME(0xFFC94D, () -> Items.CLOCK),
-        TOO_FAR(0x66B3FF, () -> Items.SPYGLASS),
-        OBSTRUCTED(0xFFA64D, () -> Items.COBBLESTONE),
-        OCCUPIED(0xFFA64D, () -> Items.RED_BED),
-        PLAYERS_AWAKE(0x66B3FF, () -> Items.PLAYER_HEAD),
-        NOT_POSSIBLE(0xA6A6B8, () -> Items.BARRIER),
-        DANGER(0xFF4040, () -> Items.TNT),
-        NUDGE(0x6FD06F, () -> Items.BELL);
+        MONSTERS(HudStyle.RED, () -> Items.ZOMBIE_HEAD),
+        WRONG_TIME(HudStyle.YELLOW, () -> Items.CLOCK),
+        TOO_FAR(HudStyle.YELLOW, () -> Items.SPYGLASS),
+        OBSTRUCTED(HudStyle.YELLOW, () -> Items.COBBLESTONE),
+        OCCUPIED(HudStyle.YELLOW, () -> Items.RED_BED),
+        PLAYERS_AWAKE(HudStyle.AQUA, () -> Items.PLAYER_HEAD),
+        NOT_POSSIBLE(HudStyle.WHITE, () -> Items.BARRIER),
+        DANGER(HudStyle.RED, () -> Items.TNT),
+        NUDGE(HudStyle.GREEN, () -> Items.BELL);
 
         private final int color;
         private final Supplier<Item> item;
