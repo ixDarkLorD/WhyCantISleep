@@ -85,12 +85,20 @@ public final class LurkerServer {
             IGNORED.clear();
             NOT_BEFORE.clear();
         });
-        // Test commands, for operators: read or set one's own mood, sanity and guilt, and bring the Lurker.
+        // Test commands, for operators: read or set one's own mood, sanity and guilt, see everything behind them, and
+        // bring the Lurker.
         CommandEvents.REGISTER.register((dispatcher, context, selection) -> dispatcher.register(Commands.literal(WhyCantISleep.MOD_ID)
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(value("mood", Mind::mood, Mind::withMood))
                 .then(value("sanity", Mind::sanity, Mind::withSanity))
                 .then(value("guilt", Mind::guilt, Mind::withGuilt))
+                .then(Commands.literal("status").executes(ctx -> {
+                    Mind mind = Mind.get(ctx.getSource().getPlayerOrException());
+                    ctx.getSource().sendSuccess(() -> Component.literal(String.format(java.util.Locale.ROOT,
+                            "mood %.1f, sanity %.1f (cap %.1f), guilt %.1f | rest %.2f, food %.2f, sky %.2f | cheer %.1f, strain %.1f | foods %s",
+                            mind.mood(), mind.sanity(), mind.sanityCap(), mind.guilt(), mind.rest(), mind.food(), mind.outdoors(), mind.cheer(), mind.strain(), mind.foods())), false);
+                    return 1;
+                }))
                 .then(Commands.literal("ignored").then(Commands.argument("times", IntegerArgumentType.integer(0, 9)).executes(ctx -> {
                     int times = IntegerArgumentType.getInteger(ctx, "times");
                     IGNORED.put(ctx.getSource().getPlayerOrException().getUUID(), times);
