@@ -87,12 +87,13 @@ function Medal($name, $outline, $light, $shade, $fill, $far, $limits) {
     Save $b $name 19 19 0
 }
 
-# A bar, in the manner of an arcade game's: a chunky capsule with a dark outline, cut into eight blocks, each with a
+# A bar, in the manner of an arcade game's: a chunky capsule with a dark outline (lit along its top, darkest along its
+# foot, and casting a shadow down and to the right), cut into eight blocks, each with a
 # glint on its shoulder. It is drawn in three layers so the color can stop anywhere: the back (the outline and the
 # empty blocks), then the fill stretched to the value (MindStatus), then the frame (the outline again, to round the
 # fill's ends off, and the block seams, glints and foot shadow, which lie over full and empty blocks alike).
 # The color runs along columns 2 to 65, rows 1 to 9. Mood's ends round; lucidity's runs on into a lit point.
-function Bar($name, $outline, $empty, $emptyTop, $tip, [bool]$pointed) {
+function Bar($name, $outline, $outlineLight, $outlineDark, $empty, $emptyTop, $tip, [bool]$pointed) {
     $inside = {
         param($x, $y)
         $off = [Math]::Abs($y - 5)
@@ -101,14 +102,20 @@ function Bar($name, $outline, $empty, $emptyTop, $tip, [bool]$pointed) {
         return $x -ge $first -and $x -le $last
     }.GetNewClosure()
     $depth = Depth 72 11 $inside
-    $back = New-Object System.Drawing.Bitmap 72, 11
-    $frame = New-Object System.Drawing.Bitmap 72, 11
-    for ($y = 0; $y -lt 11; $y++) { for ($x = 0; $x -lt 72; $x++) {
-        $d = $depth[$x, $y]
-        $clear = Argb 0 0
-        if ($d -eq 0) { $back.SetPixel($x, $y, $clear); $frame.SetPixel($x, $y, $clear); continue }
+    # A pixel wider and taller than the bar, for the shadow it casts down and to the right.
+    $back = New-Object System.Drawing.Bitmap 73, 12
+    $frame = New-Object System.Drawing.Bitmap 73, 12
+    $clear = Argb 0 0
+    for ($y = 0; $y -lt 12; $y++) { for ($x = 0; $x -lt 73; $x++) {
+        $d = if ($x -lt 72 -and $y -lt 11) { $depth[$x, $y] } else { 0 }
+        if ($d -eq 0) {
+            $cast = $x -gt 0 -and $y -gt 0 -and $depth[($x - 1), ($y - 1)] -gt 0
+            $back.SetPixel($x, $y, $(if ($cast) { Argb 110 0x000000 } else { $clear })); $frame.SetPixel($x, $y, $clear); continue
+        }
+        # The outline is lit along its top, where the light falls on it, and darkest along its foot.
+        $rim = if ($y -eq 0 -or $depth[$x, ($y - 1)] -eq 0) { Argb 255 $outlineLight } elseif ($y -eq 10 -or $depth[$x, ($y + 1)] -eq 0) { Argb 255 $outlineDark } else { Argb 255 $outline }
         # The outline, and the two columns at each end the color never reaches.
-        if ($d -eq 1 -or $x -lt 2) { $back.SetPixel($x, $y, (Argb 255 $outline)); $frame.SetPixel($x, $y, (Argb 255 $outline)); continue }
+        if ($d -eq 1 -or $x -lt 2) { $back.SetPixel($x, $y, $rim); $frame.SetPixel($x, $y, $rim); continue }
         if ($x -gt 65) {
             # Past the color: more outline on a round end, the lit tip on a pointed one.
             $end = if ($pointed -and $d -ge 2 -and $x -gt 66) { Argb 255 $tip } else { Argb 255 $outline }
@@ -122,14 +129,14 @@ function Bar($name, $outline, $empty, $emptyTop, $tip, [bool]$pointed) {
             else { $clear }
         $frame.SetPixel($x, $y, $over)
     } }
-    Save $back "${name}_track" 72 11 0
-    Save $frame "${name}_frame" 72 11 0
+    Save $back "${name}_track" 73 12 0
+    Save $frame "${name}_frame" 73 12 0
 }
 # The coin: circles 19, 17 and 13 across (as squared distances). The diamond: 9, 7 and 5 out along its edges.
 Medal "mood_medal" 0x1E1408 0xFFE08A 0xB07A22 0x2A1C0C { param($x, $y) $x * $x + $y * $y } @(97, 76, 45)
 Medal "lucidity_medal" 0x14181C 0xE9B6B8 0x8A4E7C 0x18101E { param($x, $y) [Math]::Abs($x) + [Math]::Abs($y) } @(9, 7, 5)
-Bar "mood" 0x2A1608 0x4A3414 0x38260E 0xFFE08A $false
-Bar "lucidity" 0x1C1220 0x3A2A3E 0x2A1E30 0xE9B6B8 $true
+Bar "mood" 0x2A1608 0x7A5220 0x120A04 0x4A3414 0x38260E 0xFFE08A $false
+Bar "lucidity" 0x1C1220 0x6A4470 0x0A070E 0x3A2A3E 0x2A1E30 0xE9B6B8 $true
 # What fills a gauge: bright, flat color, nine rows from a light shoulder down to a deep foot. It only stretches.
 function GaugeFill($name, $light, $base, $shade, $deep) {
     $b = New-Object System.Drawing.Bitmap 8, 9
