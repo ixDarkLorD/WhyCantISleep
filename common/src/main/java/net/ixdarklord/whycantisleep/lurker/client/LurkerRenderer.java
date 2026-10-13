@@ -38,6 +38,7 @@ public class LurkerRenderer extends MobRenderer<LurkerEntity, LurkerRenderState,
         super.extractRenderState(entity, state, partialTicks);
         state.attackAnim = entity.getAttackAnim(partialTicks);
         state.hallucination = entity.isHallucination();
+        state.huntAmount = entity.huntAmount(partialTicks);
     }
 
     @Override

@@ -1,6 +1,7 @@
 {
   "commands.whycantisleep.dread.get": "Your dread is %s of %s",
   "commands.whycantisleep.dread.set": "Set your dread to %s",
+  "commands.whycantisleep.ignored.set": "It has now been ignored %s times in a row",
   "commands.whycantisleep.summon.failed": "Found nowhere for it to come from",
   "commands.whycantisleep.summon.success": "Something is coming for you",
   "config.whycantisleep.arrow_size.large": "Large",
@@ -87,6 +88,8 @@
   "subtitles.whycantisleep.lurker.death": "Lurker dies",
   "subtitles.whycantisleep.lurker.emerge": "Lurker emerges",
   "subtitles.whycantisleep.lurker.hurt": "Lurker hurts",
+  "subtitles.whycantisleep.lurker.lure": "Lurker calls",
+  "subtitles.whycantisleep.lurker.notice": "Lurker sees you",
   "subtitles.whycantisleep.lurker.vanish": "Lurker vanishes",
   "subtitles.whycantisleep.nudge": "Someone nudges you",
   "subtitles.whycantisleep.scare": "Something stirs under the bed",

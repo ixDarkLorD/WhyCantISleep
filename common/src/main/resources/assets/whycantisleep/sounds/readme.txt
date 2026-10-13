@@ -21,6 +21,8 @@ For several variants of one sound, number them: whisper1.ogg, whisper2.ogg, whis
   lurker/hurt.ogg       the Lurker struck                                   entity.phantom.hurt        mono
   lurker/death.ogg      the Lurker killed                                   entity.phantom.death       mono
   lurker/emerge.ogg     the Lurker coming out into the world                entity.warden.emerge       mono
+  lurker/lure.ogg       the Lurker, ignored before, calling to be looked at entity.warden.listening_angry mono
+  lurker/notice.ogg     the Lurker seen, starting its hunt                  entity.warden.roar         mono
   lurker/vanish.ogg     the Lurker gone (daylight, or its player lost)      entity.enderman.teleport   mono
 
 The heartbeat is played again and again, faster as the Lurker nears (every 1.7 seconds down to every half second),
