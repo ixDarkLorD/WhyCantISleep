@@ -83,6 +83,12 @@
   "gui.whycantisleep.nudge.received": "%s is in bed and waiting for you to sleep",
   "gui.whycantisleep.nudge.sent": "You nudged %s",
   "subtitles.whycantisleep.blocked": "Heart pounds",
+  "subtitles.whycantisleep.lurker.ambient": "Lurker breathes",
+  "subtitles.whycantisleep.lurker.death": "Lurker dies",
+  "subtitles.whycantisleep.lurker.emerge": "Lurker emerges",
+  "subtitles.whycantisleep.lurker.hurt": "Lurker hurts",
+  "subtitles.whycantisleep.lurker.vanish": "Lurker vanishes",
+  "subtitles.whycantisleep.nudge": "Someone nudges you",
   "subtitles.whycantisleep.scare": "Something stirs under the bed",
   "subtitles.whycantisleep.warning": "Warning sounds",
   "subtitles.whycantisleep.whisper": "Something whispers"
