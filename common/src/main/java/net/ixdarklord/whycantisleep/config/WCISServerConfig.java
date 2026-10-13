@@ -47,12 +47,12 @@ public final class WCISServerConfig {
             .comment("Whether the mod's advancements can be earned.").build();
     static {
         BUILDER.pop();
-        BUILDER.push("mind", "Mood, sanity and guilt.");
+        BUILDER.push("mind", "Mood and sanity.");
     }
     public static final ConfigValue<Boolean> MIND_SYSTEM = BUILDER.bool("moodAndSanity", true)
-            .comment("Whether players have a mood, which follows how they live, and a sanity, which follows their mood and their guilt. Off, everyone stays as they are and the thing under the bed never comes.").build();
+            .comment("Whether players have a mood, which follows how they live, and a sanity, which follows their mood and what they do. Off, everyone stays as they are and the thing under the bed never comes.").build();
     public static final ConfigValue<Boolean> PVP_GUILT = BUILDER.bool("pvpGuilt", true)
-            .comment("Whether attacking or killing a player who isn't fighting back is guilt. Off, nothing done to another player is.").enabledWhen(MIND_SYSTEM).build();
+            .comment("Whether attacking or killing a player who isn't fighting back costs the attacker sanity. Off, nothing done to another player does.").enabledWhen(MIND_SYSTEM).build();
     static {
         BUILDER.pop();
     }

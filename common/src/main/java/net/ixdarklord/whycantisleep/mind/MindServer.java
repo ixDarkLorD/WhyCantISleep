@@ -23,18 +23,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The rules of {@link Mind}: what moves a player's mood, guilt and sanity.
+ * The rules of {@link Mind}: what moves a player's mood and sanity. There are only those two.
  * <p>
  * <b>Mood</b> is not a checklist. Every ten seconds it steps towards a target made of three needs, which ordinary
  * play keeps met: rest (sleeping now and then), food (not going hungry, with some variety), and the open sky (not
  * living underground). Small good things lift it for a while ({@link Mind#cheer}): a food not eaten lately, feeding
- * an animal, company, a night's sleep. Getting hurt and dying weigh on it for a while ({@link Mind#strain}).
+ * an animal, company, a night's sleep. Hard things weigh on it for a while ({@link Mind#strain}): getting hurt, dying,
+ * and a bad conscience.
  * <p>
- * <b>Guilt</b> comes from killing what trusted the player (villagers, pets, young animals, golems) and from attacking
- * another player who isn't fighting back. It fades with time and kindness.
- * <p>
- * <b>Sanity</b> recovers while mood is content or better and wears away while it is gloomy or worse, and can't
- * recover past what guilt allows. Sleeping in the dark costs some at once; sleeping in the light gives some back.
+ * <b>Sanity</b> recovers while mood is content or better and wears away while it is gloomy or worse. Sleeping in the
+ * dark costs some at once; sleeping in the light gives some back. And a <b>guilty act</b> costs it at once: killing
+ * what trusted the player (villagers, pets, young animals, golems), or attacking another player who isn't fighting
+ * back. Guilt is not a number of its own: the act takes its toll on sanity there and then, weighs on the mood for a
+ * while, and is over.
  * <p>
  * Every number here is a first guess, to be tuned by play. An in-game day is 24000 ticks, 120 of these updates.
  */
@@ -59,10 +60,10 @@ public final class MindServer {
     private static final float NEW_FOOD_CHEER = 4.0F;
     private static final float MEAL_CHEER = 0.5F;
     private static final float FED_ANIMAL_CHEER = 2.0F;
-    private static final float FED_ANIMAL_GUILT = -1.0F;
+    private static final float FED_ANIMAL_SANITY = 0.5F;
     private static final float LIT_SLEEP_CHEER = 3.0F;
     private static final float RESTED_CHEER = 6.0F;
-    private static final float RESTED_GUILT = -4.0F;
+    private static final float RESTED_SANITY = 3.0F;
     private static final float HURT_STRAIN = 0.4F;
     private static final float DEATH_STRAIN = 15.0F;
 
@@ -73,18 +74,18 @@ public final class MindServer {
     private static final float DARK_SLEEP_SANITY = -8.0F;
     private static final float LIT_SLEEP_SANITY = 6.0F;
 
-    // Guilt fades by 12 a day.
-    private static final float GUILT_FADE = 0.1F;
-    private static final float GUILT_VILLAGER = 25.0F;
-    private static final float GUILT_OWN_PET = 30.0F;
-    private static final float GUILT_PET = 20.0F;
-    private static final float GUILT_GOLEM = 10.0F;
-    private static final float GUILT_YOUNG = 8.0F;
-    private static final float GUILT_PLAYER_KILL = 35.0F;
-    private static final float GUILT_PLAYER_HIT = 2.0F;
+    // What a guilty act costs in sanity at once; it also weighs on the mood, by this share of the same amount.
+    private static final float VILLAGER_COST = 15.0F;
+    private static final float OWN_PET_COST = 18.0F;
+    private static final float PET_COST = 12.0F;
+    private static final float GOLEM_COST = 6.0F;
+    private static final float YOUNG_COST = 5.0F;
+    private static final float PLAYER_KILL_COST = 20.0F;
+    private static final float PLAYER_HIT_COST = 1.5F;
+    private static final float CONSCIENCE_STRAIN = 0.6F;
     // A player who struck back within this long is fighting, not being attacked.
     private static final int PROVOKED_TICKS = 20 * 30;
-    private static final int HIT_GUILT_INTERVAL = 20;
+    private static final int HIT_COST_INTERVAL = 20;
 
     // Who last struck whom, and when (server ticks): "attacker>victim".
     private static final Map<String, Integer> LAST_STRIKE = new HashMap<>();
@@ -108,7 +109,7 @@ public final class MindServer {
         return WCISServerConfig.MIND_SYSTEM.get() && !player.isCreative() && !player.isSpectator();
     }
 
-    // Every ten seconds: the needs are measured, mood steps towards what they make, and sanity and guilt follow.
+    // Every ten seconds: the needs are measured, mood steps towards what they make, and sanity follows mood.
     private static void update(ServerPlayer player) {
         if (!applies(player) || !player.isAlive()) return;
         ServerLevel level = player.level();
@@ -124,17 +125,12 @@ public final class MindServer {
         float target = MOOD_FLOOR + MOOD_FROM_NEEDS * (rest * 0.4F + food * 0.3F + outdoors * 0.3F)
                 + mind.cheer() - mind.strain() + (hasCompany(player) ? COMPANY_BONUS : 0.0F);
         float mood = mind.mood() + Mth.clamp(Mth.clamp(target, 0.0F, Mind.MAX) - mind.mood(), -MOOD_STEP, MOOD_STEP);
-        float guilt = Math.max(0.0F, mind.guilt() - GUILT_FADE);
 
         MoodLevel feeling = MoodLevel.of(mood);
         float drift = feeling.ordinal() >= MoodLevel.CONTENT.ordinal() ? SANITY_RECOVERY
                 : feeling == MoodLevel.GLOOMY ? SANITY_WEAR_GLOOMY : feeling == MoodLevel.MISERABLE ? SANITY_WEAR_MISERABLE : 0.0F;
-        float cap = Mind.MAX - guilt * 0.6F;
-        float sanity = mind.sanity() + drift;
-        // Recovery stops at what guilt allows; sanity already above that settles down to it.
-        if (sanity > cap) sanity = Math.max(cap, mind.sanity() - 0.3F);
 
-        Mind updated = new Mind(mood, sanity, guilt, rest, food, outdoors, mind.cheer() * FADE, mind.strain() * FADE, mind.foods());
+        Mind updated = new Mind(mood, mind.sanity() + drift, rest, food, outdoors, mind.cheer() * FADE, mind.strain() * FADE, mind.foods());
         Mind.update(player, old -> updated);
     }
 
@@ -158,37 +154,37 @@ public final class MindServer {
         });
     }
 
-    /** The player fed an animal ({@code AnimalMixin}): a small kindness, good for the mood and for a guilty conscience. */
+    /** The player fed an animal ({@code AnimalMixin}): a small kindness, good for the mood and a little for the mind. */
     public static void onFedAnimal(ServerPlayer player) {
         if (!applies(player)) return;
-        Mind.update(player, mind -> mind.withCheer(mind.cheer() + FED_ANIMAL_CHEER).withGuilt(mind.guilt() + FED_ANIMAL_GUILT));
+        Mind.update(player, mind -> mind.withCheer(mind.cheer() + FED_ANIMAL_CHEER).withSanity(mind.sanity() + FED_ANIMAL_SANITY));
     }
 
     /** The player lay down to sleep: in the dark it costs sanity at once, in the light it gives some back. */
     public static void onLayDown(ServerPlayer player, boolean dark) {
         if (!applies(player)) return;
         Mind.update(player, mind -> dark ? mind.withSanity(mind.sanity() + DARK_SLEEP_SANITY)
-                : mind.withSanity(Math.min(Math.max(mind.sanity(), mind.sanityCap()), mind.sanity() + LIT_SLEEP_SANITY)).withCheer(mind.cheer() + LIT_SLEEP_CHEER));
+                : mind.withSanity(mind.sanity() + LIT_SLEEP_SANITY).withCheer(mind.cheer() + LIT_SLEEP_CHEER));
     }
 
     /** The player woke after sleeping the night through ({@code ServerPlayerMixin}). */
     public static void onRested(ServerPlayer player) {
         if (!applies(player)) return;
-        Mind.update(player, mind -> mind.withCheer(mind.cheer() + RESTED_CHEER).withGuilt(mind.guilt() + RESTED_GUILT));
+        Mind.update(player, mind -> mind.withCheer(mind.cheer() + RESTED_CHEER).withSanity(mind.sanity() + RESTED_SANITY));
     }
 
-    /** The player was hurt ({@code ServerPlayerMixin}): it weighs on the mood, and between players it may be guilt. */
+    /** The player was hurt ({@code ServerPlayerMixin}): it weighs on the mood, and between players it may be an attack. */
     public static void onHurt(ServerPlayer player, DamageSource source, float damage) {
         if (applies(player)) Mind.update(player, mind -> mind.withStrain(mind.strain() + damage * HURT_STRAIN));
         if (source.getEntity() instanceof ServerPlayer attacker && attacker != player) onStruck(attacker, player);
     }
 
-    // One player struck another. Striking someone who hasn't struck back lately is an attack, and a little guilt each time.
+    // One player struck another. Striking someone who hasn't struck back lately is an attack, and costs a little each time.
     private static void onStruck(ServerPlayer attacker, ServerPlayer victim) {
         int now = attacker.level().getServer().getTickCount();
         Integer last = LAST_STRIKE.put(key(attacker, victim), now);
         if (!WCISServerConfig.PVP_GUILT.get() || !applies(attacker) || isProvoked(attacker, victim, now)) return;
-        if (last == null || now - last >= HIT_GUILT_INTERVAL) addGuilt(attacker, GUILT_PLAYER_HIT);
+        if (last == null || now - last >= HIT_COST_INTERVAL) onGuiltyAct(attacker, PLAYER_HIT_COST);
     }
 
     // Whether the victim has been fighting the attacker: they struck them within the last half minute.
@@ -201,27 +197,28 @@ public final class MindServer {
         return attacker.getUUID() + ">" + victim.getUUID();
     }
 
-    /** A player died ({@code ServerPlayerMixin}): it weighs on their mood, and on the conscience of whoever murdered them. */
+    /** A player died ({@code ServerPlayerMixin}): it weighs on their mood, and on the mind of whoever murdered them. */
     public static void onPlayerDied(ServerPlayer player, DamageSource source) {
         if (applies(player)) Mind.update(player, mind -> mind.withStrain(mind.strain() + DEATH_STRAIN));
         if (source.getEntity() instanceof ServerPlayer killer && killer != player && WCISServerConfig.PVP_GUILT.get() && applies(killer)
                 && !isProvoked(killer, player, killer.level().getServer().getTickCount())) {
-            addGuilt(killer, GUILT_PLAYER_KILL);
+            onGuiltyAct(killer, PLAYER_KILL_COST);
         }
     }
 
-    /** Something other than a player died ({@code LivingEntityMixin}): killing what trusted the player is guilt. */
+    /** Something other than a player died ({@code LivingEntityMixin}): killing what trusted the player costs them. */
     public static void onKilled(LivingEntity victim, DamageSource source) {
         if (!(source.getEntity() instanceof ServerPlayer killer) || !applies(killer)) return;
-        float guilt = victim instanceof AbstractVillager ? GUILT_VILLAGER
-                : victim instanceof TamableAnimal pet && pet.isTame() ? (pet.isOwnedBy(killer) ? GUILT_OWN_PET : GUILT_PET)
-                : victim instanceof IronGolem ? GUILT_GOLEM
-                : victim instanceof Animal && victim.isBaby() ? GUILT_YOUNG : 0.0F;
-        if (guilt > 0.0F) addGuilt(killer, guilt);
+        float cost = victim instanceof AbstractVillager ? VILLAGER_COST
+                : victim instanceof TamableAnimal pet && pet.isTame() ? (pet.isOwnedBy(killer) ? OWN_PET_COST : PET_COST)
+                : victim instanceof IronGolem ? GOLEM_COST
+                : victim instanceof Animal && victim.isBaby() ? YOUNG_COST : 0.0F;
+        if (cost > 0.0F) onGuiltyAct(killer, cost);
     }
 
-    private static void addGuilt(ServerPlayer player, float amount) {
-        Mind.update(player, mind -> mind.withGuilt(mind.guilt() + amount));
+    // A guilty act: its cost comes off sanity at once, and a share of it weighs on the mood for a while.
+    private static void onGuiltyAct(ServerPlayer player, float cost) {
+        Mind.update(player, mind -> mind.withSanity(mind.sanity() - cost).withStrain(mind.strain() + cost * CONSCIENCE_STRAIN));
     }
 
     /** Server side: moves a player's sanity, for what the Lurker does to it. */

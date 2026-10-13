@@ -64,12 +64,7 @@ public final class MindStatus {
         HudStyle.bar(graphics, HudStyle.MOOD_FILL, x + ICON_SIZE + GAP, y + 2, BAR_WIDTH, mind.mood() / Mind.MAX, 1.0F);
         sanityIcon(graphics, mind.stage(), sanityX, y, 1.0F);
         HudStyle.bar(graphics, HudStyle.SANITY_FILL, sanityX + ICON_SIZE + GAP, y + 2, BAR_WIDTH, mind.sanity() / Mind.MAX, 1.0F);
-        // Guilt shows as the part of the sanity bar that can't be won back: hatched off from its far end.
-        int lost = Math.round((BAR_WIDTH - 2) * (1.0F - mind.sanityCap() / Mind.MAX));
-        for (int i = 0; i < lost; i++) {
-            int column = sanityX + ICON_SIZE + GAP + BAR_WIDTH - 2 - i;
-            graphics.fill(column, y + 3, column + 1, y + 6, i % 2 == 0 ? 0xE0101014 : 0x70101014);
-        }
+
         if (mouseY >= y - HudStyle.PANEL_PADDING && mouseY < y + ICON_SIZE + HudStyle.PANEL_PADDING) {
             Font font = minecraft.font;
             if (mouseX >= x - HudStyle.PANEL_PADDING && mouseX < x + PART_WIDTH + HudStyle.PANEL_PADDING) graphics.setComponentTooltipForNextFrame(font, moodLines(mind), mouseX, mouseY);
@@ -114,14 +109,13 @@ public final class MindStatus {
         return Component.translatable("gui.whycantisleep.mind.need." + name, Component.translatable("gui.whycantisleep.mind.need." + word).withStyle(color)).withStyle(ChatFormatting.GRAY);
     }
 
-    // "Sanity: Steady", then which way it is going and why, then what guilt is doing to it.
+    // "Sanity: Steady", then which way it is going and why.
     private static List<Component> sanityLines(Mind mind) {
         List<Component> lines = new ArrayList<>();
         lines.add(Component.translatable("gui.whycantisleep.mind.sanity", Component.translatable("gui.whycantisleep.mind.sanity." + mind.stage().key())).withStyle(ChatFormatting.LIGHT_PURPLE));
         MoodLevel mood = mind.moodLevel();
-        String drift = mood.ordinal() >= MoodLevel.CONTENT.ordinal() ? (mind.sanity() >= mind.sanityCap() - 0.5F ? "full" : "recovering") : mood.isLow() ? "wearing" : "holding";
+        String drift = mood.ordinal() >= MoodLevel.CONTENT.ordinal() ? (mind.sanity() >= Mind.MAX - 0.5F ? "full" : "recovering") : mood.isLow() ? "wearing" : "holding";
         lines.add(Component.translatable("gui.whycantisleep.mind.sanity.drift." + drift).withStyle(ChatFormatting.GRAY));
-        if (mind.guilt() >= 5.0F) lines.add(Component.translatable("gui.whycantisleep.mind.guilt." + (mind.guilt() >= 40.0F ? "heavy" : "some")).withStyle(ChatFormatting.DARK_RED));
         return lines;
     }
 }
