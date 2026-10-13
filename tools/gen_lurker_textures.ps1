@@ -1,9 +1,11 @@
 # Draws the Lurker's two textures under assets/whycantisleep/textures/entity/lurker/:
-#   lurker.png       its skin: night-dark hide with a grain, veins of maroon through it, ribs and vertebrae showing
-#                    crimson, navy horn for its horns, claws, spurs, ridge and tail blade, a mouth full of teeth,
-#                    two sockets, and the eyes that sit in them (an eyeball, a slit pupil and a lid each)
-#   lurker_eyes.png  what glows, drawn over the skin (LurkerRenderer's eyes layer, which pulses): the eyeballs, red
-#                    with a hotter heart; and the veins and the spine, faintly, like embers held under the skin
+#   lurker.png       its skin: night-dark armor in overlapping plates, every face shaded for where it points (lit from
+#                    above, dark beneath, dimmed along its edges), veins of maroon through it, ribs showing crimson,
+#                    navy horn for its horns, claws, spurs, ridge and tail blade, a mouth full of teeth, two sockets,
+#                    and the eyes that sit in them (an eyeball, a slit pupil and a lid each)
+#   lurker_eyes.png  what glows, drawn over the skin (LurkerRenderer's glow layer, which pulses): the eyeballs, red
+#                    with a hotter heart; stretches of the veins; the embers down its back and in the cracks of its
+#                    knees
 # The colors are the author's sunset palette (LurkerPalette.java has the same five).
 # LurkerModel lays its parts out on a 64x64 sheet (texOffs and box sizes); the textures are drawn at twice that, so
 # every model pixel is 2x2 texels. Coordinates below are the model's unless they say "texel". Change both together.
@@ -28,70 +30,127 @@ $navy = @(31, 45, 74)
 $maroon = @(90, 36, 51)
 $crimson = @(138, 10, 36)
 $red = @(255, 45, 70)
+# Horn: the navy of the palette, lifted so it stands off the hide.
+$bone = @(58, 78, 118)
 
-# A box's unwrapped area: width 2 * (depth + width), height depth + height, from its texOffs. Filled with a grain,
-# darker towards the foot of the box so its underside falls away.
-function Fill-Box($u, $v, $w, $h, $d, $base, $grain) {
-    $x0 = $u * $scale; $y0 = $v * $scale
-    $x1 = ($u + 2 * ($d + $w)) * $scale; $y1 = ($v + $d + $h) * $scale
-    for ($y = $y0; $y -lt $y1; $y++) {
-        for ($x = $x0; $x -lt $x1; $x++) {
-            $n = $random.Next(-$grain, $grain + 1)
-            $shade = ($y - $y0) * -0.2
-            $skin.SetPixel($x, $y, (Rgb ($base[0] + $n + $shade) ($base[1] + $n + $shade) ($base[2] + $n + $shade)))
-        }
-    }
-}
-# One texel of the skin, in texel coordinates; with a glow, the same texel of the eyes layer too.
+# One texel of the skin, in texel coordinates; with a glow, the same texel of the glowing layer too.
 function Dot($tx, $ty, $color, $glow = $null) {
     if ($tx -lt 0 -or $ty -lt 0 -or $tx -ge $size -or $ty -ge $size) { return }
     $skin.SetPixel($tx, $ty, $color)
     if ($glow -ne $null) { $eyes.SetPixel($tx, $ty, $glow) }
 }
-# Thin wandering lines down an area, in model coordinates: veins, which also glow faintly.
+
+# A box's six faces, unwrapped from its texOffs (u, v) for a box w wide, h high and d deep. Each face is painted for
+# where it points: the top catches the light, the sides less, the back less still and the underside almost none; it
+# darkens a little down its height and along its edges, where one face meets the next; and it carries a grain.
+# $pattern lays armor over that:
+#   plates  seams across each face's height, a dark line with a lit lip under it: overlapping plates, or the bands
+#           of a limb
+#   rings   seams across the box's depth instead: the lengths of a tail or a horn
+# and $ridge lights a line down the middle of the top and front, where the plates meet.
+function Box($u, $v, $w, $h, $d, $base, $grain, $pattern = "", $period = 4, [bool]$ridge = $false) {
+    # Each face: its place and size in model pixels, how lit it is, and which way the box's depth runs across it
+    # ("y" down the face, "x" along it, "" not at all).
+    $faces = @(
+        @(($u + $d), $v, $w, $d, 1.28, "y", $true),
+        @(($u + $d + $w), $v, $w, $d, 0.5, "y", $false),
+        @($u, ($v + $d), $d, $h, 0.8, "x", $false),
+        @(($u + $d), ($v + $d), $w, $h, 1.0, "", $true),
+        @(($u + $d + $w), ($v + $d), $d, $h, 0.8, "x", $false),
+        @(($u + $d + $w + $d), ($v + $d), $w, $h, 0.66, "", $false)
+    )
+    foreach ($face in $faces) {
+        $x0 = $face[0] * $scale; $y0 = $face[1] * $scale
+        $fw = [int]($face[2] * $scale); $fh = [int]($face[3] * $scale)
+        $top = ($face[5] -eq "y")
+        for ($ty = 0; $ty -lt $fh; $ty++) {
+            for ($tx = 0; $tx -lt $fw; $tx++) {
+                $f = $face[4]
+                # Tops round off towards their sides; every other face darkens towards its foot.
+                if ($top) { $f *= 1.0 - 0.14 * [Math]::Abs($tx - ($fw - 1) / 2.0) / [Math]::Max(1.0, $fw / 2.0) }
+                else { $f *= 1.0 - 0.2 * $ty / [Math]::Max(1, $fh - 1) }
+                if ($fw -ge 4 -and $fh -ge 4) {
+                    $border = [Math]::Min([Math]::Min($tx, $ty), [Math]::Min($fw - 1 - $tx, $fh - 1 - $ty))
+                    if ($border -eq 0) { $f *= 0.74 } elseif ($border -eq 1) { $f *= 0.9 }
+                }
+                $along = -1
+                if ($pattern -eq "plates") { $along = $ty }
+                elseif ($pattern -eq "rings") { if ($face[5] -eq "y") { $along = $ty } elseif ($face[5] -eq "x") { $along = $tx } }
+                if ($along -ge 0) {
+                    $m = $along % $period
+                    if ($m -eq 0) { $f *= 0.55 } elseif ($m -eq 1) { $f *= 1.28 }
+                }
+                if ($ridge -and $face[6] -and [Math]::Abs($tx - ($fw - 1) / 2.0) -lt 1.0) { $f *= 1.3 }
+                $n = $random.Next(-$grain, $grain + 1)
+                $skin.SetPixel($x0 + $tx, $y0 + $ty, (Rgb ($base[0] * $f + $n) ($base[1] * $f + $n) ($base[2] * $f + $n)))
+            }
+        }
+    }
+}
+
+# Thin wandering lines down an area, in model coordinates: veins. Each is maroon under the skin and, for stretches
+# of its length, lit: crimson, with now and then a bright knot.
 function Veins($u, $v, $w, $h, $count) {
     for ($i = 0; $i -lt $count; $i++) {
-        $x = ($u + $random.NextDouble() * $w) * $scale; $y = $v * $scale
+        $x = ($u + 0.5 + $random.NextDouble() * ($w - 1)) * $scale; $y = $v * $scale
+        $lit = $random.Next(0, 2) -eq 0
         while ($y -lt ($v + $h) * $scale) {
-            Dot ([int]$x) ([int]$y) (Shade $maroon 0.9) (Shade $crimson 0.55)
-            $x += $random.Next(-1, 2); $y += 1
+            if ($random.Next(0, 7) -eq 0) { $lit = -not $lit }
+            if ($lit) {
+                $knot = $random.Next(0, 9) -eq 0
+                Dot ([int]$x) ([int]$y) (Shade $crimson 0.85) $(if ($knot) { Shade $red 0.9 } else { Shade $crimson 0.7 })
+            } else {
+                Dot ([int]$x) ([int]$y) (Shade $maroon 0.7)
+            }
+            # Mostly straight down, with a step to one side now and then.
+            if ($random.Next(0, 3) -eq 0) { $x += $random.Next(-1, 2) }
+            $y += 1
             if ($x -lt $u * $scale -or $x -ge ($u + $w) * $scale) { break }
         }
     }
 }
 
-# Horn: the navy of the palette, lifted so it stands off the hide.
-$bone = @(58, 78, 118)
-Fill-Box 0 0 7 5 6 $abyss 4       # head
-Fill-Box 0 11 7 2 6 $abyss 4      # jaw
-Fill-Box 0 19 8 5 8 $abyss 4      # chest
-Fill-Box 0 32 6 4 7 @(24, 28, 40) 4   # belly, a shade towards navy
-Fill-Box 28 32 2 2 5 @(20, 21, 26) 3  # tail
-Fill-Box 32 0 2 7 2 @(20, 21, 25) 3   # upper limbs
-Fill-Box 40 0 2 15 2 @(20, 21, 25) 3  # lower limbs
-Fill-Box 48 0 2 3 2 $bone 7       # the ridge down its back
-Fill-Box 48 4 1 3 3 $bone 7       # claws and knee spurs
-Fill-Box 52 4 1 4 1 @(104, 14, 34) 8  # ribs, crimson
-Fill-Box 48 10 1 5 4 $bone 7      # horns and the tail's blade
+Box 0 0 7 5 6 @(29, 29, 33) 3                  # head: the hide, lifted a little so its shading shows
+Box 0 11 7 2 6 @(24, 24, 27) 3                  # jaw
+Box 0 19 8 5 8 @(29, 29, 33) 3 "plates" 4      # chest
+Box 0 32 6 4 7 @(26, 30, 44) 3 "rings" 4        # belly: segments, a shade towards navy
+Box 28 32 2 2 5 @(24, 25, 31) 2 "rings" 5       # tail lengths
+Box 32 0 2 7 2 @(23, 24, 29) 2 "plates" 6       # upper limbs
+Box 40 0 2 15 2 @(23, 24, 29) 2 "plates" 6      # lower limbs
+Box 48 0 2 3 2 $bone 5                          # the ridge down its back, and the spikes on its tail
+Box 56 0 1 4 1 @(124, 12, 34) 6                 # ribs, crimson
+Box 56 6 1 3 3 $bone 5 "rings" 3                # claws and knee spurs
+Box 34 20 1 5 4 $bone 5 "rings" 3               # horns and the tail's blade
+Box 0 52 9 1 7 @(34, 36, 46) 3 "rings" 4 $true  # the armor over its shoulders
+Box 34 44 7 1 2 @(18, 18, 21) 2                 # its brow
+Box 34 48 1 2 1 @(186, 168, 174) 6              # fangs: bone, duller than the teeth behind them
+Box 40 50 3 3 3 @(20, 20, 24) 3                 # knee joints
 
-Veins 0 19 32 13 16
-Veins 0 32 26 11 9
-Veins 0 0 26 11 8
-Veins 40 2 8 15 7
-Veins 32 2 8 7 4
-Veins 28 34 14 5 4
+Veins 0 27 32 5 7     # chest sides, front and back
+Veins 0 39 26 4 4     # belly
+Veins 0 6 26 5 4      # head
+Veins 40 2 8 15 3     # lower limbs
+Veins 32 2 8 7 2      # upper limbs
+Veins 28 37 14 2 2    # tail
 
-$pale = Shade $crimson 0.75
-$spark = Shade $red 0.7
-# Chest top face is at (depth, 0) from its texOffs: (8, 19), 8 wide and 8 deep. A row of vertebrae down its middle,
-# every other one lit.
-for ($z = 0; $z -lt 8; $z++) {
-    $lit = if ($z % 2 -eq 0) { $spark } else { $null }
-    Dot ((8 + 4) * $scale - 1) ((19 + $z) * $scale) $pale $lit
-    Dot ((8 + 4) * $scale) ((19 + $z) * $scale) $pale $lit
+# Embers down the middle of the shoulder armor (its top face is at (7, 52), 9 wide and 7 deep), one to a plate.
+$ember = Shade $crimson 0.9
+for ($z = 0; $z -lt 7; $z++) {
+    $ty = (52 + $z) * $scale
+    if ($ty % 4 -ne 2) { continue }
+    Dot (11 * $scale + 1) $ty $ember (Shade $red 0.85)
+    Dot (11 * $scale) $ty $ember (Shade $crimson 0.8)
+    Dot (11 * $scale + 2) $ty $ember (Shade $crimson 0.8)
 }
-# Chest sides: the right one at (0, 27), the left one at (16, 27), each 8 wide and 5 high. Ribs showing through.
-foreach ($sx in @(0, 16)) { for ($r = 0; $r -lt 4; $r++) { for ($y = 0; $y -lt 5 * $scale - 2; $y++) { Dot (($sx + 1 + $r * 2) * $scale) (27 * $scale + 1 + $y) $pale } } }
+# Cracks in the knee joints, lit from inside: a cross on each side face (they start at (40, 53), each 3 by 3).
+for ($side = 0; $side -lt 4; $side++) {
+    $cx = (40 + $side * 3) * $scale + 3; $cy = 53 * $scale + 3
+    Dot $cx $cy (Shade $crimson 1.0) (Shade $red 0.95)
+    foreach ($o in @(@(-1, 0), @(1, 0), @(0, -1), @(0, 1))) { Dot ($cx + $o[0]) ($cy + $o[1]) (Shade $crimson 0.7) (Shade $crimson 0.75) }
+    Dot ($cx - 2) ($cy - 1) (Shade $maroon 0.8); Dot ($cx + 2) ($cy + 1) (Shade $maroon 0.8)
+}
+# Chest sides: the right one at (0, 27), the left one at (16, 27), each 8 wide and 5 high. The shadow each rib casts.
+foreach ($sx in @(0, 16)) { for ($r = 0; $r -lt 3; $r++) { for ($y = 1; $y -lt 5 * $scale - 1; $y++) { Dot (($sx + 2 + $r * 2) * $scale + 1) (27 * $scale + $y) (Rgb 8 8 10) } } }
 
 # The head's front face is at (depth, depth) from its texOffs: model (6, 6), 7 wide and 5 high, so texels (12, 12) on.
 $fx = 6 * $scale; $fy = 6 * $scale
@@ -100,23 +159,32 @@ $hollow = Shade $navy 0.45
 # Each socket is a pit 4 texels square, a model pixel in from each side and a model pixel down; the eye sits in it.
 foreach ($ex in @(2, 8)) {
     for ($y = 0; $y -lt 4; $y++) { for ($x = 0; $x -lt 4; $x++) { Dot ($fx + $ex + $x) ($fy + 2 + $y) $pit } }
-    # A dark hollow around the pit, so the eye sinks into the skull.
+    # A dark hollow around the pit, so the eye sinks into the skull, and a deeper shadow under it: a gaunt cheek.
     for ($x = -1; $x -le 4; $x++) { Dot ($fx + $ex + $x) ($fy + 1) $hollow; Dot ($fx + $ex + $x) ($fy + 6) $hollow }
     for ($y = 2; $y -le 5; $y++) { Dot ($fx + $ex - 1) ($fy + $y) $hollow; Dot ($fx + $ex + 4) ($fy + $y) $hollow }
+    for ($x = 0; $x -le 3; $x++) { Dot ($fx + $ex + $x) ($fy + 7) (Rgb 10 10 12) }
 }
-# Upper teeth along the foot of the head's face, lower teeth along the top of the jaw's (the jaw's front is at (6, 17)).
-# Teeth are the one pale thing on it: bone, with the sunset on it.
+# Two slits for a nose, between and below the eyes.
+Dot ($fx + 6) ($fy + 5) $pit; Dot ($fx + 6) ($fy + 6) $pit
+Dot ($fx + 7) ($fy + 5) $pit; Dot ($fx + 7) ($fy + 6) $pit
+# Upper teeth along the foot of the head's face, each with a gum above it; lower teeth along the top of the jaw's
+# (the jaw's front is at (6, 17)). Teeth are the one pale thing on it: bone, with the sunset on it.
 $tooth = Rgb 226 204 208
-$root = Shade $crimson 0.9
-for ($x = 1; $x -lt 13; $x += 2) { Dot ($fx + $x) ($fy + 9) $tooth; Dot ($fx + $x) ($fy + 8) $root }
+$toothShade = Rgb 168 146 152
+$gum = Shade $crimson 0.8
+for ($x = 1; $x -lt 13; $x += 2) { Dot ($fx + $x) ($fy + 9) $tooth; Dot ($fx + $x) ($fy + 8) $gum; Dot ($fx + $x + 1) ($fy + 9) (Rgb 6 4 6) }
 $jy = 17 * $scale
-for ($x = 2; $x -lt 13; $x += 2) { Dot ($fx + $x) $jy $tooth; Dot ($fx + $x) ($jy + 1) $root }
-# The inside of the mouth: the jaw's top face, at (6, 11), 7 wide and 6 deep. Crimson, darker towards the throat.
-for ($z = 0; $z -lt 6 * $scale; $z++) { for ($x = 0; $x -lt 7 * $scale; $x++) { Dot ($fx + $x) (11 * $scale + $z) (Shade $crimson (0.8 - $z * 0.05 + $random.NextDouble() * 0.08)) } }
+for ($x = 2; $x -lt 13; $x += 2) { Dot ($fx + $x) $jy $tooth; Dot ($fx + $x) ($jy + 1) $toothShade; Dot ($fx + $x) ($jy + 2) $gum }
+# The inside of the mouth: the jaw's top face, at (6, 11), 7 wide and 6 deep. Crimson, darker towards the throat, with
+# a tongue lying down the middle of it.
+for ($z = 0; $z -lt 6 * $scale; $z++) { for ($x = 0; $x -lt 7 * $scale; $x++) {
+    $tongue = ([Math]::Abs($x - 6.5) -lt 2.5 -and $z -lt 9)
+    Dot ($fx + $x) (11 * $scale + $z) (Shade $crimson ((0.8 - $z * 0.05 + $random.NextDouble() * 0.08) * $(if ($tongue) { 1.3 } else { 0.8 })))
+} }
 
 # The eyes are parts of the model (LurkerModel.eye), each with a place of its own on the sheet. A box at texOffs
 # (u, v), w wide, h high and d deep, has its front face at (u + d, v + d).
-# The eyeball, at (0, 46), 2 by 2 by 1: crimson on the skin, so it is red even in daylight; and on the glowing layer
+# The eyeball, at (0, 46), 2 by 2 by 1: deep red on the skin, so it is red even in daylight; and on the glowing layer
 # red all over with a hotter heart on its front face.
 # The glow is added to the skin under it, so both are kept short of blue: together they must still come out red.
 $eyeHot = Rgb 255 96 70
