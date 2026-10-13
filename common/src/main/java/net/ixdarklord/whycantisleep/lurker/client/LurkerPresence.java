@@ -7,7 +7,7 @@ import net.ixdarklord.coolcatcanvas.api.utils.Easing;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientPlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
-import net.ixdarklord.whycantisleep.client.fx.WCISSounds;
+import net.ixdarklord.whycantisleep.sound.WCISSounds;
 import net.ixdarklord.whycantisleep.config.WCISClientConfig;
 import net.ixdarklord.whycantisleep.config.WCISConfigs;
 import net.ixdarklord.whycantisleep.lurker.LurkerEntity;

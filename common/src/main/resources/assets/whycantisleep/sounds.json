@@ -5,9 +5,45 @@
       { "name": "minecraft:entity.warden.heartbeat", "type": "event" }
     ]
   },
+  "lurker.ambient": {
+    "subtitle": "subtitles.whycantisleep.lurker.ambient",
+    "sounds": [
+      { "name": "minecraft:entity.warden.nearby_close", "type": "event" }
+    ]
+  },
+  "lurker.death": {
+    "subtitle": "subtitles.whycantisleep.lurker.death",
+    "sounds": [
+      { "name": "minecraft:entity.phantom.death", "type": "event" }
+    ]
+  },
+  "lurker.emerge": {
+    "subtitle": "subtitles.whycantisleep.lurker.emerge",
+    "sounds": [
+      { "name": "minecraft:entity.warden.emerge", "type": "event" }
+    ]
+  },
+  "lurker.hurt": {
+    "subtitle": "subtitles.whycantisleep.lurker.hurt",
+    "sounds": [
+      { "name": "minecraft:entity.phantom.hurt", "type": "event" }
+    ]
+  },
+  "lurker.vanish": {
+    "subtitle": "subtitles.whycantisleep.lurker.vanish",
+    "sounds": [
+      { "name": "minecraft:entity.enderman.teleport", "type": "event" }
+    ]
+  },
   "notice": {
     "sounds": [
       { "name": "minecraft:ui.toast.in", "type": "event" }
+    ]
+  },
+  "nudge": {
+    "subtitle": "subtitles.whycantisleep.nudge",
+    "sounds": [
+      { "name": "minecraft:block.note_block.bell", "type": "event" }
     ]
   },
   "scare": {

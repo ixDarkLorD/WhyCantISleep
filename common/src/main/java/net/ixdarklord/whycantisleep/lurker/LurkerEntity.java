@@ -4,7 +4,7 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
+import net.ixdarklord.whycantisleep.sound.WCISSounds;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -107,7 +107,7 @@ public class LurkerEntity extends Monster {
     // Gone in a puff of smoke, with nothing left behind.
     private void vanish(ServerLevel level) {
         level.sendParticles(ParticleTypes.LARGE_SMOKE, this.getX(), this.getY() + 0.4, this.getZ(), 20, 0.3, 0.3, 0.3, 0.02);
-        this.playSound(SoundEvents.ENDERMAN_TELEPORT, 0.6F, 0.5F);
+        this.playSound(WCISSounds.LURKER_VANISH, 0.6F, 1.0F);
         this.discard();
     }
 
@@ -147,16 +147,16 @@ public class LurkerEntity extends Monster {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.WARDEN_NEARBY_CLOSE;
+        return WCISSounds.LURKER_AMBIENT;
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.PHANTOM_HURT;
+        return WCISSounds.LURKER_HURT;
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.PHANTOM_DEATH;
+        return WCISSounds.LURKER_DEATH;
     }
 }

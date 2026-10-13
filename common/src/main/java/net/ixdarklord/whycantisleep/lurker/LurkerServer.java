@@ -12,7 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
+import net.ixdarklord.whycantisleep.sound.WCISSounds;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.RandomSource;
@@ -162,7 +162,7 @@ public final class LurkerServer {
         lurker.setVictim(player.getUUID());
         if (!level.addFreshEntity(lurker)) return false;
         ACTIVE.put(player.getUUID(), lurker);
-        level.playSound(null, spot, SoundEvents.WARDEN_EMERGE, SoundSource.HOSTILE, 0.8F, 1.4F);
+        level.playSound(null, spot, WCISSounds.LURKER_EMERGE, SoundSource.HOSTILE, 0.8F, 1.0F);
         return true;
     }
 

@@ -14,7 +14,8 @@ import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
+import net.ixdarklord.whycantisleep.sound.WCISSounds;
+import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
@@ -118,9 +119,9 @@ public final class SleepBoardServer {
         }
         LAST_NUDGE.put(sender.getUUID(), now);
 
-        // The game's own sound and a message with its English text: a player without the mod gets them just the same.
-        target.connection.send(new ClientboundSoundPacket(SoundEvents.NOTE_BLOCK_BELL, SoundSource.PLAYERS,
-                target.getX(), target.getY(), target.getZ(), 1.0F, 1.2F, target.getRandom().nextLong()));
+        // The message carries its English text as well as its key, so it reads right whatever the target's language files hold.
+        target.connection.send(new ClientboundSoundPacket(Holder.direct(WCISSounds.NUDGE), SoundSource.PLAYERS,
+                target.getX(), target.getY(), target.getZ(), 1.0F, 1.0F, target.getRandom().nextLong()));
         target.sendSystemMessage(Component.translatableWithFallback("gui.whycantisleep.nudge.received", "%s is in bed and waiting for you to sleep", sender.getDisplayName()));
         sender.sendSystemMessage(Component.translatableWithFallback("gui.whycantisleep.nudge.sent", "You nudged %s", target.getDisplayName()), true);
     }
