@@ -50,8 +50,10 @@ public final class WCISClientConfig {
             .comment("While you're in bed, shows who is still awake and why. Needs the mod on the server.").enabledWhen(WCISServerConfig.SLEEP_BOARD).build();
     static {
         BUILDER.pop();
-        BUILDER.push("spooky", "Whispers and scares.");
+        BUILDER.push("spooky", "Whispers, scares and the thing under the bed.");
     }
+    public static final ConfigValue<Boolean> SCARY_CONTENT = BUILDER.bool("scaryContent", true)
+            .comment("Off, nothing frightening happens to you: no whispers, no scares, no dark flashes, and the thing under the bed leaves you alone.").build();
     public static final ConfigValue<Boolean> WHISPERS = BUILDER.bool("whispers", true)
             .comment("Plays whispers from the direction of the nearest blocking monster.").build();
     public static final ConfigValue<Integer> WHISPER_VOLUME = BUILDER.intValue("whisperVolume", 70)

@@ -17,7 +17,7 @@ A multiloader mod built on the author's libraries **CoolCatLib: Core** (`coolcat
 - **Build every loader before committing** (`gradlew build`), and fix errors before moving on.
 - **Keep config names and defaults in sync with the mod page** (the list under "Config" below is the page's). Renaming or re-defaulting an option is a mod page change: ask first.
 - Shared logic goes in `common`; loader modules hold only loader glue.
-- **Register nothing in a game registry** (no items, entity types, sound events, data components, and so no `AttachmentRegistry`): a client with the mod must be able to join a server without it, and a server with it must accept clients without it. Sounds are unregistered `SoundEvent`s played on the client (`client/fx/WCISSounds` + `sounds.json`, which points at the game's own sounds); per-player server data goes in a `SavedData`.
+- **The mod is required on both the client and the server** (the author's decision, 2026-10-13, so the creature could be a real entity with its own model). Registry entries are allowed: the `lurker` entity type and the `dread` attachment exist. Sounds are still unregistered `SoundEvent`s played on the client (`client/fx/WCISSounds` + `sounds.json`, which points at the game's own sounds).
 - Commits follow the user's `github-commit` skill: their identity only, no Claude attribution, and push only when asked.
 
 ## Versions
@@ -82,21 +82,28 @@ APIs this mod uses (`net.ixdarklord.coolcatcore.api.*`):
 - `config.*`: `Config.builder(MOD_ID, ConfigScope.CLIENT | SERVER)`, values as static `ConfigValue` fields, groups with `push`/`pop` in static blocks, `enumValue` (enums implement `EnumType.Displayable`), `color`, `intValue().range().slider()`, `enabledWhen`. A `SERVER` config is synced to clients on join and on change (`Config.isRemote()`, `ConfigEvents.SYNCED`). Names are translated as `config.whycantisleep.<client|server>.<group>.<key>` (`.title` for the config); tooltips fall back to the `comment`. Screens come from Glazed Menu when installed (`config.client.ConfigScreens`); Core has none of its own.
 - `network.Network`: `registerClientbound` / `registerServerbound` (record payloads can derive their codec through `PayloadCodecs`), `sendToPlayer`, `sendToServer`, and `canPlayerReceive(player, type)`, which is how the server tells who has the mod. Clientbound handlers must be lambdas into a `client` package class so a dedicated server never loads it.
 - `event.v2.common`: `PlayerEvents` (`JOIN`, `LEAVE`, `START_TICK`, `END_TICK`), `ServerTickEvents`, `ServerLifecycleEvents`, `BlockEvents.BREAK`, `EntityEvents.LOAD`. `event.v2.client`: `ClientTickEvents`, `ClientGuiEvents.RENDER_HUD`, `ClientPlayerEvents`. Each is an `EventInvoker` (`X.END.register(...)`).
-- `platform.Platform`. (Not `attachment.AttachmentRegistry`: it registers a data component; see the rules.)
+- `registry.DeferredRegister` / `RegistryEntry` / `EntityAttributes` and `client.registry.EntityRendererRegistry` (the Lurker; Core has no model layer registry, so `LurkerRenderer` bakes its `LayerDefinition` itself), `attachment.AttachmentRegistry` (dread: saved, synced to its own player, kept through death), `event.v2.common.CommandEvents`, `platform.Platform`.
 
 ## Sides and sync
 
-The mod must work in three installs, and neither side may require the other:
-
-- **Client only** (singleplayer host is "both"; any server without the mod): the client detects a failed sleep from the vanilla message, redoes the vanilla monster check locally, and runs highlights, arrows, explanations, the dimension warning and whispers. The server-only features (sleep board, nudges, show to everyone, advancements) are off.
-- **Server with the mod**: the server is authoritative. It sends the failure reason and the exact blocking mobs to clients that have the mod, and its config overrides theirs.
-- **Server only**: players without the mod get the vanilla glowing effect when "Show to everyone" is on, and nudges (a vanilla sound and message).
+The mod is needed on both sides. The server is authoritative: it sends the failure reason and the exact blocking mobs, runs the sleep board and nudges, keeps each player's dread, and its config overrides the client's. The client still recognises the game's own sleep messages by translation key and can redo the monster check itself (`SleepChecks.blockersOnClient`), a leftover from when client-only installs were supported; it is harmless and keeps the HUD working if a report is ever missed.
 
 Config gating: every client option a server setting controls is declared `enabledWhen(<server value>)` in `WCISClientConfig`. Glazed Menu evaluates dependencies across configs, so the entry shows greyed out ("Depends on …") while the server has it off: that is the "locked" state. Code must read such options through `WCISConfigs.isEnabled(option)`, which walks the same dependency chain, never through `option.get()` alone.
 
 ## The sleep HUD
 
 Sleep messages are not shown on the game's action bar. `GuiMixin` cancels the game's sleep lines (recognised by translation key in `client/hud/Explanations`) and `client/hud/SleepNotices` shows a card instead: a `SleepNotice` (kind, title, hint), whose kind gives the accent color, the icon (a vanilla item) and the sound and screen effect (`SleepEffects.onNotice`). The sleep board (`client/board/SleepBoard`) and the cards share `client/hud/HudStyle`, which is the game's own UI on purpose (the author asked for a clean HUD on theme with Minecraft's): the tooltip's box and frame sprites, the boss bar sprites for progress, the chat's colors for text, vanilla items for icons and `PlayerFaceExtractor` for players. Don't add custom panel art or gradients to it. The option is still named "Action bar info" on the mod page: it now decides whether a blocked sleep's card names the count and the closest monster.
+
+## The thing under the bed (`lurker/`)
+
+Added at the author's request on 2026-10-13; every number is a first guess (`LurkerServer`'s constants).
+
+- **Dread** (`Dread`, 0 to 100, a synced player attachment): +15 for lying down to sleep with block light under 4 at the bed, -20 for sleeping in the light, +2 a minute after a day and a half without sleep and +4 after three days (the game's `time_since_rest` statistic). Stages: Watched from 25, Haunted from 50, Hunted from 85.
+- **Watched and Haunted are client side** (`lurker/client/LurkerHaunt`), seen only by the player: eyes under dark beds and whispers; then the creature itself as a hallucination, a `LurkerEntity` added to the client's level only (never known to the server), standing in the dark or crawling out beside a bed the player uses, gone when looked at, approached or after 8 seconds.
+- **Hunted is real** (`LurkerServer.summon`): a `LurkerEntity` comes from beside the player's last bed if it is near, else from the dark around them. It targets only its victim, vanishes in daylight, when its player is out of reach for 20 seconds or after 3 minutes. Killing it sets dread to 0; if it kills its player, dread drops to 30.
+- **Opting out**: the client option "Scary content" off stops every frightening effect on that client and tells the server (`ScaryPreferencePayload`) to build no dread for, and send no creature after, that player. The server option "Bed creature" turns it off for everyone. Creative and spectator players are left alone.
+- **Model and textures**: `LurkerModel` (boxes in code) and `tools/gen_lurker_textures.ps1`, which share the parts' places on the 64x64 sheet; change both together. `tools/gen_arrow_texture.ps1` draws the HUD arrows.
+- **Testing**: `/whycantisleep dread [0-100]` and `/whycantisleep summon` (operators).
 
 ## Config (the names and defaults on the mod page)
 
@@ -113,6 +120,7 @@ Client (`WCISClientConfig`, `config/whycantisleep-client.toml`):
 | Sleep explanations | on | |
 | Dimension warning | on | |
 | Sleep board | on | Sleep board (server) |
+| Scary content | on | **new, not on the mod page yet** |
 | Whispers | on | |
 | Whisper volume | 70% | |
 | Under-the-bed scares | on | Scare chance = 0 |
@@ -130,6 +138,7 @@ Server (`WCISServerConfig`, `config/whycantisleep-server.toml`, synced):
 | Allow nudges | on |
 | Nudge cooldown | 30 s |
 | Scare chance | 2% (0 disables) |
+| Bed creature | on (**new, not on the mod page yet**) |
 | Advancements | on |
 
 ## Features, in build order

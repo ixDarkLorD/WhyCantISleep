@@ -41,6 +41,8 @@ public final class WCISServerConfig {
     }
     public static final ConfigValue<Integer> SCARE_CHANCE = BUILDER.intValue("scareChance", 2)
             .range(0, 100).slider().comment("Chance, in percent, of a \"monster under the bed\" scare on a failed sleep. 0 disables it.").build();
+    public static final ConfigValue<Boolean> BED_CREATURE = BUILDER.bool("bedCreature", true)
+            .comment("Whether the thing under the bed exists: dread building up for players who sleep in the dark or go without sleep, the hallucinations it brings, and the creature itself.").build();
     public static final ConfigValue<Boolean> ADVANCEMENTS = BUILDER.bool("advancements", true)
             .comment("Whether the mod's advancements can be earned.").build();
     static {

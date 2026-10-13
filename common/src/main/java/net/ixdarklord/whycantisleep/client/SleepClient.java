@@ -8,6 +8,7 @@ import net.ixdarklord.whycantisleep.client.hud.Explanations;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotice;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotices;
 import net.ixdarklord.whycantisleep.config.WCISClientConfig;
+import net.ixdarklord.whycantisleep.lurker.client.LurkerHaunt;
 import net.ixdarklord.whycantisleep.config.WCISServerConfig;
 import net.ixdarklord.whycantisleep.network.SleepBlockedPayload;
 import net.ixdarklord.whycantisleep.sleep.SleepChecks;
@@ -71,6 +72,7 @@ public final class SleepClient {
         if (!(state.getBlock() instanceof BedBlock)) return false;
         BlockPos bed = state.getValue(BedBlock.PART) == BedPart.HEAD ? pos.immutable() : pos.relative(state.getValue(BedBlock.FACING));
         lastBed = bed;
+        LurkerHaunt.onBedUsed(bed);
 
         if (!WCISClientConfig.DIMENSION_WARNING.get()) return false;
         // Sneaking with an item in hand uses the item, not the bed.
