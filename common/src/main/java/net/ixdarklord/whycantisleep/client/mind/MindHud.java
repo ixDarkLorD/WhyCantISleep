@@ -10,7 +10,7 @@ import net.ixdarklord.whycantisleep.config.WCISClientConfig;
 import net.ixdarklord.whycantisleep.config.WCISConfigs;
 import net.ixdarklord.whycantisleep.mind.Mind;
 import net.ixdarklord.whycantisleep.mind.MoodLevel;
-import net.ixdarklord.whycantisleep.mind.SanityStage;
+import net.ixdarklord.whycantisleep.mind.LucidityStage;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -19,8 +19,8 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * The heads-up for a mood or a sanity that isn't holding. Nothing shows while the player is fine. While mood is flat
- * or worse, or sanity is anything short of steady, its badge sits beside the hotbar, beating faster the worse it is; and
+ * The heads-up for a mood or a lucidity that isn't holding. Nothing shows while the player is fine. While mood is flat
+ * or worse, or lucidity is anything short of steady, its badge sits beside the hotbar, beating faster the worse it is; and
  * the moment either drops to a low level, a card says so, with what is behind it and what would help.
  */
 public final class MindHud {
@@ -29,7 +29,7 @@ public final class MindHud {
     private static final int MARGIN = 5;
 
     private static @Nullable MoodLevel lastMood;
-    private static @Nullable SanityStage lastStage;
+    private static @Nullable LucidityStage lastStage;
     private static long tick;
 
     private MindHud() {
@@ -48,17 +48,17 @@ public final class MindHud {
         return minecraft.player != null && !minecraft.player.isCreative() && !minecraft.player.isSpectator() && WCISConfigs.isEnabled(WCISClientConfig.STATUS_INDICATORS);
     }
 
-    // A card the moment mood or sanity drops a level. Nothing on the way back up, and nothing on first sight.
+    // A card the moment mood or lucidity drops a level. Nothing on the way back up, and nothing on first sight.
     private static void tick(Minecraft minecraft) {
         tick++;
         if (minecraft.player == null) return;
         Mind mind = Mind.get(minecraft.player);
         MoodLevel mood = mind.moodLevel();
-        SanityStage stage = mind.stage();
+        LucidityStage stage = mind.stage();
         if (isShown(minecraft)) {
             if (lastStage != null && stage.ordinal() < lastStage.ordinal()) {
-                String key = "gui.whycantisleep.mind.notice.sanity." + stage.key();
-                SleepNotices.show(new SleepNotice(SleepNotice.Kind.SANITY, Component.translatable(key + ".title"), Component.translatable(key + ".hint")), 120);
+                String key = "gui.whycantisleep.mind.notice.lucidity." + stage.key();
+                SleepNotices.show(new SleepNotice(SleepNotice.Kind.LUCIDITY, Component.translatable(key + ".title"), Component.translatable(key + ".hint")), 120);
             } else if (lastMood != null && mood.ordinal() < lastMood.ordinal() && mood.isLow()) {
                 SleepNotices.show(new SleepNotice(SleepNotice.Kind.MOOD, Component.translatable("gui.whycantisleep.mind.notice.mood." + mood.key() + ".title"),
                         Component.translatable("gui.whycantisleep.mind.notice.mood.hint." + worstNeed(mind))), 120);
@@ -80,24 +80,23 @@ public final class MindHud {
         if (minecraft.options.hideGui || !isShown(minecraft)) return;
         Mind mind = Mind.get(minecraft.player);
         float time = tick + delta.getGameTimeDeltaPartialTick(true);
-        // Each is a badge the size of a hotbar slot's inside: its own panel with its icon on it.
-        int x = graphics.guiWidth() / 2 + HOTBAR_HALF + MARGIN + HudStyle.PANEL_PADDING;
-        int y = graphics.guiHeight() - 16;
+        // Each is its gauge's medal with its icon on it.
+        int x = graphics.guiWidth() / 2 + HOTBAR_HALF + MARGIN;
+        int y = graphics.guiHeight() - 19;
         MoodLevel mood = mind.moodLevel();
         if (mood.isUnstable()) {
             float alpha = beat(time, mood == MoodLevel.MISERABLE ? 0.25F : mood == MoodLevel.GLOOMY ? 0.12F : 0.0F);
-            HudStyle.panel(graphics, HudStyle.MOOD_PANEL, x, y, MindStatus.ICON_SIZE, MindStatus.ICON_SIZE, alpha);
-            MindStatus.moodIcon(graphics, mood, x, y, alpha);
-            x += MindStatus.ICON_SIZE + HudStyle.PANEL_PADDING * 2 + 1;
+            HudStyle.medal(graphics, HudStyle.MOOD_MEDAL, x, y, alpha);
+            MindStatus.moodIcon(graphics, mood, x + 3, y + 3, alpha);
+            x += HudStyle.MEDAL_SIZE + 2;
         }
-        SanityStage stage = mind.stage();
-        if (stage != SanityStage.STEADY) {
-            float alpha = beat(time, stage == SanityStage.BREAKING ? 0.35F : stage == SanityStage.SHAKEN ? 0.2F : 0.0F);
-            HudStyle.panel(graphics, HudStyle.SANITY_PANEL, x, y, MindStatus.ICON_SIZE, MindStatus.ICON_SIZE, alpha);
-            MindStatus.sanityIcon(graphics, stage, x, y, alpha);
+        LucidityStage stage = mind.stage();
+        if (stage != LucidityStage.STEADY) {
+            float alpha = beat(time, stage == LucidityStage.BREAKING ? 0.35F : stage == LucidityStage.SHAKEN ? 0.2F : 0.0F);
+            HudStyle.medal(graphics, HudStyle.LUCIDITY_MEDAL, x, y, alpha);
+            MindStatus.lucidityIcon(graphics, stage, x + 3, y + 3, alpha);
         }
     }
-
     // A badge's opacity, rising and falling at a pace: the worse things are, the faster. Merely unsteady, it holds still.
     private static float beat(float time, float pace) {
         return pace <= 0.0F ? 1.0F : 0.75F + 0.25F * Mth.sin(time * pace);

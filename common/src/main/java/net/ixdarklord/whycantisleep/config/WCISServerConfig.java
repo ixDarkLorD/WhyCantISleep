@@ -42,17 +42,17 @@ public final class WCISServerConfig {
     public static final ConfigValue<Integer> SCARE_CHANCE = BUILDER.intValue("scareChance", 2)
             .range(0, 100).slider().comment("Chance, in percent, of a \"monster under the bed\" scare on a failed sleep. 0 disables it.").build();
     public static final ConfigValue<Boolean> BED_CREATURE = BUILDER.bool("bedCreature", true)
-            .comment("Whether the thing under the bed exists: the hallucinations low sanity brings, and the creature itself.").build();
+            .comment("Whether the thing under the bed exists: the hallucinations low lucidity brings, and the creature itself.").build();
     public static final ConfigValue<Boolean> ADVANCEMENTS = BUILDER.bool("advancements", true)
             .comment("Whether the mod's advancements can be earned.").build();
     static {
         BUILDER.pop();
-        BUILDER.push("mind", "Mood and sanity.");
+        BUILDER.push("mind", "Mood and lucidity.");
     }
-    public static final ConfigValue<Boolean> MIND_SYSTEM = BUILDER.bool("moodAndSanity", true)
-            .comment("Whether players have a mood, which follows how they live, and a sanity, which follows their mood and what they do. Off, everyone stays as they are and the thing under the bed never comes.").build();
+    public static final ConfigValue<Boolean> MIND_SYSTEM = BUILDER.bool("moodAndLucidity", true).aliases("moodAndSanity")
+            .comment("Whether players have a mood, which follows how they live, and a lucidity, which follows their mood and what they do. Off, everyone stays as they are and the thing under the bed never comes.").build();
     public static final ConfigValue<Boolean> PVP_GUILT = BUILDER.bool("pvpGuilt", true)
-            .comment("Whether attacking or killing a player who isn't fighting back costs the attacker sanity. Off, nothing done to another player does.").enabledWhen(MIND_SYSTEM).build();
+            .comment("Whether attacking or killing a player who isn't fighting back costs the attacker lucidity. Off, nothing done to another player does.").enabledWhen(MIND_SYSTEM).build();
     static {
         BUILDER.pop();
     }

@@ -1,7 +1,7 @@
-# Draws assets/whycantisleep/textures/gui/mind_icons.png: the 9x9 icons of the mood and sanity status, in the manner
+# Draws assets/whycantisleep/textures/gui/mind_icons.png: the 9x9 icons of the mood and lucidity status, in the manner
 # of the game's hearts and hunger. Two rows of four on a 36x18 sheet (MindIcons.java has the same places):
 #   row 0, mood:    cheerful, content/flat, gloomy, miserable   (a face)
-#   row 1, sanity:  steady, uneasy, shaken, breaking            (an eye)
+#   row 1, lucidity:  steady, uneasy, shaken, breaking            (an eye)
 # Run from the repo root: powershell -File tools/gen_mind_icons.ps1
 Add-Type -AssemblyName System.Drawing
 
@@ -32,7 +32,7 @@ Paint $bitmap 1 0 $flat  @{ a = (Rgb 222 196 110); h = (Rgb 240 222 160) }
 Paint $bitmap 2 0 $frown @{ a = (Rgb 150 158 190); h = (Rgb 184 190 214) }
 Paint $bitmap 3 0 $weep  @{ a = (Rgb 104 112 156); h = (Rgb 140 148 186); t = (Rgb 120 200 255) }
 
-# Eyes: "w" the white, "i" the iris, "p" the pupil. The colors run down the Lurker's palette as sanity goes.
+# Eyes: "w" the white, "i" the iris, "p" the pupil. The colors run down the Lurker's palette as lucidity goes.
 $open   = @(".........", "..kkkkk..", ".kwwwwwk.", "kwwiiiwwk", "kwwipiwwk", "kwwiiiwwk", ".kwwwwwk.", "..kkkkk..", ".........")
 $narrow = @(".........", ".........", "..kkkkk..", "kkwiiiwkk", "kwwipiwwk", "kkwiiiwkk", "..kkkkk..", ".........", ".........")
 $crack  = @(".........", "..kkkkk..", ".kwwkwwk.", "kwwikiwwk", "kwwipkwwk", "kwwiikwwk", ".kwwwkwk.", "..kkkkk..", ".........")

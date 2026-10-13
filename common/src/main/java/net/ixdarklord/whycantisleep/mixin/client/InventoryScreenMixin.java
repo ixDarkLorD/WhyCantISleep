@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Draws the player's mood and sanity above their inventory (CoolCatLib: Core has no event for drawing on a screen). */
+/** Draws the player's mood and lucidity above their inventory (CoolCatLib: Core has no event for drawing on a screen). */
 @Mixin(InventoryScreen.class)
 public abstract class InventoryScreenMixin extends AbstractContainerScreen<InventoryMenu> {
     private InventoryScreenMixin(InventoryMenu menu, Inventory inventory, Component title) {

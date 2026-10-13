@@ -9,7 +9,7 @@ import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.whycantisleep.config.WCISServerConfig;
 import net.ixdarklord.whycantisleep.mind.Mind;
 import net.ixdarklord.whycantisleep.mind.MindServer;
-import net.ixdarklord.whycantisleep.mind.SanityStage;
+import net.ixdarklord.whycantisleep.mind.LucidityStage;
 import net.ixdarklord.whycantisleep.network.WCISNetwork;
 import net.ixdarklord.whycantisleep.sound.WCISSounds;
 import net.minecraft.commands.CommandSourceStack;
@@ -38,9 +38,9 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
- * The thing under the bed's server side: when a player's sanity ({@link Mind}) is {@linkplain SanityStage#BREAKING
+ * The thing under the bed's server side: when a player's lucidity ({@link Mind}) is {@linkplain LucidityStage#BREAKING
  * breaking}, it makes the creature real. Players who turned scary content off, and worlds with the creature off, are
- * left alone: nothing comes for them, whatever their sanity.
+ * left alone: nothing comes for them, whatever their lucidity.
  * <p>
  * Every number here is a first guess, to be tuned by play.
  */
@@ -49,11 +49,11 @@ public final class LurkerServer {
     public static final int DARK_LIGHT = 4;
     // The sky's light is 4 on a clear night and 15 by day; from here up, a place is lit by the day.
     private static final int DAYLIGHT = 8;
-    // Once sanity is breaking, each second it has this chance in one to come.
+    // Once lucidity is breaking, each second it has this chance in one to come.
     private static final int SUMMON_ODDS = 15;
-    // Killing it gives this much sanity back; being killed by it leaves at least this much.
-    private static final float SANITY_FOR_KILLING = 35.0F;
-    private static final float SANITY_AFTER_DEATH = 45.0F;
+    // Killing it gives this much lucidity back; being killed by it leaves at least this much.
+    private static final float LUCIDITY_FOR_KILLING = 35.0F;
+    private static final float LUCIDITY_AFTER_DEATH = 45.0F;
     // Ignored, it stays away this long before it tries again.
     private static final int RETURN_TICKS = 20 * 40;
 
@@ -85,17 +85,17 @@ public final class LurkerServer {
             IGNORED.clear();
             NOT_BEFORE.clear();
         });
-        // Test commands, for operators: read or set one's own mood and sanity, see everything behind them, and
+        // Test commands, for operators: read or set one's own mood and lucidity, see everything behind them, and
         // bring the Lurker.
         CommandEvents.REGISTER.register((dispatcher, context, selection) -> dispatcher.register(Commands.literal(WhyCantISleep.MOD_ID)
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(value("mood", Mind::mood, Mind::withMood))
-                .then(value("sanity", Mind::sanity, Mind::withSanity))
+                .then(value("lucidity", Mind::lucidity, Mind::withLucidity))
                 .then(Commands.literal("status").executes(ctx -> {
                     Mind mind = Mind.get(ctx.getSource().getPlayerOrException());
                     ctx.getSource().sendSuccess(() -> Component.literal(String.format(java.util.Locale.ROOT,
-                            "mood %.1f, sanity %.1f | rest %.2f, food %.2f, sky %.2f | cheer %.1f, strain %.1f | foods %s",
-                            mind.mood(), mind.sanity(), mind.rest(), mind.food(), mind.outdoors(), mind.cheer(), mind.strain(), mind.foods())), false);
+                            "mood %.1f, lucidity %.1f | rest %.2f, food %.2f, sky %.2f | cheer %.1f, strain %.1f | foods %s",
+                            mind.mood(), mind.lucidity(), mind.rest(), mind.food(), mind.outdoors(), mind.cheer(), mind.strain(), mind.foods())), false);
                     return 1;
                 }))
                 .then(Commands.literal("ignored").then(Commands.argument("times", IntegerArgumentType.integer(0, 9)).executes(ctx -> {
@@ -145,7 +145,7 @@ public final class LurkerServer {
                 && player.level().getDifficulty() != Difficulty.PEACEFUL;
     }
 
-    /** A player lay down to sleep ({@code ServerPlayerMixin}): where, and whether in the dark, which their sanity feels. */
+    /** A player lay down to sleep ({@code ServerPlayerMixin}): where, and whether in the dark, which their lucidity feels. */
     public static void onSlept(ServerPlayer player, BlockPos bed) {
         LAST_BED.put(player.getUUID(), new Bed(player.level().dimension(), bed.immutable()));
         MindServer.onLayDown(player, isDark(player.level(), bed));
@@ -164,7 +164,7 @@ public final class LurkerServer {
         if (player.tickCount % 20 != 0 || !troubles(player)) return;
         // It comes in the dark: at night, or wherever the light doesn't reach.
         ServerLevel level = player.level();
-        if (Mind.get(player).stage() == SanityStage.BREAKING && !ACTIVE.containsKey(player.getUUID())
+        if (Mind.get(player).stage() == LucidityStage.BREAKING && !ACTIVE.containsKey(player.getUUID())
                 && level.getServer().getTickCount() >= NOT_BEFORE.getOrDefault(player.getUUID(), 0)
                 && (level.isDarkOutside() || level.getMaxLocalRawBrightness(player.blockPosition()) < DARK_LIGHT)
                 && player.getRandom().nextInt(SUMMON_ODDS) == 0) {
@@ -233,16 +233,16 @@ public final class LurkerServer {
         if (lurker.victim() != null) IGNORED.remove(lurker.victim());
     }
 
-    /** The creature was killed: facing it gives its player a good part of their sanity back. */
+    /** The creature was killed: facing it gives its player a good part of their lucidity back. */
     static void onLurkerKilled(LurkerEntity lurker) {
         UUID victim = lurker.victim();
         Player player = victim == null ? null : lurker.level().getPlayerByUUID(victim);
-        if (player != null) MindServer.addSanity(player, SANITY_FOR_KILLING);
+        if (player != null) MindServer.addLucidity(player, LUCIDITY_FOR_KILLING);
     }
 
     /** The creature got its player: it is sated for a while, not for good. */
     static void onVictimKilled(Player player) {
-        MindServer.restoreSanity(player, SANITY_AFTER_DEATH);
+        MindServer.restoreLucidity(player, LUCIDITY_AFTER_DEATH);
     }
 
     static void forget(LurkerEntity lurker) {

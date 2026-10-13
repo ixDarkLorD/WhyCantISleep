@@ -1,10 +1,10 @@
 # Draws the sleep HUD's own panels and bars as GUI sprites, under assets/whycantisleep/textures/gui/sprites/hud/,
 # each with the .mcmeta that tells the game how to stretch it (nine-slice), so HudStyle draws them at any size:
 #   card.png          the message card and the sleep board: slate, like a slab of night
-#   mood_panel.png    the mood status: warm wood with a gold rim
-#   sanity_panel.png  the sanity status: storm plum with a rose rim (the Lurker's palette)
+#   mood_medal.png, mood_track.png          the mood gauge: a gold coin and a riveted track
+#   lucidity_medal.png, lucidity_track.png  the lucidity gauge: a rose diamond and a notched, pointed track
 #   bar_back.png      the empty track of a status bar
-#   mood_fill.png, sanity_fill.png, sleep_fill.png   what fills it: gold, rose to violet, green
+#   mood_fill.png, lucidity_fill.png, sleep_fill.png   what fills it: gold, rose to violet, green
 # Panels are 16x16 with a 4 pixel border; the track is 8x5 with a 1 pixel border; the fills just stretch.
 # Run from the repo root: powershell -File tools/gen_hud_textures.ps1
 Add-Type -AssemblyName System.Drawing
@@ -44,9 +44,51 @@ function Panel($name, $outline, $light, $shade, $inner, $fill, $fillAlpha) {
 }
 
 Panel "card" 0x0B0C10 0x6A6E84 0x30323E 0x1A1B24 0x14151C 232
-Panel "mood_panel" 0x1E1408 0xE8BC55 0x8C5A1C 0x4A3216 0x2E2010 236
-Panel "sanity_panel" 0x14181C 0xCB8CAA 0x663A63 0x3A2A3E 0x20172A 236
 
+# The two status gauges are shaped nothing like the card: each is a medal holding its icon, with a track running out
+# of it for its bar. Mood's is a round gold coin on a riveted, round-ended track; lucidity's is a rose-edged diamond
+# on a notched track that ends in a point. They are drawn at their own size, never stretched (MindStatus has the sizes).
+function Medal($name, $outline, $light, $shade, $ring, $fill, [bool]$diamond) {
+    $b = New-Object System.Drawing.Bitmap 15, 15
+    for ($y = 0; $y -lt 15; $y++) {
+        for ($x = 0; $x -lt 15; $x++) {
+            # How far out from the middle the pixel is: around a circle, or along a diamond's edges.
+            $d = if ($diamond) { [Math]::Abs($x - 7) + [Math]::Abs($y - 7) } else { [Math]::Sqrt(($x - 7) * ($x - 7) + ($y - 7) * ($y - 7)) }
+            $lit = ($x + $y) -lt 14
+            $color = if ($d -gt 7.3) { Argb 0 0 }
+                elseif ($d -gt 6.3) { Argb 255 $outline }
+                elseif ($d -gt 5.2) { if ($lit) { Argb 255 $light } else { Argb 255 $shade } }
+                elseif ($d -gt 4.3) { Argb 255 $ring }
+                else { Argb 255 $fill }
+            $b.SetPixel($x, $y, $color)
+        }
+    }
+    Save $b $name 15 15 0
+}
+function Track($name, $outline, $light, $shade, $edge, $groove, $mark, [int]$every, [bool]$pointed) {
+    $b = New-Object System.Drawing.Bitmap 66, 9
+    for ($y = 0; $y -lt 9; $y++) {
+        $off = [Math]::Abs($y - 4)
+        # Where the row ends on the right: a point, or a rounded end.
+        $last = if ($pointed) { 65 - [int]($off * 1.5) } else { if ($off -eq 4) { 62 } elseif ($off -eq 3) { 64 } else { 65 } }
+        for ($x = 0; $x -lt 66; $x++) {
+            $color = if ($x -gt $last) { Argb 0 0 }
+                elseif ($y -eq 0 -or $y -eq 8 -or $x -eq $last) { Argb 255 $outline }
+                elseif ($y -eq 1 -or $y -eq 7 -or $x -eq $last - 1) {
+                    # Along the rim, a mark at even steps: a rivet on mood's, a notch on lucidity's.
+                    if ($x % $every -eq 4) { Argb 255 $mark } elseif ($y -eq 1) { Argb 255 $light } else { Argb 255 $shade }
+                }
+                elseif ($y -eq 2 -or $y -eq 6 -or $x -ge $last - 3) { Argb 255 $edge }
+                else { Argb 255 $groove }
+            $b.SetPixel($x, $y, $color)
+        }
+    }
+    Save $b $name 66 9 0
+}
+Medal "mood_medal" 0x1E1408 0xFFE08A 0xB07A22 0x6A4612 0x33230F $false
+Medal "lucidity_medal" 0x14181C 0xE9B6B8 0x8A4E7C 0x4A2E50 0x1C1424 $true
+Track "mood_track" 0x1E1408 0xE8BC55 0x8C5A1C 0x241A0C 0x15100A 0xFFF2C0 9 $false
+Track "lucidity_track" 0x14181C 0xCB8CAA 0x663A63 0x1E1626 0x100C16 0x14181C 7 $true
 # A bar's empty track: an outline and a dark groove.
 $b = New-Object System.Drawing.Bitmap 8, 5
 for ($y = 0; $y -lt 5; $y++) { for ($x = 0; $x -lt 8; $x++) {
@@ -65,6 +107,6 @@ function Fill($name, $top, $middle, $bottom) {
     Save $b $name 8 5 0
 }
 Fill "mood_fill" 0xFFE98A 0xFFC83C 0xC2851C
-Fill "sanity_fill" 0xE9B6B8 0xCB8CAA 0x8A4E7C
+Fill "lucidity_fill" 0xE9B6B8 0xCB8CAA 0x8A4E7C
 Fill "sleep_fill" 0xA6F08C 0x55D455 0x2E8E36
 "Wrote $dir"
