@@ -15,7 +15,6 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,11 +26,12 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class MindHud {
     // How far under the crosshair, which reaches 7 down from the screen's middle.
-    private static final int BELOW_CROSSHAIR = 13;
+    private static final int BELOW_CROSSHAIR = 11;
     private static final int BETWEEN = 3;
     // A badge that has just appeared or got worse swells in over this long, then settles.
     private static final int POP_TICKS = 50;
-    private static final float POP_SCALE = 0.7F;
+    // Small enough to stay clear of the crosshair above and the message card below.
+    private static final float POP_SCALE = 0.4F;
     // How solid a badge rests: the mild levels faint, the bad ones plain.
     private static final float REST_ALPHA = 0.55F;
     private static @Nullable MoodLevel lastMood;
@@ -98,42 +98,35 @@ public final class MindHud {
         if (!showMood && !showLucidity) return;
         // Each is its gauge's medal with its icon on it; the two share the middle.
         int width = showMood && showLucidity ? HudStyle.MEDAL_SIZE * 2 + BETWEEN : HudStyle.MEDAL_SIZE;
-        int x = (graphics.guiWidth() - width) / 2;
-        int y = graphics.guiHeight() / 2 + BELOW_CROSSHAIR;
+        float moodPop = showMood ? pop(time, MindHud.moodPop) : 0.0F;
+        float lucidityPop = showLucidity ? pop(time, MindHud.lucidityPop) : 0.0F;
+        // The two swell as one, about their shared middle, so neither grows over the other.
+        float scale = 1.0F + POP_SCALE * Math.max(moodPop, lucidityPop);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(graphics.guiWidth() / 2.0F, graphics.guiHeight() / 2 + BELOW_CROSSHAIR + HudStyle.MEDAL_SIZE / 2.0F);
+        graphics.pose().scale(scale, scale);
+        graphics.pose().translate(-width / 2.0F, -HudStyle.MEDAL_SIZE / 2.0F);
+        int x = 0;
         if (showMood) {
             boolean bad = mood.isLow();
-            float pop = pop(time, moodPop);
-            float alpha = Mth.lerp(pop, bad ? 1.0F : REST_ALPHA, 1.0F) * beat(time, mood == MoodLevel.MISERABLE ? 0.25F : bad ? 0.12F : 0.0F);
-            badge(graphics, HudStyle.MOOD_MEDAL, x, y, pop, alpha);
-            MindStatus.moodIcon(graphics, mood, HudStyle.MEDAL_INSET, HudStyle.MEDAL_INSET, alpha);
-            graphics.pose().popMatrix();
+            float alpha = Mth.lerp(moodPop, bad ? 1.0F : REST_ALPHA, 1.0F) * beat(time, mood == MoodLevel.MISERABLE ? 0.25F : bad ? 0.12F : 0.0F);
+            HudStyle.medal(graphics, HudStyle.MOOD_MEDAL, x, 0, alpha);
+            MindStatus.moodIcon(graphics, mood, x + HudStyle.MEDAL_INSET, HudStyle.MEDAL_INSET, alpha);
             x += HudStyle.MEDAL_SIZE + BETWEEN;
         }
         if (showLucidity) {
             boolean bad = stage.ordinal() <= LucidityStage.SHAKEN.ordinal();
-            float pop = pop(time, lucidityPop);
-            float alpha = Mth.lerp(pop, bad ? 1.0F : REST_ALPHA, 1.0F) * beat(time, stage == LucidityStage.BREAKING ? 0.35F : bad ? 0.2F : 0.0F);
-            badge(graphics, HudStyle.LUCIDITY_MEDAL, x, y, pop, alpha);
-            MindStatus.lucidityIcon(graphics, stage, HudStyle.MEDAL_INSET, HudStyle.MEDAL_INSET, alpha);
-            graphics.pose().popMatrix();
+            float alpha = Mth.lerp(lucidityPop, bad ? 1.0F : REST_ALPHA, 1.0F) * beat(time, stage == LucidityStage.BREAKING ? 0.35F : bad ? 0.2F : 0.0F);
+            HudStyle.medal(graphics, HudStyle.LUCIDITY_MEDAL, x, 0, alpha);
+            MindStatus.lucidityIcon(graphics, stage, x + HudStyle.MEDAL_INSET, HudStyle.MEDAL_INSET, alpha);
         }
+        graphics.pose().popMatrix();
     }
 
     // How far into its swell a badge is: 1 the moment it appears or worsens, easing down to 0.
     private static float pop(float time, long since) {
         float left = 1.0F - (time - since) / POP_TICKS;
         return left <= 0.0F ? 0.0F : left * left;
-    }
-
-    // Draws a medal swollen about its middle, and leaves the matrix in place for its icon; the caller pops it.
-    private static void badge(GuiGraphicsExtractor graphics, Identifier medal, int x, int y, float pop, float alpha) {
-        float half = HudStyle.MEDAL_SIZE / 2.0F;
-        float scale = 1.0F + POP_SCALE * pop;
-        graphics.pose().pushMatrix();
-        graphics.pose().translate(x + half, y + half);
-        graphics.pose().scale(scale, scale);
-        graphics.pose().translate(-half, -half);
-        HudStyle.medal(graphics, medal, 0, 0, alpha);
     }
     // A badge's opacity, rising and falling at a pace: the worse things are, the faster. Merely unsteady, it holds still.
     private static float beat(float time, float pace) {

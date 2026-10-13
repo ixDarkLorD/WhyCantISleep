@@ -38,7 +38,7 @@ public final class MindStatus {
     private static final int TRACK_Y = (HudStyle.MEDAL_SIZE - HudStyle.TRACK_HEIGHT) / 2;
     // The groove inside the track that the fill runs along: clear of the medal on the left and of the end on the right.
     private static final int FILL_X = TRACK_X + 6;
-    private static final int FILL_WIDTH = HudStyle.TRACK_WIDTH - 6 - 8;
+    private static final int FILL_WIDTH = HudStyle.TRACK_WIDTH - 6 - 6;
     private static final int GAUGE_WIDTH = TRACK_X + HudStyle.TRACK_WIDTH;
     // The inventory's own width; the two gauges sit side by side, centered over it.
     private static final int INVENTORY_WIDTH = 176;
@@ -82,7 +82,7 @@ public final class MindStatus {
     }
 
     // One gauge: the track first, its fill with a glint passing over it, the marks where its meaning changes, what the
-    // other bar closes off hatched at the far end with a bright stop where it begins, then the medal over the track's
+    // other bar closes off dimmed at the far end with a bright stop where it begins, then the medal over the track's
     // near end.
     private static void gauge(GuiGraphicsExtractor graphics, Identifier track, Identifier medal, Identifier fill, int x, int y, float value, float ceiling,
                               float[] marks, float time) {
@@ -100,20 +100,18 @@ public final class MindStatus {
                 if (column >= fillX && column < fillX + filled) graphics.fill(column, trackY + 3, column + 1, trackY + 8, i == 1 ? 0x90FFFFFF : 0x40FFFFFF);
             }
         }
-        // A mark is a nick in the groove's top and bottom edges, dark over the fill and faint over the empty track.
+        // A mark is a thin line across the groove: a seam in the fill, barely there over the empty track.
         for (float mark : marks) {
             int column = fillX + Math.round(FILL_WIDTH * mark / Mind.MAX);
-            int color = column < fillX + filled ? 0xA0101014 : 0x50FFFFFF;
-            graphics.fill(column, trackY + 3, column + 1, trackY + 4, color);
-            graphics.fill(column, trackY + 7, column + 1, trackY + 8, color);
+            graphics.fill(column, trackY + 3, column + 1, trackY + 8, column < fillX + filled ? 0x70101014 : 0x20FFFFFF);
         }
 
         int closed = Math.round(FILL_WIDTH * (1.0F - Mth.clamp(ceiling / Mind.MAX, 0.0F, 1.0F)));
-        for (int i = 0; i < closed; i++) {
-            int column = fillX + FILL_WIDTH - 1 - i;
-            graphics.fill(column, trackY + 3, column + 1, trackY + 8, i % 2 == 0 ? 0xE0101014 : 0x70101014);
+        if (closed > 0) {
+            int from = fillX + FILL_WIDTH - closed;
+            graphics.fill(from, trackY + 3, fillX + FILL_WIDTH, trackY + 8, 0xB0101014);
+            graphics.fill(from - 1, trackY + 3, from, trackY + 8, 0xD0FFFFFF);
         }
-        if (closed > 0) graphics.fill(fillX + FILL_WIDTH - closed - 1, trackY + 3, fillX + FILL_WIDTH - closed, trackY + 8, 0xD0FFFFFF);
         HudStyle.medal(graphics, medal, x, y, 1.0F);
     }
 
