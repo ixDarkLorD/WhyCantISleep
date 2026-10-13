@@ -97,15 +97,45 @@ public final class SleepEffects {
                 nearestDistance = distance;
             }
         }
-        if (nearest != null && WCISClientConfig.WHISPERS.get()) {
+        if (nearest != null) {
             for (int whisperTick : WHISPER_TICKS) {
-                // Played where the monster is, so it is heard from its side.
-                if (age == whisperTick) {
-                    minecraft.level.playLocalSound(nearest.getX(), nearest.getEyeY(), nearest.getZ(), WCISSounds.WHISPER, SoundSource.AMBIENT,
-                            WCISClientConfig.WHISPER_VOLUME.get() / 100.0F * 1.6F, 0.75F + RANDOM.nextFloat() * 0.3F, false);
-                }
+                if (age == whisperTick) whisper(nearest.getEyePosition());
             }
         }
+    }
+
+    /** A whisper from a place, so it is heard from that side; nothing with whispers or scary content off. */
+    public static void whisper(Vec3 from) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.level == null || !WCISClientConfig.SCARY_CONTENT.get() || !WCISConfigs.isEnabled(WCISClientConfig.WHISPERS)) return;
+        minecraft.level.playLocalSound(from.x, from.y, from.z, WCISSounds.WHISPER, SoundSource.AMBIENT,
+                WCISClientConfig.WHISPER_VOLUME.get() / 100.0F * 1.6F, 0.75F + RANDOM.nextFloat() * 0.3F, false);
+    }
+
+    /** Two eyes looking out from under a bed, on the side the player is on. */
+    public static void eyes(BlockPos bed) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.player == null) return;
+        Vec3 center = Vec3.atBottomCenterOf(bed).add(0.0, 0.12, 0.0);
+        Vec3 toPlayer = minecraft.player.position().subtract(center).multiply(1.0, 0.0, 1.0);
+        toPlayer = toPlayer.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : toPlayer.normalize();
+        Vec3 side = new Vec3(-toPlayer.z, 0.0, toPlayer.x);
+        Vec3 face = center.add(toPlayer.scale(0.48));
+        WorldParticles.spawn(EYE, face.add(side.scale(0.13)), Vec3.ZERO);
+        WorldParticles.spawn(EYE, face.add(side.scale(-0.13)), Vec3.ZERO);
+    }
+
+    /** A burst of darkness: something appearing, or gone. */
+    public static void shadowBurst(Vec3 at) {
+        WorldParticles.burst(SHADOW, at, 26, 0.5, 0.09);
+    }
+
+    /** The darkness that clings to the creature as it moves. */
+    public static void shadowTrail(Entity entity) {
+        if (entity.tickCount % 2 != 0) return;
+        AABB box = entity.getBoundingBox();
+        WorldParticles.spawn(SHADOW, box.minX + RANDOM.nextDouble() * box.getXsize(), box.minY + RANDOM.nextDouble() * box.getYsize(), box.minZ + RANDOM.nextDouble() * box.getZsize(),
+                0.0, 0.01, 0.0);
     }
 
     private static ParticleSpec wisp(int color) {
@@ -123,16 +153,11 @@ public final class SleepEffects {
     /** The "monster under the bed" scare: eyes at the bed's edge, darkness pouring out, a shriek and a jolt. */
     public static void scare(BlockPos bed) {
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.level == null || minecraft.player == null || !WCISConfigs.isEnabled(WCISClientConfig.UNDER_THE_BED_SCARES)) return;
+        if (minecraft.level == null || minecraft.player == null) return;
+        if (!WCISClientConfig.SCARY_CONTENT.get() || !WCISConfigs.isEnabled(WCISClientConfig.UNDER_THE_BED_SCARES)) return;
         Vec3 center = Vec3.atBottomCenterOf(bed).add(0.0, 0.12, 0.0);
-        // The eyes look out from the side of the bed the player is on.
-        Vec3 toPlayer = minecraft.player.position().subtract(center).multiply(1.0, 0.0, 1.0);
-        toPlayer = toPlayer.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : toPlayer.normalize();
-        Vec3 side = new Vec3(-toPlayer.z, 0.0, toPlayer.x);
-        Vec3 face = center.add(toPlayer.scale(0.48));
-        WorldParticles.spawn(EYE, face.add(side.scale(0.13)), Vec3.ZERO);
-        WorldParticles.spawn(EYE, face.add(side.scale(-0.13)), Vec3.ZERO);
-        WorldParticles.burst(SHADOW, center, 26, 0.5, 0.09);
+        eyes(bed);
+        shadowBurst(center);
 
         minecraft.level.playLocalSound(center.x, center.y, center.z, WCISSounds.SCARE, SoundSource.HOSTILE, 1.0F, 0.6F + RANDOM.nextFloat() * 0.15F, false);
         ScreenEffects.tint(WhyCantISleep.id("scare"), 0xB0000000).fade(1, 26, Easing.QUAD_OUT).enableFor(2);

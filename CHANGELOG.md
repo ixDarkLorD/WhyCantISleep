@@ -12,4 +12,6 @@ This file is for listing all the changes to this project
 - **Dimension warning**: the first use of a bed where beds explode (the Nether, the End) only warns; using it again within three seconds goes through.
 - **Sleep board** (needs the mod on the server): while you're in bed, a panel lists who is still awake and why (awake, mining, fighting, AFK, in another dimension) with the progress toward the `playersSleepingPercentage` rule.
 - **Nudges**: click an awake player on the board to send them a bell and a message, with a cooldown. Players without the mod get them too.
+- **The thing under the bed**: sleep in the dark too often, or go too long without sleep, and dread builds. First there are eyes under dark beds and whispers; then it comes out, a figure only you see that is gone when you look at it; ignore it long enough and it becomes real and hunts you. Sleeping in the light eases the dread, and killing the creature ends it. The "Scary content" option turns all of it off for you, and "Bed creature" turns it off for a whole server.
+- The mod is now needed on both the client and the server.
 - Client and server configs, with client options locked while the server turns their feature off.

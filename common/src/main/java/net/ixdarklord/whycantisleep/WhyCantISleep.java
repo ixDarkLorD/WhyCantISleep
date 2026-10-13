@@ -3,6 +3,9 @@ package net.ixdarklord.whycantisleep;
 import net.ixdarklord.coolcatcore.api.core.ModConstructor;
 import net.ixdarklord.coolcatcore.api.platform.Platform;
 import net.ixdarklord.whycantisleep.config.WCISConfigs;
+import net.ixdarklord.whycantisleep.lurker.Dread;
+import net.ixdarklord.whycantisleep.lurker.LurkerServer;
+import net.ixdarklord.whycantisleep.lurker.WCISEntities;
 import net.ixdarklord.whycantisleep.network.WCISNetwork;
 import net.ixdarklord.whycantisleep.sleep.SleepBoardServer;
 import net.minecraft.resources.Identifier;
@@ -25,7 +28,10 @@ public final class WhyCantISleep implements ModConstructor {
         LOGGER.info("Loading {} on {}", MOD_NAME, Platform.isFabric() ? "Fabric" : "NeoForge");
 
         WCISConfigs.register();
+        WCISEntities.register();
+        Dread.ATTACHMENTS.register();
         WCISNetwork.register();
+        LurkerServer.init();
         SleepBoardServer.init();
     }
 
