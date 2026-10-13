@@ -33,5 +33,13 @@
   "config.whycantisleep.server.spooky": "Spooky touches",
   "config.whycantisleep.server.spooky.advancements": "Advancements",
   "config.whycantisleep.server.spooky.scareChance": "Scare chance",
-  "config.whycantisleep.server.title": "Why Can't I Sleep? (Server)"
+  "config.whycantisleep.server.title": "Why Can't I Sleep? (Server)",
+  "gui.whycantisleep.blockers.above": "%s blocks above",
+  "gui.whycantisleep.blockers.above.one": "%s block above",
+  "gui.whycantisleep.blockers.away": "%s blocks away",
+  "gui.whycantisleep.blockers.away.one": "%s block away",
+  "gui.whycantisleep.blockers.below": "%s blocks below",
+  "gui.whycantisleep.blockers.below.one": "%s block below",
+  "gui.whycantisleep.blockers.many": "%s monsters nearby - closest: %s, %s",
+  "gui.whycantisleep.blockers.one": "1 monster nearby: %s, %s"
 }

@@ -2,7 +2,8 @@ package net.ixdarklord.whycantisleep.client;
 
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientPlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
-import net.ixdarklord.whycantisleep.client.highlight.Highlights;
+import net.ixdarklord.whycantisleep.client.hud.BlockerInfo;
+import net.ixdarklord.whycantisleep.config.WCISClientConfig;
 import net.ixdarklord.whycantisleep.network.SleepBlockedPayload;
 import net.ixdarklord.whycantisleep.sleep.SleepChecks;
 import net.minecraft.client.Minecraft;
@@ -10,11 +11,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
-import org.jspecify.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,20 +63,23 @@ public final class SleepClient {
             Entity entity = minecraft.level.getEntity(id);
             if (entity != null) blockers.add(entity);
         }
-        onBlocked(payload.bed(), blockers);
+        Blockers.set(blockers);
     }
 
-    /** A message was put above the hotbar ({@code GuiMixin}): the game's "monsters nearby" one means a failed sleep. */
-    public static void onOverlayMessage(Component message) {
-        if (!(message.getContents() instanceof TranslatableContents contents) || !contents.getKey().equals(NOT_SAFE)) return;
-        if (tick - lastReport <= REPORT_TICKS) return;
+    /**
+     * A message is about to be put above the hotbar ({@code GuiMixin}): the game's "monsters nearby" one means a failed
+     * sleep. Returns the message to show in its place.
+     */
+    public static Component onOverlayMessage(Component message) {
+        if (!(message.getContents() instanceof TranslatableContents contents) || !contents.getKey().equals(NOT_SAFE)) return message;
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.level == null || minecraft.player == null || lastBed == null) return;
-        List<Monster> blockers = SleepChecks.blockersOnClient(minecraft.level, minecraft.player, lastBed);
-        onBlocked(lastBed, blockers);
-    }
-
-    private static void onBlocked(BlockPos bed, List<? extends Entity> blockers) {
-        Highlights.show(blockers);
+        if (minecraft.level == null || minecraft.player == null) return message;
+        // No recent report: the server doesn't have the mod, so look for the monsters from here.
+        if (tick - lastReport > REPORT_TICKS && lastBed != null) {
+            Blockers.set(SleepChecks.blockersOnClient(minecraft.level, minecraft.player, lastBed));
+        }
+        if (!WCISClientConfig.ACTION_BAR_INFO.get()) return message;
+        Component info = BlockerInfo.describe(minecraft.player, Blockers.entities());
+        return info != null ? info : message;
     }
 }
