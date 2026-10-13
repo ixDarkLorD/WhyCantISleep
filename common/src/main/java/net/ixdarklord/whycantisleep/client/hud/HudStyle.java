@@ -75,7 +75,8 @@ public final class HudStyle {
 
     /** A medal, to hold a 9 by 9 icon {@link #MEDAL_INSET} in from its corner. */
     public static void medal(GuiGraphicsExtractor graphics, Identifier sprite, int x, int y, float alpha) {
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, y, MEDAL_SIZE, MEDAL_SIZE, ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F)));
+        // The picture is a pixel bigger each way than the medal, for the shadow it casts.
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, y, MEDAL_SIZE + 1, MEDAL_SIZE + 1, ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F)));
     }
 
     /** A bar of a width, {@link #BAR_HEIGHT} tall, filled to a share with one of the fills. */
