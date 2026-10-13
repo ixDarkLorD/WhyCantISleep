@@ -22,15 +22,15 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * The sleep HUD's board: while the player is in bed on a server, a card listing who is still awake and why, with the
- * progress toward skipping the night. It is drawn like the game's own lists: the tooltip's box, the boss bar for the
- * progress, and each player's face beside their name as on the player list. Clicking an awake player nudges them. The
+ * progress toward skipping the night, on the HUD's slate card, with each player's face beside their name as on the
+ * player list. Clicking an awake player nudges them. The
  * card is on the HUD, under the in-bed chat screen, whose clicks {@code ChatScreenMixin} passes here.
  */
 public final class SleepBoard {
     // The content area's corner; the box pads and frames around it.
     private static final int X = 10;
     private static final int Y = 10;
-    private static final int WIDTH = HudStyle.BAR_WIDTH;
+    private static final int WIDTH = 170;
     private static final int ROW_HEIGHT = 10;
     private static final int HEADER_HEIGHT = 22;
     private static final int FACE_SIZE = 8;
@@ -105,7 +105,7 @@ public final class SleepBoard {
         graphics.text(font, Component.translatable("gui.whycantisleep.board.title"), X, Y, HudStyle.color(HudStyle.WHITE, alpha), true);
         Component count = Component.translatable("gui.whycantisleep.board.progress", board.sleeping(), board.needed());
         graphics.text(font, count, X + WIDTH - font.width(count), Y, HudStyle.color(enough ? HudStyle.GREEN : HudStyle.GRAY, alpha), true);
-        HudStyle.bar(graphics, X, Y + 12, board.sleeping() / (float) Math.max(1, board.needed()), alpha);
+        HudStyle.bar(graphics, HudStyle.SLEEP_FILL, X, Y + 12, WIDTH, board.sleeping() / (float) Math.max(1, board.needed()), alpha);
 
         int rowY = Y + HEADER_HEIGHT;
         if (rows == 0) {

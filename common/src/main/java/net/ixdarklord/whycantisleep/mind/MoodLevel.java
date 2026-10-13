@@ -22,7 +22,12 @@ public enum MoodLevel {
         return this.below;
     }
 
-    /** Whether this mood is low enough to tell the player about. */
+    /** Whether this mood isn't holding sanity up any more: flat or worse, when the HUD shows its badge. */
+    public boolean isUnstable() {
+        return this.ordinal() <= FLAT.ordinal();
+    }
+
+    /** Whether this mood is low enough to warn the player about. */
     public boolean isLow() {
         return this.ordinal() <= GLOOMY.ordinal();
     }

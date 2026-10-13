@@ -1,5 +1,6 @@
 package net.ixdarklord.whycantisleep.client.hud;
 
+import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
@@ -7,19 +8,23 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 
 /**
- * The look the mod's HUD cards share, which is the game's own: the tooltip's box and frame, the boss bar for progress,
- * and the chat's colors for text. A resource pack that restyles those restyles these cards with them.
+ * The look the mod's HUD shares: panels and bars of its own, drawn in the game's manner (beveled, pixel for pixel,
+ * with the chat's colors for text). They are GUI sprites that stretch to any size, drawn by
+ * {@code tools/gen_hud_textures.ps1}; a resource pack can restyle them like any of the game's.
  */
 public final class HudStyle {
-    private static final Identifier TOOLTIP_BACKGROUND = Identifier.withDefaultNamespace("tooltip/background");
-    private static final Identifier TOOLTIP_FRAME = Identifier.withDefaultNamespace("tooltip/frame");
-    private static final Identifier BAR_BACKGROUND = Identifier.withDefaultNamespace("boss_bar/green_background");
-    private static final Identifier BAR_PROGRESS = Identifier.withDefaultNamespace("boss_bar/green_progress");
-    // The tooltip sprites carry an empty margin around the box, and the box pads its contents (TooltipRenderUtil).
-    private static final int SPRITE_MARGIN = 9;
-    private static final int BOX_PADDING = 3;
-    /** The boss bar sprites' size: a bar is drawn at this width. */
-    public static final int BAR_WIDTH = 182;
+    /** The message card and the sleep board: slate. */
+    public static final Identifier CARD = WhyCantISleep.id("hud/card");
+    /** The mood status: warm wood with a gold rim. */
+    public static final Identifier MOOD_PANEL = WhyCantISleep.id("hud/mood_panel");
+    /** The sanity status: storm plum with a rose rim. */
+    public static final Identifier SANITY_PANEL = WhyCantISleep.id("hud/sanity_panel");
+    private static final Identifier BAR_BACK = WhyCantISleep.id("hud/bar_back");
+    public static final Identifier MOOD_FILL = WhyCantISleep.id("hud/mood_fill");
+    public static final Identifier SANITY_FILL = WhyCantISleep.id("hud/sanity_fill");
+    public static final Identifier SLEEP_FILL = WhyCantISleep.id("hud/sleep_fill");
+    /** How far a panel reaches beyond what it holds: its border, and a pixel of air inside it. */
+    public static final int PANEL_PADDING = 5;
     public static final int BAR_HEIGHT = 5;
 
     // The chat's colors.
@@ -41,19 +46,24 @@ public final class HudStyle {
         return ARGB.color(Math.round(Mth.clamp(alpha, 0.0F, 1.0F) * 255.0F), rgb);
     }
 
-    /** The game's tooltip box around a content area, which it pads by 3 pixels on every side. */
-    public static void box(GuiGraphicsExtractor graphics, int x, int y, int width, int height, float alpha) {
-        int outset = SPRITE_MARGIN + BOX_PADDING;
-        int tint = ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F));
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, TOOLTIP_BACKGROUND, x - outset, y - outset, width + outset * 2, height + outset * 2, tint);
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, TOOLTIP_FRAME, x - outset, y - outset, width + outset * 2, height + outset * 2, tint);
+    /** A panel around a content area, which it pads by {@link #PANEL_PADDING} on every side. */
+    public static void panel(GuiGraphicsExtractor graphics, Identifier sprite, int x, int y, int width, int height, float alpha) {
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x - PANEL_PADDING, y - PANEL_PADDING, width + PANEL_PADDING * 2, height + PANEL_PADDING * 2,
+                ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F)));
     }
 
-    /** The green boss bar, {@link #BAR_WIDTH} wide, filled to a share. */
-    public static void bar(GuiGraphicsExtractor graphics, int x, int y, float filled, float alpha) {
+    /** The slate card around a content area. */
+    public static void box(GuiGraphicsExtractor graphics, int x, int y, int width, int height, float alpha) {
+        panel(graphics, CARD, x, y, width, height, alpha);
+    }
+
+    /** A bar of a width, {@link #BAR_HEIGHT} tall, filled to a share with one of the fills. */
+    public static void bar(GuiGraphicsExtractor graphics, Identifier fill, int x, int y, int width, float filled, float alpha) {
         int tint = ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F));
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BAR_BACKGROUND, x, y, BAR_WIDTH, BAR_HEIGHT, tint);
-        int width = Mth.lerpDiscrete(Mth.clamp(filled, 0.0F, 1.0F), 0, BAR_WIDTH);
-        if (width > 0) graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BAR_PROGRESS, BAR_WIDTH, BAR_HEIGHT, 0, 0, x, y, width, BAR_HEIGHT, tint);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BAR_BACK, x, y, width, BAR_HEIGHT, tint);
+        // The fill keeps inside the track's outline, and shows at least a sliver of anything above nothing.
+        int inner = width - 2;
+        int filledWidth = filled <= 0.0F ? 0 : Math.max(1, Math.round(inner * Mth.clamp(filled, 0.0F, 1.0F)));
+        if (filledWidth > 0) graphics.blitSprite(RenderPipelines.GUI_TEXTURED, fill, x + 1, y, filledWidth, BAR_HEIGHT, tint);
     }
 }
