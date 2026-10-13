@@ -4,6 +4,7 @@
 #   mood_medal.png, mood_track.png, mood_frame.png              the mood gauge: a gold coin and a round capsule of blocks
 #   lucidity_medal.png, lucidity_track.png, lucidity_frame.png  the lucidity gauge: a rose diamond and a pointed one
 #   mood_limit.png, lucidity_limit.png  the stripes over the part of a gauge the other bar closes off
+#   slot.png          the sunk slot a card's icon sits in
 #   bar_back.png      the empty track of a status bar
 #   sleep_fill.png    what fills it on the sleep board: green
 #   mood_fill.png, lucidity_fill.png   what fills the gauges: bright gold, and rose
@@ -145,10 +146,17 @@ function Bar($name, $outline, $outlineLight, $outlineDark, $empty, $emptyTop, [b
             $back.SetPixel($x, $y, (Argb 255 $outline)); $frame.SetPixel($x, $y, (Argb 255 $outline)); continue
         }
         $back.SetPixel($x, $y, $(if ($y -eq 1) { Argb 255 $emptyTop } else { Argb 255 $empty }))
+        # Each block is beveled: a seam on its right, light along its top and left edges, shade along its right and
+        # foot, and a glint on its shoulder with a fainter pixel under it.
         $block = ($x - 2) % 8
         $over = if ($block -eq 7) { Argb 150 $outline }
-            elseif ($y -eq 2 -and $block -ge 1 -and $block -le 3) { Argb 120 0xFFFFFF }
-            elseif ($y -eq 9) { Argb 45 0x000000 }
+            elseif ($y -eq 9) { Argb 70 0x000000 }
+            elseif ($y -eq 2 -and $block -ge 1 -and $block -le 3) { Argb 150 0xFFFFFF }
+            elseif ($y -eq 3 -and $block -eq 1) { Argb 90 0xFFFFFF }
+            elseif ($block -eq 6) { Argb 55 0x000000 }
+            elseif ($y -eq 1) { Argb 50 0xFFFFFF }
+            elseif ($block -eq 0) { Argb 55 0xFFFFFF }
+            elseif ($y -eq 8) { Argb 35 0x000000 }
             else { $clear }
         $frame.SetPixel($x, $y, $over)
     } }
@@ -161,16 +169,32 @@ Medal "mood_medal" 0x1E1408 0x0E0802 @(0xFFF6CC, 0xFFD966, 0xD9A63C, 0x8E5E18) @
 Medal "lucidity_medal" 0x14181C 0x08090C @(0xFFEAEE, 0xE9B6B8, 0xCB8CAA, 0x7A4470) @(0x0C0812, 0x18101E, 0x32203A) { param($x, $y) [Math]::Abs($x) + [Math]::Abs($y) } @(9, 7, 5, 4)
 Bar "mood" 0x2A1608 0x2A1608 0x120A04 0x4A3414 0x38260E $false
 Bar "lucidity" 0x1C1220 0x1C1220 0x0A070E 0x3A2A3E 0x2A1E30 $true
-# What fills a gauge: bright, flat color, nine rows from a light shoulder down to a deep foot. It only stretches.
-function GaugeFill($name, $light, $base, $shade, $deep) {
+# What fills a gauge: nine rows of color, shaded like a rounded bar: a pale shoulder, the color at its fullest a
+# third of the way down, and a slow fall to a deep foot. It only stretches.
+function GaugeFill($name, $rows) {
     $b = New-Object System.Drawing.Bitmap 8, 9
-    for ($y = 0; $y -lt 9; $y++) { for ($x = 0; $x -lt 8; $x++) {
-        $b.SetPixel($x, $y, (Argb 255 $(if ($y -eq 0) { $light } elseif ($y -le 6) { $base } elseif ($y -eq 7) { $shade } else { $deep })))
-    } }
+    for ($y = 0; $y -lt 9; $y++) { for ($x = 0; $x -lt 8; $x++) { $b.SetPixel($x, $y, (Argb 255 $rows[$y])) } }
     Save $b $name 8 9 0
 }
-GaugeFill "mood_fill" 0xFFE27A 0xFFC02E 0xE09A1E 0xB87616
-GaugeFill "lucidity_fill" 0xF4C6CC 0xD992B0 0xA86488 0x8A4E7C
+GaugeFill "mood_fill" @(0xFFF0A0, 0xFFDC64, 0xFFCA36, 0xFFC02E, 0xF8B428, 0xEDA622, 0xDC961C, 0xC27E16, 0x9E6410)
+GaugeFill "lucidity_fill" @(0xFBD6DC, 0xEEB4C8, 0xE2A0BA, 0xD992B0, 0xCF88A8, 0xC27A9C, 0xB06C90, 0x985A80, 0x7C466C)
+
+# The slot an icon sits in on the card, 20 by 20 for a 16 by 16 item: sunk, so dark along its top and left and lit
+# along its foot and right, with a shadow lying on its floor under the dark edges.
+$b = New-Object System.Drawing.Bitmap 20, 20
+for ($y = 0; $y -lt 20; $y++) { for ($x = 0; $x -lt 20; $x++) {
+    $edge = [Math]::Min([Math]::Min($x, $y), [Math]::Min(19 - $x, 19 - $y))
+    $near = ($x + $y) -lt 19
+    $corner = (($x -eq 0 -or $x -eq 19) -and ($y -eq 0 -or $y -eq 19))
+    $color = if ($corner) { Argb 0 0 }
+        elseif ($edge -eq 0) { if ($near) { Argb 255 0x0A070E } else { Argb 255 0x7A5A84 } }
+        elseif ($edge -eq 1) { if ($near) { Argb 255 0x120C18 } else { Argb 255 0x3E2E48 } }
+        elseif ($edge -eq 2 -and $near) { Argb 255 0x241A2C }
+        else { Argb 255 0x30243A }
+    $b.SetPixel($x, $y, $color)
+} }
+Save $b "slot" 20 20 0
+
 # What lies over the part of a gauge the other bar closes off: diagonal stripes in two dim tones of the bar's own
 # color, as on a barrier. It tiles along the bar (the stripes repeat every 4 pixels, the picture every 8).
 function GaugeLimit($name, $stripe, $between) {

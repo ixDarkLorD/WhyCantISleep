@@ -22,8 +22,7 @@ import java.util.List;
  */
 public final class SleepNotices {
     private static final int ICON_SIZE = 16;
-    // The slot the icon sits in: the icon, a pixel of floor round it and a pixel of outline.
-    private static final int SLOT_SIZE = ICON_SIZE + 4;
+    private static final int SLOT_SIZE = HudStyle.SLOT_SIZE;
     private static final int SLOT_GAP = 6;
     private static final int LINE_HEIGHT = 10;
     // Text wraps at this width, so the card stays compact however long the message.
@@ -88,11 +87,8 @@ public final class SleepNotices {
         int y = graphics.guiHeight() - BOTTOM_OFFSET - height;
 
         HudStyle.box(graphics, x, y, width, height, alpha);
-        // The slot: sunk into the card, its floor a shade lighter than its rim.
         int slotY = y + (height - SLOT_SIZE) / 2;
-        graphics.fill(x, slotY, x + SLOT_SIZE, slotY + SLOT_SIZE, HudStyle.color(0x0A070E, alpha));
-        graphics.fill(x + 1, slotY + 1, x + SLOT_SIZE - 1, slotY + SLOT_SIZE - 1, HudStyle.color(0x33263C, alpha));
-        graphics.fill(x + 1, slotY + 1, x + SLOT_SIZE - 1, slotY + 2, HudStyle.color(0x1A1220, alpha));
+        HudStyle.slot(graphics, x, slotY, alpha);
         // Items can't be drawn faded, so the icon waits until the box is mostly there.
         if (alpha > 0.6F) graphics.fakeItem(shown.kind().icon(), x + 2, slotY + 2);
 
