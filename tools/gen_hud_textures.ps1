@@ -73,22 +73,33 @@ function Depth($width, $height, $inside) {
     return , $depth
 }
 
-# A medal: three shapes one inside the next, each a clean one of its kind: the outline, the rim lit from the top left,
-# and the dark field its icon sits on. $far measures a pixel's distance from the middle; the three limits are how far
-# out the whole medal, its rim and its field reach.
-function Medal($name, $outline, $light, $shade, $fill, $far, $limits) {
-    $b = New-Object System.Drawing.Bitmap 19, 19
-    for ($y = 0; $y -lt 19; $y++) { for ($x = 0; $x -lt 19; $x++) {
-        $d = & $far ($x - 9) ($y - 9)
-        $color = if ($d -gt $limits[0]) { Argb 0 0 }
-            elseif ($d -gt $limits[1]) { Argb 255 $outline }
-            elseif ($d -gt $limits[2]) { if (($x + $y) -lt 18) { Argb 255 $light } else { Argb 255 $shade } }
-            else { Argb 255 $fill }
-        $b.SetPixel($x, $y, $color)
+# A medal: three shapes one inside the next, each a clean one of its kind: the outline, the rim, and the sunk field
+# its icon sits on. $far measures a pixel's distance from the middle; the limits are how far out the whole medal, its
+# rim, its field, and the field's flat middle reach.
+# The light comes from the top left. The rim runs through four tones round its turn, from a highlight facing the
+# light to a shade facing away; the field, being sunk, is shaded the other way just inside the rim (a shadow under
+# the lit side, a little light caught on the far side); the outline is darkest along the foot; and the whole medal
+# casts a shadow down and to the right, for which the picture is a pixel wider and taller than the medal.
+function Medal($name, $outline, $outlineDark, $rim, $field, $far, $limits) {
+    $b = New-Object System.Drawing.Bitmap 20, 20
+    for ($y = 0; $y -lt 20; $y++) { for ($x = 0; $x -lt 20; $x++) {
+        $dx = $x - 9; $dy = $y - 9
+        $d = & $far $dx $dy
+        if ($d -gt $limits[0]) {
+            $cast = (& $far ($dx - 1) ($dy - 1)) -le $limits[0]
+            $b.SetPixel($x, $y, $(if ($cast) { Argb 110 0x000000 } else { Argb 0 0 })); continue
+        }
+        # How squarely the pixel faces the light: 1 towards it, -1 away.
+        $length = [Math]::Sqrt($dx * $dx + $dy * $dy)
+        $facing = if ($length -eq 0) { 0 } else { -($dx + $dy) / ($length * 1.4142) }
+        $color = if ($d -gt $limits[1]) { if ($facing -lt -0.5) { $outlineDark } else { $outline } }
+            elseif ($d -gt $limits[2]) { if ($facing -gt 0.8) { $rim[0] } elseif ($facing -gt 0.2) { $rim[1] } elseif ($facing -gt -0.5) { $rim[2] } else { $rim[3] } }
+            elseif ($d -gt $limits[3]) { if ($facing -gt 0.2) { $field[0] } elseif ($facing -lt -0.5) { $field[2] } else { $field[1] } }
+            else { $field[1] }
+        $b.SetPixel($x, $y, (Argb 255 $color))
     } }
-    Save $b $name 19 19 0
+    Save $b $name 20 20 0
 }
-
 # A bar, in the manner of an arcade game's: a chunky capsule with a dark outline (lit along its top, darkest along its
 # foot, and casting a shadow down and to the right), cut into eight blocks, each with a
 # glint on its shoulder. It is drawn in three layers so the color can stop anywhere: the back (the outline and the
@@ -134,9 +145,10 @@ function Bar($name, $outline, $outlineLight, $outlineDark, $empty, $emptyTop, [b
     Save $back "${name}_track" 73 12 0
     Save $frame "${name}_frame" 73 12 0
 }
-# The coin: circles 19, 17 and 13 across (as squared distances). The diamond: 9, 7 and 5 out along its edges.
-Medal "mood_medal" 0x1E1408 0xFFE08A 0xB07A22 0x2A1C0C { param($x, $y) $x * $x + $y * $y } @(97, 76, 45)
-Medal "lucidity_medal" 0x14181C 0xE9B6B8 0x8A4E7C 0x18101E { param($x, $y) [Math]::Abs($x) + [Math]::Abs($y) } @(9, 7, 5)
+# The coin: circles 19, 17, 13 and 11 across (as squared distances). The diamond: 9, 7, 5 and 4 out along its edges.
+# Rim tones run highlight, light, middle, shade; field tones run shadow, floor, caught light.
+Medal "mood_medal" 0x1E1408 0x0E0802 @(0xFFF6CC, 0xFFD966, 0xD9A63C, 0x8E5E18) @(0x160E04, 0x2A1C0C, 0x43300F) { param($x, $y) $x * $x + $y * $y } @(97, 76, 45, 32)
+Medal "lucidity_medal" 0x14181C 0x08090C @(0xFFEAEE, 0xE9B6B8, 0xCB8CAA, 0x7A4470) @(0x0C0812, 0x18101E, 0x32203A) { param($x, $y) [Math]::Abs($x) + [Math]::Abs($y) } @(9, 7, 5, 4)
 Bar "mood" 0x2A1608 0x2A1608 0x120A04 0x4A3414 0x38260E $false
 Bar "lucidity" 0x1C1220 0x1C1220 0x0A070E 0x3A2A3E 0x2A1E30 $true
 # What fills a gauge: bright, flat color, nine rows from a light shoulder down to a deep foot. It only stretches.
