@@ -42,8 +42,10 @@ void main() {
     color = mix(color, vec3(grey) * vec3(0.84, 0.90, 1.0), 0.75 * Strength * (1.0 - redness));
 
     // The darkness has a ragged edge that drifts, like something breathing at the rim of sight.
-    float angle = atan(fromCenter.y, fromCenter.x);
-    float ragged = ce_noise(vec2(angle * 3.0, Time * 0.6)) * 0.16 + ce_noise(texCoord * 9.0 + vec2(0.0, Time * 0.25)) * 0.08;
+    // The raggedness goes round the view by direction, not by angle: an angle jumps from one end of its range to the
+    // other straight left of the center, which drew a seam across the darkness there.
+    vec2 around = fromCenter / max(length(fromCenter), 0.0001);
+    float ragged = ce_noise(around * 2.4 + vec2(Time * 0.6, Time * 0.35)) * 0.16 + ce_noise(texCoord * 9.0 + vec2(0.0, Time * 0.25)) * 0.08;
     float inner = mix(0.78, 0.3, clamp(Strength * 0.75 + Approach * 0.35, 0.0, 1.0));
     float closing = smoothstep(inner, inner + 0.55, edge + ragged * Strength);
     // Watched, the edges are left alone: the dark below is all there is.
