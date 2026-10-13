@@ -1,12 +1,12 @@
 # Draws the sleep HUD's own panels and bars as GUI sprites, under assets/whycantisleep/textures/gui/sprites/hud/,
 # each with the .mcmeta that tells the game how to stretch it (nine-slice), so HudStyle draws them at any size:
-#   card.png          the message card and the sleep board: slate, like a slab of night
+#   card.png          the message card and the sleep board: dusk plum, outlined and shaded like the bars
 #   mood_medal.png, mood_track.png, mood_frame.png              the mood gauge: a gold coin and a round capsule of blocks
 #   lucidity_medal.png, lucidity_track.png, lucidity_frame.png  the lucidity gauge: a rose diamond and a pointed one
 #   bar_back.png      the empty track of a status bar
 #   sleep_fill.png    what fills it on the sleep board: green
 #   mood_fill.png, lucidity_fill.png   what fills the gauges: bright gold, and rose
-# Panels are 16x16 with a 4 pixel border; the track is 8x5 with a 1 pixel border; the fills just stretch.
+# The card is 16x16 with a 4 pixel border (and a pixel of shadow); the plain track is 8x5 with a 1 pixel border; the fills just stretch.
 # Run from the repo root: powershell -File tools/gen_hud_textures.ps1
 Add-Type -AssemblyName System.Drawing
 
@@ -22,34 +22,6 @@ function Save($bitmap, $name, $width, $height, $border) {
     $meta = "{`n  `"gui`": {`n    `"scaling`": {`n      `"type`": `"nine_slice`",`n      `"width`": $width,`n      `"height`": $height,`n      `"border`": $border`n    }`n  }`n}`n"
     [IO.File]::WriteAllText((Join-Path $dir "$name.png.mcmeta"), $meta, $utf8)
 }
-
-# A panel: a dark outline with its corners cut, a rim lit from the top left, a second inner line, and a fill that
-# lets a little of the world through.
-function Panel($name, $outline, $light, $shade, $inner, $fill, $fillAlpha) {
-    $b = New-Object System.Drawing.Bitmap 16, 16
-    for ($y = 0; $y -lt 16; $y++) {
-        for ($x = 0; $x -lt 16; $x++) {
-            $edge = [Math]::Min([Math]::Min($x, $y), [Math]::Min(15 - $x, 15 - $y))
-            $corner = (($x -eq 0 -or $x -eq 15) -and ($y -eq 0 -or $y -eq 15))
-            $color = if ($corner) { Argb 0 0 }
-                elseif ($edge -eq 0) { Argb 255 $outline }
-                elseif ($edge -eq 1) { if ($x -eq 1 -or $y -eq 1) { Argb 255 $light } else { Argb 255 $shade } }
-                elseif ($edge -eq 2) { Argb 255 $inner }
-                else { Argb $fillAlpha $fill }
-            $b.SetPixel($x, $y, $color)
-        }
-    }
-    # The rim's two meeting corners take the middle tone, as the game's own bevels do.
-    $b.SetPixel(14, 1, (Argb 255 $inner)); $b.SetPixel(1, 14, (Argb 255 $inner))
-    Save $b $name 16 16 4
-}
-
-Panel "card" 0x0B0C10 0x6A6E84 0x30323E 0x1A1B24 0x14151C 232
-
-# The two status gauges are shaped nothing like the card: each is a medal holding its icon, with a track running out
-# of it for its bar. Mood's is a round gold coin on a round-ended bar; lucidity's is a rose-edged diamond on a bar
-# that ends in a point. They are drawn at their own size, never stretched (MindStatus has the sizes).
-# Both are built the same clean way: a shape, then its rings counted in from the edge, each ring one flat tone.
 
 # For each pixel of a shape, how many pixels in from its edge it is (1 on the edge itself, 0 outside).
 function Depth($width, $height, $inside) {
@@ -72,6 +44,43 @@ function Depth($width, $height, $inside) {
     }
     return , $depth
 }
+
+# The card is made the way the bars and medals are: a chunky dark outline with rounded corners, darkest along its
+# foot; a rim lit from the top left; a sunk, nearly solid middle with a shadow under the lit side of the rim; and a
+# shadow cast down and to the right, for which the picture is a pixel wider and taller than the card.
+function Card($name, $outline, $outlineDark, $light, $shade, $shadow, $fill, $fillAlpha) {
+    $inside = {
+        param($x, $y)
+        $off = [Math]::Min($y, 15 - $y)
+        $cut = if ($off -eq 0) { 2 } elseif ($off -eq 1) { 1 } else { 0 }
+        return $x -ge $cut -and $x -le 15 - $cut
+    }
+    $depth = Depth 16 16 $inside
+    $b = New-Object System.Drawing.Bitmap 17, 17
+    for ($y = 0; $y -lt 17; $y++) { for ($x = 0; $x -lt 17; $x++) {
+        $d = if ($x -lt 16 -and $y -lt 16) { $depth[$x, $y] } else { 0 }
+        $lit = ($x + $y) -lt 15
+        $color = if ($d -eq 0) { if ($x -gt 0 -and $y -gt 0 -and $depth[($x - 1), ($y - 1)] -gt 0) { Argb 110 0x000000 } else { Argb 0 0 } }
+            elseif ($d -eq 1) { if ($lit) { Argb 255 $outline } else { Argb 255 $outlineDark } }
+            elseif ($d -eq 2) { if ($lit) { Argb 255 $light } else { Argb 255 $shade } }
+            elseif ($d -eq 3 -and $lit) { Argb $fillAlpha $shadow }
+            else { Argb $fillAlpha $fill }
+        $b.SetPixel($x, $y, $color)
+    } }
+    $b.Save((Join-Path $dir "$name.png"), [System.Drawing.Imaging.ImageFormat]::Png)
+    $b.Dispose()
+    # The corners keep their size and the sides stretch; the right and bottom borders carry the shadow's pixel too.
+    $meta = "{`n  `"gui`": {`n    `"scaling`": {`n      `"type`": `"nine_slice`",`n      `"width`": 17,`n      `"height`": 17,`n      `"border`": {`n        `"left`": 4,`n        `"top`": 4,`n        `"right`": 5,`n        `"bottom`": 5`n      }`n    }`n  }`n}`n"
+    [IO.File]::WriteAllText((Join-Path $dir "$name.png.mcmeta"), $meta, $utf8)
+}
+
+# Dusk plum, from the same palette as the lucidity bar and the Lurker.
+Card "card" 0x1C1220 0x0A070E 0x7A5A84 0x3A2A3E 0x140E1A 0x221828 244
+
+# The two status gauges are shaped nothing like the card: each is a medal holding its icon, with a track running out
+# of it for its bar. Mood's is a round gold coin on a round-ended bar; lucidity's is a rose-edged diamond on a bar
+# that ends in a point. They are drawn at their own size, never stretched (MindStatus has the sizes).
+# Both are built the same clean way: a shape, then its rings counted in from the edge, each ring one flat tone.
 
 # A medal: three shapes one inside the next, each a clean one of its kind: the outline, the rim, and the sunk field
 # its icon sits on. $far measures a pixel's distance from the middle; the limits are how far out the whole medal, its
@@ -165,7 +174,7 @@ GaugeFill "lucidity_fill" 0xF4C6CC 0xD992B0 0xA86488 0x8A4E7C
 $b = New-Object System.Drawing.Bitmap 8, 5
 for ($y = 0; $y -lt 5; $y++) { for ($x = 0; $x -lt 8; $x++) {
     $edge = ($x -eq 0 -or $x -eq 7 -or $y -eq 0 -or $y -eq 4)
-    $b.SetPixel($x, $y, $(if ($edge) { Argb 255 0x0B0C10 } elseif ($y -eq 1) { Argb 255 0x1A1B22 } else { Argb 255 0x2A2B36 }))
+    $b.SetPixel($x, $y, $(if ($edge) { Argb 255 $(if ($y -eq 4) { 0x0A070E } else { 0x1C1220 }) } elseif ($y -eq 1) { Argb 255 0x2A1E30 } else { Argb 255 0x3A2A3E }))
 } }
 Save $b "bar_back" 8 5 1
 
