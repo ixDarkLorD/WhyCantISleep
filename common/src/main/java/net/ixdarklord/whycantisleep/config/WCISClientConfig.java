@@ -67,7 +67,7 @@ public final class WCISClientConfig {
         BUILDER.push("mind", "Mood and lucidity.");
     }
     public static final ConfigValue<Boolean> STATUS_INDICATORS = BUILDER.bool("statusIndicators", true)
-            .comment("Shows an icon beside the hotbar, and a word of warning, when your mood or your lucidity is low.").enabledWhen(WCISServerConfig.MIND_SYSTEM).build();
+            .comment("Shows an icon under the crosshair, and a word of warning, when your mood or your lucidity is low.").enabledWhen(WCISServerConfig.MIND_SYSTEM).build();
     public static final ConfigValue<Boolean> INVENTORY_STATUS = BUILDER.bool("inventoryStatus", true)
             .comment("Shows your mood and your lucidity as bars above your inventory.").enabledWhen(WCISServerConfig.MIND_SYSTEM).build();
     static {

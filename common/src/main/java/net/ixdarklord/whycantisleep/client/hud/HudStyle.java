@@ -22,9 +22,13 @@ public final class HudStyle {
     public static final Identifier LUCIDITY_MEDAL = WhyCantISleep.id("hud/lucidity_medal");
     public static final Identifier LUCIDITY_TRACK = WhyCantISleep.id("hud/lucidity_track");
     /** A medal's size, and a track's: they are drawn as they are, never stretched. */
-    public static final int MEDAL_SIZE = 15;
-    public static final int TRACK_WIDTH = 66;
-    public static final int TRACK_HEIGHT = 9;
+    public static final int MEDAL_SIZE = 19;
+    public static final int TRACK_WIDTH = 68;
+    public static final int TRACK_HEIGHT = 11;
+    /** How tall a gauge's fill is: five rows of color with a clear row above and below. */
+    public static final int GAUGE_FILL_HEIGHT = 7;
+    /** How far in from a medal's corner its 9 by 9 icon sits. */
+    public static final int MEDAL_INSET = 5;
     private static final Identifier BAR_BACK = WhyCantISleep.id("hud/bar_back");
     public static final Identifier MOOD_FILL = WhyCantISleep.id("hud/mood_fill");
     public static final Identifier LUCIDITY_FILL = WhyCantISleep.id("hud/lucidity_fill");
@@ -63,7 +67,7 @@ public final class HudStyle {
         panel(graphics, CARD, x, y, width, height, alpha);
     }
 
-    /** A medal, to hold a 9 by 9 icon at 3 pixels in from its corner. */
+    /** A medal, to hold a 9 by 9 icon {@link #MEDAL_INSET} in from its corner. */
     public static void medal(GuiGraphicsExtractor graphics, Identifier sprite, int x, int y, float alpha) {
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, y, MEDAL_SIZE, MEDAL_SIZE, ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F)));
     }
