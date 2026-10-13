@@ -6,6 +6,7 @@ import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
 import net.ixdarklord.coolcatcore.api.network.Network;
 import net.ixdarklord.whycantisleep.client.fx.SleepEffects;
 import net.ixdarklord.whycantisleep.config.WCISClientConfig;
+import net.ixdarklord.whycantisleep.config.WCISServerConfig;
 import net.ixdarklord.whycantisleep.lurker.Dread;
 import net.ixdarklord.whycantisleep.lurker.LurkerEntity;
 import net.ixdarklord.whycantisleep.lurker.LurkerServer;
@@ -63,6 +64,11 @@ public final class LurkerHaunt {
         });
     }
 
+    // Nothing haunts a player who turned scary content off, or on a server that turned the creature off.
+    private static boolean enabled() {
+        return WCISClientConfig.SCARY_CONTENT.get() && WCISServerConfig.BED_CREATURE.get();
+    }
+
     private static void sendPreference() {
         Network.sendToServer(new ScaryPreferencePayload(WCISClientConfig.SCARY_CONTENT.get()));
     }
@@ -71,7 +77,7 @@ public final class LurkerHaunt {
         LocalPlayer player = minecraft.player;
         ClientLevel level = minecraft.level;
         if (player == null || level == null || minecraft.isPaused()) return;
-        if (!WCISClientConfig.SCARY_CONTENT.get()) {
+        if (!enabled()) {
             banish(level, false);
             return;
         }
@@ -99,7 +105,7 @@ public final class LurkerHaunt {
      */
     public static void onBedUsed(BlockPos bed) {
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.player == null || minecraft.level == null || !WCISClientConfig.SCARY_CONTENT.get()) return;
+        if (minecraft.player == null || minecraft.level == null || !enabled()) return;
         if (!Dread.stage(minecraft.player).reached(Dread.Stage.HAUNTED) || !LurkerServer.isDark(minecraft.level, bed) || ghost != null) return;
         // Out at the side of the bed away from the player.
         Vec3 center = Vec3.atBottomCenterOf(bed);
