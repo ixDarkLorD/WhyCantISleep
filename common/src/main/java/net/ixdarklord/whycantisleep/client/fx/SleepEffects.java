@@ -20,6 +20,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
@@ -35,12 +36,20 @@ public final class SleepEffects {
     // The client ticks, after the monsters were pointed out, at which a whisper comes.
     private static final int[] WHISPER_TICKS = {8, 34};
 
-    // Two points of light for a second: eyes.
+    // Two points of light for a second: eyes, the cold violet of the Lurker's.
     private static final ParticleSpec EYE = ParticleSpec.builder(VfxMaterial.additive(VfxMaterial.GLOW))
             .lifetime(26, 30)
             .size(Curve.of(0.0F, 0.07F, 0.0F).easing(Easing.EXPO_OUT, Easing.EXPO_IN))
             .opacity(Curve.of(0.0F, 1.0F, 0.0F).easing(Easing.EXPO_OUT, Easing.SINE_IN))
-            .color(0xFF2A1A, 0xAA0000)
+            .color(0xC9A6FF, 0x4A1AD0)
+            .build();
+    // A mote of the same light, drifting up from the Lurker's eyes and thinning away.
+    private static final ParticleSpec EYE_MOTE = ParticleSpec.builder(VfxMaterial.additive(VfxMaterial.GLOW))
+            .lifetime(14, 24)
+            .size(Curve.of(0.05F, 0.035F, 0.0F))
+            .opacity(Curve.of(0.0F, 0.8F, 0.0F))
+            .color(0xD8C2FF, 0x3A12B8)
+            .drag(0.96F)
             .build();
     // Darkness pouring out from under the bed.
     private static final ParticleSpec SHADOW = ParticleSpec.builder(VfxMaterial.alpha(VfxMaterial.SMOKE))
@@ -128,6 +137,19 @@ public final class SleepEffects {
     /** A burst of darkness: something appearing, or gone. */
     public static void shadowBurst(Vec3 at) {
         WorldParticles.burst(SHADOW, at, 26, 0.5, 0.09);
+    }
+
+    /** What hangs about the Lurker: darkness clinging to its body, and motes of cold light bleeding up from its eyes. */
+    public static void lurkerAura(Entity entity) {
+        shadowTrail(entity);
+        if (!(entity instanceof net.minecraft.world.entity.LivingEntity living) || entity.tickCount % 3 != 0) return;
+        // The eyes sit at the front of its head, either side of the way it faces.
+        float yaw = living.yHeadRot * Mth.DEG_TO_RAD;
+        Vec3 forward = new Vec3(-Mth.sin(yaw), 0.0, Mth.cos(yaw));
+        Vec3 side = new Vec3(forward.z, 0.0, -forward.x);
+        Vec3 face = entity.position().add(0.0, 0.66, 0.0).add(forward.scale(0.95));
+        double offset = RANDOM.nextBoolean() ? 0.15 : -0.15;
+        WorldParticles.spawn(EYE_MOTE, face.add(side.scale(offset)), new Vec3(0.0, 0.012 + RANDOM.nextDouble() * 0.01, 0.0));
     }
 
     /** The darkness that clings to the creature as it moves. */
