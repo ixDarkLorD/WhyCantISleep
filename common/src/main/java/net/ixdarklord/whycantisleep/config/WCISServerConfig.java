@@ -42,9 +42,17 @@ public final class WCISServerConfig {
     public static final ConfigValue<Integer> SCARE_CHANCE = BUILDER.intValue("scareChance", 2)
             .range(0, 100).slider().comment("Chance, in percent, of a \"monster under the bed\" scare on a failed sleep. 0 disables it.").build();
     public static final ConfigValue<Boolean> BED_CREATURE = BUILDER.bool("bedCreature", true)
-            .comment("Whether the thing under the bed exists: dread building up for players who sleep in the dark or go without sleep, the hallucinations it brings, and the creature itself.").build();
+            .comment("Whether the thing under the bed exists: the hallucinations low sanity brings, and the creature itself.").build();
     public static final ConfigValue<Boolean> ADVANCEMENTS = BUILDER.bool("advancements", true)
             .comment("Whether the mod's advancements can be earned.").build();
+    static {
+        BUILDER.pop();
+        BUILDER.push("mind", "Mood, sanity and guilt.");
+    }
+    public static final ConfigValue<Boolean> MIND_SYSTEM = BUILDER.bool("moodAndSanity", true)
+            .comment("Whether players have a mood, which follows how they live, and a sanity, which follows their mood and their guilt. Off, everyone stays as they are and the thing under the bed never comes.").build();
+    public static final ConfigValue<Boolean> PVP_GUILT = BUILDER.bool("pvpGuilt", true)
+            .comment("Whether attacking or killing a player who isn't fighting back is guilt. Off, nothing done to another player is.").enabledWhen(MIND_SYSTEM).build();
     static {
         BUILDER.pop();
     }

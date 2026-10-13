@@ -17,7 +17,7 @@ A multiloader mod built on the author's libraries **CoolCatLib: Core** (`coolcat
 - **Build every loader before committing** (`gradlew build`), and fix errors before moving on.
 - **Keep config names and defaults in sync with the mod page** (the list under "Config" below is the page's). Renaming or re-defaulting an option is a mod page change: ask first.
 - Shared logic goes in `common`; loader modules hold only loader glue.
-- **The mod is required on both the client and the server** (the author's decision, 2026-10-13, so the creature could be a real entity with its own model). Registry entries are allowed: the `lurker` entity type and the `dread` attachment exist. Sounds are unregistered `SoundEvent`s (`sound/WCISSounds`; the server names one by id, the client resolves it). `assets/whycantisleep/sounds.json` is **generated**: the author drops `.ogg` files into `assets/whycantisleep/sounds/` (see its `readme.txt` for the names) and `tools/gen_sounds_json.ps1` rewrites the file, using a sound's own files when present and a vanilla stand-in otherwise. Add a new sound in three places: `WCISSounds`, the script's table, the readme's table.
+- **The mod is required on both the client and the server** (the author's decision, 2026-10-13, so the creature could be a real entity with its own model). Registry entries are allowed: the `lurker` entity type and the `mind` attachment exist. Sounds are unregistered `SoundEvent`s (`sound/WCISSounds`; the server names one by id, the client resolves it). `assets/whycantisleep/sounds.json` is **generated**: the author drops `.ogg` files into `assets/whycantisleep/sounds/` (see its `readme.txt` for the names) and `tools/gen_sounds_json.ps1` rewrites the file, using a sound's own files when present and a vanilla stand-in otherwise. Add a new sound in three places: `WCISSounds`, the script's table, the readme's table.
 - Commits follow the user's `github-commit` skill: their identity only, no Claude attribution, and push only when asked.
 
 ## Versions
@@ -82,11 +82,11 @@ APIs this mod uses (`net.ixdarklord.coolcatcore.api.*`):
 - `config.*`: `Config.builder(MOD_ID, ConfigScope.CLIENT | SERVER)`, values as static `ConfigValue` fields, groups with `push`/`pop` in static blocks, `enumValue` (enums implement `EnumType.Displayable`), `color`, `intValue().range().slider()`, `enabledWhen`. A `SERVER` config is synced to clients on join and on change (`Config.isRemote()`, `ConfigEvents.SYNCED`). Names are translated as `config.whycantisleep.<client|server>.<group>.<key>` (`.title` for the config); tooltips fall back to the `comment`. Screens come from Glazed Menu when installed (`config.client.ConfigScreens`); Core has none of its own.
 - `network.Network`: `registerClientbound` / `registerServerbound` (record payloads can derive their codec through `PayloadCodecs`), `sendToPlayer`, `sendToServer`, and `canPlayerReceive(player, type)`, which is how the server tells who has the mod. Clientbound handlers must be lambdas into a `client` package class so a dedicated server never loads it.
 - `event.v2.common`: `PlayerEvents` (`JOIN`, `LEAVE`, `START_TICK`, `END_TICK`), `ServerTickEvents`, `ServerLifecycleEvents`, `BlockEvents.BREAK`, `EntityEvents.LOAD`. `event.v2.client`: `ClientTickEvents`, `ClientGuiEvents.RENDER_HUD`, `ClientPlayerEvents`. Each is an `EventInvoker` (`X.END.register(...)`).
-- `registry.DeferredRegister` / `RegistryEntry` / `EntityAttributes` and `client.registry.EntityRendererRegistry` (the Lurker; Core has no model layer registry, so `LurkerRenderer` bakes its `LayerDefinition` itself), `attachment.AttachmentRegistry` (dread: saved, synced to its own player, kept through death), `event.v2.common.CommandEvents`, `platform.Platform`.
+- `registry.DeferredRegister` / `RegistryEntry` / `EntityAttributes` and `client.registry.EntityRendererRegistry` (the Lurker; Core has no model layer registry, so `LurkerRenderer` bakes its `LayerDefinition` itself), `attachment.AttachmentRegistry` (`Mind`: saved, synced to its own player, kept through death), `event.v2.common.CommandEvents`, `platform.Platform`.
 
 ## Sides and sync
 
-The mod is needed on both sides. The server is authoritative: it sends the failure reason and the exact blocking mobs, runs the sleep board and nudges, keeps each player's dread, and its config overrides the client's. The client still recognises the game's own sleep messages by translation key and can redo the monster check itself (`SleepChecks.blockersOnClient`), a leftover from when client-only installs were supported; it is harmless and keeps the HUD working if a report is ever missed.
+The mod is needed on both sides. The server is authoritative: it sends the failure reason and the exact blocking mobs, runs the sleep board and nudges, keeps each player's mood, sanity and guilt, and its config overrides the client's. The client still recognises the game's own sleep messages by translation key and can redo the monster check itself (`SleepChecks.blockersOnClient`), a leftover from when client-only installs were supported; it is harmless and keeps the HUD working if a report is ever missed.
 
 Config gating: every client option a server setting controls is declared `enabledWhen(<server value>)` in `WCISClientConfig`. Glazed Menu evaluates dependencies across configs, so the entry shows greyed out ("Depends on …") while the server has it off: that is the "locked" state. Code must read such options through `WCISConfigs.isEnabled(option)`, which walks the same dependency chain, never through `option.get()` alone.
 
@@ -98,19 +98,30 @@ Sleep messages are not shown on the game's action bar. `GuiMixin` cancels the ga
 
 Added at the author's request on 2026-10-13; every number is a first guess (`LurkerServer`'s constants).
 
-- **Dread** (`Dread`, 0 to 100, a synced player attachment): +15 for lying down to sleep with block light under 4 at the bed, -20 for sleeping in the light, +2 a minute after a day and a half without sleep and +4 after three days (the game's `time_since_rest` statistic). Stages: Watched from 25, Haunted from 50, Hunted from 85.
-- **Watched and Haunted are client side** (`lurker/client/LurkerHaunt`), seen only by the player: eyes under dark beds and whispers; then the creature itself as a hallucination, a `LurkerEntity` added to the client's level only (never known to the server), standing in the dark or crawling out beside a bed the player uses, gone when looked at, approached or after 8 seconds.
+- **What calls it** is low sanity (`mind/`, below). Stages (`SanityStage`): Uneasy under 75, Shaken under 50, Breaking under 25. Lying down in the dark costs 8 sanity at once, in the light gives 6 back.
+- **Uneasy and Shaken are client side** (`lurker/client/LurkerHaunt`), seen only by the player: eyes under dark beds and whispers; then the creature itself as a hallucination, a `LurkerEntity` added to the client's level only (never known to the server), standing in the dark or crawling out beside a bed the player uses, gone when looked at, approached or after 8 seconds.
 - **Hunted is real** (`LurkerServer.summon`): a `LurkerEntity` comes from beside the player's last bed if it is near, else from the dark around them. It targets only its victim. Never in Peaceful (vanilla lets no mob target a player there; a Lurker that won't move in a test world is this).
   - **Watching** (how it starts; synced `HUNTING` false): it stands and stares. Its player's screen goes dark but for one light that falls from where the Lurker is (`Dark` and `Light` uniforms of the `dread` effect), spilling in from the screen's edge when it is out of view.
   - **Hunting**: the server starts it the moment the player looks at it (within about 21 degrees, in line of sight, for 5 ticks), walks into it or strikes it. It runs at about sprint speed.
   - **Ignored**: unlooked at for 25 seconds it leaves, stays away 40 seconds, and `LurkerServer` counts the snub. From the second snub in a row it **lures**: it calls out and the client turns the player's view slowly towards it (`LurkerPresence.pull`, faster per snub, slow enough to resist by turning away). Being looked at resets the count.
-  - **Escaped**: hunting, a player who stays 14 blocks clear of it for 6 seconds has got away; it vanishes and stays away 40 seconds. It also vanishes in daylight or after 3 minutes. Killing it sets dread to 0; if it kills its player, dread drops to 30.
-- **Opting out**: the client option "Scary content" off stops every frightening effect on that client and tells the server (`ScaryPreferencePayload`) to build no dread for, and send no creature after, that player. The server option "Bed creature" turns it off for everyone. Creative and spectator players are left alone.
+  - **Escaped**: hunting, a player who stays 14 blocks clear of it for 6 seconds has got away; it vanishes and stays away 40 seconds. It also vanishes in daylight or after 3 minutes. Killing it gives 35 sanity back; if it kills its player, their sanity is lifted to at least 45.
+- **Opting out**: the client option "Scary content" off stops every frightening effect on that client and tells the server (`ScaryPreferencePayload`) to send no creature after that player (their mood and sanity still move). The server option "Bed creature" turns it off for everyone. Creative and spectator players are left alone.
 - **Model and textures**: `LurkerModel` (boxes in code: chest, belly, tail, horned head with a hinged jaw, four two-part clawed limbs) and `tools/gen_lurker_textures.ps1`, which share the parts' places on a 64x64 layout drawn at 128x128; change both together. The second texture, drawn with `RenderTypes.eyes`, is everything that glows: each eye a ring of rose light around an unlit core, plus the veins and lit vertebrae. The model eases between three stances from `LurkerRenderState.huntAmount` and its age: rising out of the ground, crouched and watching, reared up and hunting. `LurkerRenderState` carries the strike animation and whether it is a hallucination (drawn translucent and flickering).
 - **Presence** (`lurker/client/LurkerPresence`): any Lurker within 24 blocks drives the `whycantisleep:dread` Canvas screen effect (`post_effect/dread.json`, `shaders/post/dread.fsh`; uniforms `Pulse` and `Approach`): color drains and a ragged darkness closes in with nearness; while it closes the distance the view tightens and splits at the edges, and a quickening heartbeat flushes the edges red and jolts the camera. `tools/gen_arrow_texture.ps1` draws the HUD arrows.
 - **Colors**: `lurker/LurkerPalette` holds the author's six-color "Electric Feel" palette (storm-dark to blush); the texture script, the particles in `SleepEffects` and the constants in `dread.fsh` repeat it. Keep the Lurker's skin, glow, particles and screen tints inside it.
-- **Testing**: `/whycantisleep dread [0-100]`, `/whycantisleep summon` and `/whycantisleep ignored <0-9>` (operators). The Lurker needs steady camera control to test: the dev run's `pauseOnLostFocus` is off in `run/options.txt` so timed checks keep running when the window loses focus, and a hand on the mouse while the window has focus will look at it for you.
+- **Testing**: `/whycantisleep mood|sanity|guilt [0-100]`, `/whycantisleep summon` and `/whycantisleep ignored <0-9>` (operators). The Lurker needs steady camera control to test: the dev run's `pauseOnLostFocus` is off in `run/options.txt` so timed checks keep running when the window loses focus, and a hand on the mouse while the window has focus will look at it for you.
 
+## Mood, sanity and guilt (`mind/`)
+
+Added at the author's request on 2026-10-14, replacing the earlier "dread" number. Every number is a first guess (`MindServer`'s constants). The author's rule: **the routine must not be harsh**. Ordinary play (sleep, eat, go outside) keeps a player steady; doing varied and kind things improves on that. Don't add needs that turn it into a checklist.
+
+- **`Mind`** is one immutable record in a synced player attachment (saved, sent to its own player, kept through death): `mood`, `sanity`, `guilt` (each 0 to 100), the three needs `rest`, `food`, `outdoors` (0 to 1), `cheer` and `strain` (0 to 25, fading), and the recent `foods`. Change it only through `Mind.update`.
+- **Mood** (`MindServer.update`, every 10 seconds): steps by 1 towards `25 + 55 * (rest 40% + food 30% + open sky 30%) + cheer - strain + 5 with company`. Levels: `MoodLevel` (Miserable under 25, Gloomy under 40, Flat under 55, Content under 75, Cheerful).
+- **Sanity**: +0.2 an update while mood is Content or better, 0 while Flat, -0.12 Gloomy, -0.25 Miserable; capped at `100 - guilt * 0.6`.
+- **Guilt**: fades 0.1 an update. Earned in `MindServer.onKilled` (villager 25, own pet 30, another's pet 20, iron golem 10, baby animal 8) and between players only when unprovoked: the victim has not struck the attacker in the last 30 seconds (2 a hit, 35 a kill; server option "PvP guilt").
+- **Hooks** (Core has no events for these, so common mixins): `FoodPropertiesMixin` (eating), `AnimalMixin` (feeding an animal), `LivingEntityMixin` (kills), `ServerPlayerMixin` (lying down, waking, being hurt, dying).
+- **Client**: `client/mind/MindHud` shows an icon beside the hotbar while mood is Gloomy or worse, or sanity below Steady, and a card (`SleepNotices`) the moment either drops a level. `client/mind/MindStatus` draws an icon and a bar for each above the inventory (`InventoryScreenMixin`), with tooltips; guilt shows as a dark notch at the end of the sanity bar. Icons: `tools/gen_mind_icons.ps1`.
+- Creative and spectator players are left out; the server option "Mood and sanity" turns it all off.
 ## Config (the names and defaults on the mod page)
 
 Client (`WCISClientConfig`, `config/whycantisleep-client.toml`):
@@ -128,6 +139,8 @@ Client (`WCISClientConfig`, `config/whycantisleep-client.toml`):
 | Sleep board | on | Sleep board (server) |
 | Scary content | on | **new, not on the mod page yet** |
 | Whispers | on | |
+| Status indicators | on | Mood and sanity (server). **New, not on the mod page yet** |
+| Inventory status | on | Mood and sanity (server). **New, not on the mod page yet** |
 | Whisper volume | 70% | |
 | Under-the-bed scares | on | Scare chance = 0 |
 | Screen shake | on | |
@@ -146,6 +159,8 @@ Server (`WCISServerConfig`, `config/whycantisleep-server.toml`, synced):
 | Scare chance | 2% (0 disables) |
 | Bed creature | on (**new, not on the mod page yet**) |
 | Advancements | on |
+| Mood and sanity | on (**new, not on the mod page yet**) |
+| PvP guilt | on (**new, not on the mod page yet**) |
 
 ## Features, in build order
 

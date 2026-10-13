@@ -1,20 +1,25 @@
 package net.ixdarklord.whycantisleep.lurker;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.ixdarklord.coolcatcore.api.event.v2.common.CommandEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.PlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.ServerLifecycleEvents;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.whycantisleep.config.WCISServerConfig;
+import net.ixdarklord.whycantisleep.mind.Mind;
+import net.ixdarklord.whycantisleep.mind.MindServer;
+import net.ixdarklord.whycantisleep.mind.SanityStage;
 import net.ixdarklord.whycantisleep.network.WCISNetwork;
+import net.ixdarklord.whycantisleep.sound.WCISSounds;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.ixdarklord.whycantisleep.sound.WCISSounds;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.stats.Stats;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -22,7 +27,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.BedBlock;
-import net.minecraft.resources.ResourceKey;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -30,11 +34,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
- * The thing under the bed's server side: it keeps each player's {@link Dread}, and when dread has gone on long enough
- * it makes the creature real. Players who turned scary content off, and worlds with the creature off, are left alone:
- * no dread builds, and nothing comes.
+ * The thing under the bed's server side: when a player's sanity ({@link Mind}) is {@linkplain SanityStage#BREAKING
+ * breaking}, it makes the creature real. Players who turned scary content off, and worlds with the creature off, are
+ * left alone: nothing comes for them, whatever their sanity.
  * <p>
  * Every number here is a first guess, to be tuned by play.
  */
@@ -43,17 +49,11 @@ public final class LurkerServer {
     public static final int DARK_LIGHT = 4;
     // The sky's light is 4 on a clear night and 15 by day; from here up, a place is lit by the day.
     private static final int DAYLIGHT = 8;
-    private static final int DARK_SLEEP_DREAD = 15;
-    private static final int LIT_SLEEP_RELIEF = 20;
-    // Without sleep: a day and a half before it starts to tell, three days before it tells twice as fast.
-    private static final int RESTLESS_TICKS = 36_000;
-    private static final int SLEEPLESS_TICKS = 72_000;
-    private static final int RESTLESS_DREAD = 2;
-    private static final int SLEEPLESS_DREAD = 4;
-    private static final int RESTLESS_INTERVAL = 1200;
-    // Once hunted, each second it has this chance in one to come.
+    // Once sanity is breaking, each second it has this chance in one to come.
     private static final int SUMMON_ODDS = 15;
-    private static final int DREAD_AFTER_DEATH = 30;
+    // Killing it gives this much sanity back; being killed by it leaves at least this much.
+    private static final float SANITY_FOR_KILLING = 35.0F;
+    private static final float SANITY_AFTER_DEATH = 45.0F;
     // Ignored, it stays away this long before it tries again.
     private static final int RETURN_TICKS = 20 * 40;
 
@@ -85,8 +85,12 @@ public final class LurkerServer {
             IGNORED.clear();
             NOT_BEFORE.clear();
         });
+        // Test commands, for operators: read or set one's own mood, sanity and guilt, and bring the Lurker.
         CommandEvents.REGISTER.register((dispatcher, context, selection) -> dispatcher.register(Commands.literal(WhyCantISleep.MOD_ID)
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .then(value("mood", Mind::mood, Mind::withMood))
+                .then(value("sanity", Mind::sanity, Mind::withSanity))
+                .then(value("guilt", Mind::guilt, Mind::withGuilt))
                 .then(Commands.literal("ignored").then(Commands.argument("times", IntegerArgumentType.integer(0, 9)).executes(ctx -> {
                     int times = IntegerArgumentType.getInteger(ctx, "times");
                     IGNORED.put(ctx.getSource().getPlayerOrException().getUUID(), times);
@@ -98,28 +102,31 @@ public final class LurkerServer {
                     boolean came = summon(player);
                     ctx.getSource().sendSuccess(() -> Component.translatable(came ? "commands.whycantisleep.summon.success" : "commands.whycantisleep.summon.failed"), true);
                     return came ? 1 : 0;
-                }))
-                .then(Commands.literal("dread")
-                        .executes(ctx -> {
-                            int dread = Dread.get(ctx.getSource().getPlayerOrException());
-                            ctx.getSource().sendSuccess(() -> Component.translatable("commands.whycantisleep.dread.get", dread, Dread.MAX), false);
-                            return dread;
-                        })
-                        .then(Commands.argument("value", IntegerArgumentType.integer(0, Dread.MAX)).executes(ctx -> {
-                            int dread = IntegerArgumentType.getInteger(ctx, "value");
-                            Dread.set(ctx.getSource().getPlayerOrException(), dread);
-                            ctx.getSource().sendSuccess(() -> Component.translatable("commands.whycantisleep.dread.set", dread), true);
-                            return dread;
-                        })))));
+                }))));
     }
 
-    /** A player's client said whether they want scary content. Turning it off also lays their dread to rest. */
+    // "/whycantisleep <name>" reads one of the three values, "/whycantisleep <name> <0-100>" sets it.
+    private static LiteralArgumentBuilder<CommandSourceStack> value(String name, Function<Mind, Float> getter, BiFunction<Mind, Float, Mind> setter) {
+        return Commands.literal(name)
+                .executes(ctx -> {
+                    int value = Math.round(getter.apply(Mind.get(ctx.getSource().getPlayerOrException())));
+                    ctx.getSource().sendSuccess(() -> Component.translatable("commands.whycantisleep." + name + ".get", value), false);
+                    return value;
+                })
+                .then(Commands.argument("value", IntegerArgumentType.integer(0, 100)).executes(ctx -> {
+                    int value = IntegerArgumentType.getInteger(ctx, "value");
+                    Mind.update(ctx.getSource().getPlayerOrException(), mind -> setter.apply(mind, (float) value));
+                    ctx.getSource().sendSuccess(() -> Component.translatable("commands.whycantisleep." + name + ".set", value), true);
+                    return value;
+                }));
+    }
+
+    /** A player's client said whether they want scary content. Turning it off also sends their Lurker away. */
     public static void onPreference(ServerPlayer player, boolean scary) {
         if (scary) {
             OPTED_OUT.remove(player.getUUID());
         } else {
             OPTED_OUT.add(player.getUUID());
-            Dread.set(player, 0);
             LurkerEntity lurker = ACTIVE.get(player.getUUID());
             if (lurker != null) lurker.discard();
         }
@@ -127,16 +134,14 @@ public final class LurkerServer {
 
     /** Whether the creature may trouble this player at all. Never in Peaceful, where the game lets nothing hunt a player. */
     public static boolean troubles(ServerPlayer player) {
-        return WCISServerConfig.BED_CREATURE.get() && !OPTED_OUT.contains(player.getUUID()) && WCISNetwork.hasMod(player)
-                && !player.isCreative() && !player.isSpectator() && player.level().getDifficulty() != Difficulty.PEACEFUL;
+        return WCISServerConfig.BED_CREATURE.get() && MindServer.applies(player) && !OPTED_OUT.contains(player.getUUID()) && WCISNetwork.hasMod(player)
+                && player.level().getDifficulty() != Difficulty.PEACEFUL;
     }
 
-    /** A player lay down to sleep ({@code ServerPlayerMixin}): in the dark it feeds the dread, in the light it eases it. */
+    /** A player lay down to sleep ({@code ServerPlayerMixin}): where, and whether in the dark, which their sanity feels. */
     public static void onSlept(ServerPlayer player, BlockPos bed) {
         LAST_BED.put(player.getUUID(), new Bed(player.level().dimension(), bed.immutable()));
-        if (!troubles(player)) return;
-        if (isDark(player.level(), bed)) Dread.add(player, DARK_SLEEP_DREAD);
-        else Dread.add(player, -LIT_SLEEP_RELIEF);
+        MindServer.onLayDown(player, isDark(player.level(), bed));
     }
 
     /**
@@ -150,14 +155,9 @@ public final class LurkerServer {
 
     private static void tick(ServerPlayer player) {
         if (player.tickCount % 20 != 0 || !troubles(player)) return;
-        if (player.tickCount % RESTLESS_INTERVAL == 0) {
-            int awake = player.getStats().getValue(Stats.CUSTOM.get(Stats.TIME_SINCE_REST));
-            if (awake >= SLEEPLESS_TICKS) Dread.add(player, SLEEPLESS_DREAD);
-            else if (awake >= RESTLESS_TICKS) Dread.add(player, RESTLESS_DREAD);
-        }
         // It comes in the dark: at night, or wherever the light doesn't reach.
         ServerLevel level = player.level();
-        if (Dread.stage(player) == Dread.Stage.HUNTED && !ACTIVE.containsKey(player.getUUID())
+        if (Mind.get(player).stage() == SanityStage.BREAKING && !ACTIVE.containsKey(player.getUUID())
                 && level.getServer().getTickCount() >= NOT_BEFORE.getOrDefault(player.getUUID(), 0)
                 && (level.isDarkOutside() || level.getMaxLocalRawBrightness(player.blockPosition()) < DARK_LIGHT)
                 && player.getRandom().nextInt(SUMMON_ODDS) == 0) {
@@ -226,16 +226,16 @@ public final class LurkerServer {
         if (lurker.victim() != null) IGNORED.remove(lurker.victim());
     }
 
-    /** The creature was killed: its player's dread is over. */
+    /** The creature was killed: facing it gives its player a good part of their sanity back. */
     static void onLurkerKilled(LurkerEntity lurker) {
         UUID victim = lurker.victim();
         Player player = victim == null ? null : lurker.level().getPlayerByUUID(victim);
-        if (player != null) Dread.set(player, 0);
+        if (player != null) MindServer.addSanity(player, SANITY_FOR_KILLING);
     }
 
     /** The creature got its player: it is sated for a while, not for good. */
     static void onVictimKilled(Player player) {
-        Dread.set(player, DREAD_AFTER_DEATH);
+        MindServer.restoreSanity(player, SANITY_AFTER_DEATH);
     }
 
     static void forget(LurkerEntity lurker) {

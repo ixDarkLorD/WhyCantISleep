@@ -27,7 +27,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 /**
- * The thing under the bed, made real: it comes for one player, the one whose dread called it, and for nobody else.
+ * The thing under the bed, made real: it comes for one player, the one whose sanity gave way, and for nobody else.
  * <p>
  * It begins by {@linkplain #isHunting() watching}: it stands where it came out and stares, and its player's world
  * goes dark but for the light it gives off ({@code LurkerPresence}). The moment its player looks at it, it hunts. A
@@ -36,7 +36,7 @@ import java.util.function.Consumer;
  * drawn slowly round towards it.
  * <p>
  * Hunting, it is gone with the daylight, after a few minutes, or when its player gets well clear of it and stays
- * clear for a while; killing it ends the dread. The same entity, never known to the server, is what a haunted player's client shows as a hallucination
+ * clear for a while; killing it gives a good part of their sanity back. The same entity, never known to the server, is what a haunted player's client shows as a hallucination
  * ({@code LurkerHaunt}).
  */
 public class LurkerEntity extends Monster {

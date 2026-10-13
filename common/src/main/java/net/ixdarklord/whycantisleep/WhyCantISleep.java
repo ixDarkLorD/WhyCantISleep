@@ -3,7 +3,8 @@ package net.ixdarklord.whycantisleep;
 import net.ixdarklord.coolcatcore.api.core.ModConstructor;
 import net.ixdarklord.coolcatcore.api.platform.Platform;
 import net.ixdarklord.whycantisleep.config.WCISConfigs;
-import net.ixdarklord.whycantisleep.lurker.Dread;
+import net.ixdarklord.whycantisleep.mind.Mind;
+import net.ixdarklord.whycantisleep.mind.MindServer;
 import net.ixdarklord.whycantisleep.lurker.LurkerServer;
 import net.ixdarklord.whycantisleep.lurker.WCISEntities;
 import net.ixdarklord.whycantisleep.network.WCISNetwork;
@@ -29,8 +30,9 @@ public final class WhyCantISleep implements ModConstructor {
 
         WCISConfigs.register();
         WCISEntities.register();
-        Dread.ATTACHMENTS.register();
+        Mind.ATTACHMENTS.register();
         WCISNetwork.register();
+        MindServer.init();
         LurkerServer.init();
         SleepBoardServer.init();
     }

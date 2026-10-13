@@ -7,6 +7,7 @@ import net.ixdarklord.whycantisleep.client.board.SleepBoard;
 import net.ixdarklord.whycantisleep.client.fx.SleepEffects;
 import net.ixdarklord.whycantisleep.client.hud.BlockerArrows;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotices;
+import net.ixdarklord.whycantisleep.client.mind.MindHud;
 import net.ixdarklord.whycantisleep.lurker.client.LurkerHaunt;
 
 /**
@@ -23,5 +24,6 @@ public final class WhyCantISleepClient implements ClientModConstructor {
         SleepBoard.init();
         SleepEffects.init();
         LurkerHaunt.init();
+        MindHud.init();
     }
 }
