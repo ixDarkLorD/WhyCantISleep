@@ -36,6 +36,9 @@ public final class HudStyle {
     /** How far in from a medal's corner its 9 by 9 icon sits. */
     public static final int MEDAL_INSET = 5;
     private static final Identifier BAR_BACK = WhyCantISleep.id("hud/bar_back");
+    /** What covers the part of a gauge the other bar closes off: dim diagonal stripes, tiled along it. */
+    public static final Identifier MOOD_LIMIT = WhyCantISleep.id("hud/mood_limit");
+    public static final Identifier LUCIDITY_LIMIT = WhyCantISleep.id("hud/lucidity_limit");
     public static final Identifier MOOD_FILL = WhyCantISleep.id("hud/mood_fill");
     public static final Identifier LUCIDITY_FILL = WhyCantISleep.id("hud/lucidity_fill");
     public static final Identifier SLEEP_FILL = WhyCantISleep.id("hud/sleep_fill");
