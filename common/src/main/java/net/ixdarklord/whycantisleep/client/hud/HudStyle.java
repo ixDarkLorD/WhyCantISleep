@@ -1,17 +1,37 @@
 package net.ixdarklord.whycantisleep.client.hud;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 
-/** The look the mod's HUD cards share: a dark glass panel with an accent color down its left edge. */
+/**
+ * The look the mod's HUD cards share, which is the game's own: the tooltip's box and frame, the boss bar for progress,
+ * and the chat's colors for text. A resource pack that restyles those restyles these cards with them.
+ */
 public final class HudStyle {
-    public static final int PANEL = 0x0D0D14;
-    public static final int TEXT = 0xFFFFFF;
-    public static final int TEXT_MUTED = 0xA6A6B8;
-    public static final int GOOD = 0x6FD06F;
-    public static final int TRACK = 0x2A2A3A;
-    public static final int PADDING = 6;
+    private static final Identifier TOOLTIP_BACKGROUND = Identifier.withDefaultNamespace("tooltip/background");
+    private static final Identifier TOOLTIP_FRAME = Identifier.withDefaultNamespace("tooltip/frame");
+    private static final Identifier BAR_BACKGROUND = Identifier.withDefaultNamespace("boss_bar/green_background");
+    private static final Identifier BAR_PROGRESS = Identifier.withDefaultNamespace("boss_bar/green_progress");
+    // The tooltip sprites carry an empty margin around the box, and the box pads its contents (TooltipRenderUtil).
+    private static final int SPRITE_MARGIN = 9;
+    private static final int BOX_PADDING = 3;
+    /** The boss bar sprites' size: a bar is drawn at this width. */
+    public static final int BAR_WIDTH = 182;
+    public static final int BAR_HEIGHT = 5;
+
+    // The chat's colors.
+    public static final int WHITE = 0xFFFFFF;
+    public static final int GRAY = 0xAAAAAA;
+    public static final int DARK_GRAY = 0x555555;
+    public static final int RED = 0xFF5555;
+    public static final int GOLD = 0xFFAA00;
+    public static final int YELLOW = 0xFFFF55;
+    public static final int GREEN = 0x55FF55;
+    public static final int AQUA = 0x55FFFF;
+    public static final int LIGHT_PURPLE = 0xFF55FF;
 
     private HudStyle() {
     }
@@ -21,23 +41,19 @@ public final class HudStyle {
         return ARGB.color(Math.round(Mth.clamp(alpha, 0.0F, 1.0F) * 255.0F), rgb);
     }
 
-    /** The card: its glass, a faint wash of the accent from the top, a thin frame and the accent bar on the left. */
-    public static void panel(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int accent, float alpha) {
-        graphics.fill(x, y, x + width, y + height, color(PANEL, alpha * 0.84F));
-        graphics.fillGradient(x, y, x + width, y + height, color(accent, alpha * 0.16F), color(accent, 0.0F));
-        graphics.outline(x, y, width, height, color(mix(accent, PANEL, 0.55F), alpha * 0.9F));
-        graphics.fill(x, y, x + 2, y + height, color(accent, alpha));
+    /** The game's tooltip box around a content area, which it pads by 3 pixels on every side. */
+    public static void box(GuiGraphicsExtractor graphics, int x, int y, int width, int height, float alpha) {
+        int outset = SPRITE_MARGIN + BOX_PADDING;
+        int tint = ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F));
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, TOOLTIP_BACKGROUND, x - outset, y - outset, width + outset * 2, height + outset * 2, tint);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, TOOLTIP_FRAME, x - outset, y - outset, width + outset * 2, height + outset * 2, tint);
     }
 
-    /** A thin bar filled to a share of its width. */
-    public static void bar(GuiGraphicsExtractor graphics, int x, int y, int width, int height, float filled, int rgb, float alpha) {
-        graphics.fill(x, y, x + width, y + height, color(TRACK, alpha));
-        int fill = Math.round(width * Mth.clamp(filled, 0.0F, 1.0F));
-        if (fill > 0) graphics.fill(x, y, x + fill, y + height, color(rgb, alpha));
-    }
-
-    /** One color moved towards another by a share, 0 to 1. */
-    public static int mix(int from, int to, float share) {
-        return ARGB.srgbLerp(share, ARGB.opaque(from), ARGB.opaque(to)) & 0xFFFFFF;
+    /** The green boss bar, {@link #BAR_WIDTH} wide, filled to a share. */
+    public static void bar(GuiGraphicsExtractor graphics, int x, int y, float filled, float alpha) {
+        int tint = ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F));
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BAR_BACKGROUND, x, y, BAR_WIDTH, BAR_HEIGHT, tint);
+        int width = Mth.lerpDiscrete(Mth.clamp(filled, 0.0F, 1.0F), 0, BAR_WIDTH);
+        if (width > 0) graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BAR_PROGRESS, BAR_WIDTH, BAR_HEIGHT, 0, 0, x, y, width, BAR_HEIGHT, tint);
     }
 }

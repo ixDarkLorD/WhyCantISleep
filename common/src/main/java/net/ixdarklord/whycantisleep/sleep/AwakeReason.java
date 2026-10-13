@@ -5,7 +5,7 @@ import java.util.Locale;
 /** Why a player isn't in bed, as far as the server can tell; shown on the sleep board. */
 public enum AwakeReason {
     AWAKE(0xFFFFFF),
-    OTHER_DIMENSION(0xAA77FF),
+    OTHER_DIMENSION(0xFF55FF),
     MINING(0xFFAA00),
     FIGHTING(0xFF5555),
     AFK(0xAAAAAA);
