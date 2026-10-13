@@ -19,6 +19,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.resources.ResourceKey;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +40,8 @@ import java.util.UUID;
 public final class LurkerServer {
     /** Block light under which a bed counts as being in the dark. */
     public static final int DARK_LIGHT = 4;
+    // The sky's light is 4 on a clear night and 15 by day; from here up, a place is lit by the day.
+    private static final int DAYLIGHT = 8;
     private static final int DARK_SLEEP_DREAD = 15;
     private static final int LIT_SLEEP_RELIEF = 20;
     // Without sleep: a day and a half before it starts to tell, three days before it tells twice as fast.
@@ -120,9 +123,13 @@ public final class LurkerServer {
         else Dread.add(player, -LIT_SLEEP_RELIEF);
     }
 
-    /** Whether a bed is in the dark: by the light of torches and lamps around it, not the sky's. */
+    /**
+     * Whether a bed is in the dark: no torch or lamp lights it, and no daylight reaches it. A bed under the open sky is
+     * dark by night (the moon's light doesn't count) and lit by day. Both sides agree on it.
+     */
     public static boolean isDark(Level level, BlockPos bed) {
-        return level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, bed.above()) < DARK_LIGHT;
+        BlockPos above = bed.above();
+        return level.getBrightness(LightLayer.BLOCK, above) < DARK_LIGHT && level.getMaxLocalRawBrightness(above) < DAYLIGHT;
     }
 
     private static void tick(ServerPlayer player) {
