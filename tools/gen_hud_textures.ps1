@@ -1,11 +1,11 @@
 # Draws the sleep HUD's own panels and bars as GUI sprites, under assets/whycantisleep/textures/gui/sprites/hud/,
 # each with the .mcmeta that tells the game how to stretch it (nine-slice), so HudStyle draws them at any size:
 #   card.png          the message card and the sleep board: slate, like a slab of night
-#   mood_medal.png, mood_track.png          the mood gauge: a gold coin and a round-ended track
-#   lucidity_medal.png, lucidity_track.png  the lucidity gauge: a rose diamond and a pointed track
+#   mood_medal.png, mood_track.png, mood_frame.png              the mood gauge: a gold coin and a round capsule of blocks
+#   lucidity_medal.png, lucidity_track.png, lucidity_frame.png  the lucidity gauge: a rose diamond and a pointed one
 #   bar_back.png      the empty track of a status bar
 #   sleep_fill.png    what fills it on the sleep board: green
-#   mood_fill.png, lucidity_fill.png   what fills the gauges, taller: gold, and blush down to violet
+#   mood_fill.png, lucidity_fill.png   what fills the gauges: bright gold, and rose
 # Panels are 16x16 with a 4 pixel border; the track is 8x5 with a 1 pixel border; the fills just stretch.
 # Run from the repo root: powershell -File tools/gen_hud_textures.ps1
 Add-Type -AssemblyName System.Drawing
@@ -47,7 +47,7 @@ function Panel($name, $outline, $light, $shade, $inner, $fill, $fillAlpha) {
 Panel "card" 0x0B0C10 0x6A6E84 0x30323E 0x1A1B24 0x14151C 232
 
 # The two status gauges are shaped nothing like the card: each is a medal holding its icon, with a track running out
-# of it for its bar. Mood's is a round gold coin on a round-ended track; lucidity's is a rose-edged diamond on a track
+# of it for its bar. Mood's is a round gold coin on a round-ended bar; lucidity's is a rose-edged diamond on a bar
 # that ends in a point. They are drawn at their own size, never stretched (MindStatus has the sizes).
 # Both are built the same clean way: a shape, then its rings counted in from the edge, each ring one flat tone.
 
@@ -87,45 +87,59 @@ function Medal($name, $outline, $light, $shade, $fill, $far, $limits) {
     Save $b $name 19 19 0
 }
 
-# A track: an outline, a rim light above and dark below, a dark lip, and the groove the fill runs along (rows 3 to 7).
-function Track($name, $outline, $light, $shade, $lip, $groove, [bool]$pointed) {
+# A bar, in the manner of an arcade game's: a chunky capsule with a dark outline, cut into eight blocks, each with a
+# glint on its shoulder. It is drawn in three layers so the color can stop anywhere: the back (the outline and the
+# empty blocks), then the fill stretched to the value (MindStatus), then the frame (the outline again, to round the
+# fill's ends off, and the block seams, glints and foot shadow, which lie over full and empty blocks alike).
+# The color runs along columns 2 to 65, rows 1 to 9. Mood's ends round; lucidity's runs on into a lit point.
+function Bar($name, $outline, $empty, $emptyTop, $tip, [bool]$pointed) {
     $inside = {
         param($x, $y)
         $off = [Math]::Abs($y - 5)
-        # Where the row ends on the right: a point, or a square end with its corners cut.
-        $last = if ($pointed) { 67 - $off } elseif ($off -eq 5) { 66 } else { 67 }
-        return $x -le $last
+        $first = if ($off -eq 5) { 2 } elseif ($off -eq 4) { 1 } else { 0 }
+        $last = if ($pointed) { 71 - $off } elseif ($off -eq 5) { 65 } elseif ($off -eq 4) { 66 } else { 67 }
+        return $x -ge $first -and $x -le $last
     }.GetNewClosure()
-    $depth = Depth 68 11 $inside
-    $b = New-Object System.Drawing.Bitmap 68, 11
-    for ($y = 0; $y -lt 11; $y++) { for ($x = 0; $x -lt 68; $x++) {
+    $depth = Depth 72 11 $inside
+    $back = New-Object System.Drawing.Bitmap 72, 11
+    $frame = New-Object System.Drawing.Bitmap 72, 11
+    for ($y = 0; $y -lt 11; $y++) { for ($x = 0; $x -lt 72; $x++) {
         $d = $depth[$x, $y]
-        $color = if ($d -eq 0) { Argb 0 0 }
-            elseif ($d -eq 1) { Argb 255 $outline }
-            elseif ($d -eq 2) { if ($y -lt 5) { Argb 255 $light } else { Argb 255 $shade } }
-            elseif ($d -eq 3) { Argb 255 $lip }
-            else { Argb 255 $groove }
-        $b.SetPixel($x, $y, $color)
+        $clear = Argb 0 0
+        if ($d -eq 0) { $back.SetPixel($x, $y, $clear); $frame.SetPixel($x, $y, $clear); continue }
+        # The outline, and the two columns at each end the color never reaches.
+        if ($d -eq 1 -or $x -lt 2) { $back.SetPixel($x, $y, (Argb 255 $outline)); $frame.SetPixel($x, $y, (Argb 255 $outline)); continue }
+        if ($x -gt 65) {
+            # Past the color: more outline on a round end, the lit tip on a pointed one.
+            $end = if ($pointed -and $d -ge 2 -and $x -gt 66) { Argb 255 $tip } else { Argb 255 $outline }
+            $back.SetPixel($x, $y, $end); $frame.SetPixel($x, $y, $end); continue
+        }
+        $back.SetPixel($x, $y, $(if ($y -eq 1) { Argb 255 $emptyTop } else { Argb 255 $empty }))
+        $block = ($x - 2) % 8
+        $over = if ($block -eq 7) { Argb 150 $outline }
+            elseif ($y -eq 2 -and $block -ge 1 -and $block -le 3) { Argb 120 0xFFFFFF }
+            elseif ($y -eq 9) { Argb 45 0x000000 }
+            else { $clear }
+        $frame.SetPixel($x, $y, $over)
     } }
-    Save $b $name 68 11 0
+    Save $back "${name}_track" 72 11 0
+    Save $frame "${name}_frame" 72 11 0
 }
 # The coin: circles 19, 17 and 13 across (as squared distances). The diamond: 9, 7 and 5 out along its edges.
 Medal "mood_medal" 0x1E1408 0xFFE08A 0xB07A22 0x2A1C0C { param($x, $y) $x * $x + $y * $y } @(97, 76, 45)
 Medal "lucidity_medal" 0x14181C 0xE9B6B8 0x8A4E7C 0x18101E { param($x, $y) [Math]::Abs($x) + [Math]::Abs($y) } @(9, 7, 5)
-Track "mood_track" 0x1E1408 0xE8BC55 0x8C5A1C 0x241A0C 0x15100A $false
-Track "lucidity_track" 0x14181C 0xCB8CAA 0x663A63 0x1E1626 0x100C16 $true
-
-# What fills a gauge: five rows of color from a bright top edge down to a deep foot, 7 tall with a clear row above and
-# below so it sits inside the track's groove.
-function GaugeFill($name, $rows) {
-    $b = New-Object System.Drawing.Bitmap 8, 7
-    for ($y = 0; $y -lt 7; $y++) { for ($x = 0; $x -lt 8; $x++) {
-        $b.SetPixel($x, $y, $(if ($y -eq 0 -or $y -eq 6) { Argb 0 0 } else { Argb 255 $rows[$y - 1] }))
+Bar "mood" 0x2A1608 0x4A3414 0x38260E 0xFFE08A $false
+Bar "lucidity" 0x1C1220 0x3A2A3E 0x2A1E30 0xE9B6B8 $true
+# What fills a gauge: bright, flat color, nine rows from a light shoulder down to a deep foot. It only stretches.
+function GaugeFill($name, $light, $base, $shade, $deep) {
+    $b = New-Object System.Drawing.Bitmap 8, 9
+    for ($y = 0; $y -lt 9; $y++) { for ($x = 0; $x -lt 8; $x++) {
+        $b.SetPixel($x, $y, (Argb 255 $(if ($y -eq 0) { $light } elseif ($y -le 6) { $base } elseif ($y -eq 7) { $shade } else { $deep })))
     } }
-    Save $b $name 8 7 0
+    Save $b $name 8 9 0
 }
-GaugeFill "mood_fill" @(0xFFF3B0, 0xFFD95A, 0xFFC02E, 0xE09A1E, 0xA86C14)
-GaugeFill "lucidity_fill" @(0xFFE0E4, 0xE9B6B8, 0xCB8CAA, 0xA86488, 0x744068)
+GaugeFill "mood_fill" 0xFFE27A 0xFFC02E 0xE09A1E 0xB87616
+GaugeFill "lucidity_fill" 0xF4C6CC 0xD992B0 0xA86488 0x8A4E7C
 # A bar's empty track: an outline and a dark groove.
 $b = New-Object System.Drawing.Bitmap 8, 5
 for ($y = 0; $y -lt 5; $y++) { for ($x = 0; $x -lt 8; $x++) {

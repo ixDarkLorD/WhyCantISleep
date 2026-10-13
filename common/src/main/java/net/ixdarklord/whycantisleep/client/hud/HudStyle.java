@@ -15,18 +15,24 @@ import net.minecraft.util.Mth;
 public final class HudStyle {
     /** The message card and the sleep board: slate. */
     public static final Identifier CARD = WhyCantISleep.id("hud/card");
-    /** The mood gauge: a gold coin for its icon, and the round-ended track its bar runs in. */
+    /**
+     * The mood gauge: a gold coin for its icon, and a round capsule of blocks for its bar. A bar is three layers: the
+     * track (its outline and empty blocks), the fill, and the frame over both (the outline again, seams and glints).
+     */
     public static final Identifier MOOD_MEDAL = WhyCantISleep.id("hud/mood_medal");
     public static final Identifier MOOD_TRACK = WhyCantISleep.id("hud/mood_track");
-    /** The lucidity gauge: a rose diamond for its icon, and the pointed track its bar runs in. */
+    public static final Identifier MOOD_FRAME = WhyCantISleep.id("hud/mood_frame");
+    /** The lucidity gauge: a rose diamond for its icon, and a capsule that runs on into a lit point. */
     public static final Identifier LUCIDITY_MEDAL = WhyCantISleep.id("hud/lucidity_medal");
     public static final Identifier LUCIDITY_TRACK = WhyCantISleep.id("hud/lucidity_track");
+    public static final Identifier LUCIDITY_FRAME = WhyCantISleep.id("hud/lucidity_frame");
     /** A medal's size, and a track's: they are drawn as they are, never stretched. */
     public static final int MEDAL_SIZE = 19;
-    public static final int TRACK_WIDTH = 68;
+    public static final int TRACK_WIDTH = 72;
     public static final int TRACK_HEIGHT = 11;
-    /** How tall a gauge's fill is: five rows of color with a clear row above and below. */
-    public static final int GAUGE_FILL_HEIGHT = 7;
+    /** A gauge's fill: it runs along the track from 2 in, 1 down, eight blocks of 8 long. */
+    public static final int GAUGE_FILL_WIDTH = 64;
+    public static final int GAUGE_FILL_HEIGHT = 9;
     /** How far in from a medal's corner its 9 by 9 icon sits. */
     public static final int MEDAL_INSET = 5;
     private static final Identifier BAR_BACK = WhyCantISleep.id("hud/bar_back");

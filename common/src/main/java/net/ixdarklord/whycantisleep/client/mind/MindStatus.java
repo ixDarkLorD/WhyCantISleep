@@ -36,18 +36,16 @@ public final class MindStatus {
     // A gauge: a medal with the icon on it, and a track running out from under its right side for the bar.
     private static final int TRACK_X = HudStyle.MEDAL_SIZE - 4;
     private static final int TRACK_Y = (HudStyle.MEDAL_SIZE - HudStyle.TRACK_HEIGHT) / 2;
-    // The groove inside the track that the fill runs along: clear of the medal on the left and of the end on the right.
-    private static final int FILL_X = TRACK_X + 6;
-    private static final int FILL_WIDTH = HudStyle.TRACK_WIDTH - 6 - 6;
-    private static final int GAUGE_WIDTH = TRACK_X + HudStyle.TRACK_WIDTH;
+    // Where the color runs along the track, and where a bar ends for laying the two out (lucidity's point pokes on).
+    private static final int FILL_X = TRACK_X + 2;
+    private static final int FILL_WIDTH = HudStyle.GAUGE_FILL_WIDTH;
+    private static final int GAUGE_WIDTH = TRACK_X + 68;
     // The inventory's own width; the two gauges sit side by side, centered over it.
     private static final int INVENTORY_WIDTH = 176;
     private static final int BETWEEN = 8;
     private static final int WIDTH = GAUGE_WIDTH * 2 + BETWEEN;
     private static final int RISE = HudStyle.MEDAL_SIZE + 3;
-    // Where each bar changes what it means, marked on its track: mood's levels, lucidity's stages.
-    private static final float[] MOOD_MARKS = {25.0F, 40.0F, 55.0F, 75.0F};
-    private static final float[] LUCIDITY_MARKS = {25.0F, 50.0F, 75.0F};
+
     // A glint runs along each fill every few seconds: this long between glints, this long to cross.
     private static final int GLINT_EVERY = 90;
     private static final int GLINT_TICKS = 18;
@@ -70,9 +68,10 @@ public final class MindStatus {
         int y = top - RISE;
         int lucidityX = x + GAUGE_WIDTH + BETWEEN;
         float time = Util.getMillis() / 50.0F;
-        gauge(graphics, HudStyle.MOOD_TRACK, HudStyle.MOOD_MEDAL, HudStyle.MOOD_FILL, x, y, mind.mood(), mind.moodCeiling(), MOOD_MARKS, time);
+        gauge(graphics, HudStyle.MOOD_TRACK, HudStyle.MOOD_FRAME, HudStyle.MOOD_MEDAL, HudStyle.MOOD_FILL, x, y, mind.mood(), mind.moodCeiling(), time);
         moodIcon(graphics, mind.moodLevel(), x + HudStyle.MEDAL_INSET, y + HudStyle.MEDAL_INSET, 1.0F);
-        gauge(graphics, HudStyle.LUCIDITY_TRACK, HudStyle.LUCIDITY_MEDAL, HudStyle.LUCIDITY_FILL, lucidityX, y, mind.lucidity(), mind.lucidityCeiling(), LUCIDITY_MARKS, time + GLINT_EVERY / 2.0F);
+        gauge(graphics, HudStyle.LUCIDITY_TRACK, HudStyle.LUCIDITY_FRAME, HudStyle.LUCIDITY_MEDAL, HudStyle.LUCIDITY_FILL, lucidityX, y, mind.lucidity(), mind.lucidityCeiling(),
+                time + GLINT_EVERY / 2.0F);
         lucidityIcon(graphics, mind.stage(), lucidityX + HudStyle.MEDAL_INSET, y + HudStyle.MEDAL_INSET, 1.0F);
         if (mouseY >= y && mouseY < y + HudStyle.MEDAL_SIZE) {
             Font font = minecraft.font;
@@ -81,40 +80,37 @@ public final class MindStatus {
         }
     }
 
-    // One gauge: the track first, its fill with a glint passing over it, the marks where its meaning changes, what the
-    // other bar closes off dimmed at the far end with a bright stop where it begins, then the medal over the track's
-    // near end.
-    private static void gauge(GuiGraphicsExtractor graphics, Identifier track, Identifier medal, Identifier fill, int x, int y, float value, float ceiling,
-                              float[] marks, float time) {
+    // One gauge: the track with its empty blocks, the color up to the value with a glint passing over it, what the
+    // other bar closes off dimmed at the far end with a bright stop where it begins, the frame over all of that (it
+    // rounds the color's ends off and cuts it into blocks), then the medal over the bar's near end.
+    private static void gauge(GuiGraphicsExtractor graphics, Identifier track, Identifier frame, Identifier medal, Identifier fill, int x, int y, float value,
+                              float ceiling, float time) {
         int fillX = x + FILL_X;
         int trackY = y + TRACK_Y;
+        int top = trackY + 1;
+        int bottom = top + HudStyle.GAUGE_FILL_HEIGHT;
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, track, x + TRACK_X, trackY, HudStyle.TRACK_WIDTH, HudStyle.TRACK_HEIGHT);
         int filled = value <= 0.0F ? 0 : Math.max(1, Math.round(FILL_WIDTH * Mth.clamp(value / Mind.MAX, 0.0F, 1.0F)));
-        if (filled > 0) graphics.blitSprite(RenderPipelines.GUI_TEXTURED, fill, fillX, trackY + 2, filled, HudStyle.GAUGE_FILL_HEIGHT);
+        if (filled > 0) graphics.blitSprite(RenderPipelines.GUI_TEXTURED, fill, fillX, top, filled, HudStyle.GAUGE_FILL_HEIGHT);
 
         float glint = time % GLINT_EVERY;
         if (glint < GLINT_TICKS && filled > 3) {
             int at = fillX + Math.round(glint / GLINT_TICKS * (filled + 2)) - 2;
             for (int i = 0; i < 3; i++) {
                 int column = at + i;
-                if (column >= fillX && column < fillX + filled) graphics.fill(column, trackY + 3, column + 1, trackY + 8, i == 1 ? 0x90FFFFFF : 0x40FFFFFF);
+                if (column >= fillX && column < fillX + filled) graphics.fill(column, top, column + 1, bottom, i == 1 ? 0x90FFFFFF : 0x40FFFFFF);
             }
-        }
-        // A mark is a thin line across the groove: a seam in the fill, barely there over the empty track.
-        for (float mark : marks) {
-            int column = fillX + Math.round(FILL_WIDTH * mark / Mind.MAX);
-            graphics.fill(column, trackY + 3, column + 1, trackY + 8, column < fillX + filled ? 0x70101014 : 0x20FFFFFF);
         }
 
         int closed = Math.round(FILL_WIDTH * (1.0F - Mth.clamp(ceiling / Mind.MAX, 0.0F, 1.0F)));
         if (closed > 0) {
             int from = fillX + FILL_WIDTH - closed;
-            graphics.fill(from, trackY + 3, fillX + FILL_WIDTH, trackY + 8, 0xB0101014);
-            graphics.fill(from - 1, trackY + 3, from, trackY + 8, 0xD0FFFFFF);
+            graphics.fill(from, top, fillX + FILL_WIDTH, bottom, 0x96101014);
+            graphics.fill(from - 1, top, from, bottom, 0xDCFFFFFF);
         }
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, frame, x + TRACK_X, trackY, HudStyle.TRACK_WIDTH, HudStyle.TRACK_HEIGHT);
         HudStyle.medal(graphics, medal, x, y, 1.0F);
     }
-
     public static void moodIcon(GuiGraphicsExtractor graphics, MoodLevel level, int x, int y, float alpha) {
         int column = switch (level) {
             case CHEERFUL -> 0;
