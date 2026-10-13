@@ -13,7 +13,7 @@ import net.minecraft.util.Mth;
  * {@code tools/gen_hud_textures.ps1}; a resource pack can restyle them like any of the game's.
  */
 public final class HudStyle {
-    /** The message card and the sleep board: slate. */
+    /** The message card and the sleep board: dusk plum, outlined, shaded and shadowed the way the gauges are. */
     public static final Identifier CARD = WhyCantISleep.id("hud/card");
     /**
      * The mood gauge: a gold coin for its icon, and a round capsule of blocks for its bar. A bar is three layers: the
@@ -64,11 +64,12 @@ public final class HudStyle {
 
     /** A panel around a content area, which it pads by {@link #PANEL_PADDING} on every side. */
     public static void panel(GuiGraphicsExtractor graphics, Identifier sprite, int x, int y, int width, int height, float alpha) {
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x - PANEL_PADDING, y - PANEL_PADDING, width + PANEL_PADDING * 2, height + PANEL_PADDING * 2,
+        // A pixel more each way than the panel itself, for the shadow it casts.
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x - PANEL_PADDING, y - PANEL_PADDING, width + PANEL_PADDING * 2 + 1, height + PANEL_PADDING * 2 + 1,
                 ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F)));
     }
 
-    /** The slate card around a content area. */
+    /** The card around a content area. */
     public static void box(GuiGraphicsExtractor graphics, int x, int y, int width, int height, float alpha) {
         panel(graphics, CARD, x, y, width, height, alpha);
     }
