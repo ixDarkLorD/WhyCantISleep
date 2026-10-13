@@ -20,6 +20,8 @@ public final class Blockers {
     // Entity id to the client tick it stops being pointed out at.
     private static final Int2LongMap ENDS = new Int2LongOpenHashMap();
     private static long tick;
+    private static long start;
+    private static long end;
 
     private Blockers() {
     }
@@ -35,8 +37,19 @@ public final class Blockers {
     /** Points these monsters out, replacing those of an earlier sleep. */
     public static void set(Collection<? extends Entity> blockers) {
         ENDS.clear();
-        long end = tick + WCISServerConfig.HIGHLIGHT_DURATION.get() * 20L;
+        start = tick;
+        end = tick + WCISServerConfig.HIGHLIGHT_DURATION.get() * 20L;
         for (Entity blocker : blockers) ENDS.put(blocker.getId(), end);
+    }
+
+    /** Client ticks since the monsters were pointed out, for the HUD's animations. */
+    public static float age(float partialTick) {
+        return tick - start + partialTick;
+    }
+
+    /** Client ticks until they stop being pointed out. */
+    public static float remaining(float partialTick) {
+        return end - tick - partialTick;
     }
 
     public static boolean isEmpty() {
