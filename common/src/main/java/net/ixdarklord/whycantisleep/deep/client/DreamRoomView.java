@@ -9,6 +9,7 @@ import net.ixdarklord.whycantisleep.network.DreamRoomEntitiesPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -42,11 +43,8 @@ import java.util.Map;
     private static final float PITCH = 62.0F;
     private static final double SPAN = 6.0;
     private static final double LOOK_ALONG = 0.6;
-    // Where the sleeper lies: this far from the middle of the bed's head towards its foot, so that, laid out as a
-    // sleeper is, their head is on the pillow and their feet at the end of the bed.
-    private static final double SLEEPER_ALONG = 1.85;
-    private static final double SLEEPER_HEIGHT = 0.5625;
-    private static final float SLEEPER_TURN = 90.0F;
+    // How high the game puts a sleeper over the floor of their bed's block.
+    private static final double SLEEPER_HEIGHT = 0.6875;
 
     private static @Nullable SceneViewport view;
     private static final List<BlockState> BLOCKS = new ArrayList<>();
@@ -116,12 +114,15 @@ import java.util.Map;
     private static void rebuild() {
         if (view == null || !hasRoom) return;
         view.clear();
+        // Towards the camera (beyond the foot of the bed), and across the bed.
+        int footX = Math.round((float) -Vec3.directionFromRotation(0.0F, bedYaw).x);
+        int footZ = Math.round((float) -Vec3.directionFromRotation(0.0F, bedYaw).z);
         int i = 0;
         for (int y = -DreamRoom.BELOW; y <= DreamRoom.ABOVE; y++) {
             for (int z = -DreamRoom.RADIUS; z <= DreamRoom.RADIUS; z++) {
                 for (int x = -DreamRoom.RADIUS; x <= DreamRoom.RADIUS; x++) {
                     BlockState state = BLOCKS.get(i++);
-                    if (!state.isAir()) view.block(new BlockPos(x, y, z), state);
+                    if (!state.isAir() && !inTheWay(x, y, z, footX, footZ)) view.block(new BlockPos(x, y, z), state);
                 }
             }
         }
@@ -131,10 +132,20 @@ import java.util.Map;
         }
         RemotePlayer body = sleeper();
         if (body != null) {
-            Vec3 toFoot = Vec3.directionFromRotation(0.0F, bedYaw).scale(-1.0);
-            // A sleeper is turned a quarter round from the way they face, to lie along the bed with their head on its pillow.
-            view.entity(body, 0.5 + toFoot.x * SLEEPER_ALONG, SLEEPER_HEIGHT, 0.5 + toFoot.z * SLEEPER_ALONG, bedYaw + SLEEPER_TURN);
+            // Where the game puts a sleeper: on the middle of the bed's head. Told which way the bed points, it lays the
+            // body out from there along it.
+            view.entity(body, 0.5, SLEEPER_HEIGHT, 0.5, 0.0F);
         }
+    }
+
+    // Whether a block would stand between the camera and the sleeper: anything higher than the bed, over it or on the
+    // camera's side of it, in a strip a little wider than the bed. Those are left out, as a drawing of a room cuts away
+    // its near wall.
+    private static boolean inTheWay(int x, int y, int z, int footX, int footZ) {
+        if (y < 1) return false;
+        int along = x * footX + z * footZ;
+        int across = Math.abs(x * footZ - z * footX);
+        return along >= 0 && across <= 1;
     }
 
     // The dreamer as they lie in their bed back home: a likeness of them, with their own skin, asleep.
@@ -142,7 +153,14 @@ import java.util.Map;
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.level == null || minecraft.player == null) return null;
         if (sleeper == null || sleeper.level() != minecraft.level) {
-            sleeper = new RemotePlayer(minecraft.level, minecraft.player.getGameProfile());
+            // The game lays a sleeper out along the bed they are in, from its head; this likeness's bed isn't in the
+            // world it lives in, so it is told which way that bed points.
+            sleeper = new RemotePlayer(minecraft.level, minecraft.player.getGameProfile()) {
+                @Override
+                public Direction getBedOrientation() {
+                    return Direction.fromYRot(bedYaw);
+                }
+            };
             sleeper.setPose(Pose.SLEEPING);
         }
         // Its own rotation stays at nothing: the viewport turns it into place, and would otherwise turn it twice.
