@@ -3,8 +3,8 @@
 #moj_import <coolcatcanvas:sky.glsl>
 
 // A dreamer's way home in the sky of the Lucid Deep (DeepClient): a rift, a jagged tear running up the sky, and through
-// it their room as it is now. Its edges burn white-hot fading to red, cracks run off them into the dark, and the tear
-// breathes, widening and narrowing a little. The room ripples faintly, as if seen through heat.
+// it their room as it is now. Its edges burn white-hot fading to red, it throws a soft hue of red and violet out into
+// the sky round it, cracks run off it into the dark, and the tear breathes, widening and narrowing a little. The room ripples faintly, as if seen through heat.
 //   SkyParams[0].x  how lit the room is, 0 to 1
 //   SkyParams[0].y  a slow breath of light over the whole rift
 uniform sampler2D Sampler0;
@@ -18,6 +18,7 @@ const vec3 RED = vec3(1.00, 0.18, 0.27);
 const vec3 CRIMSON = vec3(0.54, 0.04, 0.14);
 const vec3 HOT = vec3(1.00, 0.80, 0.78);
 const vec3 VOID = vec3(0.015, 0.012, 0.025);
+const vec3 VIOLET = vec3(0.32, 0.08, 0.30);
 
 float hash(float n) {
     return fract(sin(n * 127.1) * 43758.5453);
@@ -73,6 +74,14 @@ void main() {
     float bleed = inside > 0.0 ? 0.0 : exp(-outside * 18.0) * step(0.0, w - 0.002);
     color += HOT * rim * 1.2 + RED * bleed * 0.9;
     alpha = max(alpha, clamp(rim * 1.2 + bleed * 0.9, 0.0, 1.0));
+    // A hue it gives off all round: a wide, soft haze of light, red near the tear and deepening to crimson and violet
+    // further out, pulsing slowly. It fades out before the edges of the sprite, so it has no square border.
+    float border = smoothstep(1.0, 0.65, max(abs(p.x), abs(p.y)));
+    float pulse = 0.85 + 0.15 * sin(time * 1.4);
+    float haze = inside > 0.0 ? 0.0 : (exp(-outside * 4.5) * 0.55 + exp(-outside * 11.0) * 0.35) * border * pulse;
+    vec3 hue = mix(VIOLET, mix(CRIMSON, RED, exp(-outside * 6.0)), exp(-outside * 2.5));
+    color += hue * haze * (1.0 - alpha);
+    alpha += haze * (1.0 - alpha);
 
     // Cracks running off the tear into the sky: a few thin jagged lines, flickering now and then.
     for (int i = 0; i < 6; i++) {
@@ -94,6 +103,8 @@ void main() {
         }
     }
 
+    // Everything above was added as light already weighed by how much it covers: weigh it back out for blending.
     if (alpha <= 0.003) discard;
-    fragColor = sky_finish(vec4(color * breath, alpha), skyWorld);
+    alpha = min(alpha, 1.0);
+    fragColor = sky_finish(vec4(color / alpha * breath, alpha), skyWorld);
 }
