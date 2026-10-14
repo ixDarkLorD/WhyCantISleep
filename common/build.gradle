@@ -1,10 +1,8 @@
 apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v4/common.gradle"
 
 dependencies {
-    // CoolCatLib: Core (common): mod constructors, events, networking, configs, attachments, platform checks
-    compileOnly "net.ixdarklord.coolcatlib:coolcatlib-core-common:${coolcatlib_version}"
-    // CoolCatLib: Canvas (common): screen effects, camera shake and world particles
-    compileOnly "net.ixdarklord.coolcatlib:coolcatlib-canvas-common:${coolcatcanvas_version}"
+    // CoolCatLib (common): mod constructors, events, networking, configs, attachments, platform checks
+    compileOnly "net.ixdarklord.coolcatlib:coolcatlib-common:${coolcatlib_version}"
 }
 
 // The shared main.gradle publishes every subproject's shadowJar. For common it must be a plain jar of this

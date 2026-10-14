@@ -6,7 +6,7 @@ import net.ixdarklord.whycantisleep.WhyCantISleepClient;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 
-/** NeoForge entrypoint: hands the common and client mod constructors to CoolCatLib: Core. */
+/** NeoForge entrypoint: hands the common and client mod constructors to CoolCatLib. */
 @Mod(WhyCantISleep.MOD_ID)
 public final class WhyCantISleepNeoForge extends NeoForgeModEntrypoint {
     public WhyCantISleepNeoForge(ModContainer container) {

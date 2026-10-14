@@ -55,7 +55,7 @@ public class LurkerRenderer extends MobRenderer<LurkerEntity, LurkerRenderState,
     private final Map<LurkerKind, LurkerModel> models = new EnumMap<>(LurkerKind.class);
 
     public LurkerRenderer(EntityRendererProvider.Context context) {
-        // The models are baked here: CoolCatLib: Core has no registry for model layers, and these need none.
+        // The models are baked here: CoolCatLib has no registry for model layers, and these need none.
         super(context, new StalkerModel(StalkerModel.createBodyLayer().bakeRoot()), 0.5F);
         this.models.put(LurkerKind.STALKER, this.model);
         this.models.put(LurkerKind.FLICKER, new FlickerModel(FlickerModel.createBodyLayer().bakeRoot()));

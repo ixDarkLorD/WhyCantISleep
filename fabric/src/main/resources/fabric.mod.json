@@ -18,10 +18,10 @@
 
   "environment": "${mod_environment}",
   "entrypoints": {
-    "coolcatcore:common": [
+    "coolcatlib:common": [
       "net.ixdarklord.whycantisleep.WhyCantISleep"
     ],
-    "coolcatcore:client": [
+    "coolcatlib:client": [
       "net.ixdarklord.whycantisleep.WhyCantISleepClient"
     ]
   },
@@ -40,7 +40,6 @@
     "minecraft": ">=${project.supported_min_mc_version} <=${max_mc_version}",
     "fabricloader": ">=${min_fabric_version}",
     "fabric-api": ">=${project.supported_min_fabric_api_version}",
-    "coolcatcore": "*",
-    "coolcatcanvas": "*"
+    "coolcatlib": ">=${coolcatlib_version}"
   }
 }
