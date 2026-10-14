@@ -79,9 +79,30 @@ function Card($name, $outline, $outlineDark, $light, $shade, $shadow, $fill, $fi
 
 # Dusk plum, from the same palette as the lucidity bar and the Lurker.
 Card "card" 0x1C1220 0x0A070E 0x7A5A84 0x3A2A3E 0x140E1A 0x221828 244
-# The plaques that hang under the two gauges with their readings on: the same make, in each gauge's own colors.
-Card "mood_sign" 0x2A1608 0x120A04 0xC8922E 0x6A4416 0x1C1206 0x34230E 255
-Card "lucidity_sign" 0x1C1220 0x0A070E 0xB06C90 0x4A2E50 0x140E1A 0x261A2E 255
+# The plaques that hang under the two gauges with their readings on, in each gauge's own colors. A plaque is a plain
+# little board: a one pixel outline with its corners cut, darkest along its foot; inside it a highlight along the top
+# and a shade along the bottom, and a flat face between for the text; and a shadow cast down and to the right.
+function Sign($name, $outline, $outlineDark, $light, $shade, $fill) {
+    $b = New-Object System.Drawing.Bitmap 13, 13
+    for ($y = 0; $y -lt 13; $y++) { for ($x = 0; $x -lt 13; $x++) {
+        $in = ($x -lt 12 -and $y -lt 12 -and -not (($x -eq 0 -or $x -eq 11) -and ($y -eq 0 -or $y -eq 11)))
+        # The shadow is the board's own shape, moved a pixel down and to the right.
+        $over = ($x -ge 1 -and $y -ge 1 -and -not (($x -eq 1 -or $x -eq 12) -and ($y -eq 1 -or $y -eq 12)))
+        $color = if (-not $in) { if ($over) { Argb 110 0x000000 } else { Argb 0 0 } }
+            elseif ($y -eq 11 -or ($y -eq 10 -and ($x -eq 0 -or $x -eq 11))) { Argb 255 $outlineDark }
+            elseif ($x -eq 0 -or $x -eq 11 -or $y -eq 0 -or (($x -eq 1 -or $x -eq 10) -and ($y -eq 1 -or $y -eq 10))) { Argb 255 $outline }
+            elseif ($y -eq 1) { Argb 255 $light }
+            elseif ($y -eq 10) { Argb 255 $shade }
+            else { Argb 255 $fill }
+        $b.SetPixel($x, $y, $color)
+    } }
+    $b.Save((Join-Path $dir "$name.png"), [System.Drawing.Imaging.ImageFormat]::Png)
+    $b.Dispose()
+    $meta = "{`n  `"gui`": {`n    `"scaling`": {`n      `"type`": `"nine_slice`",`n      `"width`": 13,`n      `"height`": 13,`n      `"border`": {`n        `"left`": 3,`n        `"top`": 3,`n        `"right`": 4,`n        `"bottom`": 4`n      }`n    }`n  }`n}`n"
+    [IO.File]::WriteAllText((Join-Path $dir "$name.png.mcmeta"), $meta, $utf8)
+}
+Sign "mood_sign" 0x2A1608 0x120A04 0xD9A63C 0x5A3A12 0x3A2810
+Sign "lucidity_sign" 0x1C1220 0x0A070E 0xCB8CAA 0x44284A 0x2A1C32
 
 # The two status gauges are shaped nothing like the card: each is a medal holding its icon, with a track running out
 # of it for its bar. Mood's is a round gold coin on a round-ended bar; lucidity's is a rose-edged diamond on a bar
