@@ -1,9 +1,12 @@
-# Draws the Lurker's two textures under assets/whycantisleep/textures/entity/lurker/:
-#   lurker.png       its skin: night-dark armor in overlapping plates, every face shaded for where it points (lit from
+# Draws the Lurker's textures under assets/whycantisleep/textures/entity/lurker/, a pair for each of its kinds
+# (LurkerKind.java): <kind>.png and <kind>_eyes.png. The kinds share one layout and differ in their hide, their horn,
+# and how thickly they are veined: the Stalker night-dark, the Flicker the navy of a sky gone dark, the Brute a dried
+# maroon and veined all over, the Leech pallid with a blood-dark belly.
+#   <kind>.png       its skin: night-dark armor in overlapping plates, every face shaded for where it points (lit from
 #                    above, dark beneath, dimmed along its edges), veins of crimson through it, ribs showing crimson,
 #                    navy horn for its horns, claws, spurs, ridge and tail blade, a mouth full of teeth, two sockets,
 #                    and the eyes that sit in them (an eyeball, a slit pupil and a lid each)
-#   lurker_eyes.png  what glows, drawn over the skin (LurkerRenderer's glow layer, which pulses): the eyeballs, red
+#   <kind>_eyes.png  what glows, drawn over the skin (LurkerRenderer's glow layer, which pulses): the eyeballs, red
 #                    with a hotter heart; every vein, red; the embers down its back and in the cracks of its knees
 # The colors are the author's sunset palette (LurkerPalette.java has the same five).
 # LurkerModel lays its parts out on a 64x64 sheet (texOffs and box sizes); the textures are drawn at twice that, so
@@ -13,6 +16,15 @@ Add-Type -AssemblyName System.Drawing
 
 $scale = 2
 $size = 64 * $scale
+# Each kind: its hide, its belly, the armor over its shoulders, its horn, and how many veins it has beside the Stalker.
+$kinds = @(
+    @{ name = "stalker"; hide = @(29, 29, 33); belly = @(26, 30, 44); armor = @(34, 36, 46); horn = @(58, 78, 118); veins = 1.0 },
+    @{ name = "flicker"; hide = @(20, 28, 50); belly = @(16, 22, 40); armor = @(28, 40, 70); horn = @(96, 118, 160); veins = 0.6 },
+    @{ name = "brute"; hide = @(46, 24, 30); belly = @(34, 18, 24); armor = @(64, 28, 36); horn = @(40, 44, 58); veins = 1.6 },
+    @{ name = "leech"; hide = @(58, 48, 54); belly = @(84, 16, 30); armor = @(70, 58, 64); horn = @(120, 104, 112); veins = 1.0 }
+)
+foreach ($kind in $kinds) {
+$hide = $kind.hide
 $random = New-Object System.Random 7331
 $skin = New-Object System.Drawing.Bitmap $size, $size
 $eyes = New-Object System.Drawing.Bitmap $size, $size
@@ -29,8 +41,8 @@ $navy = @(31, 45, 74)
 $maroon = @(90, 36, 51)
 $crimson = @(138, 10, 36)
 $red = @(255, 45, 70)
-# Horn: the navy of the palette, lifted so it stands off the hide.
-$bone = @(58, 78, 118)
+$bone = $kind.horn
+function Tone($c, $f) { @(($c[0] * $f), ($c[1] * $f), ($c[2] * $f)) }
 
 # One texel of the skin, in texel coordinates, and the same texel of the glowing layer: lit with a glow, and put
 # out without one, so a detail painted over a vein (a tooth, a socket) does not go on glowing like the vein.
@@ -92,6 +104,7 @@ function Box($u, $v, $w, $h, $d, $base, $grain, $pattern = "", $period = 4, [boo
 # is crimson; on the glowing layer it is red along its whole length, hotter at a knot now and then, with a dim red
 # spilling onto the hide on either side of it so the light looks like it comes from under the skin.
 function Veins($u, $v, $w, $h, $count) {
+    $count = [Math]::Max(1, [int][Math]::Round($count * $kind.veins))
     $veinGlow = Rgb 160 14 22
     $knotGlow = Rgb 214 52 44
     $spill = Rgb 28 1 4
@@ -114,21 +127,21 @@ function Veins($u, $v, $w, $h, $count) {
     }
 }
 
-Box 0 0 7 5 6 @(29, 29, 33) 3                  # head: the hide, lifted a little so its shading shows
-Box 0 11 7 2 6 @(24, 24, 27) 3                  # jaw
-Box 0 19 8 5 8 @(29, 29, 33) 3 "plates" 4      # chest
-Box 0 32 6 4 7 @(26, 30, 44) 3 "rings" 4        # belly: segments, a shade towards navy
-Box 28 32 2 2 5 @(24, 25, 31) 2 "rings" 5       # tail lengths
-Box 32 0 2 7 2 @(23, 24, 29) 2 "plates" 6       # upper limbs
-Box 40 0 2 15 2 @(23, 24, 29) 2 "plates" 6      # lower limbs
+Box 0 0 7 5 6 $hide 3                           # head
+Box 0 11 7 2 6 (Tone $hide 0.83) 3              # jaw
+Box 0 19 8 5 8 $hide 3 "plates" 4               # chest
+Box 0 32 6 4 7 $kind.belly 3 "rings" 4          # belly: segments
+Box 28 32 2 2 5 (Tone $hide 0.84) 2 "rings" 5   # tail lengths
+Box 32 0 2 7 2 (Tone $hide 0.8) 2 "plates" 6    # upper limbs
+Box 40 0 2 15 2 (Tone $hide 0.8) 2 "plates" 6   # lower limbs
 Box 48 0 2 3 2 $bone 5                          # the ridge down its back, and the spikes on its tail
 Box 56 0 1 4 1 @(124, 12, 34) 6                 # ribs, crimson
 Box 56 6 1 3 3 $bone 5 "rings" 3                # claws and knee spurs
 Box 34 20 1 5 4 $bone 5 "rings" 3               # horns and the tail's blade
-Box 0 52 9 1 7 @(34, 36, 46) 3 "rings" 4 $true  # the armor over its shoulders
-Box 34 44 7 1 2 @(18, 18, 21) 2                 # its brow
+Box 0 52 9 1 7 $kind.armor 3 "rings" 4 $true    # the armor over its shoulders
+Box 34 44 7 1 2 (Tone $hide 0.62) 2             # its brow
 Box 34 48 1 2 1 @(186, 168, 174) 6              # fangs: bone, duller than the teeth behind them
-Box 40 50 3 3 3 @(20, 20, 24) 3                 # knee joints
+Box 40 50 3 3 3 (Tone $hide 0.7) 3              # knee joints
 
 # Enough of them to map its body, few enough that the dark hide between them still reads: a limb takes two.
 Veins 0 27 32 5 8     # chest sides, front and back
@@ -213,12 +226,13 @@ for ($y = 46 * $scale; $y -lt 49 * $scale; $y++) { for ($x = 8 * $scale; $x -lt 
 for ($y = 46 * $scale; $y -lt 50 * $scale; $y++) { for ($x = 14 * $scale; $x -lt 21 * $scale; $x++) {
     $n = $random.Next(-2, 3)
     $lip = if ($y -ge 49 * $scale - 1) { 0.55 } else { 0.85 }
-    Dot $x $y (Rgb (($abyss[0] + $n) * $lip) (($abyss[1] + $n) * $lip) (($abyss[2] + $n) * $lip))
+    Dot $x $y (Rgb (($hide[0] * 0.8 + $n) * $lip) (($hide[1] * 0.8 + $n) * $lip) (($hide[2] * 0.8 + $n) * $lip))
 } }
 
 $dir = Join-Path (Get-Location) "common\src\main\resources\assets\whycantisleep\textures\entity\lurker"
 New-Item -ItemType Directory -Force $dir | Out-Null
-$skin.Save((Join-Path $dir "lurker.png"), [System.Drawing.Imaging.ImageFormat]::Png)
-$eyes.Save((Join-Path $dir "lurker_eyes.png"), [System.Drawing.Imaging.ImageFormat]::Png)
+$skin.Save((Join-Path $dir "$($kind.name).png"), [System.Drawing.Imaging.ImageFormat]::Png)
+$eyes.Save((Join-Path $dir "$($kind.name)_eyes.png"), [System.Drawing.Imaging.ImageFormat]::Png)
 $skin.Dispose(); $eyes.Dispose()
+}
 "Wrote $dir"

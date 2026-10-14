@@ -1,16 +1,26 @@
 package net.ixdarklord.whycantisleep.lurker;
 
 import net.ixdarklord.whycantisleep.sound.WCISSounds;
+import net.ixdarklord.whycantisleep.mind.Mind;
+import net.ixdarklord.whycantisleep.mind.MindServer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -36,14 +46,16 @@ import java.util.function.Consumer;
  * drawn slowly round towards it.
  * <p>
  * Hunting, it is gone with the daylight, after a few minutes, or when its player gets well clear of it and stays
- * clear for a while; killing it gives a good part of their lucidity back. The same entity, never known to the server, is what a haunted player's client shows as a hallucination
- * ({@code LurkerHaunt}).
+ * clear for a while; killing it gives a good part of their lucidity back. It comes in several {@linkplain LurkerKind
+ * kinds}, each with something of its own it does while it hunts. The same entity, never known to the server, is what
+ * a haunted player's client shows as a hallucination ({@code LurkerHaunt}).
  */
 public class LurkerEntity extends Monster {
     private static final EntityDataAccessor<Boolean> HUNTING = SynchedEntityData.defineId(LurkerEntity.class, EntityDataSerializers.BOOLEAN);
     // Its player's network id, so that player's client knows the watcher is theirs; 0 for none.
     private static final EntityDataAccessor<Integer> VICTIM_ID = SynchedEntityData.defineId(LurkerEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> LURE = SynchedEntityData.defineId(LurkerEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> KIND = SynchedEntityData.defineId(LurkerEntity.class, EntityDataSerializers.INT);
 
     private static final int LIFETIME_TICKS = 20 * 180;
     // How long it waits, with its player gone or out of reach, before it gives up.
@@ -62,6 +74,19 @@ public class LurkerEntity extends Monster {
     /** How many times it must have been ignored in a row before it lures. */
     public static final int LURE_FROM = 2;
     private static final int LURE_CALL_INTERVAL = 50;
+    // The Flicker: how often it may step behind its player, how far off it must be to bother, how far behind them it
+    // lands, and how squarely they must be facing it (as a cosine) for it to stay put.
+    private static final int BLINK_INTERVAL = 20 * 3;
+    private static final double BLINK_FROM = 5.0;
+    private static final double BLINK_BEHIND = 3.5;
+    private static final double BLINK_SEEN_DOT = 0.35;
+    // The Brute: how often it roars, from how far its player feels it, and what it costs their lucidity.
+    private static final int ROAR_INTERVAL = 20 * 8;
+    private static final double ROAR_RANGE = 14.0;
+    private static final float ROAR_LUCIDITY = 2.0F;
+    // The Leech: what its bite takes from its player's mood, and gives back to it in health.
+    private static final float BITE_MOOD = 4.0F;
+    private static final float BITE_HEAL = 4.0F;
 
     /** Set on clients: draws the darkness that clings to it, each tick (world effects are client code). */
     public static Consumer<LurkerEntity> clientTick = lurker -> {
@@ -72,6 +97,7 @@ public class LurkerEntity extends Monster {
     private int watchedTicks;
     private int lookedTicks;
     private int outrunTicks;
+    private int abilityTicks;
     // Client side: how far into its hunting stance it is, 0 to 1, this tick and the last.
     private float huntAnim;
     private float huntAnimO;
@@ -96,6 +122,7 @@ public class LurkerEntity extends Monster {
         builder.define(HUNTING, false);
         builder.define(VICTIM_ID, 0);
         builder.define(LURE, 0);
+        builder.define(KIND, 0);
     }
 
     @Override
@@ -111,6 +138,32 @@ public class LurkerEntity extends Monster {
 
     public void setVictim(UUID victim) {
         this.victim = victim;
+    }
+
+    public LurkerKind kind() {
+        return LurkerKind.byId(this.entityData.get(KIND));
+    }
+
+    /** Makes it one of the kinds: its build, and with it a full measure of that kind's health. */
+    public void setKind(LurkerKind kind) {
+        this.entityData.set(KIND, kind.ordinal());
+        this.setBase(Attributes.MAX_HEALTH, kind.health);
+        this.setBase(Attributes.MOVEMENT_SPEED, kind.speed);
+        this.setBase(Attributes.ATTACK_DAMAGE, kind.damage);
+        this.setBase(Attributes.SCALE, kind.scale);
+        this.setBase(Attributes.KNOCKBACK_RESISTANCE, kind.knockbackResistance);
+        this.setHealth(this.getMaxHealth());
+    }
+
+    private void setBase(Holder<Attribute> attribute, double value) {
+        AttributeInstance instance = this.getAttribute(attribute);
+        if (instance != null) instance.setBaseValue(value);
+    }
+
+    /** It is named for its kind: a Flicker, a Brute. */
+    @Override
+    protected Component getTypeName() {
+        return Component.translatable("entity.whycantisleep.lurker." + this.kind().key());
     }
 
     /** Whether it has been looked at and is coming; until then it only watches. */
@@ -206,13 +259,60 @@ public class LurkerEntity extends Monster {
         }
     }
 
-    // Hunting: a player who gets well clear of it, and stays clear, has got away.
+    // Hunting: a player who gets well clear of it, and stays clear, has got away. Meanwhile it does what its kind does.
     private void chase(ServerLevel level, Player player) {
+        this.abilityTicks++;
+        switch (this.kind()) {
+            case FLICKER -> this.blink(level, player);
+            case BRUTE -> this.roar(level, player);
+            default -> {
+            }
+        }
         this.outrunTicks = player.distanceToSqr(this) > ESCAPE_DISTANCE * ESCAPE_DISTANCE ? this.outrunTicks + 1 : Math.max(0, this.outrunTicks - 2);
         if (this.outrunTicks >= ESCAPE_TICKS) {
             LurkerServer.onEscaped(this);
             this.vanish(level);
         }
+    }
+
+    // The Flicker: when its player isn't facing it, it is gone from where it was and standing behind them.
+    private void blink(ServerLevel level, Player player) {
+        if (this.abilityTicks < BLINK_INTERVAL || player.distanceToSqr(this) < BLINK_FROM * BLINK_FROM) return;
+        Vec3 toLurker = this.getEyePosition().subtract(player.getEyePosition()).normalize();
+        if (toLurker.dot(player.getLookAngle()) > BLINK_SEEN_DOT) return;
+        Vec3 behind = player.position().subtract(player.getLookAngle().multiply(1.0, 0.0, 1.0).normalize().scale(BLINK_BEHIND));
+        BlockPos spot = LurkerServer.standableNear(level, BlockPos.containing(behind), 1, this.random);
+        if (spot == null) return;
+        this.abilityTicks = 0;
+        level.sendParticles(ParticleTypes.LARGE_SMOKE, this.getX(), this.getY() + 0.4, this.getZ(), 12, 0.3, 0.3, 0.3, 0.02);
+        this.teleportTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5);
+        this.getNavigation().stop();
+        level.sendParticles(ParticleTypes.LARGE_SMOKE, this.getX(), this.getY() + 0.4, this.getZ(), 12, 0.3, 0.3, 0.3, 0.02);
+        this.playSound(WCISSounds.LURKER_VANISH, 0.7F, 1.5F);
+    }
+
+    // The Brute: a roar its player feels in their legs, their eyes and their head.
+    private void roar(ServerLevel level, Player player) {
+        if (this.abilityTicks < ROAR_INTERVAL || player.distanceToSqr(this) > ROAR_RANGE * ROAR_RANGE) return;
+        this.abilityTicks = 0;
+        this.playSound(WCISSounds.LURKER_NOTICE, 2.0F, 0.5F);
+        player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 1), this);
+        player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 80, 0), this);
+        MindServer.addLucidity(player, -ROAR_LUCIDITY);
+        level.sendParticles(ParticleTypes.SONIC_BOOM, this.getX(), this.getEyeY(), this.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+    }
+
+    // The Leech: its bite leaves its player starving, weak and low, and feeds it.
+    @Override
+    public boolean doHurtTarget(ServerLevel level, Entity target) {
+        boolean hurt = super.doHurtTarget(level, target);
+        if (hurt && this.kind() == LurkerKind.LEECH && target instanceof Player player && player.getUUID().equals(this.victim)) {
+            player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 100, 1), this);
+            player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 0), this);
+            Mind.update(player, mind -> mind.withMood(Math.max(0.0F, mind.mood() - BITE_MOOD)));
+            this.heal(BITE_HEAL);
+        }
+        return hurt;
     }
 
     private void startHunting() {
@@ -255,6 +355,7 @@ public class LurkerEntity extends Monster {
         super.addAdditionalSaveData(output);
         if (this.victim != null) output.store("Victim", UUIDUtil.CODEC, this.victim);
         output.putBoolean("Hunting", this.isHunting());
+        output.putString("Kind", this.kind().key());
     }
 
     @Override
@@ -262,6 +363,7 @@ public class LurkerEntity extends Monster {
         super.readAdditionalSaveData(input);
         this.victim = input.read("Victim", UUIDUtil.CODEC).orElse(null);
         this.entityData.set(HUNTING, input.getBooleanOr("Hunting", false));
+        this.setKind(LurkerKind.byKey(input.getStringOr("Kind", LurkerKind.STALKER.key())));
     }
 
     @Override
