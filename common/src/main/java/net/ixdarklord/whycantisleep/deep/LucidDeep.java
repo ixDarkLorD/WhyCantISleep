@@ -58,7 +58,7 @@ public final class LucidDeep {
     public static final float ENTER_LUCIDITY = 75.0F;
     /** Where every dreamer's Window hangs in their sky: due north, this many degrees up, and this many degrees across. */
     public static final float WINDOW_ELEVATION = 24.0F;
-    public static final float WINDOW_SIZE = 34.0F;
+    public static final float WINDOW_SIZE = 42.0F;
     // How squarely a dreamer must look at their Window for the lens to wake them, as the cosine of the angle off it.
     private static final double WINDOW_AIM = Math.cos(Math.toRadians(WINDOW_SIZE * 0.6));
     // How many ticks into their sleep a dreamer starts to slip under, and how long that takes: all of it before the night
