@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The dreamer's room, live, as their Window shows it: looking down from over the foot of their bed at themselves lying
- * asleep in it, with the room round them and whatever is moving there ({@link DreamRoom} on the server sends the blocks
+ * The dreamer's room, live, as their Window shows it: looking down at an angle, from beyond a corner at the foot of
+ * their bed, at themselves lying asleep in it, with the room round them and whatever is moving there ({@link DreamRoom} on the server sends the blocks
  * and the moving things; the sleeper is the dreamer's own likeness, made here). It is drawn by CoolCatLib's
  * {@link SceneViewport} into a texture the Window in the sky wears ({@link DeepClient}). Kept cheap: a small texture,
  * redrawn a few times a second at most and only while something in it moves, and not at all while no Window is in
@@ -37,15 +37,17 @@ import java.util.Map;
     public static final Identifier TEXTURE = WhyCantISleep.id("dream/room");
     private static final int SIZE = 192;
     private static final int REFRESH_RATE = 6;
-    // The camera hangs over the foot of the bed looking down at the sleeper, this steeply, with this much of the room
-    // across the picture, centred this far along the bed from its head.
-    private static final float PITCH = 62.0F;
-    private static final double SPAN = 6.0;
+    // The camera looks down at the sleeper from beyond a corner at the foot of the bed: turned this far off the bed's
+    // line, this steeply, with this much of the room across the picture, centred this far along the bed from its head.
+    private static final float CORNER = 40.0F;
+    private static final float PITCH = 38.0F;
+    private static final double SPAN = 5.5;
     private static final double LOOK_ALONG = 0.6;
-    // Where the sleeper lies: a sleeping player is placed at the middle of the bed's head; their body is laid out
-    // from there towards its foot.
-    private static final double SLEEPER_ALONG = 0.95;
+    // Where the sleeper lies: this far from the middle of the bed's head towards its foot, so that, laid out as a
+    // sleeper is, their head is on the pillow and their feet at the end of the bed.
+    private static final double SLEEPER_ALONG = 1.85;
     private static final double SLEEPER_HEIGHT = 0.5625;
+    private static final float SLEEPER_TURN = 90.0F;
 
     private static @Nullable SceneViewport view;
     private static final List<BlockState> BLOCKS = new ArrayList<>();
@@ -88,7 +90,7 @@ import java.util.Map;
         bedYaw = payload.facing();
         // Over the foot of the bed, looking along it towards the head.
         Vec3 toFoot = Vec3.directionFromRotation(0.0F, bedYaw).scale(-1.0);
-        view.camera(bedYaw + 180.0F, PITCH).frame(SPAN, 0.5 + toFoot.x * LOOK_ALONG, 0.4, 0.5 + toFoot.z * LOOK_ALONG);
+        view.camera(bedYaw + 180.0F + CORNER, PITCH).frame(SPAN, 0.5 + toFoot.x * LOOK_ALONG, 0.4, 0.5 + toFoot.z * LOOK_ALONG);
         hasRoom = true;
         rebuild();
     }
@@ -132,7 +134,7 @@ import java.util.Map;
         if (body != null) {
             Vec3 toFoot = Vec3.directionFromRotation(0.0F, bedYaw).scale(-1.0);
             // A sleeper is turned a quarter round from the way they face, to lie along the bed with their head on its pillow.
-            view.entity(body, 0.5 + toFoot.x * SLEEPER_ALONG, SLEEPER_HEIGHT, 0.5 + toFoot.z * SLEEPER_ALONG, bedYaw + 90.0F);
+            view.entity(body, 0.5 + toFoot.x * SLEEPER_ALONG, SLEEPER_HEIGHT, 0.5 + toFoot.z * SLEEPER_ALONG, bedYaw + SLEEPER_TURN);
         }
     }
 
