@@ -7,6 +7,7 @@
     "AnimalMixin",
     "FoodPropertiesMixin",
     "LivingEntityMixin",
+    "PlayerMixin",
     "ServerPlayerMixin"
   ],
   "client": [
