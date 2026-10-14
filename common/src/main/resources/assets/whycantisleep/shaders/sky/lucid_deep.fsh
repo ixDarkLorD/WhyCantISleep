@@ -2,11 +2,12 @@
 
 #moj_import <coolcatcanvas:sky.glsl>
 
-// The sky of the Lucid Deep (whycantisleep:lucid_deep): an abyss. Almost nothing shows in it most of the time: black
-// overhead, the faintest bruise of navy round the horizon, and far below everything a red light. What is there is
-// shown by what lights it:
-//   - Lightning: every few seconds a fork of red lightning jumps between two clouds, and for a moment the whole sky
-//     lights up, the banks of smoky cloud nearest it most of all.
+// The sky of the Lucid Deep (whycantisleep:lucid_deep): an abyss under a storm. Black overhead, a storm-dark band of
+// navy and maroon round the horizon, and far below everything a red light; across it all, cloud. What is there is
+// shown most by what lights it:
+//   - A storm: banks of heavy cloud in navy and maroon churn past, paler where they thin.
+//   - Lightning: every couple of seconds a fork of red lightning jumps between two clouds, and for a moment the whole
+//     sky lights up, the clouds nearest it most of all.
 //   - Surges: now and then the red light below swells, and the clouds take its glow from underneath before it sinks.
 //   - Eyes: now and then, a pair of great red eyes opens somewhere in the clouds, looks at you a while, and closes.
 // Motes of red light hang in the dark. The colors are the Lurker's palette (LurkerPalette.java).
@@ -54,12 +55,14 @@ vec2 onLayer(vec3 d, float height, out float facing) {
     return d.xz * t;
 }
 
-// One bank of cloud: smoke that drifts, thicker in places, with ragged holes.
+// One bank of storm cloud: heavy smoke driven by the wind, churning in on itself, with ragged gaps.
 float cloud(vec2 p, float time, float seed) {
-    vec2 drift = vec2(time * 0.012, time * 0.007) + seed;
-    float shape = fbm(p * 0.6 + drift);
-    float detail = fbm(p * 2.2 - drift * 1.7 + seed * 3.0);
-    return smoothstep(0.42, 0.78, shape * 0.75 + detail * 0.35);
+    vec2 drift = vec2(time * 0.035, time * 0.018) + seed;
+    // The shape is pushed about by a second, slower noise, so it churns rather than slides.
+    vec2 churn = vec2(fbm(p * 0.4 + drift * 0.5 + 7.3), fbm(p * 0.4 - drift * 0.4 + 2.1)) - 0.5;
+    float shape = fbm(p * 0.55 + drift + churn * 1.6);
+    float detail = fbm(p * 2.4 - drift * 2.2 + seed * 3.0 + churn);
+    return smoothstep(0.32, 0.72, shape * 0.75 + detail * 0.35);
 }
 
 // The angle between two directions round the sky, from their headings (no seam anywhere).
@@ -74,7 +77,7 @@ void main() {
     vec2 heading = normalize(d.xz + vec2(1.0e-4));
 
     // ---- Lightning: a strike every few seconds, each with its own heading and height, flickering as it dies.
-    float period = 4.2;
+    float period = 2.6;
     float strike = floor(time / period);
     float into = fract(time / period) * period;
     float flash = 0.0;
@@ -111,24 +114,31 @@ void main() {
     float surge = hash(vec2(floor(time / surgePeriod), 2.2)) > 0.35 ? sin(clamp(surgeInto / 4.0, 0.0, 1.0) * 3.14159) : 0.0;
     surge = surge * surge;
 
-    // ---- The backdrop: near black, the faintest navy at the horizon, the red light far below.
-    vec3 color = mix(NAVY * 0.1, ABYSS, smoothstep(0.0, 0.45, up));
-    color = mix(color, NAVY * 0.06, smoothstep(0.0, -0.25, up));
+    // ---- The backdrop: near black overhead, a storm-dark band of navy and maroon round the horizon, the red light
+    // far below.
+    vec3 color = mix(NAVY * 0.22 + MAROON * 0.08, ABYSS, smoothstep(0.0, 0.5, up));
+    color = mix(color, NAVY * 0.08 + MAROON * 0.04, smoothstep(0.0, -0.25, up));
     float below = smoothstep(-0.15, -1.0, up);
     color += mix(MAROON * 0.12, CRIMSON * 0.35, below * below) * below * (1.0 + surge * 1.5);
     color += RED * (pow(below, 10.0) * 0.5 + pow(below, 3.0) * 0.05) * (1.0 + surge * 2.0);
     color += NAVY * 0.12 * flash;
 
-    // ---- Clouds: three banks and the haze along the horizon. Dark smoke, all but invisible until something lights it.
+    // ---- Clouds: three banks of storm and the haze along the horizon. Dark, heavy and moving, in the palette's navy
+    // and maroon, lit from below by the red light, and brightly by the lightning.
     float facing;
     float c1 = cloud(onLayer(d, 60.0, facing) * 0.01, time, 0.0) * facing;
     float c2 = cloud(onLayer(d, -45.0, facing) * 0.012, time, 11.0) * facing;
     float c3 = cloud(onLayer(d, -160.0, facing) * 0.006, time * 0.6, 23.0) * facing;
     float haze = fbm(heading * 3.0 + vec2(time * 0.01, up * 6.0)) * exp(-abs(up) * 7.0);
-    color = mix(color, NAVY * 0.07, c1 * 0.8);
-    color = mix(color, MAROON * 0.08 + NAVY * 0.03, c2 * 0.85);
-    color = mix(color, CRIMSON * 0.12, c3 * 0.6);
-    color = mix(color, MAROON * 0.06 + NAVY * 0.03, clamp(haze * 1.1, 0.0, 0.8));
+    // Each bank is darker on top and paler at its rim, where it thins: that is what shows its shape in the dark.
+    float rim1 = c1 * (1.0 - c1) * 4.0;
+    float rim2 = c2 * (1.0 - c2) * 4.0;
+    color = mix(color, NAVY * 0.36 + MAROON * 0.06, c1 * 0.9);
+    color += NAVY * 0.2 * rim1;
+    color = mix(color, MAROON * 0.42 + NAVY * 0.12, c2 * 0.9);
+    color += (MAROON * 0.25 + CRIMSON * 0.12) * rim2;
+    color = mix(color, CRIMSON * 0.3 + MAROON * 0.15, c3 * 0.75);
+    color = mix(color, MAROON * 0.26 + NAVY * 0.12, clamp(haze * 1.2, 0.0, 0.85));
     float clouds = max(max(c1, c2), max(c3, haze));
     // Lit: by the strike (cold at the edges, red at its heart) and, from below, by a surge.
     color += clouds * struck * mix(NAVY * 1.4, RED, clamp(near * 1.4, 0.0, 1.0));
