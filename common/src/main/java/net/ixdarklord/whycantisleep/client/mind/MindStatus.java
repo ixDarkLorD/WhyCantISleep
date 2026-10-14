@@ -45,13 +45,16 @@ public final class MindStatus {
     private static final int INVENTORY_WIDTH = 176;
     private static final int BETWEEN = 8;
     private static final int WIDTH = GAUGE_WIDTH * 2 + BETWEEN;
-    // Under each bar hangs a plaque with its reading: two short chains from the bar's foot, then the plaque, whose
-    // text is 8 tall inside the panel's padding.
+    // Under each bar hangs a plaque with its reading: two short chains from the bar's foot, then the plaque. The
+    // plaque and its text are drawn small, at SIGN_SCALE: before scaling it is the text, 8 tall, with SIGN_PADDING
+    // round it, and a pixel of shadow.
     private static final int BAR_FOOT = TRACK_Y + 11;
     private static final int CHAIN_LENGTH = 3;
-    private static final int SIGN_TEXT_Y = BAR_FOOT + CHAIN_LENGTH + HudStyle.PANEL_PADDING;
-    private static final int HEIGHT = SIGN_TEXT_Y + 8 + HudStyle.PANEL_PADDING + 1;
-    private static final int RISE = HEIGHT;
+    private static final float SIGN_SCALE = 0.75F;
+    private static final int SIGN_PADDING = 3;
+    private static final int SIGN_HEIGHT = 8 + SIGN_PADDING * 2;
+    private static final int HEIGHT = BAR_FOOT + CHAIN_LENGTH + Mth.ceil((SIGN_HEIGHT + 1) * SIGN_SCALE);
+    private static final int RISE = HEIGHT + 1;
 
     // A glint runs along each fill every few seconds: this long between glints, this long to cross.
     private static final int GLINT_EVERY = 90;
@@ -137,16 +140,21 @@ public final class MindStatus {
 
     // The plaque under a gauge, centered under its bar: two chains from the bar's foot, the panel, and the reading.
     private static void sign(GuiGraphicsExtractor graphics, Font font, Identifier sprite, int x, int y, Component text, int textColor, int chainColor) {
-        int width = font.width(text);
-        int left = x + FILL_X + (FILL_WIDTH - width) / 2;
+        int width = font.width(text) + SIGN_PADDING * 2;
+        int middle = x + FILL_X + FILL_WIDTH / 2;
         int chainY = y + BAR_FOOT;
-        for (int chainX : new int[]{left, left + width - 2}) {
+        int half = Math.round(width * SIGN_SCALE / 2.0F);
+        for (int chainX : new int[]{middle - half + 3, middle + half - 5}) {
             // A link's bright side and its dark side.
             graphics.fill(chainX, chainY, chainX + 1, chainY + CHAIN_LENGTH, HudStyle.color(chainColor, 1.0F));
             graphics.fill(chainX + 1, chainY, chainX + 2, chainY + CHAIN_LENGTH, 0xFF101014);
         }
-        HudStyle.panel(graphics, sprite, left, y + SIGN_TEXT_Y, width, 8, 1.0F);
-        graphics.text(font, text, left, y + SIGN_TEXT_Y, HudStyle.color(textColor, 1.0F), true);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(middle, chainY + CHAIN_LENGTH);
+        graphics.pose().scale(SIGN_SCALE, SIGN_SCALE);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, -width / 2, 0, width + 1, SIGN_HEIGHT + 1);
+        graphics.text(font, text, -width / 2 + SIGN_PADDING, SIGN_PADDING, HudStyle.color(textColor, 1.0F), true);
+        graphics.pose().popMatrix();
     }
 
     public static void moodIcon(GuiGraphicsExtractor graphics, MoodLevel level, int x, int y, float alpha) {
