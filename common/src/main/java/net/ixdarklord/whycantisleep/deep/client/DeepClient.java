@@ -47,6 +47,8 @@ public final class DeepClient {
                     DreamRoomView.use();
                     out[0] = Mth.clamp(DreamRoomView.daylight(), 0.3F, 1.0F);
                     out[1] = 0.92F + 0.08F * Mth.sin((float) (System.currentTimeMillis() % 100000L) * 0.0015F);
+                    // z: how open the rift is; it closes after they arrive and opens when they look for it.
+                    out[2] = DreamTransition.riftOpen(1.0F);
                 });
 
         ItemTooltipEvents.MODIFY.register((stack, context, flag, lines) -> {

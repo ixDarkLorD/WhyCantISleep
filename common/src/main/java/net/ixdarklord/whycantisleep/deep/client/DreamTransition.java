@@ -13,6 +13,7 @@ import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
 import net.ixdarklord.coolcatcore.api.network.Network;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.whycantisleep.deep.LucidDeep;
+import net.ixdarklord.whycantisleep.deep.WCISItems;
 import net.ixdarklord.whycantisleep.network.DreamReadyPayload;
 import net.ixdarklord.whycantisleep.network.DreamTransitionPayload;
 import net.minecraft.client.Minecraft;
@@ -54,11 +55,20 @@ public final class DreamTransition {
     private static final double CAMERA_ABOVE = 6.5;
     // How long they lie there after the fall before they get up, in the scene that follows it.
     private static final int LIE_TICKS = 26;
+    // Getting up: pushing up off the ground on their arms, then up on to their feet from a crouch.
+    private static final int RISE_TICKS = 30;
+    private static final float PUSH_UP_PART = 0.45F;
+    // The arrival scene lasts this long from the landing; the rift closes a moment after it.
+    private static final int SCENE_TICKS = LIE_TICKS + 164;
+    private static final int CLOSE_AFTER = 30;
+    // How fast the rift opens and closes, a share of the way each tick.
+    private static final float RIFT_OPENING = 0.06F;
+    private static final float RIFT_CLOSING = 0.025F;
     // How a falling player moves (the game's own numbers), to know where the camera must be at each moment.
     private static final double GRAVITY = 0.08;
     private static final double DRAG = 0.98;
 
-    private enum Stage { NONE, DRIFTING, BLACK, FALLING, LYING }
+    private enum Stage { NONE, DRIFTING, BLACK, FALLING, LYING, RISING }
 
     // When the smoke and tentacles start to creep in, and when they have covered the screen.
     private static final int SLIP_FROM = 14;
@@ -69,6 +79,12 @@ public final class DreamTransition {
     private static float slipped;
     private static Stage stage = Stage.NONE;
     private static int ticks;
+    // The rift: how open it is now and last tick (0 to 1); whether it has been allowed to close since they arrived; and
+    // ticks since the landing, to know when the arrival scene is over (-1 when there was none).
+    private static float rift = 1.0F;
+    private static float riftO = 1.0F;
+    private static boolean riftSettled;
+    private static int sinceLanding = -1;
 
     private DreamTransition() {
     }
@@ -85,6 +101,7 @@ public final class DreamTransition {
                 .activeWhen(context -> stage == Stage.DRIFTING)
                 .strength(context -> slipped);
         ClientTickEvents.END.register(DreamTransition::tick);
+        ClientTickEvents.END.register(DreamTransition::tickRift);
         ClientPlayerEvents.LEAVE.register(player -> reset());
     }
 
@@ -95,7 +112,31 @@ public final class DreamTransition {
 
     /** Whether the player is falling or lying face down: their body is laid flat. */
     public static boolean isLyingFaceDown() {
-        return stage == Stage.FALLING || stage == Stage.LYING;
+        return stage == Stage.FALLING || stage == Stage.LYING || stage == Stage.RISING && riseProgress(0.0F) < PUSH_UP_PART;
+    }
+
+    /** Whether they are on their feet but still crouched, coming up from the ground. */
+    public static boolean isCrouchingUp() {
+        return stage == Stage.RISING && riseProgress(0.0F) >= PUSH_UP_PART;
+    }
+
+    /** Whether they are getting up, and how far: 0 still flat, {@link #PUSH_UP_PART} up on their arms, 1 standing. */
+    public static boolean isRising() {
+        return stage == Stage.RISING;
+    }
+
+    public static float riseProgress(float partialTick) {
+        return stage == Stage.RISING ? Mth.clamp((ticks + partialTick) / RISE_TICKS, 0.0F, 1.0F) : 0.0F;
+    }
+
+    /** The share of getting up that is pushing up off the ground. */
+    public static float pushUpPart() {
+        return PUSH_UP_PART;
+    }
+
+    /** How open the rift is, 0 (healed shut) to 1. */
+    public static float riftOpen(float partialTick) {
+        return Mth.lerp(partialTick, riftO, rift);
     }
 
     /** Whether they are falling: their arms and legs flail. */
@@ -229,18 +270,43 @@ public final class DreamTransition {
                 } else if (player.onGround() && ticks > 2) {
                     CameraShake.shake(7.0F, 14);
                     arrive(player);
+                    sinceLanding = 0;
                     stage = Stage.LYING;
                     ticks = 0;
                 }
             }
             case LYING -> {
                 if (ticks >= LIE_TICKS) {
+                    stage = Stage.RISING;
+                    ticks = 0;
+                }
+            }
+            case RISING -> {
+                if (ticks >= RISE_TICKS) {
                     stage = Stage.NONE;
                 }
             }
             default -> {
             }
         }
+    }
+
+    // The rift stays open while they arrive and for a moment after; then it heals shut, and tears open again whenever
+    // they raise the lens to look for it (it is what they wake through). Away from the Deep it is left open, ready.
+    private static void tickRift(Minecraft minecraft) {
+        LocalPlayer player = minecraft.player;
+        riftO = rift;
+        if (player == null || !LucidDeep.isDeep(player.level())) {
+            rift = riftO = 1.0F;
+            riftSettled = false;
+            sinceLanding = -1;
+            return;
+        }
+        if (sinceLanding >= 0) sinceLanding++;
+        if (!riftSettled && (sinceLanding > SCENE_TICKS + CLOSE_AFTER || sinceLanding < 0 && stage == Stage.NONE)) riftSettled = true;
+        boolean looking = player.isUsingItem() && player.getUseItem().is(WCISItems.DREAM_LENS.get());
+        float target = !riftSettled || looking ? 1.0F : 0.0F;
+        rift = target > rift ? Math.min(target, rift + RIFT_OPENING) : Math.max(target, rift - RIFT_CLOSING);
     }
 
     private static void reset() {

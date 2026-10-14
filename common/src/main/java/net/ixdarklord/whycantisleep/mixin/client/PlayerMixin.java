@@ -14,8 +14,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Lays the dreamer out flat while they fall into the Lucid Deep and lie on the island ({@link DreamTransition}): the
- * crawling pose, which out of water is the body face down. Only for the player of this client, and only on it.
+ * Lays the dreamer out flat while they fall into the Lucid Deep, lie on the island and push themselves up off it (the
+ * crawling pose, which out of water is the body face down), then crouches them as they come up on to their feet
+ * ({@link DreamTransition}). Only for the player of this client, and only on it.
  */
 @Mixin(Player.class)
 public abstract class PlayerMixin extends LivingEntity {
@@ -25,8 +26,12 @@ public abstract class PlayerMixin extends LivingEntity {
 
     @Inject(method = "updatePlayerPose", at = @At("HEAD"), cancellable = true)
     private void whycantisleep$lieFaceDown(CallbackInfo ci) {
-        if (this.level().isClientSide() && (Entity) this == Minecraft.getInstance().player && DreamTransition.isLyingFaceDown()) {
+        if (!this.level().isClientSide() || (Entity) this != Minecraft.getInstance().player) return;
+        if (DreamTransition.isLyingFaceDown()) {
             this.setPose(Pose.SWIMMING);
+            ci.cancel();
+        } else if (DreamTransition.isCrouchingUp()) {
+            this.setPose(Pose.CROUCHING);
             ci.cancel();
         }
     }
