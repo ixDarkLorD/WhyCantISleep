@@ -39,6 +39,9 @@ public final class HudStyle {
     public static final Identifier SLOT = WhyCantISleep.id("hud/slot");
     public static final int SLOT_SIZE = 20;
     private static final Identifier BAR_BACK = WhyCantISleep.id("hud/bar_back");
+    /** The plaque that hangs under each gauge with its reading on: a panel like the card, in the gauge's colors. */
+    public static final Identifier MOOD_SIGN = WhyCantISleep.id("hud/mood_sign");
+    public static final Identifier LUCIDITY_SIGN = WhyCantISleep.id("hud/lucidity_sign");
     /** What covers the part of a gauge the other bar closes off: dim diagonal stripes, tiled along it. */
     public static final Identifier MOOD_LIMIT = WhyCantISleep.id("hud/mood_limit");
     public static final Identifier LUCIDITY_LIMIT = WhyCantISleep.id("hud/lucidity_limit");

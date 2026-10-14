@@ -105,6 +105,7 @@
   "gui.whycantisleep.mind.lucidity.steady": "Lucid",
   "gui.whycantisleep.mind.lucidity.uneasy": "Hazy",
   "gui.whycantisleep.mind.mood": "Mood: %s",
+  "gui.whycantisleep.mind.reading": "%s %s",
   "gui.whycantisleep.mind.mood.cheerful": "Cheerful",
   "gui.whycantisleep.mind.mood.content": "Content",
   "gui.whycantisleep.mind.mood.flat": "Flat",
