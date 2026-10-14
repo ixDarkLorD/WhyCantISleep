@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
@@ -50,9 +51,16 @@ public class LurkerRenderer extends MobRenderer<LurkerEntity, LurkerRenderState,
     private static final float BLINK_TICKS = 7.0F;
     private static final float[] BLINK_EVERY = {83.0F, 131.0F};
 
+    // Each kind is a different creature to look at, with a model of its own.
+    private final Map<LurkerKind, LurkerModel> models = new EnumMap<>(LurkerKind.class);
+
     public LurkerRenderer(EntityRendererProvider.Context context) {
-        // The model is baked here: CoolCatLib: Core has no registry for model layers, and one model needs none.
-        super(context, new LurkerModel(LurkerModel.createBodyLayer().bakeRoot()), 0.5F);
+        // The models are baked here: CoolCatLib: Core has no registry for model layers, and these need none.
+        super(context, new StalkerModel(StalkerModel.createBodyLayer().bakeRoot()), 0.5F);
+        this.models.put(LurkerKind.STALKER, this.model);
+        this.models.put(LurkerKind.FLICKER, new FlickerModel(FlickerModel.createBodyLayer().bakeRoot()));
+        this.models.put(LurkerKind.BRUTE, new BruteModel(BruteModel.createBodyLayer().bakeRoot()));
+        this.models.put(LurkerKind.LEECH, new LeechModel(LeechModel.createBodyLayer().bakeRoot()));
         // The game's own eyes layer, but with a brightness that rises and falls: slowly while it watches, quick as a
         // pulse while it hunts.
         this.addLayer(new RenderLayer<>(this) {
@@ -97,6 +105,13 @@ public class LurkerRenderer extends MobRenderer<LurkerEntity, LurkerRenderState,
             if (into < BLINK_TICKS) blink = Math.max(blink, Mth.sin(into / BLINK_TICKS * Mth.PI));
         }
         state.blink = blink;
+    }
+
+    /** Draws it with its own kind's model (the layers draw with whichever model is current, so they follow). */
+    @Override
+    public void submit(LurkerRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
+        this.model = this.models.get(state.kind);
+        super.submit(state, poseStack, collector, camera);
     }
 
     @Override

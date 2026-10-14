@@ -5,24 +5,24 @@ import net.minecraft.util.RandomSource;
 import java.util.Locale;
 
 /**
- * The kinds of Lurker. They are one creature underneath (one entity, one model, the same watching and hunting), told
- * apart by their build, their skin and one thing each that only it does:
+ * The kinds of Lurker. They are one creature underneath (one entity, the same watching and hunting) and four to look
+ * at, each with a body, a skin and a way of moving of its own, and one thing each that only it does:
  * <ul>
- *     <li>the <b>Stalker</b>, the plain one: nothing but patience and teeth;</li>
- *     <li>the <b>Flicker</b>, thin and half there: hunting, it steps out of sight and reappears behind its player
+ *     <li>the <b>Stalker</b>, on four spider's legs: nothing but patience and teeth;</li>
+ *     <li>the <b>Flicker</b>, a legless wraith with arms too long for it, half there: hunting, it steps out of sight and reappears behind its player
  *     whenever they look away from it;</li>
- *     <li>the <b>Brute</b>, huge, slow and hard to kill: it roars, and its roar slows its player, blinds them and
+ *     <li>the <b>Brute</b>, a hulk on its knuckles, slow and hard to kill: it roars, and its roar slows its player, blinds them and
  *     shakes their lucidity;</li>
- *     <li>the <b>Leech</b>, small and quicker than a sprint: its bite does little harm but leaves its player starving,
+ *     <li>the <b>Leech</b>, a segmented crawler quicker than a sprint: its bite does little harm but leaves its player starving,
  *     weak and miserable, and feeds it.</li>
  * </ul>
  * Every number here is a first guess, to be tuned by play.
  */
 public enum LurkerKind {
     STALKER(30.0, 0.27, 5.0, 1.0, 0.0, 40),
-    FLICKER(18.0, 0.25, 4.0, 0.9, 0.0, 25),
-    BRUTE(60.0, 0.2, 9.0, 1.4, 0.8, 20),
-    LEECH(14.0, 0.32, 2.0, 0.65, 0.0, 15);
+    FLICKER(18.0, 0.25, 4.0, 1.0, 0.0, 25),
+    BRUTE(60.0, 0.2, 9.0, 1.2, 0.8, 20),
+    LEECH(14.0, 0.32, 2.0, 0.85, 0.0, 15);
 
     private static final LurkerKind[] VALUES = values();
 
