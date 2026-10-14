@@ -13,7 +13,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -32,10 +34,13 @@ import java.util.UUID;
  * world goes on there: a Lurker could come to stand by the empty bed.
  */
 public final class DreamRoom {
-    /** The box sent: this far out from the bed to each side, this far below it and above it. */
+    /**
+     * The box sent: this far out from the bed to each side, this far below it and above it. It stops two blocks up, so
+     * the Window, looking down into the room, sees the bed and not the ceiling over it.
+     */
     public static final int RADIUS = 6;
     public static final int BELOW = 1;
-    public static final int ABOVE = 4;
+    public static final int ABOVE = 2;
     public static final int SIDE = RADIUS * 2 + 1;
     public static final int HEIGHT = BELOW + ABOVE + 1;
     private static final int BLOCKS_EVERY = 20;
@@ -57,7 +62,7 @@ public final class DreamRoom {
         if (player.tickCount % BLOCKS_EVERY == 0) {
             // A portal's ticket: refreshed while they dream, it lapses by itself a few seconds after they wake.
             home.getChunkSource().addTicketWithRadius(TicketType.PORTAL, ChunkPos.containing(bed), 1);
-            sendBlocks(player, home, bed, from.yaw(), false);
+            sendBlocks(player, home, bed, bedFacing(home, bed, from.yaw()), false);
         }
         if (player.tickCount % VISITORS_EVERY == 0) sendVisitors(player, home, from.pos());
     }
@@ -67,7 +72,14 @@ public final class DreamRoom {
         ServerLevel home = player.level().getServer().getLevel(from.dimension());
         SENT_BLOCKS.remove(player.getUUID());
         SENT_VISITORS.remove(player.getUUID());
-        if (home != null) sendBlocks(player, home, BlockPos.containing(from.pos()), from.yaw(), true);
+        BlockPos bed = BlockPos.containing(from.pos());
+        if (home != null) sendBlocks(player, home, bed, bedFacing(home, bed, from.yaw()), true);
+    }
+
+    // Which way the bed points, from its foot to its head, as a yaw; the sleeper's own yaw if there is no bed there.
+    private static float bedFacing(ServerLevel home, BlockPos bed, float otherwise) {
+        BlockState state = home.hasChunkAt(bed) ? home.getBlockState(bed) : null;
+        return state != null && state.getBlock() instanceof BedBlock ? state.getValue(BedBlock.FACING).toYRot() : otherwise;
     }
 
     static void forget(ServerPlayer player) {

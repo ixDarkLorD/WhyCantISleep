@@ -8,7 +8,7 @@
 //   - Lightning: every few seconds a fork of red lightning jumps between two clouds, and for a moment the whole sky
 //     lights up, the banks of smoky cloud nearest it most of all.
 //   - Surges: now and then the red light below swells, and the clouds take its glow from underneath before it sinks.
-//   - Eyes: rarely, a pair of great red eyes opens somewhere in the clouds, looks at you a while, and closes.
+//   - Eyes: now and then, a pair of great red eyes opens somewhere in the clouds, looks at you a while, and closes.
 // Motes of red light hang in the dark. The colors are the Lurker's palette (LurkerPalette.java).
 in vec3 skyLocal;
 in vec3 skyWorld;
@@ -135,11 +135,11 @@ void main() {
     color += (c2 + c3 + haze * 0.5) * surge * CRIMSON * 0.55 * smoothstep(0.4, -0.3, up);
     color += mix(RED, vec3(1.0, 0.75, 0.75), 0.4) * bolt;
 
-    // ---- Eyes: about once a minute, maybe, a pair opens somewhere in the clouds, looks, and closes.
-    float eyePeriod = 47.0;
+    // ---- Eyes: every half minute or so, a pair opens somewhere in the clouds, looks, and closes.
+    float eyePeriod = 26.0;
     float eyeSlot = floor(time / eyePeriod);
     float eyeInto = fract(time / eyePeriod) * eyePeriod;
-    if (hash(vec2(eyeSlot, 9.4)) > 0.45 && eyeInto < 7.0) {
+    if (hash(vec2(eyeSlot, 9.4)) > 0.25 && eyeInto < 7.0) {
         float eyeAngle = hash(vec2(eyeSlot, 4.7)) * TAU;
         vec2 eyeHeading = vec2(cos(eyeAngle), sin(eyeAngle));
         float eyeHeight = mix(0.08, 0.42, hash(vec2(eyeSlot, 6.1)));
