@@ -29,16 +29,20 @@ public abstract class PlayerModelMixin extends HumanoidModel<AvatarRenderState> 
         if (minecraft.player == null || state.id != minecraft.player.getId()) return;
         float age = state.ageInTicks;
         if (DreamTransition.isFalling()) {
-            // Flailing: arms thrown out and clawing at the air, legs kicking, each out of step with the others.
-            this.rightArm.xRot = -2.4F + Mth.sin(age * 0.9F) * 0.7F;
-            this.leftArm.xRot = -2.4F + Mth.sin(age * 0.9F + 2.1F) * 0.7F;
-            this.rightArm.zRot = 0.9F + Mth.sin(age * 0.7F) * 0.5F;
-            this.leftArm.zRot = -0.9F - Mth.sin(age * 0.7F + 1.3F) * 0.5F;
-            this.rightLeg.xRot = Mth.sin(age * 0.8F) * 0.7F;
-            this.leftLeg.xRot = Mth.sin(age * 0.8F + Mth.PI) * 0.7F;
-            this.rightLeg.zRot = 0.25F + Mth.sin(age * 0.5F) * 0.15F;
-            this.leftLeg.zRot = -0.25F - Mth.sin(age * 0.5F + 0.8F) * 0.15F;
-            this.head.xRot = -0.6F + Mth.sin(age * 0.6F) * 0.15F;
+            // Falling face down, spread out like a skydiver: arms flung out to the sides and arched back towards the
+            // sky, legs wide and kicked back, all of it flailing out of step. On this model the right arm and leg go
+            // out with a positive turn about z, the left ones with a negative one; a positive turn about x swings a
+            // limb behind the body, which face down is up.
+            this.rightArm.zRot = 1.25F + Mth.sin(age * 0.7F) * 0.35F;
+            this.leftArm.zRot = -1.25F - Mth.sin(age * 0.7F + 1.3F) * 0.35F;
+            this.rightArm.xRot = 0.45F + Mth.sin(age * 0.95F) * 0.55F;
+            this.leftArm.xRot = 0.45F + Mth.sin(age * 0.95F + 2.1F) * 0.55F;
+            this.rightLeg.zRot = 0.35F + Mth.sin(age * 0.5F) * 0.12F;
+            this.leftLeg.zRot = -0.35F - Mth.sin(age * 0.5F + 0.8F) * 0.12F;
+            this.rightLeg.xRot = 0.5F + Mth.sin(age * 0.8F) * 0.45F;
+            this.leftLeg.xRot = 0.5F + Mth.sin(age * 0.8F + Mth.PI) * 0.45F;
+            // Head craned up, to see what is coming.
+            this.head.xRot = -0.7F + Mth.sin(age * 0.6F) * 0.12F;
         } else if (DreamTransition.isSprawled()) {
             // Landed flat: arms flung out to the sides, legs apart, head turned to one side.
             this.rightArm.xRot = -0.2F;
