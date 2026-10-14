@@ -1,6 +1,7 @@
 # Draws the sleep HUD's own panels and bars as GUI sprites, under assets/whycantisleep/textures/gui/sprites/hud/,
 # each with the .mcmeta that tells the game how to stretch it (nine-slice), so HudStyle draws them at any size:
 #   card.png          the message card and the sleep board: dusk plum, outlined and shaded like the bars
+#   mood_sign.png, lucidity_sign.png  the plaque hanging under each gauge, which carries its reading
 #   mood_medal.png, mood_track.png, mood_frame.png              the mood gauge: a gold coin and a round capsule of blocks
 #   lucidity_medal.png, lucidity_track.png, lucidity_frame.png  the lucidity gauge: a rose diamond and a pointed one
 #   mood_limit.png, lucidity_limit.png  the stripes over the part of a gauge the other bar closes off
@@ -78,6 +79,9 @@ function Card($name, $outline, $outlineDark, $light, $shade, $shadow, $fill, $fi
 
 # Dusk plum, from the same palette as the lucidity bar and the Lurker.
 Card "card" 0x1C1220 0x0A070E 0x7A5A84 0x3A2A3E 0x140E1A 0x221828 244
+# The plaques that hang under the two gauges with their readings on: the same make, in each gauge's own colors.
+Card "mood_sign" 0x2A1608 0x120A04 0xC8922E 0x6A4416 0x1C1206 0x34230E 255
+Card "lucidity_sign" 0x1C1220 0x0A070E 0xB06C90 0x4A2E50 0x140E1A 0x261A2E 255
 
 # The two status gauges are shaped nothing like the card: each is a medal holding its icon, with a track running out
 # of it for its bar. Mood's is a round gold coin on a round-ended bar; lucidity's is a rose-edged diamond on a bar

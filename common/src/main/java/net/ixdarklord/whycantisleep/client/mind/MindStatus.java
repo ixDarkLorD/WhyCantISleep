@@ -45,7 +45,13 @@ public final class MindStatus {
     private static final int INVENTORY_WIDTH = 176;
     private static final int BETWEEN = 8;
     private static final int WIDTH = GAUGE_WIDTH * 2 + BETWEEN;
-    private static final int RISE = HudStyle.MEDAL_SIZE + 3;
+    // Under each bar hangs a plaque with its reading: two short chains from the bar's foot, then the plaque, whose
+    // text is 8 tall inside the panel's padding.
+    private static final int BAR_FOOT = TRACK_Y + 11;
+    private static final int CHAIN_LENGTH = 3;
+    private static final int SIGN_TEXT_Y = BAR_FOOT + CHAIN_LENGTH + HudStyle.PANEL_PADDING;
+    private static final int HEIGHT = SIGN_TEXT_Y + 8 + HudStyle.PANEL_PADDING + 1;
+    private static final int RISE = HEIGHT;
 
     // A glint runs along each fill every few seconds: this long between glints, this long to cross.
     private static final int GLINT_EVERY = 90;
@@ -66,7 +72,8 @@ public final class MindStatus {
         if (!isShown()) return;
         Mind mind = Mind.get(minecraft.player);
         int x = left + (INVENTORY_WIDTH - WIDTH) / 2;
-        int y = top - RISE;
+        // On a short window the inventory is too near the top for all of it: keep it on the screen.
+        int y = Math.max(0, top - RISE);
         int lucidityX = x + GAUGE_WIDTH + BETWEEN;
         float time = Util.getMillis() / 50.0F;
         gauge(graphics, HudStyle.MOOD_TRACK, HudStyle.MOOD_FRAME, HudStyle.MOOD_MEDAL, HudStyle.MOOD_FILL, HudStyle.MOOD_LIMIT, x, y, mind.mood(), mind.moodCeiling(), time);
@@ -75,7 +82,9 @@ public final class MindStatus {
                 mind.lucidityCeiling(),
                 time + GLINT_EVERY / 2.0F);
         lucidityIcon(graphics, mind.stage(), lucidityX + HudStyle.MEDAL_INSET, y + HudStyle.MEDAL_INSET, 1.0F);
-        if (mouseY >= y && mouseY < y + HudStyle.MEDAL_SIZE) {
+        sign(graphics, minecraft.font, HudStyle.MOOD_SIGN, x, y, reading("mood." + mind.moodLevel().key(), mind.mood()), 0xFFD966, 0xC8922E);
+        sign(graphics, minecraft.font, HudStyle.LUCIDITY_SIGN, lucidityX, y, reading("lucidity." + mind.stage().key(), mind.lucidity()), 0xF0C0CC, 0xB06C90);
+        if (mouseY >= y && mouseY < y + HEIGHT) {
             Font font = minecraft.font;
             if (mouseX >= x && mouseX < x + GAUGE_WIDTH) graphics.setComponentTooltipForNextFrame(font, moodLines(mind), mouseX, mouseY);
             else if (mouseX >= lucidityX && mouseX < lucidityX + GAUGE_WIDTH) graphics.setComponentTooltipForNextFrame(font, lucidityLines(mind), mouseX, mouseY);
@@ -95,12 +104,17 @@ public final class MindStatus {
         int filled = value <= 0.0F ? 0 : Math.max(1, Math.round(FILL_WIDTH * Mth.clamp(value / Mind.MAX, 0.0F, 1.0F)));
         if (filled > 0) graphics.blitSprite(RenderPipelines.GUI_TEXTURED, fill, fillX, top, filled, HudStyle.GAUGE_FILL_HEIGHT);
 
+        // The glint is a slanted streak, leaning the way the light falls: each row of it sits a pixel further left
+        // than the row above. It starts wholly off the fill's left end and runs off its right.
         float glint = time % GLINT_EVERY;
         if (glint < GLINT_TICKS && filled > 3) {
-            int at = fillX + Math.round(glint / GLINT_TICKS * (filled + 2)) - 2;
-            for (int i = 0; i < 3; i++) {
-                int column = at + i;
-                if (column >= fillX && column < fillX + filled) graphics.fill(column, top, column + 1, bottom, i == 1 ? 0x90FFFFFF : 0x40FFFFFF);
+            int lean = HudStyle.GAUGE_FILL_HEIGHT - 1;
+            int at = fillX - 3 + Math.round(glint / GLINT_TICKS * (filled + lean + 3)) - lean;
+            for (int row = 0; row < HudStyle.GAUGE_FILL_HEIGHT; row++) {
+                for (int i = 0; i < 3; i++) {
+                    int column = at + i + lean - row;
+                    if (column >= fillX && column < fillX + filled) graphics.fill(column, top + row, column + 1, top + row + 1, i == 1 ? 0x90FFFFFF : 0x40FFFFFF);
+                }
             }
         }
 
@@ -116,6 +130,25 @@ public final class MindStatus {
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, frame, x + TRACK_X, trackY, HudStyle.TRACK_WIDTH, HudStyle.TRACK_HEIGHT);
         HudStyle.medal(graphics, medal, x, y, 1.0F);
     }
+    // What a plaque says: the level in a word, and the value. "Content 72".
+    private static Component reading(String key, float value) {
+        return Component.translatable("gui.whycantisleep.mind.reading", Component.translatable("gui.whycantisleep.mind." + key), Math.round(value));
+    }
+
+    // The plaque under a gauge, centered under its bar: two chains from the bar's foot, the panel, and the reading.
+    private static void sign(GuiGraphicsExtractor graphics, Font font, Identifier sprite, int x, int y, Component text, int textColor, int chainColor) {
+        int width = font.width(text);
+        int left = x + FILL_X + (FILL_WIDTH - width) / 2;
+        int chainY = y + BAR_FOOT;
+        for (int chainX : new int[]{left, left + width - 2}) {
+            // A link's bright side and its dark side.
+            graphics.fill(chainX, chainY, chainX + 1, chainY + CHAIN_LENGTH, HudStyle.color(chainColor, 1.0F));
+            graphics.fill(chainX + 1, chainY, chainX + 2, chainY + CHAIN_LENGTH, 0xFF101014);
+        }
+        HudStyle.panel(graphics, sprite, left, y + SIGN_TEXT_Y, width, 8, 1.0F);
+        graphics.text(font, text, left, y + SIGN_TEXT_Y, HudStyle.color(textColor, 1.0F), true);
+    }
+
     public static void moodIcon(GuiGraphicsExtractor graphics, MoodLevel level, int x, int y, float alpha) {
         int column = switch (level) {
             case CHEERFUL -> 0;
