@@ -1,5 +1,6 @@
 package net.ixdarklord.whycantisleep.lurker.client;
 
+import net.ixdarklord.whycantisleep.lurker.LurkerKind;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 
 /** What the Lurker's model and renderer need beyond any living entity's. */
@@ -13,6 +14,8 @@ public class LurkerRenderState extends LivingEntityRenderState {
     /** Where its pupils sit: -1 to 1, towards its own right and up, 0 straight ahead. */
     public float lookX;
     public float lookY;
+    /** Which kind it is: its skin, and how solid it looks. */
+    public LurkerKind kind = LurkerKind.STALKER;
     /** How far its lids are closed by a blink: 0 not blinking, 1 shut. */
     public float blink;
 }

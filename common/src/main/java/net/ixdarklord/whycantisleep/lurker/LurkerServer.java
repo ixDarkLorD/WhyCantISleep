@@ -2,6 +2,7 @@ package net.ixdarklord.whycantisleep.lurker;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.ixdarklord.coolcatcore.api.event.v2.common.CommandEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.PlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.ServerLifecycleEvents;
@@ -104,12 +105,21 @@ public final class LurkerServer {
                     ctx.getSource().sendSuccess(() -> Component.translatable("commands.whycantisleep.ignored.set", times), true);
                     return times;
                 })))
-                .then(Commands.literal("summon").executes(ctx -> {
-                    ServerPlayer player = ctx.getSource().getPlayerOrException();
-                    boolean came = summon(player);
-                    ctx.getSource().sendSuccess(() -> Component.translatable(came ? "commands.whycantisleep.summon.success" : "commands.whycantisleep.summon.failed"), true);
-                    return came ? 1 : 0;
-                }))));
+                .then(summonCommand())));
+    }
+
+    // "/whycantisleep summon" brings whichever kind comes, "/whycantisleep summon <kind>" that one.
+    private static LiteralArgumentBuilder<CommandSourceStack> summonCommand() {
+        LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal("summon").executes(ctx -> summoned(ctx.getSource(), null));
+        for (LurkerKind kind : LurkerKind.values()) command.then(Commands.literal(kind.key()).executes(ctx -> summoned(ctx.getSource(), kind)));
+        return command;
+    }
+
+    private static int summoned(CommandSourceStack source, @Nullable LurkerKind kind) throws CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
+        boolean came = kind == null ? summon(player) : summon(player, kind);
+        source.sendSuccess(() -> Component.translatable(came ? "commands.whycantisleep.summon.success" : "commands.whycantisleep.summon.failed"), true);
+        return came ? 1 : 0;
     }
 
     // "/whycantisleep <name>" reads one of the two values, "/whycantisleep <name> <0-100>" sets it.
@@ -172,8 +182,13 @@ public final class LurkerServer {
         }
     }
 
-    /** Makes the creature real for a player: out from under their bed when it is near, else from the dark around them. */
+    /** Makes the creature real for a player, as whichever kind comes: see {@link #summon(ServerPlayer, LurkerKind)}. */
     public static boolean summon(ServerPlayer player) {
+        return summon(player, LurkerKind.pick(player.getRandom()));
+    }
+
+    /** Makes a kind of the creature real for a player: out from under their bed when it is near, else from the dark around them. */
+    public static boolean summon(ServerPlayer player, LurkerKind kind) {
         ServerLevel level = player.level();
         BlockPos spot = null;
         Bed bed = LAST_BED.get(player.getUUID());
@@ -190,6 +205,7 @@ public final class LurkerServer {
         LurkerEntity lurker = WCISEntities.LURKER.get().create(level, EntitySpawnReason.TRIGGERED);
         if (lurker == null) return false;
         lurker.snapTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, player.getRandom().nextFloat() * 360.0F, 0.0F);
+        lurker.setKind(kind);
         lurker.setVictim(player.getUUID());
         lurker.setLure(IGNORED.getOrDefault(player.getUUID(), 0));
         if (!level.addFreshEntity(lurker)) return false;
@@ -199,7 +215,7 @@ public final class LurkerServer {
     }
 
     // An open spot to stand on near a block: solid below, room for the creature, within a few blocks up or down.
-    private static @Nullable BlockPos standableNear(ServerLevel level, BlockPos center, int radius, RandomSource random) {
+    static @Nullable BlockPos standableNear(ServerLevel level, BlockPos center, int radius, RandomSource random) {
         for (int attempt = 0; attempt < 16; attempt++) {
             BlockPos column = center.offset(random.nextInt(radius * 2 + 1) - radius, 0, random.nextInt(radius * 2 + 1) - radius);
             for (int dy = 2; dy >= -3; dy--) {
