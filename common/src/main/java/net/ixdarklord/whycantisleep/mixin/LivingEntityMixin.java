@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Hears of every death (CoolCatLib: Core has no death event): what a player killed is what they may feel guilty for. */
+/** Hears of every death (CoolCatLib has no death event): what a player killed is what they may feel guilty for. */
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
     @Inject(method = "die", at = @At("HEAD"))

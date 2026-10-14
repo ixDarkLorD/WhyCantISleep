@@ -8,6 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > Find out what's keeping you awake at night. Highlights the monsters blocking your sleep, explains every failed sleep, and adds a little bedtime fear.
 
+> **CoolCatLib is one mod since 2026-10-14 (version 26.1.2-5):** Core and Canvas merged into **CoolCatLib**, mod id `coolcatlib`. This project now depends on `net.ixdarklord.coolcatlib:coolcatlib-{common,fabric,neoforge}` (`coolcatlib_version`, no `coolcatcanvas_version`), requires `coolcatlib` in `fabric.mod.json` / `neoforge.mods.toml`, and lists its constructors under the `coolcatlib:common` / `coolcatlib:client` entrypoints. The packages are unchanged (`net.ixdarklord.coolcatcore`, `net.ixdarklord.coolcatcanvas`); its sources are `../CoolCatLib-26.1.2/{common,fabric,neoforge}`. Where the notes below say Core, Canvas, `coolcatcore`, `coolcatcanvas` or `coolcatlib-core-*` / `coolcatlib-canvas-*`, read them as this one mod.
+
 A multiloader mod built on the author's libraries **CoolCatLib: Core** (`coolcatcore`, package `net.ixdarklord.coolcatcore`) and **CoolCatLib: Canvas** (`coolcatcanvas`, package `net.ixdarklord.coolcatcanvas`; required since 2026-10-13, at the author's request, for the visuals). The repository is private until the first release.
 
 ### Rules for every session
