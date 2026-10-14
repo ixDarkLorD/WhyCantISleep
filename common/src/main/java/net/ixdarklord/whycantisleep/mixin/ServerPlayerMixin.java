@@ -2,6 +2,7 @@ package net.ixdarklord.whycantisleep.mixin;
 
 import com.mojang.datafixers.util.Either;
 import net.ixdarklord.whycantisleep.lurker.LurkerServer;
+import net.ixdarklord.whycantisleep.deep.LucidDeep;
 import net.ixdarklord.whycantisleep.mind.MindServer;
 import net.ixdarklord.whycantisleep.sleep.SleepServer;
 import net.minecraft.server.level.ServerLevel;
@@ -17,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * What the server needs to hear from a player that CoolCatLib: Core has no event for: why a sleep failed (the game's own
+ * What the server needs to hear from a player that CoolCatLib has no event for: why a sleep failed (the game's own
  * answer), waking after a night's sleep, being hurt and dying.
  */
 @Mixin(ServerPlayer.class)
@@ -43,8 +44,13 @@ public abstract class ServerPlayerMixin {
         if (cir.getReturnValue()) MindServer.onHurt((ServerPlayer) (Object) this, source, damage);
     }
 
-    @Inject(method = "die", at = @At("HEAD"))
+    @Inject(method = "die", at = @At("HEAD"), cancellable = true)
     private void whycantisleep$onDeath(DamageSource source, CallbackInfo ci) {
+        // Dying in the Lucid Deep only wakes a dreamer.
+        if (LucidDeep.onDeath((ServerPlayer) (Object) this)) {
+            ci.cancel();
+            return;
+        }
         MindServer.onPlayerDied((ServerPlayer) (Object) this, source);
     }
 }

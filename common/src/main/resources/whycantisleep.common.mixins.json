@@ -15,7 +15,9 @@
     "client.GuiMixin",
     "client.InventoryScreenMixin",
     "client.MinecraftMixin",
-    "client.MultiPlayerGameModeMixin"
+    "client.MultiPlayerGameModeMixin",
+    "client.PlayerMixin",
+    "client.PlayerModelMixin"
   ],
   "injectors": {
     "defaultRequire": 1

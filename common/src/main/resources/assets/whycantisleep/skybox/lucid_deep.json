@@ -1,0 +1,14 @@
+{
+  "dimensions": ["whycantisleep:lucid_deep"],
+  "hide": ["sky", "sunrise", "sun", "moon", "stars", "void", "end_sky", "end_flash"],
+  "fade_in": 10,
+  "fade_out": 10,
+  "layers": [
+    {
+      "name": "abyss",
+      "type": "shader",
+      "fragment_shader": "whycantisleep:sky/lucid_deep",
+      "fog": 0.15
+    }
+  ]
+}
