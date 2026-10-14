@@ -34,16 +34,16 @@ import net.minecraft.world.phys.Vec3;
  *     <li><b>The fall.</b> The black lifts on them falling out of the sky face down, arms and legs flailing, seen from a
  *     camera falling with them a few blocks above. They hit the island and lie spread out on their face; the view
  *     shakes.</li>
- *     <li><b>Waking up there.</b> They pick themselves up facing the rift. The camera, in front of them, turns slowly
- *     to look up at the rift, and comes back to them and into their eyes, while they say what they are thinking.</li>
+ *     <li><b>Waking up there.</b> They pick themselves up facing the rift. The camera, in front of them, turns where it
+ *     stands to look up at the rift, then glides back into their eyes, while they say what they are thinking.</li>
  * </ol>
  * The server says when the first part starts ({@link DreamTransitionPayload}); everything here is client only. The
  * falling and lying poses are put on the player by {@code PlayerMixin} and {@code PlayerModelMixin}.
  */
 public final class DreamTransition {
     // The pull away from the bed, and when in it the screen goes wholly black (it fades to black over its last part).
-    private static final int DRIFT_TICKS = 58;
-    private static final int BLACK_AT = 52;
+    private static final int DRIFT_TICKS = 110;
+    private static final int BLACK_AT = 104;
     // How long the black lingers after the Deep is there, and how long it takes to lift.
     private static final int SETTLE_TICKS = 4;
     private static final int LIFT_TICKS = 24;
@@ -61,7 +61,7 @@ public final class DreamTransition {
     private enum Stage { NONE, DRIFTING, BLACK, FALLING, LYING }
 
     // When the smoke and tentacles start to creep in, and when they have covered the screen.
-    private static final int SLIP_FROM = 6;
+    private static final int SLIP_FROM = 14;
     private static final int SLIP_TO = BLACK_AT;
 
     private static ScreenEffect cover;
@@ -125,9 +125,9 @@ public final class DreamTransition {
         // One long, even rise, the keyframes on a smooth curve through each other, gathering pace gently.
         Cutscenes.play(Cutscene.builder()
                 .keyframe(0, eye.add(0.0, 1.9, 0.0), yaw, 90)
-                .keyframe(20, eye.add(0.0, 2.6, 0.0), yaw + 3, 90).roll(2).easing(Easing.SINE_IN_OUT).interpolation(Interpolation.SMOOTH)
-                .keyframe(40, eye.add(0.0, 4.6, 0.0), yaw + 9, 90).roll(6).easing(Easing.SINE_IN_OUT).interpolation(Interpolation.SMOOTH)
-                .keyframe(DRIFT_TICKS, eye.add(0.0, 8.5, 0.0), yaw + 16, 90).roll(11).easing(Easing.SINE_IN_OUT).interpolation(Interpolation.SMOOTH)
+                .keyframe(40, eye.add(0.0, 2.8, 0.0), yaw + 4, 90).roll(2).easing(Easing.SINE_IN_OUT).interpolation(Interpolation.SMOOTH)
+                .keyframe(78, eye.add(0.0, 5.2, 0.0), yaw + 11, 90).roll(6).easing(Easing.SINE_IN_OUT).interpolation(Interpolation.SMOOTH)
+                .keyframe(DRIFT_TICKS, eye.add(0.0, 9.5, 0.0), yaw + 18, 90).roll(11).easing(Easing.SINE_IN_OUT).interpolation(Interpolation.SMOOTH)
                 .blendIn(14)
                 .hideHud(true)
                 .lockInput(true)
@@ -164,29 +164,28 @@ public final class DreamTransition {
                 .build());
     }
 
-    // After the fall: they lie a moment, then pick themselves up facing the rift. The camera starts out in front of
-    // them, between them and the rift, looking back at them; slowly turns and lifts to look up at the rift, showing
-    // what they see; holds on it; then comes back round to them and down into their eyes. What they say, shaken, is
-    // written along the bottom.
+    // After the fall: they lie a moment, then pick themselves up facing the rift. The camera does three things, each
+    // easing in and out on its own, with nothing in between: it watches them from in front as they get up, turns where
+    // it stands to look up at the rift, and glides back into their eyes. What they say, shaken, is written along the
+    // bottom.
     private static void arrive(LocalPlayer player) {
         Vec3 feet = player.position();
         float faceRift = 180.0F;
         float upToRift = -LucidDeep.WINDOW_ELEVATION;
-        // North of them is towards the rift: -z.
-        Vec3 front = feet.add(0.0, 1.5, -3.2);
+        // In front of them, towards the rift (north is -z), at their eye height, looking back at them.
+        Vec3 front = feet.add(0.0, 1.5, -3.5);
         Vec3 eye = feet.add(0.0, 1.62, 0.0);
         Cutscenes.play(Cutscene.builder()
-                .keyframe(0, feet.add(0.0, 4.5, -1.0), 0, 70)
-                .keyframe(22, front.add(0.0, 0.5, 0.0), 0, 18).easing(Easing.SINE_IN_OUT).interpolation(Interpolation.SMOOTH)
-                .keyframe(46, front, 0, 8).easing(Easing.SINE_IN_OUT).interpolation(Interpolation.SMOOTH)
-                .keyframe(100, front.add(0.4, 0.6, 0.5), faceRift, upToRift).easing(Easing.SINE_IN_OUT).interpolation(Interpolation.SMOOTH)
-                .keyframe(140, front.add(0.5, 0.7, 0.6), faceRift, upToRift - 2).easing(Easing.SINE_IN_OUT).interpolation(Interpolation.SMOOTH)
-                .keyframe(176, feet.add(0.9, 2.0, 1.6), faceRift - 15, -8).easing(Easing.SINE_IN_OUT).interpolation(Interpolation.SMOOTH)
-                .keyframe(200, eye, faceRift, upToRift * 0.6F).easing(Easing.SINE_IN_OUT).interpolation(Interpolation.SMOOTH)
-                .subtitle(30, 44, Component.translatable("subtitle.whycantisleep.deep.where"))
-                .subtitle(84, 50, Component.translatable("subtitle.whycantisleep.deep.me"))
-                .subtitle(150, 46, Component.translatable("subtitle.whycantisleep.deep.wake"))
-                .blendOut(8)
+                .keyframe(0, front, 0, 8)
+                .keyframe(LIE_TICKS + 24, front, 0, 8).interpolation(Interpolation.LINEAR)
+                .keyframe(LIE_TICKS + 84, front, faceRift, upToRift).easing(Easing.SINE_IN_OUT).interpolation(Interpolation.LINEAR)
+                .keyframe(LIE_TICKS + 124, front, faceRift, upToRift).interpolation(Interpolation.LINEAR)
+                .keyframe(LIE_TICKS + 164, eye, faceRift, upToRift * 0.6F).easing(Easing.SINE_IN_OUT).interpolation(Interpolation.LINEAR)
+                .subtitle(LIE_TICKS + 4, 46, Component.translatable("subtitle.whycantisleep.deep.where"))
+                .subtitle(LIE_TICKS + 70, 52, Component.translatable("subtitle.whycantisleep.deep.me"))
+                .subtitle(LIE_TICKS + 126, 46, Component.translatable("subtitle.whycantisleep.deep.wake"))
+                .blendIn(6)
+                .blendOut(6)
                 .hideHud(true)
                 .lockInput(true)
                 .skippable(true)

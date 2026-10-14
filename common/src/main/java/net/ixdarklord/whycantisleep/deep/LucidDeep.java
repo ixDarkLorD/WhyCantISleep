@@ -19,6 +19,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -61,10 +62,10 @@ public final class LucidDeep {
     public static final float WINDOW_SIZE = 42.0F;
     // How squarely a dreamer must look at their Window for the lens to wake them, as the cosine of the angle off it.
     private static final double WINDOW_AIM = Math.cos(Math.toRadians(WINDOW_SIZE * 0.6));
-    // How many ticks into their sleep a dreamer starts to slip under, and how long that takes: all of it before the night
-    // would pass, at 100.
+    // How many ticks into their sleep a dreamer starts to slip under, and how long that takes. The night doesn't pass
+    // while they slip ({@code PlayerMixin}), however long it takes.
     private static final int DRIFT_START = 20;
-    private static final int DRIFT_TICKS = 58;
+    private static final int DRIFT_TICKS = 110;
     // How far above the island they come out of the sky.
     private static final int FALL_HEIGHT = 40;
     // Lucidity a dreamer loses each second in the Deep: from 75 that is a quarter of an hour.
@@ -84,8 +85,9 @@ public final class LucidDeep {
     public static final int DREAMT = 2;
     public static final Attachment<Integer> ORIGIN = Mind.ATTACHMENTS.builder("dream_origin", Codec.INT, 0).build();
 
-    // Players slipping under, and dreamers still falling to the island.
-    private static final Set<UUID> DRIFTING = new HashSet<>();
+    // Dreamers still falling to the island.
+    // Players slipping under, and the tick each started on (the game's own sleep counter stops at 100).
+    private static final Map<UUID, Integer> DRIFTING = new HashMap<>();
     private static final Set<UUID> FALLING = new HashSet<>();
     // Dreamers hanging where they came out of the sky until their client is ready to watch them fall, and since when.
     private static final Map<UUID, Integer> HELD = new HashMap<>();
@@ -103,6 +105,11 @@ public final class LucidDeep {
             FALLING.remove(player.getUUID());
             HELD.remove(player.getUUID());
         });
+    }
+
+    /** Whether a player is slipping under: lying in bed with the lens, on the way to the Deep. */
+    public static boolean isSlipping(Player player) {
+        return DRIFTING.containsKey(player.getUUID());
     }
 
     public static boolean isDeep(Level level) {
@@ -160,7 +167,7 @@ public final class LucidDeep {
     // A sleeper holding the lens with a clear mind slips under: their client is told to show it, and when it has,
     // they go under. Waking first (or being woken) stops it.
     private static void drift(ServerPlayer player) {
-        boolean drifting = DRIFTING.contains(player.getUUID());
+        boolean drifting = DRIFTING.containsKey(player.getUUID());
         if (!player.isSleeping() || !holdsLens(player)) {
             if (drifting) {
                 DRIFTING.remove(player.getUUID());
@@ -174,10 +181,10 @@ public final class LucidDeep {
                 player.sendOverlayMessage(Component.translatable("message.whycantisleep.deep.too_clouded").withStyle(ChatFormatting.LIGHT_PURPLE));
                 return;
             }
-            DRIFTING.add(player.getUUID());
+            DRIFTING.put(player.getUUID(), player.tickCount);
             Vec3 eye = player.getEyePosition();
             WCISNetwork.sendToPlayer(player, new DreamTransitionPayload(DreamTransitionPayload.DRIFT, eye.x, eye.y, eye.z, player.getYRot()));
-        } else if (drifting && asleep >= DRIFT_START + DRIFT_TICKS) {
+        } else if (drifting && player.tickCount - DRIFTING.get(player.getUUID()) >= DRIFT_TICKS) {
             DRIFTING.remove(player.getUUID());
             goUnder(player);
         }
