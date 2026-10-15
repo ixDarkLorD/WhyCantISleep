@@ -1,5 +1,6 @@
 package net.ixdarklord.whycantisleep.lurker;
 
+import net.ixdarklord.whycantisleep.deep.WCISItems;
 import net.ixdarklord.whycantisleep.sound.WCISSounds;
 import net.ixdarklord.whycantisleep.mind.Mind;
 import net.ixdarklord.whycantisleep.mind.MindServer;
@@ -224,7 +225,9 @@ public class LurkerEntity extends Monster {
         }
         if (!(this.level() instanceof ServerLevel level) || !this.isAlive()) return;
         Player player = this.victim == null ? null : level.getPlayerByUUID(this.victim);
-        boolean present = player != null && player.isAlive() && !player.isCreative() && !player.isSpectator() && player.distanceToSqr(this) < REACH * REACH;
+        // The Weeping Veil hides its wearer: to a Lurker they are as good as gone.
+        boolean present = player != null && player.isAlive() && !player.isCreative() && !player.isSpectator() && player.distanceToSqr(this) < REACH * REACH
+                && !WCISItems.wearsVeil(player);
         this.entityData.set(VICTIM_ID, present ? player.getId() : 0);
         if (!this.isHunting() && present) this.watch(level, player);
         // Out of reach altogether counts as clear of it too.

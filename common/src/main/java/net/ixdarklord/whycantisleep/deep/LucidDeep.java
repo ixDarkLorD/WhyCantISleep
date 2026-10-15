@@ -100,7 +100,10 @@ public final class LucidDeep {
             if (player instanceof ServerPlayer serverPlayer) tick(serverPlayer);
         });
         PlayerEvents.LEAVE.register(player -> {
-            if (player instanceof ServerPlayer serverPlayer) DreamRoom.forget(serverPlayer);
+            if (player instanceof ServerPlayer serverPlayer) {
+                DreamRoom.forget(serverPlayer);
+                DreamCastle.forget(serverPlayer);
+            }
             DRIFTING.remove(player.getUUID());
             FALLING.remove(player.getUUID());
             HELD.remove(player.getUUID());
@@ -123,6 +126,12 @@ public final class LucidDeep {
     }
 
     private static void tick(ServerPlayer player) {
+        // Anyone in the Deep, dreaming or not, sees the storm over the castle.
+        if (isDeep(player.level())) {
+            DreamCastle.tell(player, (ServerLevel) player.level());
+        } else {
+            DreamCastle.forget(player);
+        }
         Dream dream = Dream.DREAM.get(player);
         if (!dream.dreaming()) {
             drift(player);
@@ -133,6 +142,7 @@ public final class LucidDeep {
             Dream.DREAM.set(player, Dream.AWAKE);
             clearOrigins(player);
             DreamRoom.forget(player);
+            DreamCastle.forget(player);
             return;
         }
         DreamRoom.tick(player, dream.from().get());
@@ -279,6 +289,7 @@ public final class LucidDeep {
         clearOrigins(player);
         Dream.DREAM.set(player, Dream.AWAKE);
         DreamRoom.forget(player);
+        DreamCastle.forget(player);
         player.fallDistance = 0.0;
         player.teleport(new TeleportTransition(home, from.pos(), Vec3.ZERO, from.yaw(), 0.0F, TeleportTransition.DO_NOTHING));
         String key = kept ? "message.whycantisleep.deep.woke" : faded > 0 ? "message.whycantisleep.deep.woke_faded" : "message.whycantisleep.deep.woke_lost";

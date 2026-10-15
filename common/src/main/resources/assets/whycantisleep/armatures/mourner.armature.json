@@ -1,0 +1,23 @@
+{
+  "glow_textures": [
+    "whycantisleep:textures/armatures/mourner_glow.png"
+  ],
+  "transition": {
+    "duration": 0.2,
+    "easing": "sine_in_out"
+  },
+  "look_at": {
+    "head": {
+      "max_yaw": 50,
+      "max_pitch": 30,
+      "smoothing": 0.15
+    }
+  },
+  "springs": {
+    "right_arm": {
+      "stiffness": 200,
+      "damping": 14,
+      "weight": 0.3
+    }
+  }
+}

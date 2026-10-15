@@ -20,6 +20,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -55,11 +56,13 @@ public final class DreamTransition {
     private static final double CAMERA_ABOVE = 6.5;
     // How long they lie there after the fall before they get up, in the scene that follows it.
     private static final int LIE_TICKS = 26;
-    // Getting up: pushing up off the ground on their arms, then up on to their feet from a crouch.
-    private static final int RISE_TICKS = 30;
-    private static final float PUSH_UP_PART = 0.45F;
+    // Getting up (the get_up clip, DreamerAnimations): hands under the shoulders, chest up, a knee brought forward,
+    // and up off the other one. The clip is as long.
+    private static final int RISE_TICKS = 48;
+    // The arrival camera watches them from in front until they are up, a moment after it.
+    private static final int WATCH_TICKS = LIE_TICKS + RISE_TICKS + 6;
     // The arrival scene lasts this long from the landing; the rift closes a moment after it.
-    private static final int SCENE_TICKS = LIE_TICKS + 164;
+    private static final int SCENE_TICKS = WATCH_TICKS + 140;
     private static final int CLOSE_AFTER = 30;
     // How fast the rift opens and closes, a share of the way each tick.
     private static final float RIFT_OPENING = 0.06F;
@@ -81,6 +84,14 @@ public final class DreamTransition {
     private static int ticks;
     // The rift: how open it is now and last tick (0 to 1); whether it has been allowed to close since they arrived; and
     // ticks since the landing, to know when the arrival scene is over (-1 when there was none).
+    // Lightning thrown out of the rift: a strike lasts this long, and the next comes this many ticks after it, give or
+    // take. While one lasts its seed and age are what the rift's shader draws it from.
+    private static final int STRIKE_TICKS = 9;
+    private static final RandomSource RANDOM = RandomSource.create();
+    private static ScreenEffect strikeFlash;
+    private static float strikeSeed;
+    private static int strikeAge = -1;
+    private static int nextStrike = 20;
     private static float rift = 1.0F;
     private static float riftO = 1.0F;
     private static boolean riftSettled;
@@ -102,6 +113,10 @@ public final class DreamTransition {
                 .strength(context -> slipped);
         ClientTickEvents.END.register(DreamTransition::tick);
         ClientTickEvents.END.register(DreamTransition::tickRift);
+        // A strike lights up the world for a moment, red.
+        strikeFlash = ScreenEffects.tint(WhyCantISleep.id("rift_strike"), 0x40FF3040)
+                .selectable(false)
+                .fade(1, 8, Easing.SINE_OUT);
         ClientPlayerEvents.LEAVE.register(player -> reset());
     }
 
@@ -110,28 +125,17 @@ public final class DreamTransition {
         return stage == Stage.DRIFTING || stage == Stage.BLACK;
     }
 
-    /** Whether the player is falling or lying face down: their body is laid flat. */
-    public static boolean isLyingFaceDown() {
-        return stage == Stage.FALLING || stage == Stage.LYING || stage == Stage.RISING && riseProgress(0.0F) < PUSH_UP_PART;
-    }
-
-    /** Whether they are on their feet but still crouched, coming up from the ground. */
-    public static boolean isCrouchingUp() {
-        return stage == Stage.RISING && riseProgress(0.0F) >= PUSH_UP_PART;
-    }
-
-    /** Whether they are getting up, and how far: 0 still flat, {@link #PUSH_UP_PART} up on their arms, 1 standing. */
+    /** Whether they are getting up off the ground. */
     public static boolean isRising() {
         return stage == Stage.RISING;
     }
 
-    public static float riseProgress(float partialTick) {
-        return stage == Stage.RISING ? Mth.clamp((ticks + partialTick) / RISE_TICKS, 0.0F, 1.0F) : 0.0F;
-    }
-
-    /** The share of getting up that is pushing up off the ground. */
-    public static float pushUpPart() {
-        return PUSH_UP_PART;
+    /** The strike out of the rift now: seed, how far through it is (0 to 1, or 1 for none), and how bright. */
+    public static void strike(float partialTick, float[] out) {
+        boolean on = strikeAge >= 0;
+        out[0] = strikeSeed;
+        out[1] = on ? Mth.clamp((strikeAge + partialTick) / STRIKE_TICKS, 0.0F, 1.0F) : 1.0F;
+        out[2] = on ? Mth.clamp(rift * 1.5F, 0.0F, 1.0F) : 0.0F;
     }
 
     /** How open the rift is, 0 (healed shut) to 1. */
@@ -218,13 +222,13 @@ public final class DreamTransition {
         Vec3 eye = feet.add(0.0, 1.62, 0.0);
         Cutscenes.play(Cutscene.builder()
                 .keyframe(0, front, 0, 8)
-                .keyframe(LIE_TICKS + 24, front, 0, 8).interpolation(Interpolation.LINEAR)
-                .keyframe(LIE_TICKS + 84, front, faceRift, upToRift).easing(Easing.SINE_IN_OUT).interpolation(Interpolation.LINEAR)
-                .keyframe(LIE_TICKS + 124, front, faceRift, upToRift).interpolation(Interpolation.LINEAR)
-                .keyframe(LIE_TICKS + 164, eye, faceRift, upToRift * 0.6F).easing(Easing.SINE_IN_OUT).interpolation(Interpolation.LINEAR)
+                .keyframe(WATCH_TICKS, front, 0, 8).interpolation(Interpolation.LINEAR)
+                .keyframe(WATCH_TICKS + 60, front, faceRift, upToRift).easing(Easing.SINE_IN_OUT).interpolation(Interpolation.LINEAR)
+                .keyframe(WATCH_TICKS + 100, front, faceRift, upToRift).interpolation(Interpolation.LINEAR)
+                .keyframe(WATCH_TICKS + 140, eye, faceRift, upToRift * 0.6F).easing(Easing.SINE_IN_OUT).interpolation(Interpolation.LINEAR)
                 .subtitle(LIE_TICKS + 4, 46, Component.translatable("subtitle.whycantisleep.deep.where"))
-                .subtitle(LIE_TICKS + 70, 52, Component.translatable("subtitle.whycantisleep.deep.me"))
-                .subtitle(LIE_TICKS + 126, 46, Component.translatable("subtitle.whycantisleep.deep.wake"))
+                .subtitle(WATCH_TICKS + 46, 52, Component.translatable("subtitle.whycantisleep.deep.me"))
+                .subtitle(WATCH_TICKS + 102, 46, Component.translatable("subtitle.whycantisleep.deep.wake"))
                 .blendIn(6)
                 .blendOut(6)
                 .hideHud(true)
@@ -304,6 +308,16 @@ public final class DreamTransition {
         }
         if (sinceLanding >= 0) sinceLanding++;
         if (!riftSettled && (sinceLanding > SCENE_TICKS + CLOSE_AFTER || sinceLanding < 0 && stage == Stage.NONE)) riftSettled = true;
+        // Lightning, while it is open: a strike every second or two, lighting up the world as it hits.
+        if (strikeAge >= 0 && ++strikeAge > STRIKE_TICKS) strikeAge = -1;
+        if (rift > 0.25F && --nextStrike <= 0) {
+            strikeSeed = RANDOM.nextFloat() * 1000.0F;
+            strikeAge = 0;
+            nextStrike = 18 + RANDOM.nextInt(36);
+            strikeFlash.enableFor(2);
+            minecraft.level.setSkyFlashTime(3);
+        }
+        if (rift > 0.2F && DreamRoomView.has()) RiftEmbers.tick(player, rift);
         boolean looking = player.isUsingItem() && player.getUseItem().is(WCISItems.DREAM_LENS.get());
         float target = !riftSettled || looking ? 1.0F : 0.0F;
         rift = target > rift ? Math.min(target, rift + RIFT_OPENING) : Math.max(target, rift - RIFT_CLOSING);

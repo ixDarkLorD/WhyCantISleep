@@ -1,0 +1,156 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.briar_archer.idle": {
+      "loop": true,
+      "animation_length": 3.0,
+      "bones": {
+        "body": {
+          "rotation": [
+            "4 + 2 * math.sin(q.anim_time * 120)",
+            0,
+            0
+          ]
+        },
+        "right_arm": {
+          "rotation": [
+            "-8 + 3 * math.sin(q.anim_time * 120)",
+            0,
+            4
+          ]
+        },
+        "left_arm": {
+          "rotation": [
+            "-6 + 3 * math.sin(q.anim_time * 120 + 60)",
+            0,
+            -4
+          ]
+        },
+        "right_forearm": {
+          "rotation": [
+            -15,
+            0,
+            0
+          ]
+        },
+        "left_forearm": {
+          "rotation": [
+            -10,
+            0,
+            0
+          ]
+        },
+        "head": {
+          "rotation": [
+            0,
+            0,
+            "4 * math.sin(q.anim_time * 60)"
+          ]
+        }
+      }
+    },
+    "animation.briar_archer.walk": {
+      "loop": true,
+      "animation_length": 1.0,
+      "bones": {
+        "right_leg": {
+          "rotation": [
+            "36 * math.sin(q.anim_time * 360)",
+            0,
+            0
+          ]
+        },
+        "left_leg": {
+          "rotation": [
+            "-36 * math.sin(q.anim_time * 360)",
+            0,
+            0
+          ]
+        },
+        "right_arm": {
+          "rotation": [
+            "-6 - 26 * math.sin(q.anim_time * 360)",
+            0,
+            0
+          ]
+        },
+        "left_arm": {
+          "rotation": [
+            "-6 + 26 * math.sin(q.anim_time * 360)",
+            0,
+            0
+          ]
+        },
+        "body": {
+          "rotation": [
+            4,
+            "4 * math.sin(q.anim_time * 360)",
+            0
+          ]
+        },
+        "right_shin": {
+          "rotation": [
+            "math.max(0, 40 * math.sin(q.anim_time * 360 + 90))",
+            0,
+            0
+          ]
+        },
+        "left_shin": {
+          "rotation": [
+            "math.max(0, -40 * math.sin(q.anim_time * 360 + 90))",
+            0,
+            0
+          ]
+        }
+      }
+    },
+    "animation.briar_archer.aim": {
+      "loop": true,
+      "animation_length": 2.0,
+      "bones": {
+        "right_arm": {
+          "rotation": [
+            -90,
+            -8,
+            0
+          ]
+        },
+        "left_arm": {
+          "rotation": [
+            -90,
+            30,
+            0
+          ]
+        },
+        "body": {
+          "rotation": [
+            0,
+            -10,
+            0
+          ]
+        },
+        "right_forearm": {
+          "rotation": [
+            0,
+            0,
+            0
+          ]
+        },
+        "left_forearm": {
+          "rotation": [
+            -30,
+            0,
+            0
+          ]
+        },
+        "head": {
+          "rotation": [
+            0,
+            0,
+            "2 * math.sin(q.anim_time * 180)"
+          ]
+        }
+      }
+    }
+  }
+}

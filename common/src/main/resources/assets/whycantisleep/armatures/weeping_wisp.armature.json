@@ -1,0 +1,9 @@
+{
+  "glow_textures": [
+    "whycantisleep:textures/armatures/weeping_wisp_glow.png"
+  ],
+  "transition": {
+    "duration": 0.2,
+    "easing": "sine_in_out"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "tip=true,waterlogged=false": {
+      "model": "whycantisleep:block/weeping_veins"
+    },
+    "tip=true,waterlogged=true": {
+      "model": "whycantisleep:block/weeping_veins"
+    },
+    "tip=false,waterlogged=false": {
+      "model": "whycantisleep:block/weeping_veins_plant"
+    },
+    "tip=false,waterlogged=true": {
+      "model": "whycantisleep:block/weeping_veins_plant"
+    }
+  }
+}

@@ -1,0 +1,218 @@
+{
+  "materials": {
+    "heart": "emissive"
+  },
+  "glow_textures": [
+    "whycantisleep:textures/armatures/gardener_glow.png"
+  ],
+  "springs": {
+    "cloak_0": {
+      "stiffness": 70,
+      "damping": 5.5,
+      "gravity": 1.5,
+      "max_angle": 55,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 4.8
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.2
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.2
+        },
+        {
+          "point": "spike_0",
+          "radius": 1.8
+        },
+        {
+          "point": "spike_1",
+          "radius": 1.8
+        },
+        {
+          "point": "spike_2",
+          "radius": 1.8
+        },
+        {
+          "point": "spike_3",
+          "radius": 1.8
+        }
+      ]
+    },
+    "cloak_1": {
+      "stiffness": 56,
+      "damping": 4.7,
+      "gravity": 3.0,
+      "max_angle": 65,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 4.8
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.2
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.2
+        },
+        {
+          "point": "spike_0",
+          "radius": 1.8
+        },
+        {
+          "point": "spike_1",
+          "radius": 1.8
+        },
+        {
+          "point": "spike_2",
+          "radius": 1.8
+        },
+        {
+          "point": "spike_3",
+          "radius": 1.8
+        }
+      ]
+    },
+    "cloak_2": {
+      "stiffness": 42,
+      "damping": 3.9,
+      "gravity": 4.5,
+      "max_angle": 75,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 4.8
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.2
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.2
+        },
+        {
+          "point": "spike_0",
+          "radius": 1.8
+        },
+        {
+          "point": "spike_1",
+          "radius": 1.8
+        },
+        {
+          "point": "spike_2",
+          "radius": 1.8
+        },
+        {
+          "point": "spike_3",
+          "radius": 1.8
+        }
+      ]
+    },
+    "cloak_3": {
+      "stiffness": 28,
+      "damping": 3.0999999999999996,
+      "gravity": 6.0,
+      "max_angle": 85,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 4.8
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.2
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.2
+        },
+        {
+          "point": "spike_0",
+          "radius": 1.8
+        },
+        {
+          "point": "spike_1",
+          "radius": 1.8
+        },
+        {
+          "point": "spike_2",
+          "radius": 1.8
+        },
+        {
+          "point": "spike_3",
+          "radius": 1.8
+        }
+      ]
+    },
+    "veil": {
+      "stiffness": 70,
+      "damping": 6,
+      "max_angle": 35
+    }
+  },
+  "look_at": {
+    "head": {
+      "max_yaw": 55,
+      "max_pitch": 35,
+      "smoothing": 0.12
+    }
+  },
+  "props": [
+    {
+      "point": "grip",
+      "model": "whycantisleep:models/obj/gardener_scythe.obj",
+      "texture": "whycantisleep:textures/obj/gardener_scythe.png",
+      "part": "scythe",
+      "material": "cutout"
+    },
+    {
+      "point": "grip",
+      "model": "whycantisleep:models/obj/gardener_scythe.obj",
+      "texture": "whycantisleep:textures/obj/gardener_scythe.png",
+      "part": "gem",
+      "material": "emissive"
+    }
+  ],
+  "transition": {
+    "duration": 0.25,
+    "easing": "sine_in_out"
+  }
+}

@@ -1,6 +1,6 @@
 #version 330
 
-#moj_import <coolcatcanvas:screen_effect.glsl>
+#moj_import <coolcatlib:screen_effect.glsl>
 
 // The Lurker's presence (whycantisleep:dread, driven by LurkerPresence).
 //   Strength  how near it is: color drains and a crawling darkness closes in from the edges.

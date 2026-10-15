@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "whycantisleep:block/weeping_veins_plant"
+  }
+}

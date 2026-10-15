@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "whycantisleep:block/polished_dreamstone",
+        "weight": 3
+      },
+      {
+        "model": "whycantisleep:block/polished_dreamstone_1"
+      }
+    ]
+  }
+}

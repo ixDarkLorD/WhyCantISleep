@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "whycantisleep:block/sleepwood_log"
+    },
+    "axis=z": {
+      "model": "whycantisleep:block/sleepwood_log_horizontal",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "whycantisleep:block/sleepwood_log_horizontal",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

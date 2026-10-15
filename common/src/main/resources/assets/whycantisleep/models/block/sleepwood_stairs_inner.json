@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "bottom": "whycantisleep:block/sleepwood_planks",
+    "top": "whycantisleep:block/sleepwood_planks",
+    "side": "whycantisleep:block/sleepwood_planks"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "whycantisleep:block/dread_brazier"
+    },
+    "facing=east": {
+      "model": "whycantisleep:block/dread_brazier",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "whycantisleep:block/dread_brazier",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "whycantisleep:block/dread_brazier",
+      "y": 270
+    }
+  }
+}
