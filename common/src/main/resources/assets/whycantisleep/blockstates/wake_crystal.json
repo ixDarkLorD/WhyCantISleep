@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=up": {
+      "model": "whycantisleep:block/wake_crystal"
+    },
+    "facing=down": {
+      "model": "whycantisleep:block/wake_crystal",
+      "x": 180
+    },
+    "facing=north": {
+      "model": "whycantisleep:block/wake_crystal",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "whycantisleep:block/wake_crystal",
+      "x": 90,
+      "y": 180
+    },
+    "facing=east": {
+      "model": "whycantisleep:block/wake_crystal",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west": {
+      "model": "whycantisleep:block/wake_crystal",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

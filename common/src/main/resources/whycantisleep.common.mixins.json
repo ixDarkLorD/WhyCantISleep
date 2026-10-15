@@ -8,6 +8,8 @@
     "FoodPropertiesMixin",
     "LivingEntityMixin",
     "PlayerMixin",
+    "ServerExplosionMixin",
+    "ServerPlayerGameModeMixin",
     "ServerPlayerMixin"
   ],
   "client": [
@@ -16,9 +18,7 @@
     "client.GuiMixin",
     "client.InventoryScreenMixin",
     "client.MinecraftMixin",
-    "client.MultiPlayerGameModeMixin",
-    "client.PlayerMixin",
-    "client.PlayerModelMixin"
+    "client.MultiPlayerGameModeMixin"
   ],
   "injectors": {
     "defaultRequire": 1

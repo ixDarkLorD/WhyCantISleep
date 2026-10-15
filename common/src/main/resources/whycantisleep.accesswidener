@@ -1,0 +1,4 @@
+accessWidener v2 official
+
+# Creative tab contents: displayItems((parameters, output) -> ...) needs the Output type.
+accessible class net/minecraft/world/item/CreativeModeTab$Output

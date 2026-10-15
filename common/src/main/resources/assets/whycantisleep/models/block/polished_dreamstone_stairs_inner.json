@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "bottom": "whycantisleep:block/polished_dreamstone",
+    "top": "whycantisleep:block/polished_dreamstone",
+    "side": "whycantisleep:block/polished_dreamstone"
+  }
+}

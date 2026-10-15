@@ -1,0 +1,87 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "all": "whycantisleep:block/veined_dreamstone",
+    "veins": "whycantisleep:block/veined_dreamstone_veins",
+    "particle": "whycantisleep:block/veined_dreamstone"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#all",
+          "cullface": "down"
+        },
+        "up": {
+          "texture": "#all",
+          "cullface": "up"
+        },
+        "north": {
+          "texture": "#all",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#all",
+          "cullface": "south"
+        },
+        "west": {
+          "texture": "#all",
+          "cullface": "west"
+        },
+        "east": {
+          "texture": "#all",
+          "cullface": "east"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "light_emission": 15,
+      "faces": {
+        "down": {
+          "texture": "#veins",
+          "cullface": "down"
+        },
+        "up": {
+          "texture": "#veins",
+          "cullface": "up"
+        },
+        "north": {
+          "texture": "#veins",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#veins",
+          "cullface": "south"
+        },
+        "west": {
+          "texture": "#veins",
+          "cullface": "west"
+        },
+        "east": {
+          "texture": "#veins",
+          "cullface": "east"
+        }
+      }
+    }
+  ]
+}

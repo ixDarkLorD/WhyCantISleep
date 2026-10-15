@@ -21,14 +21,29 @@ import net.minecraft.util.Mth;
  * they stand.
  */
 public final class DeepClient {
+    // The rift's sprite is this many times the size of the tear itself, to leave room round it for its glow and the
+    // lightning it throws out (shaders/sky/dream_window.fsh has the same number).
+    private static final float RIFT_REACH = 2.2F;
+
     private DeepClient() {
     }
 
     public static void init() {
         DreamRoomView.init();
         DreamTransition.init();
+        CastleVortex.init();
+        DreamerAnimations.init();
+        GardenerClient.init();
+        HeartPortalClient.init();
+        ReliquaryClient.init();
+        TombClient.init();
+        LabyrinthMobsClient.init();
+        TearGlowClient.init();
+        GardenWardClient.init();
+        FlameBloomClient.init();
+        DeepSkyClient.init();
         Skyboxes.register(WhyCantISleep.id("dream_window"), SkyboxDefinition.builder()
-                        .layer(SkyLayerDefinition.sprite(DreamRoomView.TEXTURE, LucidDeep.WINDOW_SIZE)
+                        .layer(SkyLayerDefinition.sprite(DreamRoomView.TEXTURE, LucidDeep.WINDOW_SIZE * RIFT_REACH)
                                 .name("window")
                                 .fragmentShader(WhyCantISleep.id("sky/dream_window"))
                                 // Tipped down from overhead to its height above the northern horizon.
@@ -47,9 +62,11 @@ public final class DeepClient {
                     DreamRoomView.use();
                     out[0] = Mth.clamp(DreamRoomView.daylight(), 0.3F, 1.0F);
                     out[1] = 0.92F + 0.08F * Mth.sin((float) (System.currentTimeMillis() % 100000L) * 0.0015F);
-                    // z: how open the rift is; it closes after they arrive and opens when they look for it.
-                    out[2] = DreamTransition.riftOpen(1.0F);
-                });
+                    // z: how open the rift is; it closes after they arrive and opens when they look for it. Out of
+                    // the Deep it is shut at once, so nothing of it shows while the sky fades back to the real one.
+                    out[2] = context.inDimension(LucidDeep.LEVEL) ? DreamTransition.riftOpen(1.0F) : 0.0F;
+                })
+                .bindParam(1, (context, out) -> DreamTransition.strike(0.0F, out));
 
         ItemTooltipEvents.MODIFY.register((stack, context, flag, lines) -> {
             if (stack.is(WCISItems.DREAM_LENS.get())) {

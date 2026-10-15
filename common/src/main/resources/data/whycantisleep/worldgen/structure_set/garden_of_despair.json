@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "whycantisleep:garden_of_despair",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 44,
+    "separation": 16,
+    "salt": 71230002
+  }
+}

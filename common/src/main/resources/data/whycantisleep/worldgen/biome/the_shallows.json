@@ -38,7 +38,7 @@
   "carvers": [],
   "downfall": 0.0,
   "effects": {
-    "water_color": "#3a1020"
+    "water_color": "#7a0e1e"
   },
   "features": [
     [],
@@ -47,10 +47,20 @@
     [],
     [],
     [],
+    [
+      "whycantisleep:ore_veined_dreamstone"
+    ],
     [],
     [],
-    [],
-    [],
+    [
+      "whycantisleep:dead_sleepwood",
+      "whycantisleep:lucid_blooms",
+      "whycantisleep:despair_thorns",
+      "whycantisleep:broken_pillar",
+      "whycantisleep:wake_crystal",
+      "whycantisleep:hanging_veins",
+      "whycantisleep:hanging_lantern"
+    ],
     []
   ],
   "has_precipitation": false,

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "whycantisleep:block/ashen_moss_top",
+    "bottom": "whycantisleep:block/ashen_soil",
+    "side": "whycantisleep:block/ashen_moss_side"
+  }
+}

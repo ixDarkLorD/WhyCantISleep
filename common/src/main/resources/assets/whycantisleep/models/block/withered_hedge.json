@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/leaves",
+  "textures": {
+    "all": "whycantisleep:block/withered_hedge"
+  }
+}

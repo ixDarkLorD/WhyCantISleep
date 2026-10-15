@@ -1,0 +1,215 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.hedge_warden.idle": {
+      "loop": true,
+      "animation_length": 4.0,
+      "bones": {
+        "body": {
+          "rotation": [
+            "3 + 1.5 * math.sin(q.anim_time * 90)",
+            0,
+            0
+          ]
+        },
+        "right_arm": {
+          "rotation": [
+            "-4 + 2 * math.sin(q.anim_time * 90)",
+            0,
+            6
+          ]
+        },
+        "left_arm": {
+          "rotation": [
+            "-4 + 2 * math.sin(q.anim_time * 90 + 90)",
+            0,
+            -6
+          ]
+        },
+        "right_forearm": {
+          "rotation": [
+            -10,
+            0,
+            0
+          ]
+        },
+        "left_forearm": {
+          "rotation": [
+            -10,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    "animation.hedge_warden.walk": {
+      "loop": true,
+      "animation_length": 1.6,
+      "bones": {
+        "right_leg": {
+          "rotation": [
+            "22 * math.sin(q.anim_time * 360)",
+            0,
+            0
+          ]
+        },
+        "left_leg": {
+          "rotation": [
+            "-22 * math.sin(q.anim_time * 360)",
+            0,
+            0
+          ]
+        },
+        "right_arm": {
+          "rotation": [
+            "-6 - 18 * math.sin(q.anim_time * 360)",
+            0,
+            0
+          ]
+        },
+        "left_arm": {
+          "rotation": [
+            "-6 + 18 * math.sin(q.anim_time * 360)",
+            0,
+            0
+          ]
+        },
+        "body": {
+          "rotation": [
+            6,
+            "5 * math.sin(q.anim_time * 225)",
+            "3 * math.sin(q.anim_time * 225)"
+          ]
+        },
+        "right_shin": {
+          "rotation": [
+            "math.max(0, 40 * math.sin(q.anim_time * 360 + 90))",
+            0,
+            0
+          ]
+        },
+        "left_shin": {
+          "rotation": [
+            "math.max(0, -40 * math.sin(q.anim_time * 360 + 90))",
+            0,
+            0
+          ]
+        }
+      }
+    },
+    "animation.hedge_warden.attack": {
+      "loop": false,
+      "animation_length": 0.8,
+      "bones": {
+        "right_arm": {
+          "rotation": {
+            "0.0": {
+              "post": [
+                0,
+                0,
+                6
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.3": {
+              "post": [
+                -150,
+                0,
+                10
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.5": {
+              "post": [
+                -40,
+                0,
+                6
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.8": {
+              "post": [
+                0,
+                0,
+                6
+              ],
+              "lerp_mode": "catmullrom"
+            }
+          }
+        },
+        "left_arm": {
+          "rotation": {
+            "0.0": {
+              "post": [
+                0,
+                0,
+                -6
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.3": {
+              "post": [
+                -150,
+                0,
+                -10
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.5": {
+              "post": [
+                -40,
+                0,
+                -6
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.8": {
+              "post": [
+                0,
+                0,
+                -6
+              ],
+              "lerp_mode": "catmullrom"
+            }
+          }
+        },
+        "body": {
+          "rotation": {
+            "0.0": {
+              "post": [
+                3,
+                0,
+                0
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.3": {
+              "post": [
+                -12,
+                0,
+                0
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.5": {
+              "post": [
+                18,
+                0,
+                0
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.8": {
+              "post": [
+                3,
+                0,
+                0
+              ],
+              "lerp_mode": "catmullrom"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "whycantisleep:block/stone_planter"
+    },
+    "facing=east": {
+      "model": "whycantisleep:block/stone_planter",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "whycantisleep:block/stone_planter",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "whycantisleep:block/stone_planter",
+      "y": 270
+    }
+  }
+}

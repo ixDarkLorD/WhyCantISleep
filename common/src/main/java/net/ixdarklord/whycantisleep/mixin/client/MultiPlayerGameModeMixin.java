@@ -1,6 +1,9 @@
 package net.ixdarklord.whycantisleep.mixin.client;
 
 import net.ixdarklord.whycantisleep.client.SleepClient;
+import net.ixdarklord.whycantisleep.deep.client.GardenWardClient;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
@@ -17,5 +20,11 @@ public abstract class MultiPlayerGameModeMixin {
     @Inject(method = "useItemOn", at = @At("HEAD"), cancellable = true)
     private void whycantisleep$onUseBlock(LocalPlayer player, InteractionHand hand, BlockHitResult blockHit, CallbackInfoReturnable<InteractionResult> cir) {
         if (SleepClient.onUseBlock(player, blockHit.getBlockPos())) cir.setReturnValue(InteractionResult.FAIL);
+    }
+
+    // A block the Garden's ward holds is not cracked: the blow rings off it (GardenWardClient).
+    @Inject(method = "continueDestroyBlock", at = @At("HEAD"), cancellable = true)
+    private void whycantisleep$wardHolds(BlockPos pos, Direction face, CallbackInfoReturnable<Boolean> cir) {
+        if (GardenWardClient.held(pos, face)) cir.setReturnValue(false);
     }
 }

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "active=false": {
+      "model": "whycantisleep:block/heart_portal"
+    },
+    "active=true": {
+      "model": "whycantisleep:block/heart_portal_open"
+    }
+  }
+}

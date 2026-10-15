@@ -1,0 +1,181 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.stone_tomb_lid",
+        "texture_width": 64,
+        "texture_height": 64
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "lid",
+          "pivot": [
+            -8,
+            11,
+            24
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -24,
+                10,
+                -8
+              ],
+              "size": [
+                32,
+                2,
+                64
+              ],
+              "uv": {
+                "up": {
+                  "uv": [
+                    0,
+                    0
+                  ],
+                  "uv_size": [
+                    32,
+                    64
+                  ]
+                },
+                "down": {
+                  "uv": [
+                    32,
+                    16
+                  ],
+                  "uv_size": [
+                    32,
+                    32
+                  ]
+                },
+                "north": {
+                  "uv": [
+                    32,
+                    0
+                  ],
+                  "uv_size": [
+                    32,
+                    2
+                  ]
+                },
+                "south": {
+                  "uv": [
+                    32,
+                    0
+                  ],
+                  "uv_size": [
+                    32,
+                    2
+                  ]
+                },
+                "east": {
+                  "uv": [
+                    32,
+                    8
+                  ],
+                  "uv_size": [
+                    32,
+                    2
+                  ]
+                },
+                "west": {
+                  "uv": [
+                    32,
+                    8
+                  ],
+                  "uv_size": [
+                    32,
+                    2
+                  ]
+                }
+              }
+            },
+            {
+              "origin": [
+                -23.5,
+                9.5,
+                -7.5
+              ],
+              "size": [
+                31,
+                0.5,
+                63
+              ],
+              "uv": {
+                "up": {
+                  "uv": [
+                    32,
+                    0
+                  ],
+                  "uv_size": [
+                    16,
+                    1
+                  ]
+                },
+                "down": {
+                  "uv": [
+                    32,
+                    0
+                  ],
+                  "uv_size": [
+                    16,
+                    1
+                  ]
+                },
+                "north": {
+                  "uv": [
+                    32,
+                    0
+                  ],
+                  "uv_size": [
+                    16,
+                    1
+                  ]
+                },
+                "south": {
+                  "uv": [
+                    32,
+                    0
+                  ],
+                  "uv_size": [
+                    16,
+                    1
+                  ]
+                },
+                "east": {
+                  "uv": [
+                    32,
+                    0
+                  ],
+                  "uv_size": [
+                    16,
+                    1
+                  ]
+                },
+                "west": {
+                  "uv": [
+                    32,
+                    0
+                  ],
+                  "uv_size": [
+                    16,
+                    1
+                  ]
+                }
+              }
+            }
+          ],
+          "parent": "root"
+        }
+      ]
+    }
+  ]
+}

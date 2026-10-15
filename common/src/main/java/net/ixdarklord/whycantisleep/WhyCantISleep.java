@@ -5,6 +5,7 @@ import net.ixdarklord.coolcatcore.api.platform.Platform;
 import net.ixdarklord.whycantisleep.config.WCISConfigs;
 import net.ixdarklord.whycantisleep.deep.Dream;
 import net.ixdarklord.whycantisleep.deep.LucidDeep;
+import net.ixdarklord.whycantisleep.deep.WCISBlocks;
 import net.ixdarklord.whycantisleep.deep.WCISItems;
 import net.ixdarklord.whycantisleep.mind.Mind;
 import net.ixdarklord.whycantisleep.mind.MindServer;
@@ -34,16 +35,22 @@ public final class WhyCantISleep implements ModConstructor {
 
         WCISConfigs.register();
         WCISEntities.register();
+        WCISBlocks.register();
+        // What climbs out of a tomb is whoever lay in it: a Tomb Revenant.
+        net.ixdarklord.whycantisleep.deep.TombBlock.risen = () -> WCISEntities.TOMB_REVENANT.get();
         WCISItems.register();
         // Everything kept in the mod's attachments is declared before they are registered.
         Objects.requireNonNull(Dream.DREAM);
         Objects.requireNonNull(LucidDeep.ORIGIN);
+        Objects.requireNonNull(net.ixdarklord.whycantisleep.deep.DeepProgress.PROGRESS);
         Mind.ATTACHMENTS.register();
         WCISNetwork.register();
         MindServer.init();
         LurkerServer.init();
         SleepBoardServer.init();
         LucidDeep.init();
+        net.ixdarklord.whycantisleep.deep.GardenWard.init();
+        net.ixdarklord.whycantisleep.deep.DeepProgress.init();
     }
 
     public static Identifier id(String path) {

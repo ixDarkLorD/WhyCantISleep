@@ -1,0 +1,884 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lucid Deep Model Viewer</title>
+<style>
+  :root { --ink: #ebe6dc; --dim: #a99db0; --night: #18141e; --panel: #221a2ae8; --well: #2a1f33; --line: #4a3340;
+          --copper: #c79a72; --ember: #ff8f6b; --plum: #70528a; }
+  html, body { margin: 0; height: 100%; color: var(--ink); font: 12px/1.4 system-ui, sans-serif; overflow: hidden;
+               background: radial-gradient(ellipse at 50% 38%, #2c2238 0%, #1b1622 55%, #100d15 100%); }
+  canvas { display: block; position: fixed; inset: 0; }
+  button, select, input { font: inherit; color: inherit; }
+  svg { width: 10px; height: 10px; fill: currentColor; display: block; }
+
+  /* Bars are rows of panels that float over the picture; only the panels take the pointer. */
+  .bar { position: fixed; left: 10px; right: 10px; display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; pointer-events: none; z-index: 2; }
+  #top { top: 10px; } #bottom { bottom: 10px; align-items: flex-end; }
+  .panel { pointer-events: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 5px;
+           display: flex; gap: 5px; align-items: center; flex-wrap: wrap; box-shadow: 0 6px 22px #0007; backdrop-filter: blur(6px); }
+  .gap { flex: 1; }
+  .panel button, .panel select { background: var(--well); border: 1px solid transparent; border-radius: 6px; padding: 4px 9px; cursor: pointer;
+                                 display: inline-flex; align-items: center; gap: 6px; min-height: 26px; box-sizing: border-box; }
+  .panel button:hover, .panel select:hover { border-color: var(--copper); }
+  .panel button.on { background: var(--line); border-color: var(--copper); color: #fff4e6; }
+  .panel button:disabled, .panel select:disabled { opacity: .35; cursor: default; border-color: transparent; }
+  :focus-visible { outline: 2px solid var(--ember); outline-offset: 1px; }
+  .group { display: inline-flex; gap: 1px; background: var(--line); border-radius: 7px; padding: 1px; }
+  .group button { border-radius: 0; border: 0; }
+  .group button:first-child { border-radius: 6px 0 0 6px; } .group button:last-child { border-radius: 0 6px 6px 0; }
+  .group button.on { box-shadow: inset 0 -2px var(--ember); }
+  .rule { width: 1px; align-self: stretch; background: var(--line); margin: 2px 2px; }
+
+  #open { font-weight: 600; font-size: 13px; max-width: 34vw; }
+  #open span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #open svg { opacity: .7; }
+  .badge { font-size: 10px; letter-spacing: .06em; text-transform: uppercase; padding: 2px 6px; border-radius: 99px; background: var(--plum); color: #f3e6ff; }
+  .badge.scratch { background: #6a4a3a; color: #ffe0c8; }
+  .chips { display: flex; gap: 4px; flex-wrap: wrap; padding: 0 4px; }
+  .chip { color: var(--dim); white-space: nowrap; } .chip b { color: var(--ink); font-weight: 600; }
+  .chip + .chip::before { content: "·"; margin-right: 4px; opacity: .5; }
+  #parts { display: none; max-width: 46vw; } #parts.some { display: flex; } #parts small { color: var(--dim); padding: 0 2px 0 4px; }
+  #parts button { padding: 2px 8px; min-height: 22px; } #parts button:not(.on) { opacity: .5; text-decoration: line-through; }
+
+  /* The transport: animations as a row of tabs, and under it the controls and the time line. */
+  #transport { flex: 1; flex-direction: column; align-items: stretch; gap: 5px; min-width: 260px; }
+  #anims { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: thin; padding-bottom: 1px; }
+  #anims button { white-space: nowrap; } #anims small { color: var(--dim); font-size: 10px; }
+  #anims button.on small { color: #ffd8c0; }
+  #controls { display: flex; gap: 6px; align-items: center; }
+  #play { width: 34px; justify-content: center; background: var(--ember); color: #2a1410; }
+  #play:hover { border-color: #fff; } #play:disabled { background: var(--well); color: var(--ink); }
+  #scrub { flex: 1; min-width: 100px; position: relative; height: 24px; }
+  #time { position: absolute; left: 0; top: 4px; width: 100%; margin: 0; accent-color: var(--ember); }
+  #ticks { position: absolute; left: 8px; right: 8px; top: 0; height: 5px; pointer-events: none; }
+  #ticks i { position: absolute; top: 0; width: 1px; height: 5px; background: var(--copper); opacity: .65; }
+  #clock { min-width: 92px; text-align: right; font-variant-numeric: tabular-nums; color: var(--dim); } #clock b { color: var(--ink); font-weight: 600; }
+  #error { color: var(--ember); white-space: pre-wrap; pointer-events: auto; }
+  #error:not(:empty) { background: var(--panel); border: 1px solid var(--ember); border-radius: 10px; padding: 6px 10px; }
+
+  /* The model menu: a palette in the middle of the top, open at once from what is already in memory. */
+  #shade { position: fixed; inset: 0; background: #0b0810a0; display: none; z-index: 4; }
+  #menu { position: fixed; left: 50%; top: 52px; transform: translateX(-50%); width: min(600px, calc(100vw - 24px)); max-height: calc(100vh - 120px);
+          display: none; flex-direction: column; background: #201826f8; border: 1px solid var(--copper); border-radius: 12px;
+          box-shadow: 0 18px 60px #000c; z-index: 5; overflow: hidden; }
+  #menu.open, #menu.open + #shade, #shade.open { display: flex; }
+  #seek { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  #seek svg { width: 13px; height: 13px; opacity: .6; }
+  #find { flex: 1; background: none; border: 0; outline: 0; font-size: 14px; }
+  #count { color: var(--dim); white-space: nowrap; }
+  #list { overflow-y: auto; padding: 4px 6px 6px; scrollbar-width: thin; }
+  #list h4 { margin: 10px 6px 3px; font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--dim);
+             display: flex; gap: 6px; } #list h4 i { font-style: normal; opacity: .6; }
+  .row { display: grid; grid-template-columns: 54px 1fr auto; gap: 8px; align-items: center; padding: 5px 6px; border-radius: 7px; cursor: pointer; }
+  .row:hover { background: var(--well); } .row.pick { background: var(--line); box-shadow: inset 2px 0 var(--ember); }
+  .row.now .name::after { content: "open"; margin-left: 8px; font-size: 10px; color: var(--ember); text-transform: uppercase; letter-spacing: .06em; }
+  .row .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .row mark { background: none; color: var(--ember); font-weight: 600; }
+  .row small { color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
+  .row .badge { justify-self: start; }
+  #menu footer { display: flex; gap: 12px; padding: 7px 12px; border-top: 1px solid var(--line); color: var(--dim); flex-wrap: wrap; }
+  kbd { border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; color: var(--ink); background: var(--well); font: inherit; font-size: 11px; }
+
+  .label { position: fixed; padding: 2px 7px; background: var(--panel); border: 1px solid var(--line); border-radius: 99px; pointer-events: none;
+           display: none; color: var(--dim); z-index: 1; }
+  #help { position: fixed; right: 10px; top: 56px; display: none; flex-direction: column; align-items: stretch; gap: 3px; padding: 10px 12px; z-index: 3; max-width: 300px; }
+  #help.open { display: flex; } #help div { display: flex; justify-content: space-between; gap: 18px; color: var(--dim); } #help h5 { margin: 4px 0 2px; font-size: 11px; color: var(--copper); }
+</style>
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+               "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+</script>
+</head>
+<body>
+<div id="top" class="bar">
+  <div class="panel">
+    <button id="prev" title="the model before this one in the list (,)"><svg viewBox="0 0 10 10"><path d="M7 1L2 5l5 4z"/></svg></button>
+    <button id="open" title="choose a model (O)"><span>loading</span><svg viewBox="0 0 10 10"><path d="M1 3l4 5 4-5z"/></svg></button>
+    <button id="next" title="the model after this one (.)"><svg viewBox="0 0 10 10"><path d="M3 1l5 4-5 4z"/></svg></button>
+    <span id="kind" class="badge" style="display:none"></span>
+    <span id="info" class="chips"></span>
+  </div>
+  <div class="panel" id="parts" title=".obj parts: click one to hide or show it"></div>
+  <span class="gap"></span>
+  <div class="panel">
+    <span class="group" id="views" title="views (keys 1 to 7)"></span>
+    <span class="rule"></span>
+    <button id="glow" class="on" title="the glowmask: on, alone, off (G)">glow</button>
+    <button id="ref" class="on" title="a player (or a block) to judge size by (P)">scale</button>
+    <button id="grid" class="on" title="the ground, in blocks">ground</button>
+    <button id="keys" title="the keys (?)">?</button>
+  </div>
+</div>
+<div id="help" class="panel">
+  <h5>models</h5><div>choose a model <kbd>O</kbd></div><div>the one before, after <span><kbd>,</kbd> <kbd>.</kbd></span></div>
+  <h5>looking</h5><div>views <span><kbd>1</kbd> to <kbd>7</kbd></span></div><div>glow, scale <span><kbd>G</kbd> <kbd>P</kbd></span></div><div>turn, zoom, slide <span>drag, wheel, right drag</span></div>
+  <h5>animation</h5><div>play or pause <kbd>Space</kbd></div><div>the next animation <kbd>A</kbd></div><div>a tick back, on <span><kbd>&larr;</kbd> <kbd>&rarr;</kbd></span></div>
+  <div>a hundredth <span><kbd>Shift</kbd> + <kbd>&larr;</kbd> <kbd>&rarr;</kbd></span></div><div>to the start <kbd>Home</kbd></div><div>slower, faster <span><kbd>[</kbd> <kbd>]</kbd></span></div><div>loop <kbd>L</kbd></div>
+</div>
+<div id="menu">
+  <div id="seek">
+    <svg viewBox="0 0 13 13"><path d="M5.5 1a4.5 4.5 0 1 0 2.7 8.1l3 3 1-1-3-3A4.5 4.5 0 0 0 5.5 1zm0 1.5a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/></svg>
+    <input id="find" type="search" placeholder="find a model, or paste a path to a .geo.json, a model .json or an .obj" autocomplete="off" spellcheck="false">
+    <span id="count"></span>
+  </div>
+  <div id="list"></div>
+  <footer><span><kbd>&uarr;</kbd> <kbd>&darr;</kbd> choose</span><span><kbd>Enter</kbd> open</span><span><kbd>Esc</kbd> close</span><span class="gap"></span><span id="looked"></span></footer>
+</div>
+<div id="shade"></div>
+<div id="bottom" class="bar">
+  <div id="transport" class="panel">
+    <div id="anims" title="animations (A for the next)"></div>
+    <div id="controls">
+      <span class="group">
+        <button id="first" title="to the start (Home)"><svg viewBox="0 0 10 10"><path d="M1 1h1.6v8H1zM9 1L3.5 5 9 9z"/></svg></button>
+        <button id="back" title="one tick back, a twentieth of a second (Left; with Shift, a hundredth)"><svg viewBox="0 0 10 10"><path d="M7.5 1L2.5 5l5 4z"/></svg></button>
+        <button id="fwd" title="one tick on (Right; with Shift, a hundredth)"><svg viewBox="0 0 10 10"><path d="M2.5 1l5 4-5 4z"/></svg></button>
+      </span>
+      <button id="play" title="play or pause (Space)"></button>
+      <span id="scrub"><span id="ticks"></span><input id="time" type="range" min="0" max="1" step="0.0005" value="0" title="time in the animation; the marks above it are its keyframes"></span>
+      <span id="clock"></span>
+      <select id="speed" title="speed ([ and ])">
+        <option value="0.1">0.1x</option><option value="0.25">0.25x</option><option value="0.5">0.5x</option>
+        <option value="1" selected>1x</option><option value="2">2x</option>
+      </select>
+      <button id="loop" class="on" title="go round again at the end (L)">loop</button>
+    </div>
+  </div>
+  <span id="error"></span>
+</div>
+<select id="anim" hidden></select>
+<script type="module">
+// Shows the mod's models the way the game builds them (ported from Starwoven's viewer):
+//   armatures   CoolCatLib's, from a Bedrock .geo.json (x turned the other way, turns about x and y reversed, box UV as
+//               CoolCatLib lays it), with their clips (Molang played as functions of time, Catmull-Rom keyframes), the
+//               glow texture over them, and the .obj props their .armature.json hangs on their points
+//   blocks      block model JSON: elements (turned, rescaled), per-face UV and its rotation, the vanilla parents the
+//               mod uses; animated texture strips play
+//   items       a generated item's sprite, or its model
+//   assemblies  tools/viewer/assemblies/<name>.json: several blocks at their places, and armatures with them
+//   .obj        by itself, its parts listed in the top bar
+// The address says what to show:
+//   ?model=<path>                from the repository's root, or whole (leave it out and the menu of models opens)
+//   &texture=                    another texture for an armature or an .obj
+//   &anim=<name>  &t=<seconds>   an animation, held at a moment (leave t out to let it play)
+//   &speed=0.25  &loop=0         how fast it plays; stop at the end
+//   &views=4  &view=front|corner|side|back|top|below
+//   &ref=0  &glow=0|only  &zoom=2  &at=x,y,z  &ui=0
+// Still, the page is drawn only four times a second; textures and materials are made once and shared.
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+
+const q = new URLSearchParams(location.search);
+const fileUrl = p => '/file?p=' + encodeURIComponent(p);
+const $ = id => document.getElementById(id);
+const fail = text => { $('error').textContent = text; window.__ready = 'error: ' + text; };
+const TICK = 1 / 20;
+const PLAY = '<svg viewBox="0 0 10 10"><path d="M2 1l7 4-7 4z"/></svg>', PAUSE = '<svg viewBox="0 0 10 10"><path d="M2 1h2.2v8H2zM5.8 1H8v8H5.8z"/></svg>';
+// The list of models is asked for as the page starts, so that it is in memory before the menu is ever opened.
+const listing = fetch('/list').then(r => r.json()).catch(() => []);
+
+// The corners of each face of a box in the order GeckoLib builds them, as picks of low (0) or high (1) on x, y, z.
+const QUADS = {
+  north: [[0,1,0],[1,1,0],[1,0,0],[0,0,0]], south: [[1,1,1],[0,1,1],[0,0,1],[1,0,1]],
+  east:  [[1,1,0],[1,1,1],[1,0,1],[1,0,0]], west:  [[0,1,1],[0,1,0],[0,0,0],[0,0,1]],
+  up:    [[0,1,1],[1,1,1],[1,1,0],[0,1,0]], down:  [[0,0,0],[1,0,0],[1,0,1],[0,0,1]],
+};
+const NORMALS = { north: [0,0,-1], south: [0,0,1], east: [1,0,0], west: [-1,0,0], up: [0,1,0], down: [0,-1,0] };
+const rad = d => d * Math.PI / 180;
+
+function faceUvs(cube) {
+  const uv = cube.uv, [sx, sy, sz] = cube.size || [0, 0, 0];
+  if (!uv) return {};
+  if (Array.isArray(uv)) {
+    const [u, v] = uv, w = Math.floor(sx), h = Math.floor(sy), d = Math.floor(sz);
+    return { west: [u + d + w, v + d, d, h], east: [u, v + d, d, h], north: [u + d, v + d, w, h],
+             south: [u + d + w + d, v + d, w, h], up: [u + d, v, w, d], down: [u + d + w, v + d, w, -d] };
+  }
+  const out = {};
+  for (const [name, f] of Object.entries(uv)) out[name] = [f.uv[0], f.uv[1], (f.uv_size || [0, 0])[0], (f.uv_size || [0, 0])[1]];
+  return out;
+}
+
+// A pair of nodes that turn their children about a point: everything inside is still in the model's own space.
+function pivoted(pivot, rotation) {
+  const outer = new THREE.Group(), inner = new THREE.Group();
+  outer.position.set(-pivot[0], pivot[1], pivot[2]);
+  outer.rotation.order = 'ZYX';
+  outer.rotation.set(rad(-rotation[0]), rad(-rotation[1]), rad(rotation[2]));
+  inner.position.set(pivot[0], -pivot[1], -pivot[2]);
+  outer.add(inner);
+  return { outer, inner };
+}
+
+function cubeGeometry(cube, tw, th, grow) {
+  const [ox, oy, oz] = cube.origin || [0, 0, 0], [sx, sy, sz] = cube.size || [0, 0, 0];
+  const low = [-(ox + sx) - grow, oy - grow, oz - grow], high = [low[0] + sx + 2 * grow, low[1] + sy + 2 * grow, low[2] + sz + 2 * grow];
+  const position = [], normal = [], uvs = [], index = [];
+  for (const [name, [u, v, w, h]] of Object.entries(faceUvs(cube))) {
+    const axis = name === 'east' || name === 'west' ? 0 : name === 'up' || name === 'down' ? 1 : 2;
+    if ([sx, sy, sz].some((s, i) => i !== axis && s === 0)) continue;
+    const base = position.length / 3;
+    // The first corner takes the right edge of the face's place on the texture, the second the left.
+    const corners = [[u + w, v], [u, v], [u, v + h], [u + w, v + h]];
+    QUADS[name].forEach((pick, i) => {
+      position.push(pick[0] ? high[0] : low[0], pick[1] ? high[1] : low[1], pick[2] ? high[2] : low[2]);
+      normal.push(...NORMALS[name]);
+      uvs.push(corners[i][0] / tw, 1 - corners[i][1] / th);
+    });
+    index.push(base, base + 1, base + 2, base, base + 2, base + 3);
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(position, 3));
+  geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normal, 3));
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geometry.setIndex(index);
+  return geometry;
+}
+
+function loadTexture(path) {
+  return new Promise(resolve => new THREE.TextureLoader().load(fileUrl(path), texture => {
+    texture.magFilter = texture.minFilter = THREE.NearestFilter;
+    texture.generateMipmaps = false;
+    texture.colorSpace = THREE.SRGBColorSpace;
+    resolve(texture);
+  }, undefined, () => resolve(null)));
+}
+
+// --- Animations: keyframes and Molang -----------------------------------------------------------------------------
+// A value is a number or a Molang expression (CoolCatLib plays both). The expressions are turned into functions of the
+// time once, as the file is read; the queries a viewer cannot know (a creature's speed, a variable) read as 0.
+const MOLANG_MATH = { sin: d => Math.sin(rad(d)), cos: d => Math.cos(rad(d)), abs: Math.abs, max: Math.max, min: Math.min,
+  pow: Math.pow, sqrt: Math.sqrt, floor: Math.floor, ceil: Math.ceil, round: Math.round, clamp: (v, a, b) => Math.min(b, Math.max(a, v)),
+  lerp: (a, b, t) => a + (b - a) * t, mod: (a, b) => a % b, pi: Math.PI, random: (a, b) => (a + b) / 2, exp: Math.exp };
+function molang(source) {
+  if (typeof source === 'number') return () => source;
+  const js = String(source).toLowerCase()
+    .replace(/\b(?:q|query)\.(?:anim_time|life_time)\b/g, 't')
+    .replace(/\bmath\.([a-z_]+)/g, 'M.$1')
+    .replace(/\b(?:q|query|v|variable|c|context|t|temp)\.[a-z_.]+/g, m => m === 't' ? m : '0')
+    .replace(/;\s*$/, '').replace(/^return\s+/, '');
+  try { const f = new Function('t', 'M', `return (${js});`); f(0, MOLANG_MATH); return t => { const v = +f(t, MOLANG_MATH); return Number.isFinite(v) ? v : 0; }; }
+  catch { return () => 0; }
+}
+const vector = value => {
+  if (typeof value === 'number' || typeof value === 'string') value = [value, value, value];
+  return Array.isArray(value) && value.length === 3 ? value.map(molang) : null;
+};
+// A channel: its keyframes [[time, [fx, fy, fz], smooth], ...] in order, or null.
+function track(frames) {
+  if (frames === undefined || frames === null) return null;
+  if (Array.isArray(frames) || typeof frames !== 'object') { const v = vector(frames); return v ? [[0, v, false]] : null; }
+  const keys = [];
+  for (const [at, raw] of Object.entries(frames)) {
+    const value = raw && !Array.isArray(raw) && typeof raw === 'object' ? (raw.post ?? raw.pre) : raw;
+    const v = vector(value);
+    if (v) keys.push([parseFloat(at), v, raw && raw.lerp_mode === 'catmullrom']);
+  }
+  return keys.length ? keys.sort((a, b) => a[0] - b[0]) : null;
+}
+const at = (key, time) => key[1].map(f => f(time));
+// Between keyframes, straight; or along a Catmull-Rom curve where a keyframe asks for it, as the game does.
+function sample(keys, time) {
+  const last = keys.length - 1;
+  if (time <= keys[0][0] || last === 0) return at(keys[0], time);
+  if (time >= keys[last][0]) return at(keys[last], time);
+  let low = 0, high = last;
+  while (high - low > 1) { const mid = (low + high) >> 1; if (keys[mid][0] <= time) low = mid; else high = mid; }
+  const a = keys[low], b = keys[high], s = (time - a[0]) / (b[0] - a[0]);
+  const p1 = at(a, time), p2 = at(b, time);
+  if (!a[2] && !b[2]) return p1.map((c, i) => c + (p2[i] - c) * s);
+  const p0 = at(keys[Math.max(0, low - 1)], time), p3 = at(keys[Math.min(last, high + 1)], time);
+  return p1.map((c, i) => 0.5 * (2 * c + (-p0[i] + p2[i]) * s + (2 * p0[i] - 5 * c + 4 * p2[i] - p3[i]) * s * s
+                                + (-p0[i] + 3 * c - 3 * p2[i] + p3[i]) * s * s * s));
+}
+function readAnimations(raw) {
+  const out = {};
+  for (const [full, a] of Object.entries(raw.animations || {})) {
+    const name = full.replace(/^animation\.[^.]+\./, '');
+    const channels = {}, times = new Set();
+    for (const [bone, moves] of Object.entries(a.bones || {})) {
+      channels[bone] = { rotation: track(moves.rotation), position: track(moves.position), scale: track(moves.scale) };
+      for (const keys of Object.values(channels[bone])) for (const key of keys || []) times.add(key[0]);
+    }
+    out[name] = { length: a.animation_length || 1, loop: a.loop === true, channels, times: [...times].sort((x, y) => x - y) };
+  }
+  return out;
+}
+
+// --- Block models: elements as the game bakes them ------------------------------------------------------------------
+const SIDES = ['north', 'south', 'east', 'west', 'up', 'down'];
+// Each face's corners, top-left, top-right, bottom-right, bottom-left as one looks at it from outside, as picks of
+// from (0) or to (1) on x, y, z; and the part of the texture the game gives a face that names none.
+const ELEMENT_QUADS = {
+  north: [[1, 1, 0], [0, 1, 0], [0, 0, 0], [1, 0, 0]], south: [[0, 1, 1], [1, 1, 1], [1, 0, 1], [0, 0, 1]],
+  east: [[1, 1, 1], [1, 1, 0], [1, 0, 0], [1, 0, 1]], west: [[0, 1, 0], [0, 1, 1], [0, 0, 1], [0, 0, 0]],
+  up: [[0, 1, 0], [1, 1, 0], [1, 1, 1], [0, 1, 1]], down: [[0, 0, 1], [1, 0, 1], [1, 0, 0], [0, 0, 0]],
+};
+const autoUv = (side, f, t) => ({
+  north: [16 - t[0], 16 - t[1], 16 - f[0], 16 - f[1]], south: [f[0], 16 - t[1], t[0], 16 - f[1]],
+  east: [16 - t[2], 16 - t[1], 16 - f[2], 16 - f[1]], west: [f[2], 16 - t[1], t[2], 16 - f[1]],
+  up: [f[0], f[2], t[0], t[2]], down: [f[0], 16 - t[2], t[0], 16 - f[2]],
+})[side];
+function elementGeometry(element, faces) {
+  const f = element.from, t = element.to, position = [], uvs = [], index = [];
+  for (const [side, face] of faces) {
+    const [u1, v1, u2, v2] = face.uv || autoUv(side, f, t);
+    let corners = [[u1, v1], [u2, v1], [u2, v2], [u1, v2]];
+    for (let r = (face.rotation || 0) / 90; r > 0; r--) corners = [corners[3], corners[0], corners[1], corners[2]];
+    const base = position.length / 3;
+    ELEMENT_QUADS[side].forEach((pick, i) => {
+      position.push(pick[0] ? t[0] : f[0], pick[1] ? t[1] : f[1], pick[2] ? t[2] : f[2]);
+      uvs.push(corners[i][0] / 16, 1 - corners[i][1] / 16);
+    });
+    index.push(base, base + 1, base + 2, base, base + 2, base + 3);
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(position, 3));
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geometry.setIndex(index);
+  geometry.computeVertexNormals();
+  return geometry;
+}
+// An element's turn about its origin (and the stretch a rescaled one gets).
+function elementPivot(rotation, into) {
+  const o = rotation.origin || [8, 8, 8], outer = new THREE.Group(), inner = new THREE.Group();
+  outer.position.set(o[0], o[1], o[2]);
+  const angle = rad(rotation.angle || 0);
+  outer.rotation[rotation.axis || 'y'] = angle;
+  if (rotation.rescale) {
+    const s = 1 / Math.cos(Math.abs(angle));
+    for (const axis of ['x', 'y', 'z']) if (axis !== (rotation.axis || 'y')) outer.scale[axis] = s;
+  }
+  inner.position.set(-o[0], -o[1], -o[2]);
+  outer.add(inner); into.add(outer);
+  return inner;
+}
+
+// The menu of models: those opened lately, the mod's own by kind, then what was built into scratch folders, newest
+// first. It opens at once with what is in memory and then asks the server again, which costs nothing (the server
+// answers from memory too). Typing narrows it and puts the best matches first; a pasted path can be opened as it is.
+function modelMenu(current) {
+  const menu = $('menu'), find = $('find'), list = $('list');
+  let all = null, rows = [], pick = 0;
+  const go = path => {
+    const next = new URLSearchParams(location.search);
+    next.set('model', path);
+    ['anim', 't', 'at', 'texture', 'animations', 'zoom'].forEach(k => next.delete(k));
+    location.search = next;
+  };
+  const recent = () => { try { return JSON.parse(localStorage.getItem('recent') || '[]'); } catch { return []; } };
+  if (current) { try { localStorage.setItem('recent', JSON.stringify([current, ...recent().filter(p => p !== current)].slice(0, 6))); } catch {} }
+  const mark = () => rows.forEach((row, i) => { row.classList.toggle('pick', i === pick); if (i === pick) row.scrollIntoView({ block: 'nearest' }); });
+  const when = seconds => new Date(seconds * 1000).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  // How well a model answers the words typed: every word must be in it somewhere; a word that begins its name counts
+  // most, one inside its name next, one only in its kind or folder least.
+  function score(m, words) {
+    let total = 0;
+    for (const w of words) {
+      const name = m.name.toLowerCase();
+      if (name.startsWith(w)) total += 4; else if (name.includes(w)) total += 2;
+      else if ((m.kind + ' ' + m.where + ' ' + m.group).toLowerCase().includes(w)) total += 1; else return 0;
+    }
+    return total || 1;
+  }
+  function lit(name, words) {
+    const span = document.createElement('span'); span.className = 'name';
+    const low = name.toLowerCase(), hit = new Array(name.length).fill(false);
+    for (const w of words) { const at = low.indexOf(w); if (at >= 0) for (let i = at; i < at + w.length; i++) hit[i] = true; }
+    let i = 0;
+    while (i < name.length) {
+      let j = i; while (j < name.length && hit[j] === hit[i]) j++;
+      const piece = hit[i] ? document.createElement('mark') : document.createTextNode('');
+      piece.textContent = name.slice(i, j); span.appendChild(piece); i = j;
+    }
+    return span;
+  }
+  function add(into, m, words) {
+    const row = document.createElement('div'), badge = document.createElement('span'), where = document.createElement('small');
+    row.className = 'row' + (m.path === current ? ' now' : '');
+    badge.className = 'badge' + (m.group === 'scratch' ? ' scratch' : ''); badge.textContent = m.kind || 'file';
+    where.textContent = m.group === 'scratch' ? `${m.where} · ${when(m.modified)}` : m.group === 'path' ? '' : 'in the mod';
+    row.append(badge, lit(m.name, words), where);
+    row.onclick = () => go(m.path); into.appendChild(row); rows.push(row);
+  }
+  function draw() {
+    const words = find.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const page = document.createDocumentFragment(); rows = [];
+    const typed = find.value.trim().replace(/\\/g, '/').replace(/^"|"$/g, '');
+    if (typed.endsWith('.json') || typed.endsWith('.obj')) add(page, { path: typed, name: 'open this path', kind: 'path', group: 'path', where: '' }, []);
+    else if (all) {
+      const fits = models => models.map(m => [score(m, words), m]).filter(([s]) => !words.length || s > 0)
+        .sort((a, b) => words.length ? b[0] - a[0] : 0).map(([, m]) => m);
+      const mod = all.filter(m => m.group === 'mod'), groups = [];
+      const seen = recent().map(p => all.find(m => m.path === p)).filter(m => m && m.path !== current);
+      if (!words.length && seen.length) groups.push(['opened lately', seen]);
+      groups.push(['creatures and animated props', mod.filter(m => m.kind === 'armature')], ['assemblies', mod.filter(m => m.kind === 'assembly')],
+                  ['blocks', mod.filter(m => m.kind === 'block')], ['items', mod.filter(m => m.kind === 'item')], ['.obj models', mod.filter(m => m.kind === 'obj')]);
+      groups.push(['scratch folders, newest first', all.filter(m => m.group === 'scratch')]);
+      for (const [title, models] of groups) {
+        const shown = fits(models);
+        if (!shown.length) continue;
+        const head = document.createElement('h4'), n = document.createElement('i');
+        head.textContent = title; n.textContent = shown.length; head.appendChild(n); page.appendChild(head);
+        for (const m of shown) add(page, m, words);
+      }
+    }
+    if (!rows.length) { const h = document.createElement('h4'); h.textContent = all ? 'nothing by that name' : 'looking for models'; page.appendChild(h); }
+    list.replaceChildren(page);
+    $('count').textContent = all ? `${rows.length} of ${all.length}` : '';
+    pick = Math.min(pick, Math.max(0, rows.length - 1)); mark();
+  }
+  const take = (found, note) => { all = found; $('looked').textContent = note; if (menu.classList.contains('open')) draw(); neighbours(); };
+  // The model before and after this one, among the mod's own of its kind.
+  function neighbours() {
+    const mine = all && all.find(m => m.path === current);
+    const same = mine ? all.filter(m => m.group === mine.group && m.kind === mine.kind) : [];
+    const at = same.indexOf(mine);
+    for (const [id, step] of [['prev', -1], ['next', 1]]) {
+      const to = at >= 0 && same.length > 1 ? same[(at + step + same.length) % same.length] : null;
+      $(id).disabled = !to; $(id).onclick = to ? () => go(to.path) : null;
+      if (to) $(id).title = `${to.name} (${step < 0 ? ',' : '.'})`;
+    }
+    if (mine) { $('kind').textContent = mine.group === 'scratch' ? 'scratch ' + mine.kind : mine.kind; $('kind').className = 'badge' + (mine.group === 'scratch' ? ' scratch' : ''); $('kind').style.display = ''; }
+  }
+  listing.then(found => take(found, ''));
+  const show = open => {
+    menu.classList.toggle('open', open); $('shade').classList.toggle('open', open); $('open').classList.toggle('on', open);
+    if (!open) return;
+    find.value = ''; pick = 0; draw(); find.focus();
+    const started = performance.now();
+    fetch('/list').then(r => r.json()).then(found => take(found, `list read in ${Math.round(performance.now() - started)} ms`)).catch(() => {});
+  };
+  $('open').onclick = () => show(!menu.classList.contains('open'));
+  $('shade').onclick = () => show(false);
+  find.oninput = () => { pick = 0; draw(); };
+  find.onkeydown = e => {
+    if (e.key === 'ArrowDown') { pick = Math.min(rows.length - 1, pick + 1); mark(); e.preventDefault(); }
+    else if (e.key === 'ArrowUp') { pick = Math.max(0, pick - 1); mark(); e.preventDefault(); }
+    else if (e.key === 'PageDown') { pick = Math.min(rows.length - 1, pick + 8); mark(); e.preventDefault(); }
+    else if (e.key === 'PageUp') { pick = Math.max(0, pick - 8); mark(); e.preventDefault(); }
+    else if (e.key === 'Enter' && rows[pick]) rows[pick].click();
+    else if (e.key === 'Escape') show(false);
+    e.stopPropagation();
+  };
+  return show;
+}
+
+async function main() {
+  const modelPath = (q.get('model') || '').replace(/\\/g, '/');
+  const showMenu = modelMenu(modelPath);
+  const named = text => { $('open').firstElementChild.textContent = text; };
+  if (q.get('ui') === '0') for (const id of ['top', 'bottom', 'help']) $(id).style.display = 'none';
+  $('keys').onclick = () => { $('help').classList.toggle('open'); $('keys').classList.toggle('on'); };
+  if (!modelPath) { named('choose a model'); $('bottom').style.display = 'none'; $('info').style.display = 'none'; showMenu(true); window.__ready = true; return; }
+  named(modelPath.split('/').pop().replace(/\.geo\.json$|\.json$|\.obj$/, ''));
+  // What the file is, by where it lives (see serve.py).
+  const kind = /\/armatures\/[^/]+\.geo\.json$/.test(modelPath) ? 'armature' : /\/models\/block\/[^/]+\.json$/.test(modelPath) ? 'block'
+    : /\/models\/item\/[^/]+\.json$/.test(modelPath) ? 'item' : /\/assemblies\/[^/]+\.json$/.test(modelPath) ? 'assembly'
+    : /\.obj$/.test(modelPath) ? 'obj' : 'armature';
+  const alone = kind === 'obj';
+  // A resource id (namespace:path) as a file: textures/... and models/... under the assets of the file being shown, or
+  // of any module's, the root of the resources taken from the model's own path.
+  const resRoot = (() => { const at = modelPath.indexOf('/assets/'); return at >= 0 ? modelPath.slice(0, at) : 'common/src/main/resources'; })();
+  const idFile = (id, folder = '', ext = '') => {
+    const [ns, path] = id.includes(':') ? id.split(':') : ['minecraft', id];
+    return `${resRoot}/assets/${ns}/${folder}${path}${path.endsWith(ext) ? '' : ext}`;
+  };
+  const fetchJson = path => fetch(fileUrl(path)).then(r => r.ok ? r.json() : null).catch(() => null);
+
+  const scene = new THREE.Scene();
+  // About how the game lights a creature: bright from above and in front, dimmer on the flanks, dark beneath.
+  scene.add(new THREE.AmbientLight(0xffffff, 1.5));
+  const sun = new THREE.DirectionalLight(0xffffff, 1.7); sun.position.set(0.25, 1, -0.6); scene.add(sun);
+  const fill = new THREE.DirectionalLight(0xffffff, 0.5); fill.position.set(-0.6, 0.2, 0.7); scene.add(fill);
+  const model = new THREE.Group(), glowParts = [], solidParts = [], rigs = [], objParts = [], animated = [];
+  let bones = {}, cubes = 0, triangles = 0, elements = 0, texture = null, glowTexture = null, tw = 16, th = 16;
+  let animations = {};
+
+  // Textures and materials are made once each, however many cubes and blocks share them.
+  const textures = {}, materials = {};
+  const tex = path => path ? (textures[path] ??= loadTexture(path).then(t => {
+    // A strip of frames (an animated block texture): show one frame at a time, as the game does.
+    if (t && t.image.height > t.image.width && t.image.height % t.image.width === 0) {
+      t.repeat.set(1, t.image.width / t.image.height); t.wrapT = THREE.RepeatWrapping;
+      animated.push({ texture: t, frames: t.image.height / t.image.width });
+    }
+    return t;
+  })) : Promise.resolve(null);
+  const MISSING = new THREE.MeshLambertMaterial({ color: 0xc8bed0, side: THREE.DoubleSide });
+  const lambert = map => map ? (materials['l' + map.uuid] ??= new THREE.MeshLambertMaterial({ map, alphaTest: 0.5, side: THREE.DoubleSide })) : MISSING;
+  const bright = map => map ? (materials['b' + map.uuid] ??= new THREE.MeshBasicMaterial({ map, alphaTest: 0.5, side: THREE.DoubleSide }))
+    : new THREE.MeshBasicMaterial({ color: 0xfff0c0, side: THREE.DoubleSide });
+  const overlay = map => materials['g' + map.uuid] ??= new THREE.MeshBasicMaterial({ map, alphaTest: 0.5, side: THREE.DoubleSide,
+                                                                                  polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+
+  // .obj models: read with three's own loader, one mesh for each object (o) in the file, or only the one named by
+  // `part` (as an armature's prop asks). The file is in blocks and in the game's own axes.
+  async function addObj(path, into, how) {
+    const response = await fetch(fileUrl(path));
+    if (!response.ok) { fail('cannot read ' + path); return null; }
+    const read = new OBJLoader().parse(await response.text());
+    const holder = new THREE.Group();
+    holder.scale.setScalar(16);
+    const seat = new THREE.Group();
+    if (how.at) seat.position.set(how.at[0], how.at[1], how.at[2]);
+    if (how.rotation) { seat.rotation.order = 'YXZ'; seat.rotation.set(rad(how.rotation[0]), rad(how.rotation[1]), rad(how.rotation[2])); }
+    seat.add(holder); into.add(seat);
+    const meshes = [];
+    read.traverse(node => { if (node.isMesh && (!how.part || node.name === how.part)) meshes.push(node); });
+    const map = await tex(how.texture);
+    for (const mesh of meshes) {
+      const lit = how.glow === true || (Array.isArray(how.glow) && how.glow.includes(mesh.name));
+      mesh.material = lit ? bright(map) : lambert(map);
+      triangles += mesh.geometry.attributes.position.count / 3;
+      holder.add(mesh);
+      objParts.push({ name: (how.label ? how.label + ' ' : '') + (mesh.name || 'part'), mesh, lit, shown: true });
+    }
+    return seat;
+  }
+
+  // An armature (CoolCatLib's, read from a Bedrock .geo.json as CoolCatLib reads it), with its clips, its texture and
+  // glow texture, and the .obj props its .armature.json carries on its points.
+  async function addArmature(geoPath, into) {
+    const geo = await fetchJson(geoPath);
+    if (!geo) { fail('cannot read ' + geoPath); return null; }
+    const geometry = geo['minecraft:geometry'][0];
+    const w = geometry.description.texture_width, h = geometry.description.texture_height;
+    const base = geoPath.replace(/\.geo\.json$/, ''), name = base.split('/').pop();
+    const assets = geoPath.slice(0, geoPath.indexOf('/armatures/'));
+    const [map, glowMap, raw, def] = await Promise.all([
+      tex(q.get('texture') || `${assets}/textures/armatures/${name}.png`),
+      q.get('glow') !== '0' ? tex(`${assets}/textures/armatures/${name}_glow.png`) : null,
+      fetchJson(base + '.animation.json'), fetchJson(base + '.armature.json')]);
+    const clips = readAnimations(raw || {});
+    const emissive = new Set(Object.entries((def || {}).materials || {}).filter(([, m]) => m === 'emissive' || m === 'glow').map(([b]) => b));
+    const rig = {}, points = {};
+    for (const bone of geometry.bones || []) {
+      const node = pivoted(bone.pivot || [0, 0, 0], bone.rotation || [0, 0, 0]);
+      rig[bone.name] = { ...node, pivot: bone.pivot || [0, 0, 0], rotation: bone.rotation || [0, 0, 0] };
+      (bone.parent && rig[bone.parent] ? rig[bone.parent].inner : into).add(node.outer);
+      for (const [point, at] of Object.entries(bone.locators || {})) points[point] = { bone: bone.name, at: Array.isArray(at) ? at : at.offset };
+      const lit = emissive.has(bone.name) || (bone.parent && emissive.has(bone.parent));
+      for (const cube of bone.cubes || []) {
+        cubes++;
+        const shape = cubeGeometry(cube, w, h, cube.inflate ?? bone.inflate ?? 0);
+        const holder = cube.rotation ? pivoted(cube.pivot || [0, 0, 0], cube.rotation) : null;
+        const parent = holder ? holder.inner : node.inner;
+        if (holder) node.inner.add(holder.outer);
+        const mesh = new THREE.Mesh(shape, lit ? bright(map) : lambert(map)); parent.add(mesh); solidParts.push(mesh);
+        if (glowMap) { const glow = new THREE.Mesh(shape, overlay(glowMap)); parent.add(glow); glowParts.push(glow); }
+      }
+    }
+    for (const prop of (def || {}).props || []) {
+      const point = points[prop.point], bone = point ? rig[point.bone] : rig[prop.point];
+      if (!bone) continue;
+      const at = point ? point.at : bone.pivot, seat = new THREE.Group();
+      seat.position.set(-at[0], at[1], at[2]); bone.inner.add(seat);
+      await addObj(idFile(prop.model), seat, { texture: prop.texture && idFile(prop.texture), part: prop.part, label: '',
+                                                 glow: prop.material === 'emissive' || prop.material === 'glow' });
+    }
+    rigs.push({ bones: rig, animations: clips });
+    Object.assign(bones, rig);
+    if (!texture) { texture = map; tw = w; th = h; }
+    glowTexture = glowTexture || glowMap;
+    for (const [n, a] of Object.entries(clips)) animations[n] ??= a;
+    return rig;
+  }
+
+  // A block model as the game builds it: its own elements, or a parent's (the mod's own, or the vanilla ones it uses).
+  const VANILLA = {
+    cube_all: () => [{ from: [0, 0, 0], to: [16, 16, 16], faces: Object.fromEntries(SIDES.map(d => [d, { texture: '#all' }])) }],
+    leaves: () => VANILLA.cube_all(),
+    cube_column: () => [{ from: [0, 0, 0], to: [16, 16, 16], faces: Object.fromEntries(SIDES.map(d => [d, { texture: d === 'up' || d === 'down' ? '#end' : '#side' }])) }],
+    cube_bottom_top: () => [{ from: [0, 0, 0], to: [16, 16, 16], faces: Object.fromEntries(SIDES.map(d => [d, { texture: d === 'up' ? '#top' : d === 'down' ? '#bottom' : '#side' }])) }],
+    cube: () => [{ from: [0, 0, 0], to: [16, 16, 16], faces: Object.fromEntries(SIDES.map(d => [d, { texture: '#' + d }])) }],
+    cross: () => [45, -45].map(angle => ({ from: [0.8, 0, 8], to: [15.2, 16, 8], rotation: { origin: [8, 8, 8], axis: 'y', angle, rescale: true },
+                                            faces: { north: { texture: '#cross' }, south: { texture: '#cross' } } })),
+  };
+  // Read once each, however many blocks of an assembly share a model.
+  const blockModels = {};
+  const readBlock = (path, depth = 0) => blockModels[path] ??= readBlockNow(path, depth);
+  async function readBlockNow(path, depth) {
+    const m = await fetchJson(path);
+    if (!m || depth > 6) return null;
+    let found = { textures: {}, elements: null };
+    const parent = (m.parent || '').replace(/^minecraft:/, '');
+    if (m.parent && !parent.startsWith('block/') && !parent.startsWith('item/')) found = (await readBlock(idFile(m.parent, 'models/', '.json'), depth + 1)) || found;
+    else if (VANILLA[parent.replace(/^(block|item)\//, '')]) found.elements = VANILLA[parent.replace(/^(block|item)\//, '')]();
+    return { textures: { ...found.textures, ...(m.textures || {}) }, elements: m.elements || found.elements || [] };
+  }
+  async function addBlock(path, into, at = [0, 0, 0]) {
+    const m = await readBlock(path);
+    if (!m) { fail('cannot read ' + path); return; }
+    const maps = {};
+    const resolve = ref => { let r = ref; for (let i = 0; i < 8 && r && r.startsWith('#'); i++) r = m.textures[r.slice(1)]; return r; };
+    const holder = new THREE.Group(); holder.position.set(at[0] * 16 - 8, at[1] * 16, at[2] * 16 - 8); into.add(holder);
+    for (const element of m.elements) {
+      elements++;
+      // The faces go by texture, so each element is one mesh per texture it uses.
+      const byTexture = {};
+      for (const [side, face] of Object.entries(element.faces || {})) (byTexture[resolve(face.texture) || ''] ??= []).push([side, face]);
+      const parent = element.rotation ? elementPivot(element.rotation, holder) : holder;
+      for (const [id, faces] of Object.entries(byTexture)) {
+        const map = id ? await (maps[id] ??= tex(idFile(id, 'textures/', '.png'))) : null;
+        const mesh = new THREE.Mesh(elementGeometry(element, faces), element.light_emission > 0 ? bright(map) : lambert(map));
+        parent.add(mesh); solidParts.push(mesh);
+      }
+    }
+  }
+  async function addItem(path, into) {
+    const m = await fetchJson(path);
+    const layer = m && m.textures && m.textures.layer0;
+    if (!layer) return addBlock(path, into);
+    const map = await tex(idFile(layer, 'textures/', '.png'));
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(16, 16), lambert(map));
+    mesh.position.set(0, 8, 0); into.add(mesh); solidParts.push(mesh); elements++;
+  }
+
+  if (kind === 'armature') await addArmature(modelPath, model);
+  else if (kind === 'block') await addBlock(modelPath, model);
+  else if (kind === 'item') await addItem(modelPath, model);
+  else if (kind === 'obj') {
+    const name = modelPath.split('/').pop().replace(/\.obj$/, '');
+    await addObj(modelPath, model, { texture: q.get('texture') || `${resRoot}/assets/${modelPath.split('/assets/')[1].split('/')[0]}/textures/obj/${name}.png`, label: '' });
+  } else {
+    // An assembly: several blocks at their places, and armatures drawn with them (a tomb's lid, a box's lid).
+    const a = await fetchJson(modelPath);
+    if (!a) return fail('cannot read ' + modelPath);
+    await Promise.all((a.parts || []).map(part => addBlock(part.model, model, part.at)));
+    for (const arm of a.armatures || []) {
+      const seat = new THREE.Group(); seat.position.set(arm.at[0] * 16, arm.at[1] * 16, arm.at[2] * 16); model.add(seat);
+      await addArmature(arm.geo, seat);
+    }
+  }
+  scene.add(model);
+  // A button for each .obj part, to hide it and show it.
+  if (objParts.length) {
+    $('parts').classList.add('some');
+    const head = document.createElement('small'); head.textContent = '.obj'; $('parts').appendChild(head);
+    for (const part of objParts) {
+      const b = document.createElement('button'); b.textContent = part.name; b.className = 'on';
+      b.onclick = () => { part.shown = !part.shown; b.classList.toggle('on', part.shown); redraw(); };
+      $('parts').appendChild(b);
+    }
+  }
+
+  model.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(model);
+  const size = box.getSize(new THREE.Vector3()), centre = box.getCenter(new THREE.Vector3());
+  // The ground in blocks, and something to judge size by: a player beside a creature, the block's own space otherwise.
+  const grid = new THREE.GridHelper(16 * 10, 10, 0x6a4a5c, 0x33263d); grid.material.transparent = true; grid.material.opacity = 0.7; scene.add(grid);
+  const outline = new THREE.LineBasicMaterial({ color: 0xc79a72, transparent: true, opacity: 0.7 });
+  let reference;
+  if (kind === 'armature' && !/reliquary|lid/.test(modelPath)) {
+    reference = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(9.6, 28.8, 9.6)), outline);
+    reference.position.set(box.min.x - 12, 14.4, 0);
+  } else {
+    reference = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(16, 16, 16)), outline);
+    reference.position.set(0, 8, 0);
+  }
+  scene.add(reference);
+
+  // The picture is drawn over the page's own background (a soft light behind the model), so it is cleared to nothing.
+  const renderer = new THREE.WebGLRenderer({ antialias: false, preserveDrawingBuffer: true, alpha: true });
+  renderer.setPixelRatio(1);
+  renderer.setClearColor(0x000000, 0);
+  document.body.prepend(renderer.domElement);
+  const reach = Math.max(size.x, size.y, size.z, 24) * 1.25;
+  const target = new THREE.Vector3(centre.x, Math.max(centre.y, size.y / 2), centre.z);
+  const VIEWS = {
+    front:  ['front', [0, 0.05, -1]], corner: ['front corner (its front and its own right side)', [0.62, 0.42, -0.75]],
+    side:   ['its right side (front to the right)', [1, 0.05, 0]], back: ['back corner', [-0.62, 0.42, 0.75]],
+    top:    ['from above (front at the bottom)', [0, 1, -0.001]],
+    below:  ['from below, its left side (what a player close under it sees)', [-0.7, -0.6, -0.55]],
+  };
+  // &zoom=2 brings every fixed view twice as close, to read the texture; &at=x,y,z looks at that point of the model.
+  const zoom = parseFloat(q.get('zoom') || '1');
+  if (q.get('at')) target.set(...q.get('at').split(',').map(Number));
+  const place = (camera, name) => {
+    camera.position.copy(target).addScaledVector(new THREE.Vector3(...VIEWS[name][1]).normalize(), reach * 2.6 / zoom);
+    camera.lookAt(target);
+    return camera;
+  };
+  const cameraFor = name => place(new THREE.PerspectiveCamera(30, 1, 1, 4000), name);
+  let dirty = true, drawn = 0;
+  const redraw = () => { dirty = true; };
+  let four = q.get('views') === '4', view = VIEWS[q.get('view')] ? q.get('view') : 'corner';
+  const free = cameraFor(view);
+  const controls = new OrbitControls(free, renderer.domElement);
+  controls.target.copy(target); controls.update();
+  controls.addEventListener('change', () => { if (view) { view = null; marks(); } redraw(); });
+  const quarter = ['front', 'corner', 'side', 'back'].map(cameraFor);
+  const labels = ['front', 'corner', 'side', 'back'].map((name, i) => {
+    const label = document.createElement('div'); label.className = 'label'; label.textContent = VIEWS[name][0];
+    label.style.left = (i % 2 ? 'calc(50% + 10px)' : '10px');
+    document.body.appendChild(label);
+    return label;
+  });
+  // The upper two labels sit under the top bar, however many rows it has wrapped to.
+  const seat = () => labels.forEach((label, i) => { label.style.top = i < 2 ? ($('top').getBoundingClientRect().bottom + 8) + 'px' : 'calc(50% + 8px)'; });
+
+  // --- What the bars do ---
+  const state = { glow: q.get('glow') === '0' ? 'off' : q.get('glow') === 'only' ? 'only' : 'on', ref: q.get('ref') !== '0', grid: true };
+  const viewButtons = {};
+  const setView = name => {                       // a named view, or 'four'
+    four = name === 'four';
+    if (!four) { place(free, name); controls.target.copy(target); controls.update(); view = name; }
+    marks(); redraw();
+  };
+  [['front', 'front'], ['corner', 'corner'], ['side', 'side'], ['back', 'back'], ['top', 'top'], ['below', 'below'], ['four', '4 views']].forEach(([name, text], i) => {
+    const b = document.createElement('button'); b.textContent = text; b.title = (VIEWS[name] ? VIEWS[name][0] : 'front, front corner, side and back at once') + ` (${i + 1})`;
+    b.onclick = () => setView(name); $('views').appendChild(b); viewButtons[name] = b;
+  });
+  function marks() {
+    for (const [name, b] of Object.entries(viewButtons)) b.classList.toggle('on', name === 'four' ? four : !four && view === name);
+    labels.forEach(l => l.style.display = four && q.get('ui') !== '0' ? 'block' : 'none'); seat();
+    controls.enabled = !four;
+    $('glow').textContent = state.glow === 'only' ? 'glow only' : 'glow'; $('glow').classList.toggle('on', state.glow !== 'off');
+    $('glow').style.display = glowTexture ? '' : 'none';
+    $('ref').classList.toggle('on', state.ref); $('grid').classList.toggle('on', state.grid);
+  }
+  $('glow').onclick = () => { state.glow = { on: 'only', only: 'off', off: 'on' }[state.glow]; marks(); redraw(); };
+  $('ref').onclick = () => { state.ref = !state.ref; marks(); redraw(); };
+  $('grid').onclick = () => { state.grid = !state.grid; marks(); redraw(); };
+
+  // --- Animations: a tab for each, and the rest pose ---
+  const names = Object.keys(animations);
+  $('anim').innerHTML = '<option value=""></option>' + names.map(n => `<option value="${n}"></option>`).join('');
+  const tabs = {};
+  for (const name of ['', ...names]) {
+    const tab = document.createElement('button'), text = document.createElement('span');
+    text.textContent = name || 'rest pose'; tab.appendChild(text);
+    if (name) { const long = document.createElement('small'); long.textContent = animations[name].length + 's'; tab.appendChild(long); }
+    tab.onclick = () => { clock = 0; choose(name); setPlaying(true); };
+    $('anims').appendChild(tab); tabs[name] = tab;
+  }
+  if (q.get('anim') && !names.includes(q.get('anim'))) fail(`no animation named ${q.get('anim')}; there are: ${names.join(', ')}`);
+  let playing = !q.has('t'), clock = q.has('t') ? parseFloat(q.get('t')) : 0, last = performance.now(), looping = true;
+  if (['0.1', '0.25', '0.5', '1', '2'].includes(q.get('speed'))) $('speed').value = q.get('speed');
+  const current = () => animations[$('anim').value];
+  const setPlaying = on => { playing = on && !!current(); $('play').innerHTML = playing ? PAUSE : PLAY; last = performance.now(); redraw(); };
+  function choose(name) {
+    $('anim').value = names.includes(name) ? name : '';
+    for (const [n, tab] of Object.entries(tabs)) { tab.classList.toggle('on', n === $('anim').value); if (n === $('anim').value) tab.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
+    const a = current();
+    looping = a ? (q.get('loop') === '0' ? false : a.loop || q.get('loop') === '1') : true;
+    $('loop').classList.toggle('on', looping);
+    $('ticks').textContent = '';
+    for (const time of a ? a.times : []) { const tick = document.createElement('i'); tick.style.left = (100 * time / a.length) + '%'; $('ticks').appendChild(tick); }
+    for (const id of ['first', 'back', 'play', 'fwd', 'loop', 'speed', 'time']) $(id).disabled = !a;
+    $('scrub').style.opacity = a ? 1 : 0.35;
+    redraw();
+  }
+  const seek = time => { const a = current(); if (!a) return; clock = Math.max(0, Math.min(a.length, time)); setPlaying(false); };
+  const step = (ticks, fine) => { const a = current(); if (!a) return; const by = fine ? 0.01 : TICK; seek(Math.round((shown(a) + ticks * by) / by) * by); };
+  const shown = a => looping ? clock % a.length : Math.min(clock, a.length);
+  $('play').onclick = () => { const a = current(); if (a && !playing && !looping && clock >= a.length) clock = 0; setPlaying(!playing); };
+  $('first').onclick = () => seek(0);
+  $('back').onclick = e => step(-1, e.shiftKey);
+  $('fwd').onclick = e => step(1, e.shiftKey);
+  $('loop').onclick = () => { looping = !looping; $('loop').classList.toggle('on', looping); redraw(); };
+  $('speed').onchange = redraw;
+  $('time').oninput = () => { const a = current(); if (a) seek($('time').value * a.length); };
+  choose(q.get('anim'));
+  setPlaying(playing);
+
+  addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' && e.target.type !== 'range' || e.ctrlKey || e.metaKey || e.altKey) return;
+    const speeds = [...$('speed').options].map(o => o.value), at = speeds.indexOf($('speed').value);
+    const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    if (key === ' ') $('play').click();
+    else if (key === 'ArrowLeft') step(-1, e.shiftKey);
+    else if (key === 'ArrowRight') step(1, e.shiftKey);
+    else if (key === 'Home') seek(0);
+    else if (key === 'l') $('loop').click();
+    else if (key === '[') { $('speed').value = speeds[Math.max(0, at - 1)]; redraw(); }
+    else if (key === ']') { $('speed').value = speeds[Math.min(speeds.length - 1, at + 1)]; redraw(); }
+    else if (key === 'a') { const all = ['', ...names]; clock = 0; choose(all[(all.indexOf($('anim').value) + 1) % all.length]); setPlaying(true); }
+    else if (key === 'g') $('glow').click();
+    else if (key === 'p') $('ref').click();
+    else if (key === 'o' || key === '/') showMenu(true);
+    else if (key === ',') $('prev').click();
+    else if (key === '.') $('next').click();
+    else if (key === '?') $('keys').click();
+    else if (key === 'Escape') { $('help').classList.remove('open'); $('keys').classList.remove('on'); }
+    else if (key >= '1' && key <= '7') Object.values(viewButtons)[+key - 1].click();
+    else return;
+    e.preventDefault();
+  });
+  addEventListener('resize', () => { seat(); redraw(); });
+
+  function pose(a, time) {
+    const name = $('anim').value;
+    for (const rig of rigs) {
+      const clip = rig.animations[name];
+      for (const [bname, bone] of Object.entries(rig.bones)) {
+        const moves = clip && clip.channels[bname];
+        const r = bone.rotation, t = moves && moves.rotation ? sample(moves.rotation, time) : [0, 0, 0];
+        const p = moves && moves.position ? sample(moves.position, time) : [0, 0, 0];
+        const s = moves && moves.scale ? sample(moves.scale, time) : [1, 1, 1];
+        bone.outer.rotation.set(rad(-(r[0] + t[0])), rad(-(r[1] + t[1])), rad(r[2] + t[2]));
+        bone.outer.position.set(-bone.pivot[0] - p[0], bone.pivot[1] + p[1], bone.pivot[2] + p[2]);
+        bone.outer.scale.set(s[0], s[1], s[2]);
+      }
+    }
+  }
+
+  function frame(now) {
+    requestAnimationFrame(frame);
+    const a = current();
+    if (playing && a) {
+      clock += (now - last) / 1000 * parseFloat($('speed').value);
+      if (!looping && clock >= a.length) { clock = a.length; setPlaying(false); }
+      dirty = true;
+    }
+    last = now;
+    // Animated texture strips step a frame each tenth of a second, as the game's do (frametime 2).
+    if (animated.length) {
+      const step = Math.floor(now / 100);
+      for (const a of animated) { const y = 1 - ((step % a.frames) + 1) / a.frames; if (a.texture.offset.y !== y) { a.texture.offset.y = y; dirty = true; } }
+    }
+    // Nothing moved, nothing to draw: but a still page is drawn four times a second all the same, because a
+    // screenshot of the pane waits for a frame and gives up if none comes.
+    if (!dirty && now - drawn < 250) return;
+    dirty = false; drawn = now;
+    const time = a ? shown(a) : 0;
+    pose(a, time);
+    if (a) $('time').value = time / a.length;
+    $('clock').innerHTML = a ? `<b>${time.toFixed(2)}</b> / ${a.length.toFixed(2)} s` : 'rest pose';
+    glowParts.forEach(part => part.visible = state.glow !== 'off');
+    solidParts.forEach(part => part.visible = state.glow !== 'only');
+    objParts.forEach(part => part.mesh.visible = part.shown && (part.lit ? true : state.glow !== 'only'));
+    reference.visible = state.ref; grid.visible = state.grid;
+    const width = innerWidth, height = innerHeight;
+    if (renderer.domElement.width !== width || renderer.domElement.height !== height) renderer.setSize(width, height, false);
+    renderer.domElement.style.width = width + 'px'; renderer.domElement.style.height = height + 'px';
+    renderer.setScissorTest(four);
+    if (four) {
+      const w = Math.floor(width / 2), h = Math.floor(height / 2);
+      quarter.forEach((camera, i) => {
+        const x = (i % 2) * w, y = (i < 2 ? 1 : 0) * h;
+        renderer.setViewport(x, y, w, h); renderer.setScissor(x, y, w, h);
+        camera.aspect = w / h; camera.updateProjectionMatrix();
+        renderer.render(scene, camera);
+      });
+    } else {
+      renderer.setViewport(0, 0, width, height);
+      free.aspect = width / height; free.updateProjectionMatrix();
+      renderer.render(scene, free);
+    }
+    window.__ready = true;
+  }
+  const chip = (strong, rest) => `<span class="chip"><b>${strong}</b>${rest ? ' ' + rest : ''}</span>`;
+  $('info').innerHTML = (Object.keys(bones).length ? chip(Object.keys(bones).length, 'bones') + chip(cubes, 'cubes') : '') +
+    (elements ? chip(elements, 'elements') : '') + (triangles ? chip(triangles, '.obj triangles') : '') +
+    chip(`${(size.x / 16).toFixed(2)} × ${(size.y / 16).toFixed(2)} × ${(size.z / 16).toFixed(2)}`, 'blocks') +
+    (texture ? chip(`${tw}×${th}`, 'texture') : '') + (glowTexture ? chip('glow', '') : '') + (Object.keys(textures).length ? chip(Object.keys(textures).length, 'textures') : '');
+  marks();
+  requestAnimationFrame(frame);
+}
+main().catch(error => fail(String(error && error.stack || error)));
+</script>
+</body>
+</html>

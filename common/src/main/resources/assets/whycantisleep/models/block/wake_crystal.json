@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "whycantisleep:block/wake_crystal"
+  }
+}

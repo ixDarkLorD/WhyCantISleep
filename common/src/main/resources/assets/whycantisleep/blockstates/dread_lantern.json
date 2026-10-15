@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "hanging=false": {
+      "model": "whycantisleep:block/dread_lantern"
+    },
+    "hanging=true": {
+      "model": "whycantisleep:block/dread_lantern_hanging"
+    }
+  }
+}
