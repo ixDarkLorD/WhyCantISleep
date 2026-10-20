@@ -4,7 +4,8 @@
     "stone": "whycantisleep:block/decor_stone",
     "side": "whycantisleep:block/tomb_side",
     "lid": "whycantisleep:block/tomb_lid_left_0",
-    "particle": "whycantisleep:block/decor_stone"
+    "particle": "whycantisleep:block/decor_stone",
+    "under": "whycantisleep:block/tomb_underside"
   },
   "elements": [
     {
@@ -35,7 +36,7 @@
           "texture": "#side"
         },
         "down": {
-          "texture": "#side"
+          "texture": "#under"
         }
       }
     },

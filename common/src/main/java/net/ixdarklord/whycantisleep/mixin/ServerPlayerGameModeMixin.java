@@ -1,6 +1,6 @@
 package net.ixdarklord.whycantisleep.mixin;
 
-import net.ixdarklord.whycantisleep.deep.GardenWard;
+import net.ixdarklord.whycantisleep.between.GardenWard;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.Packet;

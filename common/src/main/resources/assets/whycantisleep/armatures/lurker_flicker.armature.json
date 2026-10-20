@@ -1,0 +1,8 @@
+{
+  "textures": [
+    "whycantisleep:textures/entity/lurker/flicker.png"
+  ],
+  "glow_textures": [
+    "whycantisleep:textures/entity/lurker/flicker_eyes.png"
+  ]
+}

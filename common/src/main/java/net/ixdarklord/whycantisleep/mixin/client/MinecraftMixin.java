@@ -1,7 +1,7 @@
 package net.ixdarklord.whycantisleep.mixin.client;
 
 import net.ixdarklord.whycantisleep.client.highlight.Highlights;
-import net.ixdarklord.whycantisleep.deep.client.DreamTransition;
+import net.ixdarklord.whycantisleep.between.client.DreamTransition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.InBedChatScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Draws the monsters that blocked a sleep with an outline, for this player only; and keeps the bed's "Leave Bed" screen
- * away while a dreamer slips into the Lucid Deep (the game would open it again every tick they lie there).
+ * away while a dreamer slips into the Dark Between (the game would open it again every tick they lie there).
  */
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin {

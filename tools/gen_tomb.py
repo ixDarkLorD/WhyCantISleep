@@ -1,6 +1,6 @@
 """Generates the stone tomb's lid as an animated armature (TombClient draws it on the tomb's head-left part):
 assets/whycantisleep/armatures/stone_tomb_lid.{geo,animation,armature}.json and its texture, put together from the
-lid tiles gen_decor.py draws (tomb_lid_<side>_<segment>.png). Run after gen_deep_blocks.py.
+lid tiles gen_decor.py draws (tomb_lid_<side>_<segment>.png). Run after gen_between_blocks.py.
 
 Bedrock coordinates, centred on the head-left block, the head to the north (-z): the lid covers that block and the
 one to its right (east: bedrock -x) and runs four blocks south.
@@ -10,7 +10,7 @@ import os
 
 from PIL import Image
 
-import gen_deep_blocks as blocks
+import gen_between_blocks as blocks
 
 ASSETS = blocks.ASSETS
 NS = blocks.NS

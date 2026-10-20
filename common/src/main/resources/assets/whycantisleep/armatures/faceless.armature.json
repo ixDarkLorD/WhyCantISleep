@@ -1,0 +1,9 @@
+{
+  "glow_textures": [
+    "whycantisleep:textures/armatures/faceless_glow.png"
+  ],
+  "transition": {
+    "duration": 0.2,
+    "easing": "sine_in_out"
+  }
+}

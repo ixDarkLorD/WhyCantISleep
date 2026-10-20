@@ -1,0 +1,115 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.dread_manta.idle": {
+      "loop": true,
+      "animation_length": 3.0,
+      "bones": {
+        "body": {
+          "position": [
+            0,
+            "0.8 * math.sin(q.anim_time * 120.0 + 90)",
+            0
+          ]
+        },
+        "right_wing": {
+          "rotation": [
+            0,
+            0,
+            "18 * math.sin(q.anim_time * 120.0)"
+          ]
+        },
+        "left_wing": {
+          "rotation": [
+            0,
+            0,
+            "-(18 * math.sin(q.anim_time * 120.0))"
+          ]
+        },
+        "right_wingtip": {
+          "rotation": [
+            0,
+            0,
+            "14 * math.sin(q.anim_time * 120.0 - 50)"
+          ]
+        },
+        "left_wingtip": {
+          "rotation": [
+            0,
+            0,
+            "-(14 * math.sin(q.anim_time * 120.0 - 50))"
+          ]
+        },
+        "tail": {
+          "rotation": [
+            "6 * math.sin(q.anim_time * 120.0)",
+            "12 * math.sin(q.anim_time * 120.0 - 90)",
+            0
+          ]
+        },
+        "tail_end": {
+          "rotation": [
+            0,
+            "18 * math.sin(q.anim_time * 120.0 - 150)",
+            0
+          ]
+        }
+      }
+    },
+    "animation.dread_manta.walk": {
+      "loop": true,
+      "animation_length": 1.5,
+      "bones": {
+        "body": {
+          "position": [
+            0,
+            "0.8 * math.sin(q.anim_time * 240.0 + 90)",
+            0
+          ]
+        },
+        "right_wing": {
+          "rotation": [
+            0,
+            0,
+            "18 * math.sin(q.anim_time * 240.0)"
+          ]
+        },
+        "left_wing": {
+          "rotation": [
+            0,
+            0,
+            "-(18 * math.sin(q.anim_time * 240.0))"
+          ]
+        },
+        "right_wingtip": {
+          "rotation": [
+            0,
+            0,
+            "14 * math.sin(q.anim_time * 240.0 - 50)"
+          ]
+        },
+        "left_wingtip": {
+          "rotation": [
+            0,
+            0,
+            "-(14 * math.sin(q.anim_time * 240.0 - 50))"
+          ]
+        },
+        "tail": {
+          "rotation": [
+            "6 * math.sin(q.anim_time * 240.0)",
+            "12 * math.sin(q.anim_time * 240.0 - 90)",
+            0
+          ]
+        },
+        "tail_end": {
+          "rotation": [
+            0,
+            "18 * math.sin(q.anim_time * 240.0 - 150)",
+            0
+          ]
+        }
+      }
+    }
+  }
+}

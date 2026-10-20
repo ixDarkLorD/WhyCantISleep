@@ -1,0 +1,367 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "bar": "whycantisleep:block/dread_iron",
+    "trim": "whycantisleep:block/candelabra_trim",
+    "stem": "whycantisleep:block/candelabra_stem",
+    "foot": "whycantisleep:block/candelabra_foot_top",
+    "blood": "whycantisleep:block/weeping_tears",
+    "particle": "whycantisleep:block/dread_iron"
+  },
+  "elements": [
+    {
+      "from": [
+        6,
+        0,
+        6
+      ],
+      "to": [
+        10,
+        0.5,
+        10
+      ],
+      "faces": {
+        "north": {
+          "texture": "#trim",
+          "uv": [
+            6,
+            0,
+            10,
+            0.5
+          ]
+        },
+        "south": {
+          "texture": "#trim",
+          "uv": [
+            6,
+            0,
+            10,
+            0.5
+          ]
+        },
+        "east": {
+          "texture": "#trim",
+          "uv": [
+            6,
+            0,
+            10,
+            0.5
+          ]
+        },
+        "west": {
+          "texture": "#trim",
+          "uv": [
+            6,
+            0,
+            10,
+            0.5
+          ]
+        },
+        "up": {
+          "texture": "#trim",
+          "uv": [
+            0,
+            8,
+            4,
+            12
+          ]
+        },
+        "down": {
+          "texture": "#trim",
+          "uv": [
+            0,
+            6,
+            4,
+            8
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        7.5,
+        0.5,
+        7.5
+      ],
+      "to": [
+        8.5,
+        2.5,
+        8.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bar"
+        },
+        "south": {
+          "texture": "#bar"
+        },
+        "east": {
+          "texture": "#bar"
+        },
+        "west": {
+          "texture": "#bar"
+        },
+        "up": {
+          "texture": "#bar"
+        },
+        "down": {
+          "texture": "#bar"
+        }
+      }
+    },
+    {
+      "from": [
+        7,
+        1.5,
+        7
+      ],
+      "to": [
+        9,
+        2,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#trim",
+          "uv": [
+            7,
+            3,
+            9,
+            3.5
+          ]
+        },
+        "south": {
+          "texture": "#trim",
+          "uv": [
+            7,
+            3,
+            9,
+            3.5
+          ]
+        },
+        "east": {
+          "texture": "#trim",
+          "uv": [
+            7,
+            3,
+            9,
+            3.5
+          ]
+        },
+        "west": {
+          "texture": "#trim",
+          "uv": [
+            7,
+            3,
+            9,
+            3.5
+          ]
+        },
+        "up": {
+          "texture": "#trim",
+          "uv": [
+            0,
+            8,
+            2,
+            10
+          ]
+        },
+        "down": {
+          "texture": "#trim",
+          "uv": [
+            0,
+            6,
+            2,
+            8
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        6.5,
+        2.5,
+        6.5
+      ],
+      "to": [
+        9.5,
+        3,
+        9.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#trim",
+          "uv": [
+            6.5,
+            3,
+            9.5,
+            3.5
+          ]
+        },
+        "south": {
+          "texture": "#trim",
+          "uv": [
+            6.5,
+            3,
+            9.5,
+            3.5
+          ]
+        },
+        "east": {
+          "texture": "#trim",
+          "uv": [
+            6.5,
+            3,
+            9.5,
+            3.5
+          ]
+        },
+        "west": {
+          "texture": "#trim",
+          "uv": [
+            6.5,
+            3,
+            9.5,
+            3.5
+          ]
+        },
+        "up": {
+          "texture": "#trim",
+          "uv": [
+            0,
+            8,
+            3.0,
+            11.0
+          ]
+        },
+        "down": {
+          "texture": "#trim",
+          "uv": [
+            0,
+            6,
+            3.0,
+            8
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        3,
+        6
+      ],
+      "to": [
+        10,
+        5.5,
+        10
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bar"
+        },
+        "south": {
+          "texture": "#bar"
+        },
+        "east": {
+          "texture": "#bar"
+        },
+        "west": {
+          "texture": "#bar"
+        },
+        "up": {
+          "texture": "#bar"
+        },
+        "down": {
+          "texture": "#bar"
+        }
+      }
+    },
+    {
+      "from": [
+        5.75,
+        5.5,
+        5.75
+      ],
+      "to": [
+        10.25,
+        6,
+        10.25
+      ],
+      "faces": {
+        "north": {
+          "texture": "#trim",
+          "uv": [
+            5.75,
+            5,
+            10.25,
+            5.5
+          ]
+        },
+        "south": {
+          "texture": "#trim",
+          "uv": [
+            5.75,
+            5,
+            10.25,
+            5.5
+          ]
+        },
+        "east": {
+          "texture": "#trim",
+          "uv": [
+            5.75,
+            5,
+            10.25,
+            5.5
+          ]
+        },
+        "west": {
+          "texture": "#trim",
+          "uv": [
+            5.75,
+            5,
+            10.25,
+            5.5
+          ]
+        },
+        "up": {
+          "texture": "#trim",
+          "uv": [
+            0,
+            8,
+            4.5,
+            12.5
+          ]
+        },
+        "down": {
+          "texture": "#trim",
+          "uv": [
+            0,
+            6,
+            4.5,
+            8
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        6.5,
+        6.02,
+        6.5
+      ],
+      "to": [
+        9.5,
+        6.02,
+        9.5
+      ],
+      "faces": {
+        "up": {
+          "texture": "#blood"
+        }
+      },
+      "light_emission": 4
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 
 #moj_import <coolcatlib:sky.glsl>
 
-// A dreamer's way home in the sky of the Lucid Deep (DeepClient): a rift, a long tear down the sky that is wide in the
+// A dreamer's way home in the sky of the Dark Between (BetweenClient): a rift, a long tear down the sky that is wide in the
 // middle and runs out to fine points at both ends, its sides cut in a few clean, sharp jags; through it their room as
 // it is now. Its edge is a thin white-hot line, a huge hue of red and violet glows out from it far into the sky, forks
 // of lightning are thrown out of it every moment it is open, and a few fine cracks run off it. It breathes a little. It can be closed: it narrows to a seam and heals in from both ends towards the
@@ -23,7 +23,7 @@ const vec3 CRIMSON = vec3(0.54, 0.04, 0.14);
 const vec3 HOT = vec3(1.00, 0.86, 0.84);
 const vec3 VOID = vec3(0.015, 0.012, 0.025);
 const vec3 VIOLET = vec3(0.32, 0.08, 0.30);
-// The sprite is this many times the tear's size (DeepClient.RIFT_REACH): the tear is drawn in the middle of it, its
+// The sprite is this many times the tear's size (BetweenClient.RIFT_REACH): the tear is drawn in the middle of it, its
 // glow and lightning in the room round it.
 const float REACH = 2.2;
 

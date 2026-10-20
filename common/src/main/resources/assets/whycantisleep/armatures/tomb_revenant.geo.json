@@ -2775,7 +2775,8 @@
                     3
                   ]
                 }
-              }
+              },
+              "inflate": 0.035
             }
           ],
           "parent": "right_arm"

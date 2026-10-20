@@ -1,4 +1,4 @@
-"""Draws each Lucid Deep boss's own boss bar (every boss gets one of its own, never the game's).
+"""Draws each Dark Between boss's own boss bar (every boss gets one of its own, never the game's).
 
     python tools/gen_boss_bars.py
 

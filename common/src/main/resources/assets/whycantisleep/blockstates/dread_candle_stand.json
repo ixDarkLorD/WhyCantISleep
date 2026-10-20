@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=north,part=single": {
+      "model": "whycantisleep:block/dread_candle_stand_single"
+    },
+    "facing=north,part=base": {
+      "model": "whycantisleep:block/dread_candle_stand_base"
+    },
+    "facing=north,part=middle": {
+      "model": "whycantisleep:block/dread_candle_stand_middle"
+    },
+    "facing=north,part=top": {
+      "model": "whycantisleep:block/dread_candle_stand_top"
+    },
+    "facing=east,part=single": {
+      "model": "whycantisleep:block/dread_candle_stand_single",
+      "y": 90
+    },
+    "facing=east,part=base": {
+      "model": "whycantisleep:block/dread_candle_stand_base",
+      "y": 90
+    },
+    "facing=east,part=middle": {
+      "model": "whycantisleep:block/dread_candle_stand_middle",
+      "y": 90
+    },
+    "facing=east,part=top": {
+      "model": "whycantisleep:block/dread_candle_stand_top",
+      "y": 90
+    },
+    "facing=south,part=single": {
+      "model": "whycantisleep:block/dread_candle_stand_single",
+      "y": 180
+    },
+    "facing=south,part=base": {
+      "model": "whycantisleep:block/dread_candle_stand_base",
+      "y": 180
+    },
+    "facing=south,part=middle": {
+      "model": "whycantisleep:block/dread_candle_stand_middle",
+      "y": 180
+    },
+    "facing=south,part=top": {
+      "model": "whycantisleep:block/dread_candle_stand_top",
+      "y": 180
+    },
+    "facing=west,part=single": {
+      "model": "whycantisleep:block/dread_candle_stand_single",
+      "y": 270
+    },
+    "facing=west,part=base": {
+      "model": "whycantisleep:block/dread_candle_stand_base",
+      "y": 270
+    },
+    "facing=west,part=middle": {
+      "model": "whycantisleep:block/dread_candle_stand_middle",
+      "y": 270
+    },
+    "facing=west,part=top": {
+      "model": "whycantisleep:block/dread_candle_stand_top",
+      "y": 270
+    }
+  }
+}

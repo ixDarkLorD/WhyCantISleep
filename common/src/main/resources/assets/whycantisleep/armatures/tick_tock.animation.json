@@ -1,0 +1,119 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.tick_tock.idle": {
+      "loop": true,
+      "animation_length": 2.0,
+      "bones": {
+        "key": {
+          "rotation": [
+            0,
+            0,
+            "q.anim_time * 180.0"
+          ]
+        },
+        "body": {
+          "position": [
+            0,
+            "0.2 * math.sin(q.anim_time * 180.0)",
+            0
+          ]
+        }
+      }
+    },
+    "animation.tick_tock.walk": {
+      "loop": true,
+      "animation_length": 0.34,
+      "bones": {
+        "right_leg_0": {
+          "rotation": [
+            0,
+            "20 * math.sin(q.anim_time * 1058.8235 + 60)",
+            "-14 * math.max(0, math.sin(q.anim_time * 1058.8235 + 60 + 90))"
+          ]
+        },
+        "left_leg_0": {
+          "rotation": [
+            0,
+            "20 * math.sin(q.anim_time * 1058.8235 + 0)",
+            "14 * math.max(0, math.sin(q.anim_time * 1058.8235 + 0 + 90))"
+          ]
+        },
+        "right_leg_1": {
+          "rotation": [
+            0,
+            "20 * math.sin(q.anim_time * 1058.8235 + 180)",
+            "-14 * math.max(0, math.sin(q.anim_time * 1058.8235 + 180 + 90))"
+          ]
+        },
+        "left_leg_1": {
+          "rotation": [
+            0,
+            "20 * math.sin(q.anim_time * 1058.8235 + 120)",
+            "14 * math.max(0, math.sin(q.anim_time * 1058.8235 + 120 + 90))"
+          ]
+        },
+        "right_leg_2": {
+          "rotation": [
+            0,
+            "20 * math.sin(q.anim_time * 1058.8235 + 300)",
+            "-14 * math.max(0, math.sin(q.anim_time * 1058.8235 + 300 + 90))"
+          ]
+        },
+        "left_leg_2": {
+          "rotation": [
+            0,
+            "20 * math.sin(q.anim_time * 1058.8235 + 240)",
+            "14 * math.max(0, math.sin(q.anim_time * 1058.8235 + 240 + 90))"
+          ]
+        },
+        "key": {
+          "rotation": [
+            0,
+            0,
+            "q.anim_time * 1058.8235"
+          ]
+        },
+        "body": {
+          "position": [
+            0,
+            "0.3 * math.abs(math.sin(q.anim_time * 1058.8235))",
+            0
+          ]
+        }
+      }
+    },
+    "animation.tick_tock.fuse": {
+      "loop": true,
+      "animation_length": 0.2,
+      "bones": {
+        "body": {
+          "position": [
+            "0.4 * math.sin(q.anim_time * 3600.0)",
+            0,
+            "0.4 * math.cos(q.anim_time * 3600.0)"
+          ],
+          "rotation": [
+            0,
+            "4 * math.sin(q.anim_time * 1800.0)",
+            0
+          ]
+        },
+        "key": {
+          "rotation": [
+            0,
+            0,
+            "q.anim_time * 1800.0"
+          ]
+        },
+        "head": {
+          "rotation": [
+            -15,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  }
+}

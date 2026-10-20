@@ -1,0 +1,60 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "axis": "x"
+      },
+      "apply": {
+        "model": "whycantisleep:block/dread_dining_table_top",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "z"
+      },
+      "apply": {
+        "model": "whycantisleep:block/dread_dining_table_top"
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "neg": "false"
+      },
+      "apply": {
+        "model": "whycantisleep:block/dread_dining_table_end",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "pos": "false"
+      },
+      "apply": {
+        "model": "whycantisleep:block/dread_dining_table_end",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "neg": "false"
+      },
+      "apply": {
+        "model": "whycantisleep:block/dread_dining_table_end"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "pos": "false"
+      },
+      "apply": {
+        "model": "whycantisleep:block/dread_dining_table_end",
+        "y": 180
+      }
+    }
+  ]
+}

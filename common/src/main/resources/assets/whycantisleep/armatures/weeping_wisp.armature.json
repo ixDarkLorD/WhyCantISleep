@@ -5,5 +5,146 @@
   "transition": {
     "duration": 0.2,
     "easing": "sine_in_out"
-  }
+  },
+  "springs": {
+    "tatter_0_0_0": {
+      "fabric": "silk",
+      "stiffness": 50.0,
+      "max_angle": 40.0,
+      "length": 2.5,
+      "colliders": [],
+      "wind": 1.2
+    },
+    "tatter_0_0_1": {
+      "fabric": "silk",
+      "stiffness": 20.0,
+      "max_angle": 70.0,
+      "length": 2.5,
+      "colliders": [],
+      "wind": 1.2
+    },
+    "tatter_1_0_0": {
+      "fabric": "silk",
+      "stiffness": 50.0,
+      "max_angle": 40.0,
+      "length": 3.5,
+      "colliders": [],
+      "wind": 1.2
+    },
+    "tatter_1_0_1": {
+      "fabric": "silk",
+      "stiffness": 20.0,
+      "max_angle": 70.0,
+      "length": 3.5,
+      "colliders": [],
+      "wind": 1.2
+    },
+    "tatter_2_0_0": {
+      "fabric": "silk",
+      "stiffness": 50.0,
+      "max_angle": 40.0,
+      "length": 3.0,
+      "colliders": [],
+      "wind": 1.2
+    },
+    "tatter_2_0_1": {
+      "fabric": "silk",
+      "stiffness": 20.0,
+      "max_angle": 70.0,
+      "length": 3.0,
+      "colliders": [],
+      "wind": 1.2
+    },
+    "tatter_3_0_0": {
+      "fabric": "silk",
+      "stiffness": 50.0,
+      "max_angle": 40.0,
+      "length": 2.25,
+      "colliders": [],
+      "wind": 1.2
+    },
+    "tatter_3_0_1": {
+      "fabric": "silk",
+      "stiffness": 20.0,
+      "max_angle": 70.0,
+      "length": 2.25,
+      "colliders": [],
+      "wind": 1.2
+    },
+    "tatter_4_0_0": {
+      "fabric": "silk",
+      "stiffness": 50.0,
+      "max_angle": 40.0,
+      "length": 1.75,
+      "colliders": [],
+      "wind": 1.2
+    },
+    "tatter_4_0_1": {
+      "fabric": "silk",
+      "stiffness": 20.0,
+      "max_angle": 70.0,
+      "length": 1.75,
+      "colliders": [],
+      "wind": 1.2
+    }
+  },
+  "look_at": {
+    "head": {
+      "max_yaw": 70,
+      "max_pitch": 35,
+      "smoothing": 0.3
+    }
+  },
+  "cloth": [
+    {
+      "joints": [
+        [
+          "tatter_0_0_0"
+        ],
+        [
+          "tatter_0_0_1"
+        ]
+      ]
+    },
+    {
+      "joints": [
+        [
+          "tatter_1_0_0"
+        ],
+        [
+          "tatter_1_0_1"
+        ]
+      ]
+    },
+    {
+      "joints": [
+        [
+          "tatter_2_0_0"
+        ],
+        [
+          "tatter_2_0_1"
+        ]
+      ]
+    },
+    {
+      "joints": [
+        [
+          "tatter_3_0_0"
+        ],
+        [
+          "tatter_3_0_1"
+        ]
+      ]
+    },
+    {
+      "joints": [
+        [
+          "tatter_4_0_0"
+        ],
+        [
+          "tatter_4_0_1"
+        ]
+      ]
+    }
+  ]
 }

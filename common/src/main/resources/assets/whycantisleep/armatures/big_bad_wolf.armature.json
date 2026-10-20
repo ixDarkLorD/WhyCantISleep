@@ -1,0 +1,377 @@
+{
+  "glow_textures": [
+    "whycantisleep:textures/armatures/big_bad_wolf_glow.png"
+  ],
+  "transition": {
+    "duration": 0.2,
+    "easing": "sine_in_out"
+  },
+  "springs": {
+    "gown_skirt_front_r_0": {
+      "fabric": "cotton",
+      "stiffness": 80.0,
+      "max_angle": 32.0,
+      "length": 3.5,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.6
+        }
+      ],
+      "links": [
+        "gown_skirt_side_r_0",
+        "gown_skirt_front_l_0"
+      ]
+    },
+    "gown_skirt_front_l_0": {
+      "fabric": "cotton",
+      "stiffness": 80.0,
+      "max_angle": 32.0,
+      "length": 3.5,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.6
+        }
+      ],
+      "links": [
+        "gown_skirt_front_r_0",
+        "gown_skirt_side_l_0"
+      ]
+    },
+    "gown_skirt_side_l_0": {
+      "fabric": "cotton",
+      "stiffness": 80.0,
+      "max_angle": 32.0,
+      "length": 3.5,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.6
+        }
+      ],
+      "links": [
+        "gown_skirt_front_l_0",
+        "gown_skirt_back_l_0"
+      ]
+    },
+    "gown_skirt_back_l_0": {
+      "fabric": "cotton",
+      "stiffness": 80.0,
+      "max_angle": 32.0,
+      "length": 3.5,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.6
+        }
+      ],
+      "links": [
+        "gown_skirt_side_l_0",
+        "gown_skirt_back_r_0"
+      ]
+    },
+    "gown_skirt_back_r_0": {
+      "fabric": "cotton",
+      "stiffness": 80.0,
+      "max_angle": 32.0,
+      "length": 3.5,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.6
+        }
+      ],
+      "links": [
+        "gown_skirt_back_l_0",
+        "gown_skirt_side_r_0"
+      ]
+    },
+    "gown_skirt_side_r_0": {
+      "fabric": "cotton",
+      "stiffness": 80.0,
+      "max_angle": 32.0,
+      "length": 3.5,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.6
+        }
+      ],
+      "links": [
+        "gown_skirt_back_r_0",
+        "gown_skirt_front_r_0"
+      ]
+    },
+    "gown_skirt_front_r_1": {
+      "fabric": "cotton",
+      "stiffness": 25.0,
+      "max_angle": 56.0,
+      "length": 3.5,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.6
+        }
+      ],
+      "links": [
+        "gown_skirt_side_r_1",
+        "gown_skirt_front_l_1"
+      ]
+    },
+    "gown_skirt_front_l_1": {
+      "fabric": "cotton",
+      "stiffness": 25.0,
+      "max_angle": 56.0,
+      "length": 3.5,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.6
+        }
+      ],
+      "links": [
+        "gown_skirt_front_r_1",
+        "gown_skirt_side_l_1"
+      ]
+    },
+    "gown_skirt_side_l_1": {
+      "fabric": "cotton",
+      "stiffness": 25.0,
+      "max_angle": 56.0,
+      "length": 3.5,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.6
+        }
+      ],
+      "links": [
+        "gown_skirt_front_l_1",
+        "gown_skirt_back_l_1"
+      ]
+    },
+    "gown_skirt_back_l_1": {
+      "fabric": "cotton",
+      "stiffness": 25.0,
+      "max_angle": 56.0,
+      "length": 3.5,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.6
+        }
+      ],
+      "links": [
+        "gown_skirt_side_l_1",
+        "gown_skirt_back_r_1"
+      ]
+    },
+    "gown_skirt_back_r_1": {
+      "fabric": "cotton",
+      "stiffness": 25.0,
+      "max_angle": 56.0,
+      "length": 3.5,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.6
+        }
+      ],
+      "links": [
+        "gown_skirt_back_l_1",
+        "gown_skirt_side_r_1"
+      ]
+    },
+    "gown_skirt_side_r_1": {
+      "fabric": "cotton",
+      "stiffness": 25.0,
+      "max_angle": 56.0,
+      "length": 3.5,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.6
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.6
+        }
+      ],
+      "links": [
+        "gown_skirt_back_r_1",
+        "gown_skirt_front_r_1"
+      ]
+    }
+  },
+  "look_at": {
+    "head": {
+      "max_yaw": 50,
+      "max_pitch": 30,
+      "smoothing": 0.2
+    }
+  },
+  "cloth": [
+    {
+      "joints": [
+        [
+          "gown_skirt_front_r_0",
+          "gown_skirt_front_l_0",
+          "gown_skirt_side_l_0",
+          "gown_skirt_back_l_0",
+          "gown_skirt_back_r_0",
+          "gown_skirt_side_r_0"
+        ],
+        [
+          "gown_skirt_front_r_1",
+          "gown_skirt_front_l_1",
+          "gown_skirt_side_l_1",
+          "gown_skirt_back_l_1",
+          "gown_skirt_back_r_1",
+          "gown_skirt_side_r_1"
+        ]
+      ],
+      "wrap": true
+    }
+  ]
+}

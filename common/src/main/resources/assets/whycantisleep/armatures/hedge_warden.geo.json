@@ -330,7 +330,8 @@
                     3
                   ]
                 }
-              }
+              },
+              "inflate": 0.035
             }
           ],
           "parent": "right_leg"
@@ -648,7 +649,8 @@
                     3
                   ]
                 }
-              }
+              },
+              "inflate": 0.035
             }
           ],
           "parent": "left_leg"
@@ -1474,7 +1476,7 @@
                   ]
                 }
               },
-              "inflate": 0.2
+              "inflate": 0.235
             },
             {
               "origin": [
@@ -1549,7 +1551,7 @@
                   ]
                 }
               },
-              "inflate": 0.2
+              "inflate": 0.235
             },
             {
               "origin": [
@@ -1624,7 +1626,7 @@
                   ]
                 }
               },
-              "inflate": 0.2
+              "inflate": 0.235
             }
           ],
           "parent": "root"

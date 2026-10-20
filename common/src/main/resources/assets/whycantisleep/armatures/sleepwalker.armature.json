@@ -1,0 +1,430 @@
+{
+  "glow_textures": [
+    "whycantisleep:textures/armatures/sleepwalker_glow.png"
+  ],
+  "transition": {
+    "duration": 0.2,
+    "easing": "sine_in_out"
+  },
+  "look_at": {
+    "head": {
+      "max_yaw": 40,
+      "max_pitch": 25,
+      "smoothing": 0.2
+    }
+  },
+  "springs": {
+    "right_arm": {
+      "stiffness": 180,
+      "damping": 14,
+      "weight": 0.3
+    },
+    "nightgown_front_r_0": {
+      "fabric": "linen",
+      "stiffness": 80.0,
+      "max_angle": 32.0,
+      "length": 5.0,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.4
+        }
+      ],
+      "links": [
+        "nightgown_side_r_0",
+        "nightgown_front_l_0"
+      ]
+    },
+    "nightgown_front_l_0": {
+      "fabric": "linen",
+      "stiffness": 80.0,
+      "max_angle": 32.0,
+      "length": 5.0,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.4
+        }
+      ],
+      "links": [
+        "nightgown_front_r_0",
+        "nightgown_side_l_0"
+      ]
+    },
+    "nightgown_side_l_0": {
+      "fabric": "linen",
+      "stiffness": 80.0,
+      "max_angle": 32.0,
+      "length": 5.0,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.4
+        }
+      ],
+      "links": [
+        "nightgown_front_l_0",
+        "nightgown_back_l_0"
+      ]
+    },
+    "nightgown_back_l_0": {
+      "fabric": "linen",
+      "stiffness": 80.0,
+      "max_angle": 32.0,
+      "length": 5.0,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.4
+        }
+      ],
+      "links": [
+        "nightgown_side_l_0",
+        "nightgown_back_r_0"
+      ]
+    },
+    "nightgown_back_r_0": {
+      "fabric": "linen",
+      "stiffness": 80.0,
+      "max_angle": 32.0,
+      "length": 5.0,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.4
+        }
+      ],
+      "links": [
+        "nightgown_back_l_0",
+        "nightgown_side_r_0"
+      ]
+    },
+    "nightgown_side_r_0": {
+      "fabric": "linen",
+      "stiffness": 80.0,
+      "max_angle": 32.0,
+      "length": 5.0,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.4
+        }
+      ],
+      "links": [
+        "nightgown_back_r_0",
+        "nightgown_front_r_0"
+      ]
+    },
+    "nightgown_front_r_1": {
+      "fabric": "linen",
+      "stiffness": 25.0,
+      "max_angle": 56.0,
+      "length": 5.0,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.4
+        }
+      ],
+      "links": [
+        "nightgown_side_r_1",
+        "nightgown_front_l_1"
+      ]
+    },
+    "nightgown_front_l_1": {
+      "fabric": "linen",
+      "stiffness": 25.0,
+      "max_angle": 56.0,
+      "length": 5.0,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.4
+        }
+      ],
+      "links": [
+        "nightgown_front_r_1",
+        "nightgown_side_l_1"
+      ]
+    },
+    "nightgown_side_l_1": {
+      "fabric": "linen",
+      "stiffness": 25.0,
+      "max_angle": 56.0,
+      "length": 5.0,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.4
+        }
+      ],
+      "links": [
+        "nightgown_front_l_1",
+        "nightgown_back_l_1"
+      ]
+    },
+    "nightgown_back_l_1": {
+      "fabric": "linen",
+      "stiffness": 25.0,
+      "max_angle": 56.0,
+      "length": 5.0,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.4
+        }
+      ],
+      "links": [
+        "nightgown_side_l_1",
+        "nightgown_back_r_1"
+      ]
+    },
+    "nightgown_back_r_1": {
+      "fabric": "linen",
+      "stiffness": 25.0,
+      "max_angle": 56.0,
+      "length": 5.0,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.4
+        }
+      ],
+      "links": [
+        "nightgown_back_l_1",
+        "nightgown_side_r_1"
+      ]
+    },
+    "nightgown_side_r_1": {
+      "fabric": "linen",
+      "stiffness": 25.0,
+      "max_angle": 56.0,
+      "length": 5.0,
+      "colliders": [
+        {
+          "point": "right_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "right_leg_cloth_1",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_0",
+          "radius": 2.4
+        },
+        {
+          "point": "left_leg_cloth_1",
+          "radius": 2.4
+        }
+      ],
+      "links": [
+        "nightgown_back_r_1",
+        "nightgown_front_r_1"
+      ]
+    },
+    "right_arm_strip_0_0": {
+      "fabric": "rags",
+      "stiffness": 50.0,
+      "max_angle": 40.0,
+      "length": 2.0,
+      "colliders": []
+    },
+    "right_arm_strip_0_1": {
+      "fabric": "rags",
+      "stiffness": 20.0,
+      "max_angle": 70.0,
+      "length": 2.0,
+      "colliders": []
+    },
+    "left_arm_strip_0_0": {
+      "fabric": "rags",
+      "stiffness": 50.0,
+      "max_angle": 40.0,
+      "length": 2.0,
+      "colliders": []
+    },
+    "left_arm_strip_0_1": {
+      "fabric": "rags",
+      "stiffness": 20.0,
+      "max_angle": 70.0,
+      "length": 2.0,
+      "colliders": []
+    }
+  },
+  "cloth": [
+    {
+      "joints": [
+        [
+          "nightgown_front_r_0",
+          "nightgown_front_l_0",
+          "nightgown_side_l_0",
+          "nightgown_back_l_0",
+          "nightgown_back_r_0",
+          "nightgown_side_r_0"
+        ],
+        [
+          "nightgown_front_r_1",
+          "nightgown_front_l_1",
+          "nightgown_side_l_1",
+          "nightgown_back_l_1",
+          "nightgown_back_r_1",
+          "nightgown_side_r_1"
+        ]
+      ],
+      "wrap": true
+    },
+    {
+      "joints": [
+        [
+          "right_arm_strip_0_0"
+        ],
+        [
+          "right_arm_strip_0_1"
+        ]
+      ]
+    },
+    {
+      "joints": [
+        [
+          "left_arm_strip_0_0"
+        ],
+        [
+          "left_arm_strip_0_1"
+        ]
+      ]
+    }
+  ]
+}

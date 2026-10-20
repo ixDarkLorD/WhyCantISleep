@@ -3,10 +3,10 @@ package net.ixdarklord.whycantisleep;
 import net.ixdarklord.coolcatcore.api.core.ModConstructor;
 import net.ixdarklord.coolcatcore.api.platform.Platform;
 import net.ixdarklord.whycantisleep.config.WCISConfigs;
-import net.ixdarklord.whycantisleep.deep.Dream;
-import net.ixdarklord.whycantisleep.deep.LucidDeep;
-import net.ixdarklord.whycantisleep.deep.WCISBlocks;
-import net.ixdarklord.whycantisleep.deep.WCISItems;
+import net.ixdarklord.whycantisleep.between.Dream;
+import net.ixdarklord.whycantisleep.between.DarkBetween;
+import net.ixdarklord.whycantisleep.between.WCISBlocks;
+import net.ixdarklord.whycantisleep.between.WCISItems;
 import net.ixdarklord.whycantisleep.mind.Mind;
 import net.ixdarklord.whycantisleep.mind.MindServer;
 import net.ixdarklord.whycantisleep.lurker.LurkerServer;
@@ -37,20 +37,23 @@ public final class WhyCantISleep implements ModConstructor {
         WCISEntities.register();
         WCISBlocks.register();
         // What climbs out of a tomb is whoever lay in it: a Tomb Revenant.
-        net.ixdarklord.whycantisleep.deep.TombBlock.risen = () -> WCISEntities.TOMB_REVENANT.get();
+        net.ixdarklord.whycantisleep.between.TombBlock.risen = () -> WCISEntities.TOMB_REVENANT.get();
         WCISItems.register();
         // Everything kept in the mod's attachments is declared before they are registered.
         Objects.requireNonNull(Dream.DREAM);
-        Objects.requireNonNull(LucidDeep.ORIGIN);
-        Objects.requireNonNull(net.ixdarklord.whycantisleep.deep.DeepProgress.PROGRESS);
+        Objects.requireNonNull(DarkBetween.ORIGIN);
+        Objects.requireNonNull(net.ixdarklord.whycantisleep.between.BetweenProgress.PROGRESS);
         Mind.ATTACHMENTS.register();
         WCISNetwork.register();
         MindServer.init();
         LurkerServer.init();
         SleepBoardServer.init();
-        LucidDeep.init();
-        net.ixdarklord.whycantisleep.deep.GardenWard.init();
-        net.ixdarklord.whycantisleep.deep.DeepProgress.init();
+        DarkBetween.init();
+        net.ixdarklord.whycantisleep.between.GardenWard.init();
+        net.ixdarklord.whycantisleep.between.BetweenCreatures.init();
+        net.ixdarklord.whycantisleep.between.WildsServer.init();
+        net.ixdarklord.whycantisleep.between.DreamGlider.init();
+        net.ixdarklord.whycantisleep.between.BetweenProgress.init();
     }
 
     public static Identifier id(String path) {

@@ -3,8 +3,8 @@ clips for the lid swinging open and shut, drawn on the client by ArmatureBlockRe
 
 Writes assets/whycantisleep/armatures/heartwood_reliquary.{geo,animation,armature}.json and its textures
 (textures/armatures/heartwood_reliquary.png and _glow.png), painted from the reliquary's block textures in
-gen_deep_blocks.py (the boards, the iron, the lid's rune ring), so the block model (still used for the item) and the
-animated one match. Run after gen_deep_blocks.py.
+gen_between_blocks.py (the boards, the iron, the lid's rune ring), so the block model (still used for the item) and the
+animated one match. Run after gen_between_blocks.py.
 
 Bedrock coordinates: centred on the block, x and z -8 to 8, y up from 0; the front faces north (-z), the hinge is at
 the back of the lid's underside.
@@ -15,7 +15,7 @@ import os
 
 from PIL import Image
 
-import gen_deep_blocks as blocks
+import gen_between_blocks as blocks
 
 ASSETS = blocks.ASSETS
 NS = blocks.NS
@@ -132,6 +132,8 @@ def clips():
 
 def main():
     m = build()
+    import geo_overlaps
+    geo_overlaps.separate(m.bones)                                      # no two faces left fighting in one plane
     arm = os.path.join(ASSETS, "armatures")
     write(os.path.join(arm, "heartwood_reliquary.geo.json"), {"format_version": "1.12.0", "minecraft:geometry": [{
         "description": {"identifier": "geometry.heartwood_reliquary", "texture_width": TEX, "texture_height": TEX},

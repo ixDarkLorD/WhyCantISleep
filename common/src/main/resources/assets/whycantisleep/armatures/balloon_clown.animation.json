@@ -1,0 +1,192 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.balloon_clown.idle": {
+      "loop": true,
+      "animation_length": 3.0,
+      "bones": {
+        "left_arm": {
+          "rotation": [
+            -170,
+            0,
+            28
+          ]
+        },
+        "left_forearm": {
+          "rotation": [
+            -6,
+            0,
+            0
+          ]
+        },
+        "right_leg": {
+          "rotation": [
+            "10 * math.sin(q.anim_time * 120.0)",
+            0,
+            4
+          ]
+        },
+        "left_leg": {
+          "rotation": [
+            "-8 * math.sin(q.anim_time * 120.0)",
+            0,
+            -4
+          ]
+        },
+        "right_shin": {
+          "rotation": [
+            "12 + 8 * math.sin(q.anim_time * 120.0 + 60)",
+            0,
+            0
+          ]
+        },
+        "left_shin": {
+          "rotation": [
+            "10 + 8 * math.sin(q.anim_time * 120.0)",
+            0,
+            0
+          ]
+        },
+        "body": {
+          "rotation": [
+            0,
+            0,
+            "5 * math.sin(q.anim_time * 120.0)"
+          ]
+        },
+        "head": {
+          "rotation": [
+            8,
+            "12 * math.sin(q.anim_time * 120.0)",
+            0
+          ]
+        },
+        "right_arm": {
+          "rotation": [
+            "-20 + 10 * math.sin(q.anim_time * 120.0)",
+            0,
+            20
+          ]
+        }
+      }
+    },
+    "animation.balloon_clown.walk": {
+      "loop": true,
+      "animation_length": 1.5,
+      "bones": {
+        "left_arm": {
+          "rotation": [
+            -170,
+            0,
+            28
+          ]
+        },
+        "left_forearm": {
+          "rotation": [
+            -6,
+            0,
+            0
+          ]
+        },
+        "right_leg": {
+          "rotation": [
+            "10 * math.sin(q.anim_time * 240.0)",
+            0,
+            4
+          ]
+        },
+        "left_leg": {
+          "rotation": [
+            "-8 * math.sin(q.anim_time * 240.0)",
+            0,
+            -4
+          ]
+        },
+        "right_shin": {
+          "rotation": [
+            "12 + 8 * math.sin(q.anim_time * 240.0 + 60)",
+            0,
+            0
+          ]
+        },
+        "left_shin": {
+          "rotation": [
+            "10 + 8 * math.sin(q.anim_time * 240.0)",
+            0,
+            0
+          ]
+        },
+        "body": {
+          "rotation": [
+            12,
+            0,
+            "6 * math.sin(q.anim_time * 240.0)"
+          ]
+        },
+        "right_arm": {
+          "rotation": [
+            -60,
+            0,
+            30
+          ]
+        }
+      }
+    },
+    "animation.balloon_clown.attack": {
+      "loop": false,
+      "animation_length": 0.6,
+      "bones": {
+        "left_arm": {
+          "rotation": [
+            -170,
+            0,
+            28
+          ]
+        },
+        "left_forearm": {
+          "rotation": [
+            -6,
+            0,
+            0
+          ]
+        },
+        "right_arm": {
+          "rotation": {
+            "0.0": {
+              "post": [
+                -20,
+                0,
+                20
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.25": {
+              "post": [
+                -110,
+                0,
+                0
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.45": {
+              "post": [
+                -60,
+                0,
+                10
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.6": {
+              "post": [
+                -20,
+                0,
+                20
+              ],
+              "lerp_mode": "catmullrom"
+            }
+          }
+        }
+      }
+    }
+  }
+}

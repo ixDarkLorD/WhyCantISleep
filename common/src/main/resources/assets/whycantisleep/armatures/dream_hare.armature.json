@@ -1,0 +1,16 @@
+{
+  "glow_textures": [
+    "whycantisleep:textures/armatures/dream_hare_glow.png"
+  ],
+  "transition": {
+    "duration": 0.2,
+    "easing": "sine_in_out"
+  },
+  "look_at": {
+    "head": {
+      "max_yaw": 40,
+      "max_pitch": 20,
+      "smoothing": 0.25
+    }
+  }
+}

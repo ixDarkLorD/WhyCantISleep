@@ -2,87 +2,189 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Lucid Deep Model Viewer</title>
+<title>Dark Between Model Viewer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-  :root { --ink: #ebe6dc; --dim: #a99db0; --night: #18141e; --panel: #221a2ae8; --well: #2a1f33; --line: #4a3340;
-          --copper: #c79a72; --ember: #ff8f6b; --plum: #70528a; }
-  html, body { margin: 0; height: 100%; color: var(--ink); font: 12px/1.4 system-ui, sans-serif; overflow: hidden;
-               background: radial-gradient(ellipse at 50% 38%, #2c2238 0%, #1b1622 55%, #100d15 100%); }
+  /* One set of tokens for the whole page: a night-violet ground, frosted panels, an ember accent (the Dark Between's). */
+  :root {
+    --bg: #0d0a12; --bg-glow: #2a2038;
+    --surface: rgba(22, 17, 30, .72); --surface-solid: #18121f; --raised: rgba(255, 255, 255, .045); --raised-hover: rgba(255, 255, 255, .08);
+    --border: rgba(255, 255, 255, .08); --border-strong: rgba(255, 255, 255, .16);
+    --text: #eee9f4; --muted: #a49bb2; --faint: #6f667d;
+    --accent: #ff8f6b; --accent-strong: #ffa585; --accent-soft: rgba(255, 143, 107, .14); --accent-line: rgba(255, 143, 107, .45);
+    --violet: #b69cff; --violet-soft: rgba(182, 156, 255, .14); --good: #7fd8a4; --bad: #ff6b7a;
+    --r-lg: 14px; --r: 10px; --r-sm: 7px; --pill: 999px;
+    --shadow: 0 1px 0 rgba(255, 255, 255, .04) inset, 0 10px 30px rgba(0, 0, 0, .45), 0 2px 6px rgba(0, 0, 0, .3);
+    --blur: blur(16px) saturate(150%);
+    --font: Inter, ui-sans-serif, system-ui, "Segoe UI", sans-serif; --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; color: var(--text); font: 12.5px/1.45 var(--font); overflow: hidden; -webkit-font-smoothing: antialiased;
+               background: radial-gradient(1200px 800px at 50% 35%, var(--bg-glow) 0%, #17111f 45%, var(--bg) 100%); }
   canvas { display: block; position: fixed; inset: 0; }
   button, select, input { font: inherit; color: inherit; }
-  svg { width: 10px; height: 10px; fill: currentColor; display: block; }
+  svg { width: 12px; height: 12px; fill: currentColor; display: block; flex: none; }
+  .ico { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  ::selection { background: var(--accent-soft); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  * { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
 
-  /* Bars are rows of panels that float over the picture; only the panels take the pointer. */
-  .bar { position: fixed; left: 10px; right: 10px; display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; pointer-events: none; z-index: 2; }
-  #top { top: 10px; } #bottom { bottom: 10px; align-items: flex-end; }
-  .panel { pointer-events: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 5px;
-           display: flex; gap: 5px; align-items: center; flex-wrap: wrap; box-shadow: 0 6px 22px #0007; backdrop-filter: blur(6px); }
+  /* Bars float over the picture; only their panels take the pointer. */
+  .bar { position: fixed; left: 14px; right: 14px; display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; pointer-events: none; z-index: 2; }
+  #top { top: 14px; } #bottom { bottom: 14px; align-items: flex-end; }
+  .panel { pointer-events: auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 6px;
+           display: flex; gap: 6px; align-items: center; flex-wrap: wrap; box-shadow: var(--shadow); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); }
   .gap { flex: 1; }
-  .panel button, .panel select { background: var(--well); border: 1px solid transparent; border-radius: 6px; padding: 4px 9px; cursor: pointer;
-                                 display: inline-flex; align-items: center; gap: 6px; min-height: 26px; box-sizing: border-box; }
-  .panel button:hover, .panel select:hover { border-color: var(--copper); }
-  .panel button.on { background: var(--line); border-color: var(--copper); color: #fff4e6; }
-  .panel button:disabled, .panel select:disabled { opacity: .35; cursor: default; border-color: transparent; }
-  :focus-visible { outline: 2px solid var(--ember); outline-offset: 1px; }
-  .group { display: inline-flex; gap: 1px; background: var(--line); border-radius: 7px; padding: 1px; }
-  .group button { border-radius: 0; border: 0; }
-  .group button:first-child { border-radius: 6px 0 0 6px; } .group button:last-child { border-radius: 0 6px 6px 0; }
-  .group button.on { box-shadow: inset 0 -2px var(--ember); }
-  .rule { width: 1px; align-self: stretch; background: var(--line); margin: 2px 2px; }
+  .bar > .panel { max-width: 100%; }
 
-  #open { font-weight: 600; font-size: 13px; max-width: 34vw; }
-  #open span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  #open svg { opacity: .7; }
-  .badge { font-size: 10px; letter-spacing: .06em; text-transform: uppercase; padding: 2px 6px; border-radius: 99px; background: var(--plum); color: #f3e6ff; }
-  .badge.scratch { background: #6a4a3a; color: #ffe0c8; }
-  .chips { display: flex; gap: 4px; flex-wrap: wrap; padding: 0 4px; }
-  .chip { color: var(--dim); white-space: nowrap; } .chip b { color: var(--ink); font-weight: 600; }
-  .chip + .chip::before { content: "·"; margin-right: 4px; opacity: .5; }
-  #parts { display: none; max-width: 46vw; } #parts.some { display: flex; } #parts small { color: var(--dim); padding: 0 2px 0 4px; }
-  #parts button { padding: 2px 8px; min-height: 22px; } #parts button:not(.on) { opacity: .5; text-decoration: line-through; }
+  /* Buttons: quiet by default, a soft fill on hover, the accent when on. */
+  .panel button, .panel select, .card button { background: transparent; border: 1px solid transparent; border-radius: var(--r-sm); padding: 5px 10px;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 7px; min-height: 30px; color: var(--muted); transition: background .12s, color .12s, border-color .12s; }
+  .panel button:hover, .panel select:hover, .card button:hover { background: var(--raised-hover); color: var(--text); }
+  .panel button.on { background: var(--accent-soft); color: var(--accent-strong); border-color: transparent; }
+  .panel button:disabled, .panel select:disabled { opacity: .35; cursor: default; background: transparent; color: var(--muted); }
+  .panel select { appearance: none; padding-right: 26px; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+      background-position: calc(100% - 13px) 50%, calc(100% - 9px) 50%; background-size: 4px 4px; background-repeat: no-repeat; background-color: var(--raised); }
+  .panel select option { background: var(--surface-solid); }
+  .group { display: inline-flex; gap: 2px; background: var(--raised); border: 1px solid var(--border); border-radius: var(--r); padding: 2px; }
+  .group button { min-height: 26px; padding: 3px 10px; border-radius: 7px; }
+  .group button.on { background: var(--surface-solid); color: var(--text); border-color: var(--border-strong); box-shadow: 0 1px 4px rgba(0, 0, 0, .35); }
+  .rule { width: 1px; align-self: stretch; background: var(--border); margin: 4px 2px; }
+  .tool { padding: 5px 9px !important; } .tool .lbl { font-weight: 500; }
+  .tool.icon-only { padding: 5px 8px !important; }
 
-  /* The transport: animations as a row of tabs, and under it the controls and the time line. */
-  #transport { flex: 1; flex-direction: column; align-items: stretch; gap: 5px; min-width: 260px; }
-  #anims { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: thin; padding-bottom: 1px; }
-  #anims button { white-space: nowrap; } #anims small { color: var(--dim); font-size: 10px; }
-  #anims button.on small { color: #ffd8c0; }
-  #controls { display: flex; gap: 6px; align-items: center; }
-  #play { width: 34px; justify-content: center; background: var(--ember); color: #2a1410; }
-  #play:hover { border-color: #fff; } #play:disabled { background: var(--well); color: var(--ink); }
-  #scrub { flex: 1; min-width: 100px; position: relative; height: 24px; }
-  #time { position: absolute; left: 0; top: 4px; width: 100%; margin: 0; accent-color: var(--ember); }
-  #ticks { position: absolute; left: 8px; right: 8px; top: 0; height: 5px; pointer-events: none; }
-  #ticks i { position: absolute; top: 0; width: 1px; height: 5px; background: var(--copper); opacity: .65; }
-  #clock { min-width: 92px; text-align: right; font-variant-numeric: tabular-nums; color: var(--dim); } #clock b { color: var(--ink); font-weight: 600; }
-  #error { color: var(--ember); white-space: pre-wrap; pointer-events: auto; }
-  #error:not(:empty) { background: var(--panel); border: 1px solid var(--ember); border-radius: 10px; padding: 6px 10px; }
+  /* The model switcher. */
+  #switcher { padding: 5px; }
+  #open { font-weight: 600; font-size: 13.5px; color: var(--text) !important; max-width: 36vw; padding: 5px 10px 5px 12px; background: var(--raised) !important;
+          border-color: var(--border) !important; }
+  #open:hover { border-color: var(--border-strong) !important; }
+  #open span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } #open svg { opacity: .6; }
+  #prev, #next { width: 30px; justify-content: center; padding: 0 !important; }
+  .badge { font-size: 10px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; padding: 3px 8px; border-radius: var(--pill);
+           background: var(--violet-soft); color: var(--violet); border: 1px solid rgba(182, 156, 255, .25); }
+  .badge.scratch { background: var(--accent-soft); color: var(--accent); border-color: var(--accent-line); }
+  .chips { display: flex; gap: 12px; flex-wrap: wrap; padding: 0 8px; color: var(--faint); font-size: 11.5px; }
+  .chip { white-space: nowrap; } .chip b { color: var(--muted); font-weight: 600; font-family: var(--mono); font-size: 11px; }
+  #parts { display: none; max-width: 46vw; } #parts.some { display: flex; } #parts small { color: var(--faint); padding: 0 2px 0 6px; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+  #parts button { min-height: 24px; padding: 2px 9px; } #parts button:not(.on) { opacity: .5; text-decoration: line-through; }
 
-  /* The model menu: a palette in the middle of the top, open at once from what is already in memory. */
-  #shade { position: fixed; inset: 0; background: #0b0810a0; display: none; z-index: 4; }
-  #menu { position: fixed; left: 50%; top: 52px; transform: translateX(-50%); width: min(600px, calc(100vw - 24px)); max-height: calc(100vh - 120px);
-          display: none; flex-direction: column; background: #201826f8; border: 1px solid var(--copper); border-radius: 12px;
-          box-shadow: 0 18px 60px #000c; z-index: 5; overflow: hidden; }
+  /* The transport: the clips as a strip of pills, then the controls and the time line. */
+  #transport { flex: 1; flex-direction: column; align-items: stretch; gap: 8px; min-width: 300px; padding: 10px 12px; }
+  #animhead { display: flex; gap: 10px; align-items: center; min-height: 26px; }
+  #animhead .eyebrow { font-size: 10px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--faint); }
+  #animnow { font-weight: 600; font-size: 13px; } #animmeta, #animcount { color: var(--faint); font-size: 11.5px; }
+  #animfind { background: var(--raised); border: 1px solid var(--border); border-radius: var(--pill); padding: 4px 12px; width: 160px; outline: 0; font-size: 12px; }
+  #animfind:focus { border-color: var(--accent-line); background: var(--raised-hover); } #animfind[hidden] { display: none; }
+  #anims { display: flex; flex-wrap: wrap; gap: 5px; max-height: 66px; overflow-y: auto; padding: 1px 2px 1px 0; }
+  #anims button { white-space: nowrap; padding: 3px 11px 3px 9px; min-height: 27px; border-radius: var(--pill); background: var(--raised); border-color: var(--border); color: var(--muted); }
+  #anims button:hover { border-color: var(--border-strong); }
+  #anims button i { font-style: normal; font-size: 11px; color: var(--violet); width: 10px; text-align: center; }
+  #anims button.once i { color: var(--faint); }
+  #anims small { color: var(--faint); font-size: 10.5px; font-family: var(--mono); }
+  #anims button.on { background: var(--accent-soft); border-color: var(--accent-line); color: var(--text); }
+  #anims button.on small, #anims button.on i { color: var(--accent-strong); }
+  #anims .split { width: 1px; align-self: stretch; background: var(--border); margin: 3px 4px; }
+  #anims button.few { opacity: .6; } #anims button.few:hover { opacity: 1; }
+  #controls { display: flex; gap: 8px; align-items: center; }
+  #controls .group button { width: 30px; justify-content: center; padding: 0; }
+  #play { width: 38px; height: 38px; min-height: 38px !important; justify-content: center; border-radius: 50% !important; padding: 0 !important;
+          background: var(--accent) !important; color: #2a120b !important; box-shadow: 0 4px 16px rgba(255, 143, 107, .35); }
+  #play:hover { background: var(--accent-strong) !important; } #play:disabled { background: var(--raised) !important; color: var(--faint) !important; box-shadow: none; }
+  #play svg { width: 13px; height: 13px; }
+  #scrub { flex: 1; min-width: 120px; position: relative; height: 28px; display: flex; align-items: center; }
+  #time { width: 100%; margin: 0; appearance: none; background: transparent; height: 28px; cursor: pointer; }
+  #time::-webkit-slider-runnable-track { height: 4px; border-radius: 99px; background: linear-gradient(90deg, var(--accent) var(--fill, 0%), var(--border-strong) var(--fill, 0%)); }
+  #time::-webkit-slider-thumb { appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #fff; margin-top: -5px; box-shadow: 0 0 0 3px var(--accent-soft), 0 2px 6px rgba(0,0,0,.5); }
+  #time::-moz-range-track { height: 4px; border-radius: 99px; background: var(--border-strong); } #time::-moz-range-progress { height: 4px; border-radius: 99px; background: var(--accent); }
+  #time::-moz-range-thumb { width: 14px; height: 14px; border: 0; border-radius: 50%; background: #fff; }
+  #time:disabled { cursor: default; opacity: .4; }
+  #ticks { position: absolute; left: 7px; right: 7px; top: 2px; height: 6px; pointer-events: none; }
+  #ticks i { position: absolute; top: 0; width: 2px; height: 6px; border-radius: 2px; background: var(--violet); opacity: .7; transform: translateX(-1px); }
+  #clock { min-width: 104px; text-align: right; font-family: var(--mono); font-size: 11.5px; color: var(--faint); } #clock b { color: var(--text); font-weight: 500; }
+  #error { color: var(--bad); white-space: pre-wrap; pointer-events: auto; font-family: var(--mono); font-size: 11px; }
+  #error:not(:empty) { background: rgba(255, 107, 122, .1); border: 1px solid rgba(255, 107, 122, .4); border-radius: var(--r); padding: 8px 12px; backdrop-filter: var(--blur); }
+
+  /* The picked creature on the board, in the transport's head. */
+  #picked { display: none; align-items: center; gap: 4px; padding: 2px 3px 2px 11px; border-radius: var(--pill); background: var(--accent-soft);
+            border: 1px solid var(--accent-line); } #picked.some { display: inline-flex; }
+  #picked b { color: var(--accent-strong); font-weight: 600; margin-right: 4px; }
+  #picked button { border-radius: var(--pill); padding: 2px 9px; min-height: 22px; font-size: 11.5px; color: var(--text); background: rgba(0, 0, 0, .2); }
+  #picked button:hover { background: rgba(0, 0, 0, .35); }
+
+  /* Cards: the inspector and the keys, floating on the right. */
+  .card { position: fixed; right: 14px; display: none; flex-direction: column; background: var(--surface-solid); border: 1px solid var(--border);
+          border-radius: var(--r-lg); box-shadow: var(--shadow); z-index: 3; overflow: hidden; }
+  .card.open { display: flex; animation: rise .16s ease-out; }
+  @keyframes rise { from { opacity: 0; transform: translateY(-4px) scale(.99); } to { opacity: 1; transform: none; } }
+  .card header { display: flex; align-items: center; gap: 8px; padding: 11px 12px 10px 14px; border-bottom: 1px solid var(--border); }
+  .card header h4 { margin: 0; font-size: 12.5px; font-weight: 600; letter-spacing: .01em; }
+  .card header .close { margin-left: auto; width: 26px; min-height: 26px; padding: 0; justify-content: center; border-radius: 7px; }
+  .card .body { overflow-y: auto; padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 14px; }
+  .pill { font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: var(--pill); background: var(--raised); color: var(--muted); border: 1px solid var(--border);
+          font-family: var(--mono); } .pill.good { color: var(--good); background: rgba(127, 216, 164, .1); border-color: rgba(127, 216, 164, .3); }
+  .pill.busy { color: var(--accent); background: var(--accent-soft); border-color: var(--accent-line); }
+
+  #stats { width: 330px; top: 72px; max-height: calc(100vh - 260px); }
+  .section h5 { margin: 0 0 7px; font-size: 10px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--faint);
+                display: flex; align-items: center; justify-content: space-between; }
+  .section h5 span { letter-spacing: 0; text-transform: none; font-weight: 500; font-family: var(--mono); color: var(--muted); }
+  .tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .tile { background: var(--raised); border: 1px solid var(--border); border-radius: var(--r); padding: 8px 10px; }
+  .tile small { display: block; color: var(--faint); font-size: 10.5px; } .tile b { font-family: var(--mono); font-size: 16px; font-weight: 500; letter-spacing: -.01em; }
+  .tile b em { font-style: normal; font-size: 11px; color: var(--muted); margin-left: 3px; }
+  #spark { width: 100%; height: 34px; display: block; margin-top: 6px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 11.5px; }
+  .kv .k { color: var(--muted); } .kv .v { text-align: right; font-family: var(--mono); font-size: 11px; color: var(--text); }
+  .kv .note { grid-column: 1 / -1; color: var(--faint); font-size: 10.5px; margin: -3px 0 3px; line-height: 1.35; }
+  .kv small { color: var(--faint); font-family: var(--font); font-size: 10.5px; margin-left: 4px; }
+  #loadbar { height: 4px; border-radius: 99px; background: var(--raised-hover); overflow: hidden; margin-bottom: 9px; }
+  #loadbar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--violet), var(--accent)); transition: width .2s; border-radius: 99px; }
+  #loadlog { overflow-y: auto; max-height: 150px; flex-shrink: 0; display: flex; flex-direction: column; gap: 3px; margin-top: 9px; padding-right: 2px; }
+  #loadlog div { display: grid; grid-template-columns: 14px 1fr 54px 46px; gap: 7px; align-items: center; font-size: 11px; color: var(--faint); }
+  #loadlog div > span:first-child { color: var(--good); } #loadlog div.bad > span:first-child, #loadlog div.bad b { color: var(--bad); }
+  #loadlog b { color: var(--text); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #loadlog u { text-decoration: none; height: 4px; border-radius: 99px; background: var(--raised-hover); overflow: hidden; display: block; }
+  #loadlog u s { display: block; height: 100%; background: var(--violet); opacity: .75; border-radius: 99px; }
+  #loadlog div.slow u s { background: var(--accent); opacity: 1; }
+  #loadlog em { font-style: normal; text-align: right; font-family: var(--mono); font-size: 10.5px; } #loadlog div.slow em { color: var(--accent); }
+  #loadlog .meta { display: none; }
+
+  #help { width: 320px; top: 72px; }
+  #help .body { gap: 12px; }
+  #help .keys { display: flex; flex-direction: column; gap: 5px; }
+  #help .keys div { display: flex; justify-content: space-between; gap: 16px; color: var(--muted); font-size: 12px; align-items: center; }
+  #help .keys div > span:last-child, #help .keys div > kbd:last-child { flex: none; }
+  kbd { display: inline-block; min-width: 20px; text-align: center; border: 1px solid var(--border-strong); border-bottom-width: 2px; border-radius: 5px; padding: 0 5px;
+        color: var(--text); background: var(--raised); font: 500 10.5px/18px var(--mono); }
+
+  /* The model menu: a command palette. */
+  #shade { position: fixed; inset: 0; background: rgba(6, 4, 9, .55); backdrop-filter: blur(3px); display: none; z-index: 4; }
+  #menu { position: fixed; left: 50%; top: 64px; transform: translateX(-50%); width: min(640px, calc(100vw - 28px)); max-height: calc(100vh - 128px);
+          display: none; flex-direction: column; background: rgba(22, 17, 30, .94); border: 1px solid var(--border-strong); border-radius: 16px;
+          box-shadow: 0 30px 80px rgba(0, 0, 0, .65); z-index: 5; overflow: hidden; backdrop-filter: var(--blur); }
   #menu.open, #menu.open + #shade, #shade.open { display: flex; }
-  #seek { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
-  #seek svg { width: 13px; height: 13px; opacity: .6; }
-  #find { flex: 1; background: none; border: 0; outline: 0; font-size: 14px; }
-  #count { color: var(--dim); white-space: nowrap; }
-  #list { overflow-y: auto; padding: 4px 6px 6px; scrollbar-width: thin; }
-  #list h4 { margin: 10px 6px 3px; font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--dim);
-             display: flex; gap: 6px; } #list h4 i { font-style: normal; opacity: .6; }
-  .row { display: grid; grid-template-columns: 54px 1fr auto; gap: 8px; align-items: center; padding: 5px 6px; border-radius: 7px; cursor: pointer; }
-  .row:hover { background: var(--well); } .row.pick { background: var(--line); box-shadow: inset 2px 0 var(--ember); }
-  .row.now .name::after { content: "open"; margin-left: 8px; font-size: 10px; color: var(--ember); text-transform: uppercase; letter-spacing: .06em; }
-  .row .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .row mark { background: none; color: var(--ember); font-weight: 600; }
-  .row small { color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
+  #menu.open { animation: rise .16s ease-out; }
+  #seek { display: flex; align-items: center; gap: 10px; padding: 13px 16px; border-bottom: 1px solid var(--border); }
+  #seek svg { width: 15px; height: 15px; opacity: .55; }
+  #find { flex: 1; background: none; border: 0; outline: 0; font-size: 14.5px; }
+  #find::placeholder, #animfind::placeholder { color: var(--faint); }
+  #count { color: var(--faint); white-space: nowrap; font-family: var(--mono); font-size: 11px; }
+  #list { overflow-y: auto; padding: 6px 8px 8px; }
+  #list h4 { margin: 12px 8px 5px; font-size: 10px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--faint);
+             display: flex; gap: 6px; } #list h4 i { font-style: normal; font-family: var(--mono); opacity: .7; }
+  .row { display: grid; grid-template-columns: 74px 1fr auto; gap: 10px; align-items: center; padding: 7px 8px; border-radius: 9px; cursor: pointer; }
+  .row:hover { background: var(--raised); } .row.pick { background: var(--accent-soft); box-shadow: inset 2px 0 var(--accent); }
+  .row.now .name::after { content: "open"; margin-left: 8px; font-size: 9.5px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: .08em; }
+  .row .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; } .row mark { background: none; color: var(--accent-strong); font-weight: 700; }
+  .row small { color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; font-size: 11px; }
   .row .badge { justify-self: start; }
-  #menu footer { display: flex; gap: 12px; padding: 7px 12px; border-top: 1px solid var(--line); color: var(--dim); flex-wrap: wrap; }
-  kbd { border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; color: var(--ink); background: var(--well); font: inherit; font-size: 11px; }
+  #menu footer { display: flex; gap: 14px; padding: 9px 16px; border-top: 1px solid var(--border); color: var(--faint); flex-wrap: wrap; font-size: 11.5px; align-items: center; }
 
-  .label { position: fixed; padding: 2px 7px; background: var(--panel); border: 1px solid var(--line); border-radius: 99px; pointer-events: none;
-           display: none; color: var(--dim); z-index: 1; }
-  #help { position: fixed; right: 10px; top: 56px; display: none; flex-direction: column; align-items: stretch; gap: 3px; padding: 10px 12px; z-index: 3; max-width: 300px; }
-  #help.open { display: flex; } #help div { display: flex; justify-content: space-between; gap: 18px; color: var(--dim); } #help h5 { margin: 4px 0 2px; font-size: 11px; color: var(--copper); }
+  .label { position: fixed; padding: 3px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--pill); pointer-events: none;
+           display: none; color: var(--muted); z-index: 1; font-size: 11.5px; backdrop-filter: var(--blur); }
+  @media (max-width: 760px) { .tool .lbl { display: none; } #open { max-width: 52vw; } .chips { display: none; } }
 </style>
 <script type="importmap">
 { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -91,10 +193,10 @@
 </head>
 <body>
 <div id="top" class="bar">
-  <div class="panel">
-    <button id="prev" title="the model before this one in the list (,)"><svg viewBox="0 0 10 10"><path d="M7 1L2 5l5 4z"/></svg></button>
-    <button id="open" title="choose a model (O)"><span>loading</span><svg viewBox="0 0 10 10"><path d="M1 3l4 5 4-5z"/></svg></button>
-    <button id="next" title="the model after this one (.)"><svg viewBox="0 0 10 10"><path d="M3 1l5 4-5 4z"/></svg></button>
+  <div class="panel" id="switcher">
+    <button id="prev" title="the model before this one in the list (,)"><svg class="ico" viewBox="0 0 16 16"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg></button>
+    <button id="open" title="choose a model (O)"><span>loading</span><svg class="ico" viewBox="0 0 16 16"><path d="m4.5 6.5 3.5 3.5 3.5-3.5"/></svg></button>
+    <button id="next" title="the model after this one (.)"><svg class="ico" viewBox="0 0 16 16"><path d="M6 3.5 10.5 8 6 12.5"/></svg></button>
     <span id="kind" class="badge" style="display:none"></span>
     <span id="info" class="chips"></span>
   </div>
@@ -103,22 +205,50 @@
   <div class="panel">
     <span class="group" id="views" title="views (keys 1 to 7)"></span>
     <span class="rule"></span>
-    <button id="glow" class="on" title="the glowmask: on, alone, off (G)">glow</button>
-    <button id="ref" class="on" title="a player (or a block) to judge size by (P)">scale</button>
-    <button id="grid" class="on" title="the ground, in blocks">ground</button>
-    <button id="keys" title="the keys (?)">?</button>
+    <button id="glow" class="on tool" title="the glowmask: on, alone, off (G)"><svg class="ico" viewBox="0 0 16 16"><path d="M8 1.5v2.2M8 12.3v2.2M1.5 8h2.2M12.3 8h2.2M3.4 3.4l1.6 1.6M11 11l1.6 1.6M3.4 12.6 5 11M11 5l1.6-1.6"/><circle cx="8" cy="8" r="2.4"/></svg><span class="lbl">glow</span></button>
+    <button id="ref" class="on tool" title="a player (or a block) to judge size by (P)"><svg class="ico" viewBox="0 0 16 16"><circle cx="8" cy="3.6" r="1.9"/><path d="M8 6.3v4.6M5 8.3h6M8 10.9l-2.3 3.6M8 10.9l2.3 3.6"/></svg><span class="lbl">scale</span></button>
+    <button id="grid" class="on tool" title="the ground, in blocks"><svg class="ico" viewBox="0 0 16 16"><path d="M2 11.5 8 14.5l6-3-6-3-6 3zM5 10l6 3M11 10l-6 3"/></svg><span class="lbl">ground</span></button>
+    <button id="physics" class="on tool" title="spring physics: hanging and floating parts swing as CoolCatLib swings them (H)"><svg class="ico" viewBox="0 0 16 16"><path d="M8 1.5v3M8 4.5c-2 1.5 2 3 0 4.5s2 3 0 4.5"/><circle cx="8" cy="14" r="1.2"/></svg><span class="lbl">springs</span></button>
+    <button id="nudge" class="tool icon-only" title="nudge the model, to see its springs react (N)"><svg class="ico" viewBox="0 0 16 16"><path d="M2 8h9M8 4.5 11.5 8 8 11.5M13.5 3v10"/></svg></button>
+    <span class="rule"></span>
+    <button id="board" class="tool" title="every creature at once, named (B)"><svg class="ico" viewBox="0 0 16 16"><rect x="2" y="2" width="5" height="5" rx="1.2"/><rect x="9" y="2" width="5" height="5" rx="1.2"/><rect x="2" y="9" width="5" height="5" rx="1.2"/><rect x="9" y="9" width="5" height="5" rx="1.2"/></svg><span class="lbl">board</span></button>
+    <button id="statsbtn" class="tool" title="the inspector: the load, the scene, the frame (I)"><svg class="ico" viewBox="0 0 16 16"><path d="M2 13.5h12M4 11V7.5M7 11V4M10 11V6M13 11V2.5"/></svg><span class="lbl">inspector</span></button>
+    <button id="keys" class="tool icon-only" title="keyboard shortcuts (?)"><svg class="ico" viewBox="0 0 16 16"><rect x="1.5" y="4" width="13" height="8.5" rx="1.8"/><path d="M4 7h.01M6.5 7h.01M9 7h.01M11.5 7h.01M5 10h6"/></svg></button>
   </div>
 </div>
-<div id="help" class="panel">
-  <h5>models</h5><div>choose a model <kbd>O</kbd></div><div>the one before, after <span><kbd>,</kbd> <kbd>.</kbd></span></div>
-  <h5>looking</h5><div>views <span><kbd>1</kbd> to <kbd>7</kbd></span></div><div>glow, scale <span><kbd>G</kbd> <kbd>P</kbd></span></div><div>turn, zoom, slide <span>drag, wheel, right drag</span></div>
-  <h5>animation</h5><div>play or pause <kbd>Space</kbd></div><div>the next animation <kbd>A</kbd></div><div>a tick back, on <span><kbd>&larr;</kbd> <kbd>&rarr;</kbd></span></div>
-  <div>a hundredth <span><kbd>Shift</kbd> + <kbd>&larr;</kbd> <kbd>&rarr;</kbd></span></div><div>to the start <kbd>Home</kbd></div><div>slower, faster <span><kbd>[</kbd> <kbd>]</kbd></span></div><div>loop <kbd>L</kbd></div>
+<div id="stats" class="card">
+  <header><svg class="ico" viewBox="0 0 16 16"><path d="M2 13.5h12M4 11V7.5M7 11V4M10 11V6M13 11V2.5"/></svg><h4>Inspector</h4><span class="pill busy" id="loadwhat">starting</span>
+    <button class="close" id="statsclose" title="close (I)"><svg class="ico" viewBox="0 0 16 16"><path d="m4 4 8 8M12 4l-8 8"/></svg></button></header>
+  <div class="body">
+    <div class="tiles" id="tiles"></div>
+    <div class="section"><h5>frame time <span id="sparknote"></span></h5><canvas id="spark" width="600" height="68"></canvas></div>
+    <div class="section"><h5>load <span id="loadtotal"></span></h5><div id="loadbar"><i></i></div><div class="kv" id="loadkv"></div><div id="loadlog"></div></div>
+    <div class="section"><h5>scene</h5><div class="kv" id="scenekv"></div></div>
+    <div class="section"><h5>frame</h5><div class="kv" id="framekv"></div></div>
+    <div class="section"><h5>playing</h5><div class="kv" id="playkv"></div></div>
+  </div>
+</div>
+<div id="help" class="card">
+  <header><svg class="ico" viewBox="0 0 16 16"><rect x="1.5" y="4" width="13" height="8.5" rx="1.8"/><path d="M4 7h.01M6.5 7h.01M9 7h.01M11.5 7h.01M5 10h6"/></svg><h4>Keyboard shortcuts</h4>
+    <button class="close" id="helpclose" title="close (?)"><svg class="ico" viewBox="0 0 16 16"><path d="m4 4 8 8M12 4l-8 8"/></svg></button></header>
+  <div class="body">
+    <div class="section"><h5>models</h5><div class="keys">
+      <div>choose a model <kbd>O</kbd></div><div>the one before, after <span><kbd>,</kbd> <kbd>.</kbd></span></div>
+      <div>every creature at once <kbd>B</kbd></div><div>pick one on the board <span>click</span></div><div>look at the one picked <kbd>F</kbd></div>
+      <div>open one alone <span>double-click</span></div><div>the inspector <kbd>I</kbd></div></div></div>
+    <div class="section"><h5>looking</h5><div class="keys">
+      <div>views <span><kbd>1</kbd> &ndash; <kbd>7</kbd></span></div><div>glow, scale <span><kbd>G</kbd> <kbd>P</kbd></span></div>
+      <div>spring physics, nudge <span><kbd>H</kbd> <kbd>N</kbd></span></div><div>turn, zoom, slide <span>drag, wheel, right drag</span></div></div></div>
+    <div class="section"><h5>animation</h5><div class="keys">
+      <div>play or pause <kbd>Space</kbd></div><div>next clip, previous <span><kbd>A</kbd> <kbd>Shift</kbd>+<kbd>A</kbd></span></div>
+      <div>a tick back, on <span><kbd>&larr;</kbd> <kbd>&rarr;</kbd></span></div><div>a hundredth <span><kbd>Shift</kbd>+<kbd>&larr;</kbd> <kbd>&rarr;</kbd></span></div>
+      <div>to the start <kbd>Home</kbd></div><div>slower, faster <span><kbd>[</kbd> <kbd>]</kbd></span></div><div>loop <kbd>L</kbd></div></div></div>
+  </div>
 </div>
 <div id="menu">
   <div id="seek">
-    <svg viewBox="0 0 13 13"><path d="M5.5 1a4.5 4.5 0 1 0 2.7 8.1l3 3 1-1-3-3A4.5 4.5 0 0 0 5.5 1zm0 1.5a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/></svg>
-    <input id="find" type="search" placeholder="find a model, or paste a path to a .geo.json, a model .json or an .obj" autocomplete="off" spellcheck="false">
+    <svg class="ico" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3.5 3.5"/></svg>
+    <input id="find" type="search" placeholder="Find a model, or paste a path to a .geo.json, a model .json or an .obj" autocomplete="off" spellcheck="false">
     <span id="count"></span>
   </div>
   <div id="list"></div>
@@ -127,21 +257,26 @@
 <div id="shade"></div>
 <div id="bottom" class="bar">
   <div id="transport" class="panel">
-    <div id="anims" title="animations (A for the next)"></div>
+    <div id="animhead"><span id="picked" title="the creature picked on the board: its own clips are below"><b id="pickname"></b>
+      <button id="pickopen" title="open it alone (double-click it)">open alone</button><button id="pickfocus" title="look at it (F)">look</button>
+      <button id="pickdrop" title="back to every creature (Esc, or click the ground)">&times;</button></span><span class="eyebrow">clip</span><b id="animnow">rest pose</b><small id="animmeta"></small><span class="gap"></span>
+      <input id="animfind" type="search" placeholder="Filter clips" autocomplete="off" spellcheck="false" hidden>
+      <small id="animcount"></small></div>
+    <div id="anims" title="animations: A for the next, Shift+A the one before"></div>
     <div id="controls">
       <span class="group">
-        <button id="first" title="to the start (Home)"><svg viewBox="0 0 10 10"><path d="M1 1h1.6v8H1zM9 1L3.5 5 9 9z"/></svg></button>
-        <button id="back" title="one tick back, a twentieth of a second (Left; with Shift, a hundredth)"><svg viewBox="0 0 10 10"><path d="M7.5 1L2.5 5l5 4z"/></svg></button>
-        <button id="fwd" title="one tick on (Right; with Shift, a hundredth)"><svg viewBox="0 0 10 10"><path d="M2.5 1l5 4-5 4z"/></svg></button>
+        <button id="first" title="to the start (Home)"><svg class="ico" viewBox="0 0 16 16"><path d="M4 3.5v9M12 3.5 6.5 8l5.5 4.5z"/></svg></button>
+        <button id="back" title="one tick back, a twentieth of a second (Left; with Shift, a hundredth)"><svg class="ico" viewBox="0 0 16 16"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg></button>
+        <button id="fwd" title="one tick on (Right; with Shift, a hundredth)"><svg class="ico" viewBox="0 0 16 16"><path d="M6 3.5 10.5 8 6 12.5"/></svg></button>
       </span>
       <button id="play" title="play or pause (Space)"></button>
       <span id="scrub"><span id="ticks"></span><input id="time" type="range" min="0" max="1" step="0.0005" value="0" title="time in the animation; the marks above it are its keyframes"></span>
       <span id="clock"></span>
       <select id="speed" title="speed ([ and ])">
-        <option value="0.1">0.1x</option><option value="0.25">0.25x</option><option value="0.5">0.5x</option>
-        <option value="1" selected>1x</option><option value="2">2x</option>
+        <option value="0.1">0.1&times;</option><option value="0.25">0.25&times;</option><option value="0.5">0.5&times;</option>
+        <option value="1" selected>1&times;</option><option value="2">2&times;</option>
       </select>
-      <button id="loop" class="on" title="go round again at the end (L)">loop</button>
+      <button id="loop" class="on tool" title="go round again at the end (L)"><svg class="ico" viewBox="0 0 16 16"><path d="M3 7.5a4.5 4.5 0 0 1 7.7-3.2L12.5 6M12.5 2.5V6H9M13 8.5a4.5 4.5 0 0 1-7.7 3.2L3.5 10M3.5 13.5V10H7"/></svg><span class="lbl">loop</span></button>
     </div>
   </div>
   <span id="error"></span>
@@ -159,6 +294,9 @@
 //   .obj        by itself, its parts listed in the top bar
 // The address says what to show:
 //   ?model=<path>                from the repository's root, or whole (leave it out and the menu of models opens)
+//   ?board=1                     every creature (the mod's armatures but its props) on one board, rows of them, each
+//                                with its name on a plate at its feet, all playing their idle; double-click one to open it
+//                                alone; &filter=<words> keeps those whose names have them
 //   &texture=                    another texture for an armature or an .obj
 //   &anim=<name>  &t=<seconds>   an animation, held at a moment (leave t out to let it play)
 //   &speed=0.25  &loop=0         how fast it plays; stop at the end
@@ -171,6 +309,12 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
 const q = new URLSearchParams(location.search);
 const fileUrl = p => '/file?p=' + encodeURIComponent(p);
+// What /bundle brought at once (the board): files' JSON and textures as data: URLs, by the paths they are asked for by;
+// null for one that isn't there, so nothing is asked of the server for it.
+const preload = { files: {}, images: {} };
+// The record of the load, for the info panel: each stage's time, a line per creature built, the counts.
+const loadInfo = { started: performance.now(), stages: [], built: [], total: 0, done: 0, finished: 0 };
+const stage = (name, ms, detail = '') => { loadInfo.stages.push([name, ms, detail]); };
 const $ = id => document.getElementById(id);
 const fail = text => { $('error').textContent = text; window.__ready = 'error: ' + text; };
 const TICK = 1 / 20;
@@ -237,7 +381,9 @@ function cubeGeometry(cube, tw, th, grow) {
 }
 
 function loadTexture(path) {
-  return new Promise(resolve => new THREE.TextureLoader().load(fileUrl(path), texture => {
+  if (path in preload.images && !preload.images[path]) return Promise.resolve(null);
+  const url = preload.images[path] || fileUrl(path);
+  return new Promise(resolve => new THREE.TextureLoader().load(url, texture => {
     texture.magFilter = texture.minFilter = THREE.NearestFilter;
     texture.generateMipmaps = false;
     texture.colorSpace = THREE.SRGBColorSpace;
@@ -362,6 +508,7 @@ function modelMenu(current) {
   const menu = $('menu'), find = $('find'), list = $('list');
   let all = null, rows = [], pick = 0;
   const go = path => {
+    if (path === '?board') { location.search = '?board=1'; return; }
     const next = new URLSearchParams(location.search);
     next.set('model', path);
     ['anim', 't', 'at', 'texture', 'animations', 'zoom'].forEach(k => next.delete(k));
@@ -416,6 +563,10 @@ function modelMenu(current) {
       groups.push(['creatures and animated props', mod.filter(m => m.kind === 'armature')], ['assemblies', mod.filter(m => m.kind === 'assembly')],
                   ['blocks', mod.filter(m => m.kind === 'block')], ['items', mod.filter(m => m.kind === 'item')], ['.obj models', mod.filter(m => m.kind === 'obj')]);
       groups.push(['scratch folders, newest first', all.filter(m => m.group === 'scratch')]);
+      if (!words.length || 'board every creature all'.includes(words[0])) {
+        const head = document.createElement('h4'); head.textContent = 'all at once'; page.appendChild(head);
+        add(page, { path: '?board', name: 'every creature, on one board', kind: 'board', group: 'path', where: '' }, words);
+      }
       for (const [title, models] of groups) {
         const shown = fits(models);
         if (!shown.length) continue;
@@ -466,15 +617,37 @@ function modelMenu(current) {
 }
 
 async function main() {
-  const modelPath = (q.get('model') || '').replace(/\\/g, '/');
+  const board = q.has('board');
+  const modelPath = board ? '' : (q.get('model') || '').replace(/\\/g, '/');
   const showMenu = modelMenu(modelPath);
+  $('board').classList.toggle('on', board);
+  $('board').onclick = () => { location.search = board ? '' : '?board=1'; };
   const named = text => { $('open').firstElementChild.textContent = text; };
-  if (q.get('ui') === '0') for (const id of ['top', 'bottom', 'help']) $(id).style.display = 'none';
-  $('keys').onclick = () => { $('help').classList.toggle('open'); $('keys').classList.toggle('on'); };
-  if (!modelPath) { named('choose a model'); $('bottom').style.display = 'none'; $('info').style.display = 'none'; showMenu(true); window.__ready = true; return; }
-  named(modelPath.split('/').pop().replace(/\.geo\.json$|\.json$|\.obj$/, ''));
+  if (q.get('ui') === '0') for (const id of ['top', 'bottom', 'help', 'stats']) $(id).style.display = 'none';
+  // While a board loads, the panel shows its progress before anything else is set up.
+  let early = null;
+  if (board) {
+    $('stats').classList.add('open'); $('statsbtn').classList.add('on');
+    early = setInterval(() => {
+      const L = loadInfo;
+      $('loadwhat').textContent = `loading ${L.done}/${L.total || '?'}`;
+      $('loadtotal').textContent = Math.round(performance.now() - L.started) + ' ms';
+      $('loadbar').firstElementChild.style.width = (L.total ? 100 * L.done / L.total : 0) + '%';
+      $('loadkv').innerHTML = L.stages.map(([n, t, d]) => `<span class="k">${n}</span><span class="v">${Math.round(t)} ms</span>${d ? `<span class="note">${d}</span>` : ''}`).join('');
+    }, 100);
+  }
+  const placeCards = () => {
+    const top = $('top').getBoundingClientRect().bottom + 10;
+    const floor = $('bottom').style.display === 'none' ? innerHeight - 14 : $('transport').getBoundingClientRect().top - 10;
+    for (const id of ['help', 'stats']) { $(id).style.top = top + 'px'; $(id).style.maxHeight = Math.max(160, floor - top) + 'px'; }
+  };
+  $('keys').onclick = () => { placeCards(); $('help').classList.toggle('open'); $('keys').classList.toggle('on'); };
+  $('helpclose').onclick = () => { $('help').classList.remove('open'); $('keys').classList.remove('on'); };
+  addEventListener('resize', placeCards);
+  if (!modelPath && !board) { named('choose a model'); $('bottom').style.display = 'none'; $('info').style.display = 'none'; showMenu(true); window.__ready = true; return; }
+  named(board ? 'every creature' : modelPath.split('/').pop().replace(/\.geo\.json$|\.json$|\.obj$/, ''));
   // What the file is, by where it lives (see serve.py).
-  const kind = /\/armatures\/[^/]+\.geo\.json$/.test(modelPath) ? 'armature' : /\/models\/block\/[^/]+\.json$/.test(modelPath) ? 'block'
+  const kind = board ? 'board' : /\/armatures\/[^/]+\.geo\.json$/.test(modelPath) ? 'armature' : /\/models\/block\/[^/]+\.json$/.test(modelPath) ? 'block'
     : /\/models\/item\/[^/]+\.json$/.test(modelPath) ? 'item' : /\/assemblies\/[^/]+\.json$/.test(modelPath) ? 'assembly'
     : /\.obj$/.test(modelPath) ? 'obj' : 'armature';
   const alone = kind === 'obj';
@@ -485,7 +658,8 @@ async function main() {
     const [ns, path] = id.includes(':') ? id.split(':') : ['minecraft', id];
     return `${resRoot}/assets/${ns}/${folder}${path}${path.endsWith(ext) ? '' : ext}`;
   };
-  const fetchJson = path => fetch(fileUrl(path)).then(r => r.ok ? r.json() : null).catch(() => null);
+  const fetchJson = path => path in preload.files ? Promise.resolve(preload.files[path])
+    : fetch(fileUrl(path)).then(r => r.ok ? r.json() : null).catch(() => null);
 
   const scene = new THREE.Scene();
   // About how the game lights a creature: bright from above and in front, dimmer on the flanks, dark beneath.
@@ -547,10 +721,13 @@ async function main() {
     const w = geometry.description.texture_width, h = geometry.description.texture_height;
     const base = geoPath.replace(/\.geo\.json$/, ''), name = base.split('/').pop();
     const assets = geoPath.slice(0, geoPath.indexOf('/armatures/'));
-    const [map, glowMap, raw, def] = await Promise.all([
-      tex(q.get('texture') || `${assets}/textures/armatures/${name}.png`),
-      q.get('glow') !== '0' ? tex(`${assets}/textures/armatures/${name}_glow.png`) : null,
-      fetchJson(base + '.animation.json'), fetchJson(base + '.armature.json')]);
+    // Its textures as the game finds them: the first of the .armature.json's `textures` and `glow_textures`, else
+    // textures/armatures/<name>.png and _glow.png.
+    const [raw, def] = await Promise.all([fetchJson(base + '.animation.json'), fetchJson(base + '.armature.json')]);
+    const listed = key => def && Array.isArray(def[key]) && def[key][0] ? idFile(def[key][0]) : null;
+    const [map, glowMap] = await Promise.all([
+      tex(q.get('texture') || listed('textures') || `${assets}/textures/armatures/${name}.png`),
+      q.get('glow') !== '0' ? tex(listed('glow_textures') || `${assets}/textures/armatures/${name}_glow.png`) : null]);
     const clips = readAnimations(raw || {});
     const emissive = new Set(Object.entries((def || {}).materials || {}).filter(([, m]) => m === 'emissive' || m === 'glow').map(([b]) => b));
     const rig = {}, points = {};
@@ -578,12 +755,202 @@ async function main() {
       await addObj(idFile(prop.model), seat, { texture: prop.texture && idFile(prop.texture), part: prop.part, label: '',
                                                  glow: prop.material === 'emissive' || prop.material === 'glow' });
     }
-    rigs.push({ bones: rig, animations: clips });
+    const builtRig = { bones: rig, animations: clips, springs: readSprings((def || {}).springs || {}, geometry.bones || [], rig, points), into };
+    for (const sp of builtRig.springs) sp.above = builtRig.springs.find(o => o.name === sp.parentName) || null;
+    builtRig.cloth = readCloth((def || {}).cloth || [], builtRig);
+    rigs.push(builtRig);
     Object.assign(bones, rig);
     if (!texture) { texture = map; tw = w; th = h; }
     glowTexture = glowTexture || glowMap;
     for (const [n, a] of Object.entries(clips)) animations[n] ??= a;
     return rig;
+  }
+
+  // The springs of an armature's .armature.json, worked out as CoolCatLib does (Spring.java): each joint's weight is
+  // its first child's pivot, else the middle of its cubes, else a little under it, put at its `length` if it has one.
+  // Cloth sheets (CoolCatLib's "cloth"), as CoolCatLib skins them: each corner of a sheet joint's cubes weighed between
+  // its own joint, the one below it and the one beside it nearest that corner (and the one below that), bilinearly; at
+  // rest, from the rig as built. Each frame skinCloth() moves those corners where the weighed joints put them.
+  function readCloth(sheets, built) {
+    const rig = built.bones, out = [];
+    if (!sheets.length) return out;
+    built.into.updateMatrixWorld(true);
+    const intoInv = new THREE.Matrix4().copy(built.into.matrixWorld).invert();
+    const rest = name => new THREE.Matrix4().multiplyMatrices(intoInv, rig[name].inner.matrixWorld);
+    const pivotAt = name => { const b = rig[name]; return new THREE.Vector3(-b.pivot[0], b.pivot[1], b.pivot[2]).applyMatrix4(rest(name)); };
+    const done = new Set();
+    const welded = weldCloth(sheets, rig, rest);
+    const weldOf = (name, P) => welded.points.get(name + '|' + P.x.toFixed(4) + ',' + P.y.toFixed(4) + ',' + P.z.toFixed(4));
+    const restAt = (name, P) => { const w = weldOf(name, P); return w ? P.copy(w.p) : P; };
+    const shares = (joint, id) => id !== undefined && welded.roots[joint] && welded.roots[joint].has(id);
+    for (const sheet of sheets) {
+      const grid = sheet.joints, wrap = !!sheet.wrap;
+      for (let r = 0; r < grid.length; r++) for (let c = 0; c < grid[r].length; c++) {
+        const name = grid[r][c];
+        if (!rig[name] || done.has(name)) continue;
+        done.add(name);
+        const own = rest(name), pivot = pivotAt(name);
+        const below = r + 1 < grid.length && rig[grid[r + 1][c]] ? grid[r + 1][c] : null;
+        const down = below ? pivotAt(below).sub(pivot) : null, length = down ? down.length() : 0;
+        if (down) down.divideScalar(length || 1);
+        const left = c > 0 ? grid[r][c - 1] : wrap ? grid[r][grid[r].length - 1] : null;
+        const right = c + 1 < grid[r].length ? grid[r][c + 1] : wrap ? grid[r][0] : null;
+        const meshes = rig[name].inner.children.filter(o => o.isMesh);
+        const geometries = [...new Set(meshes.map(m => m.geometry))];
+        // Its edge toward each neighbour across: how far its faces reach that way (a corner there is half each's).
+        const reach = {};
+        for (const other of [left, right]) {
+          if (!other || other === name || !rig[other]) continue;
+          const dir = pivotAt(other).sub(pivot); if (dir.length() < 1e-4) continue; dir.normalize();
+          let r = 0;
+          for (const g of geometries) { const pp = g.attributes.position; for (let i = 0; i < pp.count; i++) r = Math.max(r, restAt(name, new THREE.Vector3(pp.getX(i), pp.getY(i), pp.getZ(i)).applyMatrix4(own)).sub(pivot).dot(dir)); }
+          reach[other] = r;
+        }
+        for (const geometry of geometries) {
+          const pos = geometry.attributes.position, verts = [];
+          for (let i = 0; i < pos.count; i++) {
+            const raw0 = new THREE.Vector3(pos.getX(i), pos.getY(i), pos.getZ(i)).applyMatrix4(own), seam = weldOf(name, raw0);
+            const P = restAt(name, raw0), local = P.clone().sub(pivot), id = seam && seam.id;
+            let a = down && length > 1e-4 ? Math.min(1, Math.max(0, local.dot(down) / length)) : 0;
+            if (below && shares(below, id)) a = 1;                                     // welded to the row below: on that seam
+            let b = 0, beside = null;
+            for (const other of [left, right]) {
+              if (!other || other === name || !rig[other]) continue;
+              const toward = pivotAt(other).sub(pivot), gap = toward.length();
+              if (gap < 1e-4) continue;
+              const edge = reach[other] > 1e-4 ? reach[other] : gap * 0.5;
+              const lean = shares(other, id) ? 0.5 : Math.min(1, Math.max(0, local.dot(toward.divideScalar(gap)) / edge)) * 0.5;
+              if (lean > b) { b = lean; beside = other; }
+            }
+            let besideBelow = null;
+            if (beside && below) { const cc = grid[r].indexOf(beside); if (r + 1 < grid.length && rig[grid[r + 1][cc]]) besideBelow = grid[r + 1][cc]; }
+            const raw = [[name, (1 - a) * (1 - b)], [below, a * (1 - b)], [beside, (1 - a) * b], [besideBelow || below, a * b]];
+            const influences = [];
+            let lost = 0;
+            for (const [joint, w] of raw) { if (w <= 0) continue; if (!joint) { lost += w; continue; } influences.push({ joint, w, q: P.clone().applyMatrix4(rest(joint).invert()) }); }
+            if (lost) influences[0].w += lost;
+            verts.push(influences);
+          }
+          out.push({ joint: name, geometry, verts });
+        }
+      }
+    }
+    return out;
+  }
+
+  const skinScratch = { m: new THREE.Matrix4(), inv: new THREE.Matrix4(), intoInv: new THREE.Matrix4(), p: new THREE.Vector3(), sum: new THREE.Vector3() };
+  // CoolCatLib's seam weld: corners of neighbouring sheet joints (beside, below, diagonally; round a wrapped sheet) that
+  // are each other's nearest and within a pixel are joined at their middle. Returns "joint|x,y,z" (rest) -> welded point.
+  function weldCloth(sheets, rig, rest) {
+    const key = (name, p) => name + '|' + p.x.toFixed(4) + ',' + p.y.toFixed(4) + ',' + p.z.toFixed(4);
+    const corners = {};
+    for (const sheet of sheets) for (const row of sheet.joints) for (const name of row) {
+      if (!rig[name] || corners[name]) continue;
+      const own = rest(name), list = [];
+      for (const m of rig[name].inner.children.filter(o => o.isMesh)) {
+        const pp = m.geometry.attributes.position;
+        for (let i = 0; i < pp.count; i++) {
+          const P = new THREE.Vector3(pp.getX(i), pp.getY(i), pp.getZ(i)).applyMatrix4(own);
+          if (!list.some(q => q.distanceToSquared(P) < 1e-8)) list.push(P);
+        }
+      }
+      corners[name] = list;
+    }
+    const parent = new Map(), find = k => { while (parent.get(k) !== k) { parent.set(k, parent.get(parent.get(k))); k = parent.get(k); } return k; };
+    for (const [name, list] of Object.entries(corners)) list.forEach((p, i) => parent.set(name + '#' + i, name + '#' + i));
+    const nearest = (list, p) => { let best = -1, d = Infinity; list.forEach((q, i) => { const e = q.distanceToSquared(p); if (e < d) { d = e; best = i; } }); return best; };
+    for (const sheet of sheets) {
+      const grid = sheet.joints;
+      for (let r = 0; r < grid.length; r++) for (let c = 0; c < grid[r].length; c++) {
+        const a = grid[r][c]; if (!corners[a]) continue;
+        for (const [dr, dc] of [[0, 1], [1, 0], [1, 1], [1, -1]]) {
+          const rr = r + dr; if (rr >= grid.length) continue;
+          let cc = c + dc; const width = grid[rr].length;
+          if (cc < 0 || cc >= width) { if (!sheet.wrap || !width) continue; cc = ((cc % width) + width) % width; }
+          const b = grid[rr][cc]; if (!corners[b] || a === b) continue;
+          corners[a].forEach((p, i) => {
+            const j = nearest(corners[b], p); if (j < 0 || nearest(corners[a], corners[b][j]) !== i || p.distanceTo(corners[b][j]) > 1) return;
+            const x = find(a + '#' + i), y = find(b + '#' + j); if (x !== y) parent.set(x, y);
+          });
+        }
+      }
+    }
+    const sums = new Map();
+    for (const [name, list] of Object.entries(corners)) list.forEach((p, i) => { const k = find(name + '#' + i), e = sums.get(k) || { s: new THREE.Vector3(), n: 0 }; e.s.add(p); e.n++; sums.set(k, e); });
+    const points = new Map(), roots = {};
+    for (const [name, list] of Object.entries(corners)) list.forEach((p, i) => {
+      const id = find(name + '#' + i), e = sums.get(id);
+      if (e.n < 2) return;
+      points.set(key(name, p), { p: e.s.clone().divideScalar(e.n), id });
+      (roots[name] = roots[name] || new Set()).add(id);
+    });
+    return { points, roots };
+  }
+
+  function skinCloth() {
+    for (const rig of rigs) {
+      if (!rig.cloth || !rig.cloth.length) continue;
+      rig.into.updateMatrixWorld(true);
+      skinScratch.intoInv.copy(rig.into.matrixWorld).invert();
+      const posed = {};
+      const at = name => posed[name] || (posed[name] = new THREE.Matrix4().multiplyMatrices(skinScratch.intoInv, rig.bones[name].inner.matrixWorld));
+      for (const piece of rig.cloth) {
+        const pos = piece.geometry.attributes.position;
+        skinScratch.inv.copy(at(piece.joint)).invert();
+        piece.verts.forEach((influences, i) => {
+          const sum = skinScratch.sum.set(0, 0, 0);
+          for (const inf of influences) sum.addScaledVector(skinScratch.p.copy(inf.q).applyMatrix4(at(inf.joint)), inf.w);
+          sum.applyMatrix4(skinScratch.inv);
+          pos.setXYZ(i, sum.x, sum.y, sum.z);
+        });
+        pos.needsUpdate = true;
+        piece.geometry.computeBoundingBox(); piece.geometry.computeBoundingSphere();
+      }
+    }
+  }
+
+  // CoolCatLib's fabrics: mass, damping, gravity, air drag, flutter, stretch, bend, link stiffness.
+  const FABRICS = { silk: [0.4, 3, 3, 0.09, 0.7, 0.02, 0, 0.25, 0.6], linen: [0.7, 4.5, 3.8, 0.06, 0.35, 0.03, 1.5, 0.3, 0.7],
+    cotton: [0.9, 5.5, 4.2, 0.05, 0.22, 0.025, 2.5, 0.35, 0.75], wool: [1.3, 6.5, 5, 0.035, 0.1, 0.02, 4, 0.45, 0.8],
+    canvas: [1.6, 7.5, 6, 0.03, 0.05, 0.01, 8, 0.55, 0.85], leather: [2, 8.5, 7, 0.02, 0, 0, 14, 0.7, 0.9],
+    rags: [0.7, 3.5, 4.5, 0.07, 0.55, 0.05, 0, 0.2, 0.5], leaves: [0.6, 4, 3.5, 0.07, 0.45, 0.04, 1, 0.3, 0.65],
+    cord: [0.25, 3, 4, 0.04, 0.15, 0, 0, 0.3, 0.55] };
+  const SPREAD = 4;                                   // CoolCatLib's Spring.SPREAD: how hard spacing eases weights apart, blocks/s^2
+  function readSprings(defs, geoBones, rig, points) {
+    const out = [];
+    for (const geoBone of geoBones) {
+      const raw = defs[geoBone.name], bone = rig[geoBone.name];
+      const f = raw && FABRICS[(raw.fabric || '').toLowerCase()];
+      const def = raw && f ? Object.assign({ mass: f[0], damping: f[1], gravity: f[2], air_drag: f[3], flutter: f[4], stretch: f[5], bend: f[6], link_stiffness: f[7], follow: f[8] }, raw) : raw;
+      if (!def || !bone) continue;
+      const pivot = new THREE.Vector3(-bone.pivot[0], bone.pivot[1], bone.pivot[2]);
+      const child = geoBones.find(b => b.parent === geoBone.name && b.pivot && new THREE.Vector3(-b.pivot[0], b.pivot[1], b.pivot[2]).distanceToSquared(pivot) > 1e-4);
+      let tip;
+      if (child) tip = new THREE.Vector3(-child.pivot[0], child.pivot[1], child.pivot[2]);
+      else if ((geoBone.cubes || []).length) {
+        tip = new THREE.Vector3();
+        for (const c of geoBone.cubes) tip.add(new THREE.Vector3(-(c.origin[0] + c.size[0] / 2), c.origin[1] + c.size[1] / 2, c.origin[2] + c.size[2] / 2));
+        tip.divideScalar(geoBone.cubes.length);
+      }
+      if (!tip || tip.distanceToSquared(pivot) < 1e-4) tip = pivot.clone().add(new THREE.Vector3(0, -4, 0));
+      if (def.length > 0) tip = pivot.clone().addScaledVector(tip.clone().sub(pivot).normalize(), def.length);
+      const collide = def.collide === true ? {} : def.collide && typeof def.collide === 'object' ? def.collide : null;
+      out.push({
+        name: geoBone.name, bone, restTip: tip,
+        stiffness: def.stiffness ?? 140, damping: def.damping ?? 12, gravity: def.buoyancy !== undefined ? -def.buoyancy : (def.gravity ?? 0),
+        maxAngle: rad(def.max_angle ?? 70), weight: def.weight ?? 1, rope: !!def.rope, wind: def.wind ?? 0, twist: def.twist ?? 0,
+        ground: !!(collide && collide.blocks !== false), radius: collide ? (collide.radius ?? 1) : (def.radius ?? 1), bounce: collide ? (collide.bounce ?? 0.3) : 0.3,
+        bump: !!def.bump, spacing: def.spacing ?? 0, pulls: !!def.pulls, parentName: geoBone.parent,
+        links: def.links || [], linkStiffness: def.link_stiffness ?? 0.6, linked: null, lastTarget: null,
+        mass: Math.max(0.05, def.mass ?? 1), airDrag: def.air_drag ?? 0, flutter: def.flutter ?? 0, stretch: Math.min(0.5, def.stretch ?? 0),
+        bend: def.bend ?? 0, windDirection: def.wind_direction ? new THREE.Vector3(-def.wind_direction[0], def.wind_direction[1], def.wind_direction[2]).normalize() : null,
+        anchor: new THREE.Vector3(), lastAnchor: null, follow: Math.min(1, Math.max(0, def.follow ?? 0)), targetVelocity: new THREE.Vector3(),
+        friction: collide ? (collide.friction ?? 0.4) : 0,
+        colliders: (def.colliders || []).map(c => ({ point: points[c.point], radius: c.radius ?? 2 })).filter(c => c.point && rig[c.point.bone]),
+        tip: null, velocity: new THREE.Vector3(), clock: 0, twistAngle: 0, twistSpeed: 0, phase: (geoBone.name.length * 1.7) % 6.28, awake: true,
+      });
+    }
+    return out;
   }
 
   // A block model as the game builds it: its own elements, or a parent's (the mod's own, or the vanilla ones it uses).
@@ -636,7 +1003,95 @@ async function main() {
     mesh.position.set(0, 8, 0); into.add(mesh); solidParts.push(mesh); elements++;
   }
 
-  if (kind === 'armature') await addArmature(modelPath, model);
+  // The board: every creature in rows on one floor, front to the camera, a plate with its name at its feet.
+  const seats = [];
+  // Spring physics: on unless ?physics=0; how many springs there are and how many swing now; when a nudge began.
+  let physics = q.get('physics') !== '0', springsAwake = 0, springCount = 0, nudgeAt = -1;
+  function plate(text, lit = false) {
+    const canvas = document.createElement('canvas'), g = canvas.getContext('2d');
+    const font = '600 44px system-ui, sans-serif';
+    g.font = font;
+    const w = Math.ceil(g.measureText(text).width) + 44, h = 68;
+    canvas.width = w; canvas.height = h;
+    g.font = font;
+    g.fillStyle = lit ? '#6a2e26f0' : '#221a2ae8'; g.strokeStyle = lit ? '#ff8f6b' : '#c79a72'; g.lineWidth = lit ? 5 : 3;
+    g.beginPath(); g.roundRect(2, 2, w - 4, h - 4, 18); g.fill(); g.stroke();
+    g.fillStyle = lit ? '#fff4e6' : '#ebe6dc'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, w / 2, h / 2 + 2);
+    const map = new THREE.CanvasTexture(canvas); map.colorSpace = THREE.SRGBColorSpace; map.anisotropy = 4;
+    // Drawn over everything, so a tall creature in a nearer row never hides the name of one behind it.
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map, transparent: true, depthWrite: false, depthTest: false }));
+    sprite.renderOrder = lit ? 11 : 10;
+    const tall = 4.5;                                                             // pixels of the world, under a third of a block
+    sprite.scale.set(tall * w / h, tall, 1);
+    return sprite;
+  }
+  const title = name => name.split('_').map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+  async function addBoard() {
+    const all = await listing;
+    const words = (q.get('filter') || '').toLowerCase().split(/\s+/).filter(Boolean);
+    // The creatures: the mod's armatures, but the props that are not creatures (a box's lid, a tomb's lid, the reliquary).
+    const mobs = all.filter(m => m.group === 'mod' && m.kind === 'armature' && !/reliquary|_lid$|tomb_lid/.test(m.name)
+                                 && words.every(w => m.name.toLowerCase().includes(w)));
+    if (!mobs.length) return fail('no creatures to put on the board');
+    loadInfo.total = mobs.length;
+    // Everything at once in one request (serve.py /bundle); without it (an older server), file by file as before.
+    let t0 = performance.now();
+    try {
+      const r = await fetch('/bundle');
+      if (r.ok) {
+        const text = await r.text(), data = JSON.parse(text);
+        Object.assign(preload.files, data.files); Object.assign(preload.images, data.images);
+        const pictures = Object.values(data.images).filter(Boolean).length;
+        stage('bundle', performance.now() - t0, `${(text.length / 1048576).toFixed(2)} MB, ${data.names.length} armatures, ${pictures} textures; server ${data.built_ms} ms`);
+      } else stage('bundle', performance.now() - t0, 'none: file by file');
+    } catch { stage('bundle', performance.now() - t0, 'failed: file by file'); }
+    // Built all at once, then measured in the board's order.
+    t0 = performance.now();
+    const built = await Promise.all(mobs.map(async m => {
+      const seat = new THREE.Group(); seat.userData.path = m.path;
+      const began = performance.now(), cubesBefore = cubes;
+      const bones = await addArmature(m.path, seat);
+      const rig = rigs.find(r => r.bones === bones);
+      loadInfo.done++;
+      loadInfo.built.push({ name: m.name, ms: performance.now() - began, bones: bones ? Object.keys(bones).length : 0,
+                            clips: rig ? Object.keys(rig.animations).length : 0, ok: !!bones });
+      named(`every creature (${loadInfo.done} of ${mobs.length})`);
+      return { seat, name: m.name, rig };
+    }));
+    stage('build', performance.now() - t0, `${mobs.length} creatures, ${cubes} cubes`);
+    t0 = performance.now();
+    named('every creature');
+    for (const s of built) {
+      s.seat.updateMatrixWorld(true);
+      const lit = plate(title(s.name), true); lit.visible = false;
+      seats.push({ ...s, box: new THREE.Box3().setFromObject(s.seat), label: plate(title(s.name)), lit });
+    }
+    // Rows about as wide as the board is deep, each creature in a cell its own width, with room between.
+    const gap = 12, columns = Math.max(1, Math.ceil(Math.sqrt(seats.length * 1.3)));
+    let z = 0;
+    for (let row = 0; row * columns < seats.length; row++) {
+      const these = seats.slice(row * columns, row * columns + columns);
+      // Each cell as wide as its creature or its name, whichever is wider.
+      const widths = these.map(s => Math.max(s.box.max.x - s.box.min.x, s.label.scale.x + 4, 20));
+      const deep = Math.max(...these.map(s => s.box.max.z - s.box.min.z), 16);
+      let x = -(widths.reduce((a, b) => a + b, 0) + gap * (these.length - 1)) / 2;
+      these.forEach((s, i) => {
+        const cx = (s.box.min.x + s.box.max.x) / 2, cz = (s.box.min.z + s.box.max.z) / 2;
+        s.seat.position.set(x + widths[i] / 2 - cx, 0, z + deep / 2 - cz);
+        s.label.position.set(x + widths[i] / 2, -1, z - 3);                        // at its feet, in front of it
+        s.lit.position.copy(s.label.position); s.lit.scale.copy(s.label.scale).multiplyScalar(1.15);
+        model.add(s.seat); model.add(s.label); model.add(s.lit);
+        x += widths[i] + gap;
+      });
+      z += deep + gap + 10;
+    }
+    $('info').dataset.board = seats.length;
+    stage('lay out', performance.now() - t0, `${Math.ceil(seats.length / Math.max(1, Math.ceil(Math.sqrt(seats.length * 1.3))))} rows`);
+  }
+
+  const readStart = performance.now();
+  if (kind === 'board') await addBoard();
+  else if (kind === 'armature') { loadInfo.total = 1; await addArmature(modelPath, model); loadInfo.done = 1; }
   else if (kind === 'block') await addBlock(modelPath, model);
   else if (kind === 'item') await addItem(modelPath, model);
   else if (kind === 'obj') {
@@ -653,8 +1108,11 @@ async function main() {
     }
   }
   scene.add(model);
+  if (early) clearInterval(early);
+  if (!board) stage('read and build', performance.now() - readStart, kind);
+  loadInfo.finished = performance.now();
   // A button for each .obj part, to hide it and show it.
-  if (objParts.length) {
+  if (objParts.length && !board) {
     $('parts').classList.add('some');
     const head = document.createElement('small'); head.textContent = '.obj'; $('parts').appendChild(head);
     for (const part of objParts) {
@@ -668,12 +1126,14 @@ async function main() {
   const box = new THREE.Box3().setFromObject(model);
   const size = box.getSize(new THREE.Vector3()), centre = box.getCenter(new THREE.Vector3());
   // The ground in blocks, and something to judge size by: a player beside a creature, the block's own space otherwise.
-  const grid = new THREE.GridHelper(16 * 10, 10, 0x6a4a5c, 0x33263d); grid.material.transparent = true; grid.material.opacity = 0.7; scene.add(grid);
+  const cells = board ? Math.ceil(Math.max(size.x, size.z) / 16) + 4 : 10;
+  const grid = new THREE.GridHelper(16 * cells, cells, 0x6a4a5c, 0x33263d);
+  if (board) grid.position.set(Math.round(centre.x / 16) * 16, 0, Math.round(centre.z / 16) * 16); grid.material.transparent = true; grid.material.opacity = 0.7; scene.add(grid);
   const outline = new THREE.LineBasicMaterial({ color: 0xc79a72, transparent: true, opacity: 0.7 });
   let reference;
-  if (kind === 'armature' && !/reliquary|lid/.test(modelPath)) {
+  if ((kind === 'armature' && !/reliquary|lid/.test(modelPath)) || board) {
     reference = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(9.6, 28.8, 9.6)), outline);
-    reference.position.set(box.min.x - 12, 14.4, 0);
+    reference.position.set(box.min.x - 12, 14.4, board ? box.min.z + 8 : 0);
   } else {
     reference = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(16, 16, 16)), outline);
     reference.position.set(0, 8, 0);
@@ -685,13 +1145,14 @@ async function main() {
   renderer.setPixelRatio(1);
   renderer.setClearColor(0x000000, 0);
   document.body.prepend(renderer.domElement);
-  const reach = Math.max(size.x, size.y, size.z, 24) * 1.25;
+  const reach = board ? Math.max(size.x, size.z) * 0.55 : Math.max(size.x, size.y, size.z, 24) * 1.25;
   const target = new THREE.Vector3(centre.x, Math.max(centre.y, size.y / 2), centre.z);
   const VIEWS = {
     front:  ['front', [0, 0.05, -1]], corner: ['front corner (its front and its own right side)', [0.62, 0.42, -0.75]],
     side:   ['its right side (front to the right)', [1, 0.05, 0]], back: ['back corner', [-0.62, 0.42, 0.75]],
     top:    ['from above (front at the bottom)', [0, 1, -0.001]],
     below:  ['from below, its left side (what a player close under it sees)', [-0.7, -0.6, -0.55]],
+    board:  ['the board, from above its front', [0.12, 0.62, -1]],
   };
   // &zoom=2 brings every fixed view twice as close, to read the texture; &at=x,y,z looks at that point of the model.
   const zoom = parseFloat(q.get('zoom') || '1');
@@ -701,14 +1162,39 @@ async function main() {
     camera.lookAt(target);
     return camera;
   };
-  const cameraFor = name => place(new THREE.PerspectiveCamera(30, 1, 1, 4000), name);
+  const cameraFor = name => place(new THREE.PerspectiveCamera(30, 1, 1, board ? 20000 : 4000), name);
   let dirty = true, drawn = 0;
   const redraw = () => { dirty = true; };
-  let four = q.get('views') === '4', view = VIEWS[q.get('view')] ? q.get('view') : 'corner';
+  let four = q.get('views') === '4', view = VIEWS[q.get('view')] ? q.get('view') : board ? 'board' : 'corner';
   const free = cameraFor(view);
   const controls = new OrbitControls(free, renderer.domElement);
   controls.target.copy(target); controls.update();
   controls.addEventListener('change', () => { if (view) { view = null; marks(); } redraw(); });
+  let pickAt = null;
+  if (board) {
+    const ray = new THREE.Raycaster();
+    // The creature under the pointer: hit on its name plate, or on its model.
+    const under = e => {
+      ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1), free);
+      const plates = ray.intersectObjects(seats.flatMap(s => [s.label, s.lit]).filter(o => o.visible), false)[0];
+      if (plates) return seats.find(s => s.label === plates.object || s.lit === plates.object);
+      for (const hit of ray.intersectObjects(seats.map(s => s.seat), true)) {
+        let node = hit.object;
+        while (node && !node.userData.path) node = node.parent;
+        if (node) return seats.find(s => s.seat === node);
+      }
+      return null;
+    };
+    renderer.domElement.addEventListener('pointerdown', e => { pickAt = [e.clientX, e.clientY]; });
+    renderer.domElement.addEventListener('pointerup', e => {
+      if (!pickAt || e.button !== 0 || Math.hypot(e.clientX - pickAt[0], e.clientY - pickAt[1]) > 4) return;   // a drag turns the view
+      pickSeat(under(e));
+    });
+    renderer.domElement.addEventListener('dblclick', e => {
+      const s = under(e);
+      if (s) location.search = '?model=' + encodeURIComponent(s.seat.userData.path);
+    });
+  }
   const quarter = ['front', 'corner', 'side', 'back'].map(cameraFor);
   const labels = ['front', 'corner', 'side', 'back'].map((name, i) => {
     const label = document.createElement('div'); label.className = 'label'; label.textContent = VIEWS[name][0];
@@ -735,34 +1221,90 @@ async function main() {
     for (const [name, b] of Object.entries(viewButtons)) b.classList.toggle('on', name === 'four' ? four : !four && view === name);
     labels.forEach(l => l.style.display = four && q.get('ui') !== '0' ? 'block' : 'none'); seat();
     controls.enabled = !four;
-    $('glow').textContent = state.glow === 'only' ? 'glow only' : 'glow'; $('glow').classList.toggle('on', state.glow !== 'off');
+    $('glow').querySelector('.lbl').textContent = state.glow === 'only' ? 'glow only' : 'glow'; $('glow').classList.toggle('on', state.glow !== 'off');
     $('glow').style.display = glowTexture ? '' : 'none';
     $('ref').classList.toggle('on', state.ref); $('grid').classList.toggle('on', state.grid);
   }
   $('glow').onclick = () => { state.glow = { on: 'only', only: 'off', off: 'on' }[state.glow]; marks(); redraw(); };
+  $('physics').classList.toggle('on', physics);
+  $('physics').onclick = () => {
+    physics = !physics; $('physics').classList.toggle('on', physics);
+    if (!physics) for (const rig of rigs) for (const sp of rig.springs || []) sp.tip = null;
+    redraw();
+  };
+  $('nudge').onclick = () => { nudgeAt = performance.now(); redraw(); };
   $('ref').onclick = () => { state.ref = !state.ref; marks(); redraw(); };
   $('grid').onclick = () => { state.grid = !state.grid; marks(); redraw(); };
 
   // --- Animations: a tab for each, and the rest pose ---
-  const names = Object.keys(animations);
+  // On the board a creature can be picked: then the bar is its own clips (their lengths, whether they loop), played on
+  // it alone, while the rest go on with the clip the board had (boardClip, on their own clock, boardClock).
+  let picked = null, boardClip = '', boardClock = 0, pickBox = null;
+  const clips = () => picked ? picked.rig.animations : animations;
+  let names = [], order = [], tabs = {};
+  // The usual clips first, in the order a creature uses them, then its own ones by name; on the board, how many of the
+  // creatures have each (the common ones first there too).
+  const COMMON = ['idle', 'walk', 'run', 'attack', 'aim', 'shoot', 'hurt', 'death'];
+  const having = name => rigs.filter(r => r.animations[name]).length;
+  const rank = name => COMMON.includes(name) ? COMMON.indexOf(name) : 100;
+  const counting = () => board && !picked;
+  const meta = name => !name ? 'the model as it is built' : counting()
+    ? `${having(name)} of ${rigs.length} creatures` : `${clips()[name].length}s, ${clips()[name].loop ? 'looping' : 'played once'}`;
+  function buildTabs() {
+  names = Object.keys(clips());
+  order = [...names].sort((x, y) => rank(x) - rank(y) || (counting() ? having(y) - having(x) : 0) || x.localeCompare(y));
   $('anim').innerHTML = '<option value=""></option>' + names.map(n => `<option value="${n}"></option>`).join('');
-  const tabs = {};
-  for (const name of ['', ...names]) {
-    const tab = document.createElement('button'), text = document.createElement('span');
-    text.textContent = name || 'rest pose'; tab.appendChild(text);
-    if (name) { const long = document.createElement('small'); long.textContent = animations[name].length + 's'; tab.appendChild(long); }
+  $('anims').replaceChildren(); tabs = {};
+  let split = false;
+  for (const name of ['', ...order]) {
+    if (name && !split && rank(name) === 100 && order.some(n => rank(n) < 100)) {
+      const line = document.createElement('span'); line.className = 'split'; $('anims').appendChild(line); split = true;
+    }
+    const tab = document.createElement('button'), icon = document.createElement('i'), text = document.createElement('span');
+    const a = clips()[name];
+    icon.textContent = !name ? '□' : a.loop ? '↻' : '→';               // rest, looping, once
+    if (name && !a.loop) tab.classList.add('once');
+    text.textContent = name || 'rest pose';
+    tab.append(icon, text);
+    if (name) {
+      const small = document.createElement('small');
+      small.textContent = counting() ? `${having(name)}/${rigs.length}` : a.length + 's';
+      tab.appendChild(small);
+      if (counting() && having(name) < rigs.length / 4) tab.classList.add('few');
+    }
+    tab.title = (name || 'rest pose') + ': ' + meta(name);
     tab.onclick = () => { clock = 0; choose(name); setPlaying(true); };
     $('anims').appendChild(tab); tabs[name] = tab;
   }
+  $('animcount').textContent = names.length ? `${names.length} clip${names.length > 1 ? 's' : ''}` : 'no clips';
+  // A filter when there are more clips than fit at a glance.
+  $('animfind').value = '';
+  $('animfind').hidden = names.length <= 8;
+  {
+    $('animfind').oninput = () => {
+      const words = $('animfind').value.trim().toLowerCase();
+      for (const [n, tab] of Object.entries(tabs)) tab.style.display = !n || !words || n.toLowerCase().includes(words) ? '' : 'none';
+      $('anims').querySelector('.split')?.style.setProperty('display', words ? 'none' : '');
+    };
+    $('animfind').onkeydown = e => {
+      if (e.key === 'Enter') { const first = Object.entries(tabs).find(([n, t]) => n && t.style.display !== 'none'); if (first) first[1].click(); }
+      if (e.key === 'Escape') { $('animfind').value = ''; $('animfind').oninput(); $('animfind').blur(); }
+      e.stopPropagation();
+    };
+  }
+  }
+  buildTabs();
   if (q.get('anim') && !names.includes(q.get('anim'))) fail(`no animation named ${q.get('anim')}; there are: ${names.join(', ')}`);
   let playing = !q.has('t'), clock = q.has('t') ? parseFloat(q.get('t')) : 0, last = performance.now(), looping = true;
   if (['0.1', '0.25', '0.5', '1', '2'].includes(q.get('speed'))) $('speed').value = q.get('speed');
-  const current = () => animations[$('anim').value];
+  const current = () => clips()[$('anim').value];
   const setPlaying = on => { playing = on && !!current(); $('play').innerHTML = playing ? PAUSE : PLAY; last = performance.now(); redraw(); };
   function choose(name) {
     $('anim').value = names.includes(name) ? name : '';
     for (const [n, tab] of Object.entries(tabs)) { tab.classList.toggle('on', n === $('anim').value); if (n === $('anim').value) tab.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
     const a = current();
+    $('animnow').textContent = $('anim').value || 'rest pose';
+    $('animmeta').textContent = meta($('anim').value);
     looping = a ? (q.get('loop') === '0' ? false : a.loop || q.get('loop') === '1') : true;
     $('loop').classList.toggle('on', looping);
     $('ticks').textContent = '';
@@ -781,8 +1323,41 @@ async function main() {
   $('loop').onclick = () => { looping = !looping; $('loop').classList.toggle('on', looping); redraw(); };
   $('speed').onchange = redraw;
   $('time').oninput = () => { const a = current(); if (a) seek($('time').value * a.length); };
-  choose(q.get('anim'));
+  choose(q.get('anim') || (board && names.includes('idle') ? 'idle' : ''));
   setPlaying(playing);
+
+  function pickSeat(s) {
+    if (s === picked) return;
+    if (!picked) { boardClip = $('anim').value; boardClock = clock; }       // what the board was playing, kept for the rest
+    if (picked) { picked.label.visible = true; picked.lit.visible = false; }
+    if (pickBox) { model.remove(pickBox); pickBox = null; }
+    picked = s;
+    $('picked').classList.toggle('some', !!s);
+    if (s) {
+      s.label.visible = false; s.lit.visible = true;
+      $('pickname').textContent = title(s.name);
+      pickBox = new THREE.Box3Helper(new THREE.Box3().setFromObject(s.seat).expandByScalar(1.5), 0xff8f6b);
+      model.add(pickBox);
+      named('every creature \u203a ' + title(s.name));
+    } else {
+      named('every creature');
+    }
+    buildTabs();
+    clock = s ? 0 : boardClock;
+    choose(s ? (names.includes('idle') ? 'idle' : names.includes('walk') ? 'walk' : '') : boardClip);
+    setPlaying(true);
+  }
+  function lookAtPicked() {
+    if (!picked) return;
+    const box = new THREE.Box3().setFromObject(picked.seat), at = box.getCenter(new THREE.Vector3()), size = box.getSize(new THREE.Vector3());
+    const from = free.position.clone().sub(controls.target).normalize();
+    controls.target.copy(at);
+    free.position.copy(at).addScaledVector(from, Math.max(size.x, size.y, size.z, 24) * 3.2);
+    controls.update(); redraw();
+  }
+  $('pickdrop').onclick = () => pickSeat(null);
+  $('pickopen').onclick = () => { if (picked) location.search = '?model=' + encodeURIComponent(picked.seat.userData.path); };
+  $('pickfocus').onclick = lookAtPicked;
 
   addEventListener('keydown', e => {
     if (e.target.tagName === 'INPUT' && e.target.type !== 'range' || e.ctrlKey || e.metaKey || e.altKey) return;
@@ -795,24 +1370,166 @@ async function main() {
     else if (key === 'l') $('loop').click();
     else if (key === '[') { $('speed').value = speeds[Math.max(0, at - 1)]; redraw(); }
     else if (key === ']') { $('speed').value = speeds[Math.min(speeds.length - 1, at + 1)]; redraw(); }
-    else if (key === 'a') { const all = ['', ...names]; clock = 0; choose(all[(all.indexOf($('anim').value) + 1) % all.length]); setPlaying(true); }
+    else if (key === 'a') {
+      const all = ['', ...order].filter(n => tabs[n].style.display !== 'none'), by = e.shiftKey ? -1 : 1;
+      clock = 0; choose(all[(all.indexOf($('anim').value) + by + all.length) % all.length]); setPlaying(true);
+    }
     else if (key === 'g') $('glow').click();
     else if (key === 'p') $('ref').click();
     else if (key === 'o' || key === '/') showMenu(true);
     else if (key === ',') $('prev').click();
     else if (key === '.') $('next').click();
     else if (key === '?') $('keys').click();
-    else if (key === 'Escape') { $('help').classList.remove('open'); $('keys').classList.remove('on'); }
+    else if (key === 'b') $('board').click();
+    else if (key === 'i') $('statsbtn').click();
+    else if (key === 'h') $('physics').click();
+    else if (key === 'n') $('nudge').click();
+    else if (key === 'f' && picked) lookAtPicked();
+    else if (key === 'Escape') {
+      if ($('help').classList.contains('open')) { $('help').classList.remove('open'); $('keys').classList.remove('on'); }
+      else if (picked) pickSeat(null);
+      else if (statsOpen) { statsOpen = false; showStats(); }
+    }
     else if (key >= '1' && key <= '7') Object.values(viewButtons)[+key - 1].click();
     else return;
     e.preventDefault();
   });
   addEventListener('resize', () => { seat(); redraw(); });
 
+  // The springs, stepped as CoolCatLib steps them, in the viewer's world (pixels: its gravity, buoyancy and wind are
+  // in blocks a second squared, so sixteen times that here). Parts that collide stand on the ground (y = 0).
+  const V = () => new THREE.Vector3();
+  const sv = { anchor: V(), target: V(), accel: V(), radial: V(), across: V(), normal: V(), from: V(), to: V(), axis: V(), point: V(), rel: V() };
+  const sq = { swing: new THREE.Quaternion(), spin: new THREE.Quaternion(), world: new THREE.Quaternion(), parent: new THREE.Quaternion() };
+  function simulateSprings(dt) {
+    springsAwake = 0; springCount = 0;
+    if (!physics) return;
+    dt = Math.min(dt, 0.05);
+    model.updateMatrixWorld(true);
+    for (const rig of rigs) for (const sp of rig.springs || []) {
+      springCount++;
+      const outer = sp.bone.outer, inner = sp.bone.inner;
+      const anchor = outer.getWorldPosition(sv.anchor), target = inner.localToWorld(sv.target.copy(sp.restTip));
+      const reach = target.distanceTo(anchor);
+      if (reach < 1e-5) continue;
+      if (!sp.tip || sp.tip.distanceToSquared(target) > 4096) { sp.tip = target.clone(); sp.velocity.set(0, 0, 0); }
+      if (sp.follow > 0 && sp.lastTarget && dt > 1e-4) sp.targetVelocity.copy(target).sub(sp.lastTarget).divideScalar(dt); else sp.targetVelocity.set(0, 0, 0);
+      (sp.lastTarget = sp.lastTarget || new THREE.Vector3()).copy(target);
+      if (!sp.linked) sp.linked = rig.springs.filter(o => o !== sp && sp.links.includes(o.name));
+      const anchorSpeed = sp.lastAnchor && dt > 1e-4 ? anchor.distanceTo(sp.lastAnchor) / dt : 0;
+      (sp.lastAnchor = sp.lastAnchor || new THREE.Vector3()).copy(anchor); sp.anchor.copy(anchor);
+      const shortest = reach * (1 - sp.stretch), longest = reach * (1 + sp.stretch);
+      const steps = Math.max(1, Math.min(8, Math.ceil(dt * 120))), h = dt / steps;
+      const balls = sp.colliders.map(c => ({ at: rig.bones[c.point.bone].inner.localToWorld(new THREE.Vector3(-c.point.at[0], c.point.at[1], c.point.at[2])), r: c.radius }));
+      const spinFade = Math.exp(-1.5 * h);
+      for (let i = 0; i < steps; i++) {
+        sp.clock += h;
+        const rel = sv.rel.copy(sp.velocity).addScaledVector(sp.targetVelocity, -sp.follow);
+        const accel = sv.accel.copy(target).sub(sp.tip).multiplyScalar(sp.stiffness).addScaledVector(rel, -sp.damping);
+        if (sp.wind > 0) {
+          const t = sp.clock + sp.phase, gust = Math.sin(t * 0.31) > 0.55 ? 2 : 1, w = sp.wind * 16;
+          accel.x += w * gust * (Math.sin(t * 0.83) * 0.6 + Math.sin(t * 2.1 + 1.3) * 0.4);
+          accel.y += w * 0.25 * Math.sin(t * 1.37 + 0.7);
+          accel.z += w * gust * (Math.cos(t * 0.71 + 2) * 0.6 + Math.sin(t * 1.7) * 0.4);
+          if (sp.windDirection) accel.addScaledVector(sp.windDirection, w * (0.7 + 0.3 * gust));
+        }
+        if (sp.airDrag > 0) accel.addScaledVector(sp.velocity, -sp.airDrag * sp.velocity.length() / 16);
+        if (sp.flutter > 0 && anchorSpeed > 0.8) {
+          const f = (sp.clock + sp.phase) * 9, push = sp.flutter * 4 * anchorSpeed;
+          accel.x += push * Math.sin(f * 1.3); accel.y += push * 0.5 * Math.sin(f * 1.7 + 1); accel.z += push * Math.cos(f * 1.1 + 2);
+        }
+        if (sp.stretch > 0) { const r = sv.across.copy(sp.tip).sub(anchor), d = r.length(); if (d > 1e-6) accel.addScaledVector(r, (reach - d) * 300 / d); }
+        accel.divideScalar(sp.mass);
+        if (sp.bend > 0) accel.addScaledVector(sv.point.copy(target).sub(sp.tip), sp.bend).addScaledVector(rel, -2 * Math.sqrt(sp.bend));   // holding its shape, critically damped
+        accel.y -= sp.gravity * 16;
+        sp.velocity.addScaledVector(accel, h);
+        sp.tip.addScaledVector(sp.velocity, h);
+        const radial = sv.radial.copy(sp.tip).sub(anchor), distance = radial.length();
+        if (distance < 1e-6) continue;
+        radial.divideScalar(distance);
+        // Pulling taut on what it hangs from (CoolCatLib's pulls): the weight above gives way by this one's share of their mass.
+        if (sp.pulls && distance > longest && sp.above && sp.above.tip) {
+          const share = sp.mass / (sp.mass + sp.above.mass);
+          sp.above.tip.addScaledVector(radial, (distance - longest) * share);
+          const outward = sp.velocity.dot(radial) - sp.above.velocity.dot(radial);
+          if (outward > 0) sp.above.velocity.addScaledVector(radial, outward * share);
+        }
+        if (!sp.rope || distance > longest) {
+          const hold = sp.rope ? longest : Math.min(longest, Math.max(shortest, distance));
+          const along = sp.velocity.dot(radial);
+          if (hold !== distance) {
+            sp.tip.copy(anchor).addScaledVector(radial, hold);
+            if (sp.stretch <= 0 ? (!sp.rope || along > 0) : (distance > hold) === (along > 0)) sp.velocity.addScaledVector(radial, -along);
+          } else if (sp.stretch <= 0 && !sp.rope) sp.velocity.addScaledVector(radial, -along);
+        }
+        if (sp.twist > 0) {
+          const across = sv.across.set(0, 1, 0).cross(radial), sideways = across.lengthSq() > 1e-6 ? sp.velocity.dot(across.normalize()) : 0;
+          sp.twistSpeed = (sp.twistSpeed + sideways / 16 * sp.twist * 6 * h) * spinFade;
+          sp.twistAngle += sp.twistSpeed * h;
+        }
+        let pushed = false;
+        for (const b of balls) {
+          const d = sp.tip.distanceTo(b.at);
+          if (d >= b.r || d < 1e-6) continue;
+          const n = sv.normal.copy(sp.tip).sub(b.at).divideScalar(d);
+          sp.tip.addScaledVector(n, b.r - d);
+          const into = sp.velocity.dot(n); if (into < 0) sp.velocity.addScaledVector(n, -into);
+          pushed = true;
+        }
+        // Off the rig's other springs that bump: half the overlap each, half the closing speed back, bounced.
+        if (sp.bump) for (const other of rig.springs) {
+          if (other === sp || !other.bump || !other.tip) continue;
+          const d = sp.tip.distanceTo(other.tip), min = sp.radius + other.radius, room = min + sp.spacing + other.spacing;
+          if (d >= room || d < 1e-6) continue;
+          const n = sv.normal.copy(sp.tip).sub(other.tip).divideScalar(d);
+          // Within the room they keep (CoolCatLib's spacing): eased apart, the harder the nearer.
+          if (room > min) sp.velocity.addScaledVector(n, Math.min(1, (room - d) / (room - min)) * SPREAD * 16 * h);
+          if (d >= min) continue;
+          sp.tip.addScaledVector(n, (min - d) * 0.5);
+          const closing = sv.point.copy(sp.velocity).sub(other.velocity).dot(n);
+          if (closing < 0) sp.velocity.addScaledVector(n, -closing * 0.5 * (1 + sp.bounce));
+          pushed = true;
+        }
+        // Cloth: woven to its neighbours, back to the distance the clip puts between them (firm apart, soft together).
+        for (const other of sp.linked) {
+          if (!other.tip || !other.lastTarget) continue;
+          const d = sp.tip.distanceTo(other.tip); if (d < 1e-6) continue;
+          const off = d - target.distanceTo(other.lastTarget), give = off > 0 ? 0.5 : 0.5 * sp.linkStiffness;
+          if (Math.abs(off) * give < 1e-6) continue;
+          const n = sv.normal.copy(sp.tip).sub(other.tip).divideScalar(d);
+          sp.tip.addScaledVector(n, -off * give);
+          const parting = sv.point.copy(sp.velocity).sub(other.velocity).dot(n);
+          sp.velocity.addScaledVector(n, -parting * 0.5 * Math.min(1, h * 30));
+          pushed = true;
+        }
+        if (sp.ground && sp.tip.y < sp.radius) {
+          sp.tip.y = sp.radius;
+          if (sp.velocity.y < 0) { sp.velocity.y *= -sp.bounce; sp.velocity.x *= 1 - sp.friction * 0.5; sp.velocity.z *= 1 - sp.friction * 0.5; }
+          pushed = true;
+        }
+        if (pushed) { const r = sv.radial.copy(sp.tip).sub(anchor), again = r.length(); if (again > 1e-6) sp.tip.copy(anchor).addScaledVector(r, Math.min(longest, Math.max(shortest, again)) / again); }
+      }
+      if (sp.velocity.lengthSq() > 0.01 || Math.abs(sp.twistSpeed) > 1e-3) springsAwake++;
+      // The swing, from where the clip has it to where the weight is, turned onto the joint.
+      const from = sv.from.copy(target).sub(anchor).normalize(), to = sv.to.copy(sp.tip).sub(anchor).normalize();
+      const angle = Math.min(Math.acos(Math.max(-1, Math.min(1, from.dot(to)))), sp.maxAngle) * sp.weight;
+      const axis = sv.axis.copy(from).cross(to);
+      const swing = axis.lengthSq() > 1e-12 && angle > 1e-5 ? sq.swing.setFromAxisAngle(axis.normalize(), angle) : sq.swing.identity();
+      if (sp.twist > 0 && Math.abs(sp.twistAngle) > 1e-4) swing.premultiply(sq.spin.setFromAxisAngle(sv.point.copy(from).applyQuaternion(swing), sp.twistAngle * sp.weight));
+      // world' = swing * world; local' = parentWorld^-1 * world'.
+      const world = outer.getWorldQuaternion(sq.world), parent = outer.parent.getWorldQuaternion(sq.parent);
+      outer.quaternion.copy(parent.invert().multiply(swing.multiply(world)));
+      outer.updateMatrixWorld(true);
+    }
+  }
+
   function pose(a, time) {
-    const name = $('anim').value;
     for (const rig of rigs) {
+      const other = picked && rig !== picked.rig;
+      const name = other ? boardClip : $('anim').value;
       const clip = rig.animations[name];
+      const at = other ? boardClock : clock;
+      if (board && clip) time = other || looping ? at % clip.length : Math.min(at, clip.length);
       for (const [bname, bone] of Object.entries(rig.bones)) {
         const moves = clip && clip.channels[bname];
         const r = bone.rotation, t = moves && moves.rotation ? sample(moves.rotation, time) : [0, 0, 0];
@@ -823,13 +1540,42 @@ async function main() {
         bone.outer.scale.set(s[0], s[1], s[2]);
       }
     }
+    // A nudge: the model shoved sideways and back over a second and a half, for its springs to show what they do.
+    if (nudgeAt >= 0) {
+      const t = (performance.now() - nudgeAt) / 1000;
+      model.position.x = t < 1.6 ? Math.sin(t * 9) * 7 * Math.exp(-t * 2.2) : 0;
+      if (t >= 1.6) nudgeAt = -1;
+    }
+    const nowMs = performance.now();
+    simulateSprings(lastPhysics ? (nowMs - lastPhysics) / 1000 : 0);
+    model.updateMatrixWorld(true);
+    skinCloth();
+    lastPhysics = nowMs;
   }
+  let lastPhysics = 0;
+  // For looking inside from the console: the rigs and the model, and the pose of any clip at any time (no springs).
+  window.__viewer = { rigs, model, poseAt: (name, t) => { const keep = $('anim').value; $('anim').value = name;
+    const physicsWas = physics; physics = false; pose(clips()[name], t); physics = physicsWas; model.updateMatrixWorld(true); $('anim').value = keep; },
+    // Plays a clip with spring physics for some seconds at 60 steps a second (shaken side to side if asked), calling
+    // onFrame after each step; for testing springs from the console.
+    run: (name, seconds, shake, onFrame) => {
+      const keep = $('anim').value; $('anim').value = name; const a = clips()[name];
+      for (let i = 1; i <= seconds * 60; i++) {
+        const t = i / 60;
+        model.position.x = shake ? Math.sin(t * 7) * 8 : 0;
+        lastPhysics = performance.now() - 1000 / 60;
+        pose(a, a ? t % a.length : 0);
+        if (onFrame) onFrame(t);
+      }
+      model.position.x = 0; $('anim').value = keep;
+    } };
 
   function frame(now) {
     requestAnimationFrame(frame);
     const a = current();
     if (playing && a) {
       clock += (now - last) / 1000 * parseFloat($('speed').value);
+      if (picked) boardClock += (now - last) / 1000 * parseFloat($('speed').value);
       if (!looping && clock >= a.length) { clock = a.length; setPlaying(false); }
       dirty = true;
     }
@@ -841,11 +1587,13 @@ async function main() {
     }
     // Nothing moved, nothing to draw: but a still page is drawn four times a second all the same, because a
     // screenshot of the pane waits for a frame and gives up if none comes.
+    if (springsAwake > 0 || nudgeAt >= 0) dirty = true;
     if (!dirty && now - drawn < 250) return;
     dirty = false; drawn = now;
     const time = a ? shown(a) : 0;
     pose(a, time);
     if (a) $('time').value = time / a.length;
+    $('time').style.setProperty('--fill', (a ? 100 * time / a.length : 0) + '%');
     $('clock').innerHTML = a ? `<b>${time.toFixed(2)}</b> / ${a.length.toFixed(2)} s` : 'rest pose';
     glowParts.forEach(part => part.visible = state.glow !== 'off');
     solidParts.forEach(part => part.visible = state.glow !== 'only');
@@ -854,6 +1602,8 @@ async function main() {
     const width = innerWidth, height = innerHeight;
     if (renderer.domElement.width !== width || renderer.domElement.height !== height) renderer.setSize(width, height, false);
     renderer.domElement.style.width = width + 'px'; renderer.domElement.style.height = height + 'px';
+    frames.push(performance.now() - now);
+    if (frames.length > 60) frames.shift();
     renderer.setScissorTest(four);
     if (four) {
       const w = Math.floor(width / 2), h = Math.floor(height / 2);
@@ -868,10 +1618,87 @@ async function main() {
       free.aspect = width / height; free.updateProjectionMatrix();
       renderer.render(scene, free);
     }
+    drawnAt.push(performance.now());
     window.__ready = true;
   }
+  // --- What is going on inside ---
+  const frames = [], drawnAt = [];
+  const kv = rows => rows.map(([k, v, note]) => `<span class="k">${k}</span><span class="v">${v}</span>${note ? `<span class="note">${note}</span>` : ''}`).join('');
+  const ms = v => v >= 1000 ? (v / 1000).toFixed(2) + ' s' : Math.round(v) + ' ms';
+  let statsOpen = board || q.get('stats') === '1';
+  $('statsbtn').onclick = () => { statsOpen = !statsOpen; showStats(); };
+  $('statsclose').onclick = () => { statsOpen = false; showStats(); };
+  function showStats() {
+    $('stats').classList.toggle('open', statsOpen); $('statsbtn').classList.toggle('on', statsOpen);
+    placeCards();
+    if (statsOpen) setTimeout(fillStats, 0);                     // once everything it reads exists
+  }
+  showStats();
+  let logged = 0;
+  const spark = $('spark').getContext('2d');
+  function sparkline() {
+    const c = $('spark'), w = c.width, h = c.height, data = frames.slice(-60);
+    spark.clearRect(0, 0, w, h);
+    if (data.length < 2) return;
+    const top = Math.max(16.7, ...data) * 1.15, x = i => i / (data.length - 1) * w, y = v => h - 4 - (v / top) * (h - 8);
+    // A faint line at 16.7 ms, a frame at 60 a second.
+    spark.strokeStyle = 'rgba(255,255,255,.12)'; spark.setLineDash([6, 6]); spark.lineWidth = 2;
+    spark.beginPath(); spark.moveTo(0, y(16.7)); spark.lineTo(w, y(16.7)); spark.stroke(); spark.setLineDash([]);
+    const fill = spark.createLinearGradient(0, 0, 0, h); fill.addColorStop(0, 'rgba(182,156,255,.35)'); fill.addColorStop(1, 'rgba(182,156,255,0)');
+    spark.beginPath(); spark.moveTo(0, h); data.forEach((v, i) => spark.lineTo(x(i), y(v))); spark.lineTo(w, h); spark.closePath(); spark.fillStyle = fill; spark.fill();
+    spark.beginPath(); data.forEach((v, i) => i ? spark.lineTo(x(i), y(v)) : spark.moveTo(x(i), y(v)));
+    spark.strokeStyle = '#b69cff'; spark.lineWidth = 3; spark.lineJoin = 'round'; spark.stroke();
+  }
+  const tile = (label, value, unit = '') => `<div class="tile"><small>${label}</small><b>${value}${unit ? `<em>${unit}</em>` : ''}</b></div>`;
+  function fillStats() {
+    if (!statsOpen) return;
+    const L = loadInfo, total = (L.finished || performance.now()) - L.started;
+    $('loadwhat').textContent = L.finished ? 'ready' : `loading ${L.done}/${L.total || '?'}`;
+    $('loadwhat').className = 'pill ' + (L.finished ? 'good' : 'busy');
+    $('loadtotal').textContent = ms(total);
+    $('loadbar').firstElementChild.style.width = (L.total ? 100 * L.done / L.total : L.finished ? 100 : 0) + '%';
+    $('loadbar').style.display = L.finished ? 'none' : '';
+    $('loadkv').innerHTML = kv(L.stages.map(([n, t, d]) => [n, ms(t), d]));
+    // A line per creature built, a bar for how long it took beside the slowest's; written once each.
+    const slowest = Math.max(1, ...L.built.map(b => b.ms));
+    if (logged > 0 && L.built.length > logged) {
+      for (const line of $('loadlog').children) line.querySelector('s').style.width = (100 * (+line.dataset.ms) / slowest) + '%';
+    }
+    for (; logged < L.built.length; logged++) {
+      const b = L.built[logged], line = document.createElement('div');
+      line.dataset.ms = b.ms;
+      line.className = (b.ok ? '' : 'bad') + (b.ms > slowest * 0.8 && L.built.length > 4 ? ' slow' : '');
+      line.title = `${b.name}: ${b.bones} bones, ${b.clips} clips, built in ${ms(b.ms)}`;
+      line.innerHTML = `<span>${b.ok ? '\u2713' : '\u2717'}</span><b>${b.name.replace(/_/g, ' ')}</b><u><s style="width:${100 * b.ms / slowest}%"></s></u><em>${ms(b.ms)}</em>`;
+      $('loadlog').appendChild(line);
+    }
+    const mem = renderer.info.memory, net = performance.getEntriesByType('resource');
+    const bytes = net.reduce((sum, e) => sum + (e.transferSize || e.encodedBodySize || 0), 0);
+    $('scenekv').innerHTML = kv([
+      ...(board ? [['creatures', seats.length]] : []), ['bones', rigs.reduce((n, r) => n + Object.keys(r.bones).length, 0)], ['cubes', cubes],
+      ['meshes', solidParts.length + glowParts.length + objParts.length],
+      ['springs', physics ? `${springCount}, ${springsAwake} swinging` : 'off'], ['textures, materials', `${Object.keys(textures).length}, ${Object.keys(materials).length}`],
+      ['on the GPU', `${mem.geometries} geometries, ${mem.textures} textures`],
+      ['network', `${net.length} requests, ${(bytes / 1048576).toFixed(2)} MB`]]);
+    const avg = frames.length ? frames.reduce((a, b) => a + b, 0) / frames.length : 0;
+    const now = performance.now(); while (drawnAt.length && now - drawnAt[0] > 1000) drawnAt.shift();
+    $('tiles').innerHTML = tile('loaded in', total >= 1000 ? (total / 1000).toFixed(2) : Math.round(total), total >= 1000 ? 's' : 'ms')
+      + tile(board ? 'creatures' : 'bones', board ? seats.length : rigs.reduce((n, r) => n + Object.keys(r.bones).length, 0))
+      + tile('draw calls', renderer.info.render.calls.toLocaleString()) + tile('frame', avg.toFixed(1), 'ms');
+    $('sparknote').textContent = `${drawnAt.length} fps drawn`;
+    sparkline();
+    $('framekv').innerHTML = kv([['triangles', renderer.info.render.triangles.toLocaleString()], ['frames drawn', `${drawnAt.length} a second`],
+      ['canvas', `${renderer.domElement.width} \u00d7 ${renderer.domElement.height}`]]);
+    const a = current();
+    $('playkv').innerHTML = kv([['clip', ($('anim').value || 'rest pose') + (a ? (a.loop ? ' ↻' : ' →') : '')],
+      ['time', a ? `${shown(a).toFixed(2)} / ${a.length.toFixed(2)} s` : '\u2014'], ['state', playing ? `playing at ${$('speed').value}x` : 'paused'],
+      ...(board ? [['picked', picked ? title(picked.name) : 'none (click a creature)'], ['the rest play', picked ? (boardClip || 'rest pose') : 'the same']] : []),
+      ['view', four ? '4 views' : view || 'free']]);
+  }
+  setInterval(fillStats, 500);
+  placeCards();
   const chip = (strong, rest) => `<span class="chip"><b>${strong}</b>${rest ? ' ' + rest : ''}</span>`;
-  $('info').innerHTML = (Object.keys(bones).length ? chip(Object.keys(bones).length, 'bones') + chip(cubes, 'cubes') : '') +
+  $('info').innerHTML = (board ? chip(seats.length, 'creatures') : '') + (!board && Object.keys(bones).length ? chip(Object.keys(bones).length, 'bones') + chip(cubes, 'cubes') : '') +
     (elements ? chip(elements, 'elements') : '') + (triangles ? chip(triangles, '.obj triangles') : '') +
     chip(`${(size.x / 16).toFixed(2)} × ${(size.y / 16).toFixed(2)} × ${(size.z / 16).toFixed(2)}`, 'blocks') +
     (texture ? chip(`${tw}×${th}`, 'texture') : '') + (glowTexture ? chip('glow', '') : '') + (Object.keys(textures).length ? chip(Object.keys(textures).length, 'textures') : '');

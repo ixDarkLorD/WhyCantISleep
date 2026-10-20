@@ -1,7 +1,7 @@
 # Draws the Lurker's textures under assets/whycantisleep/textures/entity/lurker/, a pair for each of its kinds
 # (LurkerKind.java): <kind>.png and <kind>_eyes.png. Each kind is a different creature with a model of its own
-# (StalkerModel, FlickerModel, BruteModel, LeechModel in lurker/client), so each has a layout of its own below: the
-# same texOffs and box sizes as its model. Change a model and its layout together.
+# (an armature each, armatures/lurker_<kind>, from tools/gen_lurker_armatures.py), so each has a layout of its own
+# below: the same box UVs and sizes as its armature. Change an armature and its layout together.
 #   <kind>.png       its skin: armor in plates, every face shaded for where it points (lit from above, dark beneath,
 #                    dimmed along its edges), veins through it, horn for its horns and claws, teeth, and its eyes (an
 #                    eyeball, a slit pupil and a lid each)
@@ -151,7 +151,7 @@ function Mouth($x0, $y0, $w, $h) {
     } }
 }
 
-# The eyes are parts of every model (LurkerModel.eyes), three boxes whose skin starts at (u, v):
+# The eyes are parts of every armature (gen_lurker_armatures.py eyes()), three boxes whose skin starts at (u, v):
 # the eyeball at (u, v), 2 by 2 by 1: deep red on the skin, so it is red even in daylight, and on the glowing layer
 # red all over with a hotter heart on its front face (the glow is added to the skin under it, so both are kept short
 # of blue: together they must still come out red); the pupil at (u + 8, v): a slit of nothing, not on the glowing

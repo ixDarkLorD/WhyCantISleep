@@ -1,5 +1,5 @@
 """The Garden's furnishings (DecorBlock): detailed block models and their textures, drawn facing north and turned by
-their blockstates. Called from gen_deep_blocks.py (decor), which owns the palette and helpers.
+their blockstates. Called from gen_between_blocks.py (decor), which owns the palette and helpers.
 
     dreamstone_urn   a foot ring and stem, a belly swelling in steps with a band of red runes, two handles, a neck, a
                      flared lip and a lid with a knob
@@ -20,9 +20,9 @@ from PIL import Image
 
 
 def run(g):
-    """g: the gen_deep_blocks module (palette, put, fine, new, write, b, state, item, ASSETS)."""
+    """g: the gen_between_blocks module (palette, put, fine, new, write, b, state, item, ASSETS)."""
     tex_dir = os.path.join(g.ASSETS, "textures", "block")
-    put, fine, new = g.put, g.fine, g.new
+    put, fine, new, mix = g.put, g.fine, g.new, g.mix
     BARK, FACE, LIP, SHADOW, GROOVE, MOSS, IRON = g.BARK, g.FACE, g.LIP, g.SHADOW, g.GROOVE, g.MOSS, g.IRON
     RED, HOT, CRIMSON = g.RED, g.HOT, g.CRIMSON
 
@@ -384,6 +384,280 @@ def run(g):
     g.write(os.path.join(tex_dir, "dread_lantern_flame.png.mcmeta"), {"animation": {"frametime": 2, "interpolate": True}})
     save("dread_lantern", lantern_icon())
 
+
+    # ---- The labyrinth's own furnishings: candelabra, weeping basin, mourning statue, iron fence and gate, piers ----
+    def pier_base_side():
+        """The foot of a pier, moulded as a column's base: a plinth, a fat torus, a cut scotia in shadow, a thin torus,
+        a fillet, and the shaft's flutes rising out of it."""
+        rng = random.Random(131)
+        img = new()
+        rows = {15: SHADOW, 14: FACE[1], 13: FACE[2], 12: FACE[2], 11: LIP,            # the plinth, its top edge lit
+                10: FACE[3], 9: mix(FACE[3], LIP, 0.5), 8: FACE[2], 7: FACE[1],          # the big torus, lit from above
+                6: SHADOW, 5: GROOVE,                                                     # the scotia, cut deep
+                4: LIP, 3: FACE[2], 2: SHADOW}                                            # the small torus and its fillet
+        for y in range(16):
+            for x in range(16):
+                if y in rows:
+                    c = rows[y]
+                else:  # the shaft's flutes, as on the pillar
+                    f = x % 4
+                    c = LIP if f == 0 else FACE[2] if f == 1 else FACE[1] if f == 2 else SHADOW
+                if x in (0, 15) and y >= 11:
+                    c = SHADOW if x == 15 else LIP
+                put(img, x, y, fine(rng, c, 0.04))
+        for x in (3, 8, 12):  # chips knocked out of the plinth
+            put(img, x, 13 + rng.randrange(2), SHADOW)
+        return img
+
+    def pier_capital_side():
+        """The head of a pier: the flutes ending at an astragal, a bell of carved leaves with red veins in them, curled
+        over at their tips, and a square abacus over all with a rune cut in its middle."""
+        rng = random.Random(132)
+        img = new()
+        for y in range(16):
+            for x in range(16):
+                if y >= 14:  # the flutes' ends
+                    f = x % 4
+                    c = LIP if f == 0 else FACE[2] if f == 1 else FACE[1] if f == 2 else SHADOW
+                elif y == 13:
+                    c = LIP  # the astragal
+                elif y == 12:
+                    c = SHADOW
+                elif y >= 4:  # the bell of leaves: four tall leaves, each ribbed down its middle, curled over at the top
+                    k = x % 8
+                    leaf = abs(k - 3.5)
+                    top = 4 + int(leaf * 0.9)
+                    if y < top:
+                        c = SHADOW
+                    elif leaf < 0.6:
+                        c = mix(CRIMSON, FACE[1], 0.35) if y > 6 else FACE[3]  # the vein down its rib
+                    else:
+                        c = FACE[3] if leaf < 2 else FACE[2] if leaf < 3.2 else FACE[1]
+                    if y == top and leaf < 3.5:
+                        c = LIP  # the curl
+                elif y == 3:
+                    c = SHADOW
+                else:  # the abacus
+                    c = LIP if y == 0 else FACE[2] if y == 1 else FACE[1]
+                put(img, x, y, fine(rng, c, 0.04))
+        for x, y in ((7, 1), (8, 1), (6, 2), (9, 2), (7, 2), (8, 2)):  # the rune on the abacus
+            put(img, x, y, GROOVE if y == 1 else mix(RED, CRIMSON, 0.5))
+        return img
+
+    def pier_end():
+        """The end of a pier stone: bevelled, a ring and a cross cut in it."""
+        rng = random.Random(133)
+        img = new()
+        for y in range(16):
+            for x in range(16):
+                c = LIP if x == 0 or y == 0 else SHADOW if x == 15 or y == 15 else FACE[2]
+                r = math.hypot(x - 7.5, y - 7.5)
+                if 4.4 < r < 5.4 or (abs(x - 7.5) < 0.6 and r < 4.4) or (abs(y - 7.5) < 0.6 and r < 4.4):
+                    c = GROOVE
+                put(img, x, y, fine(rng, c, 0.04))
+        return img
+
+    def candle_wax():
+        """Candle wax gone the colour of old bone, drips frozen down it, a black wick."""
+        rng = random.Random(134)
+        img = new()
+        for y in range(16):
+            for x in range(16):
+                c = (204, 190, 166) if (x + rng.randrange(3)) % 5 else (226, 214, 194)
+                if y > 12:
+                    c = (168, 150, 126)
+                put(img, x, y, fine(rng, c, 0.04))
+        put(img, 7, 0, (24, 18, 16))
+        put(img, 8, 0, (24, 18, 16))
+        return img
+
+    def candle_flame():
+        """A candle flame, animated (candle_flame.png.mcmeta): a small tear of light, white at its root, swaying."""
+        frames = 6
+        img = Image.new("RGBA", (16, 16 * frames), (0, 0, 0, 0))
+        for f in range(frames):
+            phase = f / frames * math.tau
+            for y in range(16):
+                v = (15.5 - y) / (12 + math.sin(phase * 2))
+                if v < 0 or v > 1:
+                    continue
+                sway = math.sin(phase + v * 2) * 0.9 * v
+                half = 3.4 * math.sin(math.pi * min(1.0, v * 1.1 + 0.08)) ** 0.7 * (1 - v) ** 0.4
+                for x in range(16):
+                    d = abs(x + 0.5 - 8 - sway)
+                    if d > half:
+                        continue
+                    k = d / max(0.5, half) * 0.6 + v * 0.55
+                    c = (255, 252, 230) if k < 0.3 else (255, 214, 120) if k < 0.55 else (255, 130, 60) if k < 0.75 else (220, 50, 46)
+                    img.putpixel((x, f * 16 + y), c + (255,))
+        return img
+
+    def tears_surface():
+        """The surface of a font of the garden's tears (animated, weeping_tears.png.mcmeta): dark blood red, rings
+        spreading slowly from where tears fall into it."""
+        frames = 8
+        img = Image.new("RGBA", (16, 16 * frames), (0, 0, 0, 255))
+        rng = random.Random(135)
+        for f in range(frames):
+            t = f / frames
+            for y in range(16):
+                for x in range(16):
+                    r = math.hypot(x - 7.5, y - 7.5)
+                    ring = max(0.0, 1 - abs(r - t * 9) * 1.2) * (1 - t)
+                    ring2 = max(0.0, 1 - abs(math.hypot(x - 4, y - 11) - ((t + 0.5) % 1) * 7) * 1.4) * (1 - (t + 0.5) % 1)
+                    c = mix((70, 6, 16), (150, 18, 34), min(1.0, ring + ring2 + rng.random() * 0.08))
+                    img.putpixel((x, f * 16 + y), c + (255,))
+        return img
+
+    def basin_face():
+        """The front of the basin's pedestal: a weeping face carved in it, eyes closed, a red tear run from each."""
+        rng = random.Random(136)
+        img = new()
+        for y in range(16):
+            for x in range(16):
+                c = FACE[2] if (x * 3 + y * 5 + rng.randrange(4)) % 9 else FACE[1]
+                if x in (0, 1) or x in (14, 15):
+                    c = LIP if x == 1 else SHADOW
+                put(img, x, y, fine(rng, c, 0.05))
+        for x in range(4, 12):  # the brow
+            put(img, x, 4, LIP)
+        for x in (5, 6, 9, 10):  # closed eyes
+            put(img, x, 6, GROOVE)
+        for y in range(7, 15):  # tears
+            put(img, 5, y, mix(RED, CRIMSON, y / 15))
+            put(img, 10, y + (1 if y < 14 else 0), mix(RED, CRIMSON, y / 15))
+        for x in (6, 7, 8, 9):  # the mouth, downturned
+            put(img, x, 11 if x in (7, 8) else 12, GROOVE)
+        put(img, 7, 8, SHADOW)
+        put(img, 8, 9, SHADOW)
+        return img
+
+    # Weathered statue stone: pale grey with a little violet, darker in its folds and pits.
+    STATUE = [(84, 76, 96), (118, 110, 128), (146, 138, 156), (172, 166, 182)]
+
+    def statue_shadow():
+        """The dark inside a mourner's hood, where its face would be."""
+        img = new()
+        for y in range(16):
+            for x in range(16):
+                put(img, x, y, (14, 10, 18) if (x + y) % 3 else (24, 16, 28))
+        return img
+
+    def statue_stone():
+        """Weathered pale dreamstone for statues: soft, grainy, darker in the folds, moss low down."""
+        rng = random.Random(137)
+        img = new()
+        for y in range(16):
+            for x in range(16):
+                c = mix(STATUE[1], STATUE[2], rng.random() * 0.7)
+                if rng.random() < 0.08:
+                    c = STATUE[0]  # pitted
+                put(img, x, y, fine(rng, c, 0.05))
+        return img
+
+    def statue_robe():
+        """A mourner's robe in stone: deep vertical folds, each lit on its left and shadowed on its right, frayed at the
+        hem, a red tear-stain run down it."""
+        rng = random.Random(138)
+        img = new()
+        for y in range(16):
+            for x in range(16):
+                f = (x + (1 if y > 8 else 0)) % 5
+                c = STATUE[3] if f == 0 else STATUE[2] if f in (1, 2) else STATUE[1] if f == 3 else STATUE[0]
+                if y == 15 and rng.random() < 0.5:
+                    c = SHADOW
+                put(img, x, y, fine(rng, c, 0.04))
+        for y in range(2, 13):
+            put(img, 9, y, mix(RED, CRIMSON, y / 12) if y > 3 else mix(FACE[3], RED, 0.5))
+        return img
+
+    def statue_hood():
+        """The hood: smooth stone draped in a few long folds, the dark inside it."""
+        rng = random.Random(139)
+        img = new()
+        for y in range(16):
+            for x in range(16):
+                f = x % 6
+                c = STATUE[3] if f < 2 else STATUE[2] if f < 4 else STATUE[1]
+                put(img, x, y, fine(rng, c, 0.04))
+        return img
+
+    def statue_plinth():
+        """The statue's plinth: polished, a band of runes round it, the name worn away."""
+        rng = random.Random(140)
+        img = new()
+        for y in range(16):
+            for x in range(16):
+                c = LIP if y == 0 else SHADOW if y == 15 else FACE[2]
+                if 6 <= y <= 9:
+                    c = FACE[1]
+                    if (x + y) % 4 == 0 or (x * 7 + y) % 9 == 0:
+                        c = GROOVE
+                put(img, x, y, fine(rng, c, 0.04))
+        return img
+
+    def dark_iron():
+        """Black wrought iron: hammered, a cold sheen along it, rust gone red in its pits."""
+        rng = random.Random(141)
+        img = new()
+        for y in range(16):
+            for x in range(16):
+                c = IRON[0] if rng.random() < 0.6 else IRON[1]
+                if x % 4 == 0:
+                    c = IRON[2]
+                if rng.random() < 0.04:
+                    c = mix(CRIMSON, IRON[0], 0.5)
+                put(img, x, y, fine(rng, c, 0.05))
+        return img
+
+    def dark_iron_icon(gate):
+        """The fence and gate as items: posts with spear tips, bars between, a crest on the gate."""
+        img = new()
+        posts = (1, 14) if gate else (6, 7, 8, 9)
+        for y in range(2, 16):
+            for x in posts:
+                put(img, x, y, IRON[1] if x in (1, 7, 14) else IRON[0])
+        if gate:
+            for x in range(2, 14):
+                put(img, x, 5, IRON[2])
+                put(img, x, 12, IRON[1])
+            for x in (3, 5, 7, 8, 10, 12):
+                for y in range(4, 15):
+                    put(img, x, y, IRON[1])
+                put(img, x, 3, IRON[2])
+            for x in (6, 7, 8, 9):
+                put(img, x, 2, mix(RED, CRIMSON, 0.5))
+        else:
+            for x in range(0, 16):
+                if x not in posts:
+                    put(img, x, 6, IRON[1])
+                    put(img, x, 12, IRON[1])
+            for x in (2, 13):
+                for y in range(4, 15):
+                    put(img, x, y, IRON[1])
+                put(img, x, 3, IRON[2])
+        for x in posts:
+            put(img, x, 1, IRON[2])
+        return img
+
+    save("dreamstone_pier_base_side", pier_base_side())
+    save("dreamstone_pier_capital_side", pier_capital_side())
+    save("dreamstone_pier_end", pier_end())
+    save("candle_wax", candle_wax())
+    save("candle_flame", candle_flame())
+    g.write(os.path.join(tex_dir, "candle_flame.png.mcmeta"), {"animation": {"frametime": 2, "interpolate": True}})
+    save("weeping_tears", tears_surface())
+    g.write(os.path.join(tex_dir, "weeping_tears.png.mcmeta"), {"animation": {"frametime": 4, "interpolate": True}})
+    save("basin_face", basin_face())
+    save("statue_stone", statue_stone())
+    save("statue_robe", statue_robe())
+    save("statue_hood", statue_hood())
+    save("statue_plinth", statue_plinth())
+    save("statue_shadow", statue_shadow())
+    save("dark_iron", dark_iron())
+    save("dread_iron_fence", dark_iron_icon(False))
+    save("dread_iron_gate", dark_iron_icon(True))
+
     # ---- Models ----
     b = g.b
 
@@ -539,10 +813,63 @@ def run(g):
             y0 = y1
     models["dreamstone_spikes"] = ({"stone": b("dreamstone"), "spike": b("spike"), "particle": b("spike")}, spikes)
 
+
+    # Candelabra: three feet under a stepped round base, a stem with a knot, two arms out and up from its head, drip
+    # cups, three candles (the middle one taller) and their flames.
+    candle = lambda cx, y0, y1: [el([cx - 0.75, y0, 7.25], [cx + 0.75, y1, 8.75], "wax"), *cross(cx, 8, y1, y1 + 3, 1.2, "flame", emit=15, full=True)]
+    models["dread_candelabra"] = ({"iron": b("dark_iron"), "wax": b("candle_wax"), "flame": b("candle_flame"), "particle": b("dark_iron")}, [
+        *[el([x - 1, 0, z - 1], [x + 1, 0.75, z + 1], "iron") for x, z in ((5, 6), (11, 6), (8, 11))],
+        el([5, 0.5, 5], [11, 1.5, 11], "iron"), el([6, 1.5, 6], [10, 2.5, 10], "iron"),
+        el([7.25, 2.5, 7.25], [8.75, 10, 8.75], "iron"), el([6.5, 5, 6.5], [9.5, 6.5, 9.5], "iron"),  # the stem and its knot
+        el([3, 9, 7.4], [13, 10, 8.6], "iron"),                                                   # the arms
+        el([3, 10, 7.4], [4, 11.5, 8.6], "iron"), el([12, 10, 7.4], [13, 11.5, 8.6], "iron"),       # turned up at the ends
+        *[el([cx - 1.25, 11.5, 6.75], [cx + 1.25, 12.25, 9.25], "iron") for cx in (3.5, 12.5)],      # drip cups
+        el([6.75, 10, 6.75], [9.25, 11, 9.25], "iron"),
+        *candle(3.5, 12.25, 14.5), *candle(12.5, 12.25, 14.5), *candle(8, 11, 15),
+    ])
+    # Weeping basin: a stepped foot, a fluted stem with a weeping face carved on its front, a collar, and a wide bowl
+    # with a rolled lip, full to near the brim of the garden's tears, which glow a little; tears run down its outside.
+    models["weeping_basin"] = ({"stone": b("decor_stone"), "post": b("dreamstone_pillar"), "face": b("basin_face"), "tears": b("weeping_tears"),
+                                "particle": b("decor_stone")}, [
+        el([2, 0, 2], [14, 1.5, 14], "stone"), el([3, 1.5, 3], [13, 2.5, 13], "stone"),
+        el([5, 2.5, 5], [11, 8, 11], "post", north="face"),
+        el([4, 8, 4], [12, 9, 12], "stone"), el([2.5, 9, 2.5], [13.5, 10, 13.5], "stone"),
+        el([1.5, 10, 1.5], [14.5, 11, 14.5], "stone"),                                            # the bowl's floor
+        *ring(11, 12.5, 1, 15, "stone", inset=1.5), *ring(12.5, 13, 0.5, 15.5, "stone", inset=1.5),  # its wall and lip
+        el([2.5, 11.8, 2.5], [13.5, 11.8, 13.5], "tears", emit=8, faces=("up",)),
+        *[el([x, 9.5, 0.95], [x + 0.6, 12, 1], "tears", emit=8, faces=("north",)) for x in (4.2, 10.5)],  # tears run down
+    ])
+    # Mourning statue, two blocks: on a plinth with a band of runes, a hooded mourner in a long robe, bent a little,
+    # its face hidden in its hands; a red stain where its tears ran.
+    statue_tex = {"stone": b("statue_stone"), "robe": b("statue_robe"), "hood": b("statue_hood"), "plinth": b("statue_plinth"),
+                  "shadow": b("statue_shadow"), "particle": b("statue_stone")}
+    models["mourning_statue_lower"] = (statue_tex, [
+        el([1, 0, 1], [15, 1.5, 15], "plinth"), el([2, 1.5, 2], [14, 2.5, 14], "stone"),        # the plinth and its step
+        el([3, 2.5, 3.5], [13, 4, 12.5], "robe"),                                                 # the hem, spread on it
+        el([3.5, 4, 4.5], [12.5, 16, 11.5], "robe"),                                              # the robe
+        el([4.5, 2.5, 11.5], [11.5, 9, 13.5], "robe"),                                            # its train, trailing behind
+        el([7, 4, 4], [9, 16, 4.5], "robe"),                                                      # a deep fold down its front
+        el([4, 11, 3.6], [12, 16, 4.5], "robe"),                                                  # falling from the arms
+    ])
+    models["mourning_statue_upper"] = (statue_tex, [
+        el([4, 0, 5], [12, 4, 11.5], "robe"),                                                     # the body
+        el([3, 3.5, 5], [13, 6.5, 11], "robe"),                                                   # the shoulders
+        el([5, 6, 6], [11, 12, 12], "hood"),                                                      # the hood, bowed
+        el([5.5, 6.5, 4.6], [10.5, 12, 6], "hood"),                                               # its brim, deep
+        el([6.5, 7, 4.5], [9.5, 11, 4.6], "shadow", faces=("north",)),                            # the dark inside it
+        el([6, 11.5, 7], [10, 13.5, 11], "hood"),                                                 # its peak
+        el([5, 0.5, 11.5], [11, 12, 12.6], "hood"),                                               # a veil down its back
+        # The arms, raised from the shoulders to the face, and the hands pressed over it, fingers and all.
+        el([3, 2.5, 3.5], [5.5, 9, 6.5], "robe", rot={"origin": [4.25, 4, 5], "axis": "x", "angle": 22.5}),
+        el([10.5, 2.5, 3.5], [13, 9, 6.5], "robe", rot={"origin": [11.75, 4, 5], "axis": "x", "angle": 22.5}),
+        el([5.6, 7.4, 3.6], [7.9, 10.2, 4.8], "stone"), el([8.1, 7.4, 3.6], [10.4, 10.2, 4.8], "stone"),
+        *[el([x, 10.2, 3.8], [x + 0.55, 11.2, 4.6], "stone") for x in (5.8, 6.5, 7.2, 8.3, 9.0, 9.7)],
+    ])
+
     turns = (("north", 0), ("east", 90), ("south", 180), ("west", 270))
     for name, (textures, elements) in models.items():
         g.write(os.path.join(g.ASSETS, "models", "block", name + ".json"), {"parent": "minecraft:block/block", "textures": textures, "elements": elements})
-        if name.startswith("dread_fire_lamp_") or name.startswith("stone_tomb_"):
+        if name.startswith("dread_fire_lamp_") or name.startswith("stone_tomb_") or name.startswith("mourning_statue_"):
             continue
         if name == "dreamstone_spikes":
             g.state(name, {"": {"model": b(name)}})
@@ -553,6 +880,86 @@ def run(g):
     g.state("dread_fire_lamp", {f"facing={f},part={p}": dict({"model": b("dread_fire_lamp_" + p)}, **({"y": y} if y else {}))
                                 for f, y in turns for p in ("base", "shaft", "top")})
     g.item("dread_fire_lamp", b("dread_fire_lamp_top"))
+    g.state("mourning_statue", {f"facing={f},half={h}": dict({"model": b("mourning_statue_" + h)}, **({"y": y} if y else {}))
+                                for f, y in turns for h in ("lower", "upper")})
+    # Its item: the whole statue, shrunk to a block.
+    g.write(os.path.join(g.ASSETS, "models", "block", "mourning_statue_item.json"), {"parent": "minecraft:block/block",
+        "textures": statue_tex, "display": {"gui": {"rotation": [30, 225, 0], "translation": [0, -2, 0], "scale": [0.36, 0.36, 0.36]}},
+        "elements": models["mourning_statue_lower"][1] + [dict(e, **{"from": [e["from"][0], e["from"][1] + 16, e["from"][2]],
+                                                                     "to": [e["to"][0], e["to"][1] + 16, e["to"][2]]},
+                                                                **({"rotation": dict(e["rotation"], origin=[e["rotation"]["origin"][0], e["rotation"]["origin"][1] + 16, e["rotation"]["origin"][2]])} if "rotation" in e else {}))
+                                                          for e in models["mourning_statue_upper"][1]]})
+    g.item("mourning_statue", b("mourning_statue_item"))
+
+    # The dread iron fence: a square post capped with a finial and spear tip; to each side, two rails and two bars
+    # between them with spear heads above.
+    iron_tex = {"iron": b("dark_iron"), "particle": b("dark_iron")}
+    spear = lambda x, z, y0, w: [el([x - w, y0, z - w], [x + w, y0 + 1.2, z + w], "iron"),
+                                 el([x - w * 0.6, y0 + 1.2, z - w * 0.6], [x + w * 0.6, y0 + 2.6, z + w * 0.6], "iron",
+                                    rot={"origin": [x, y0 + 1.9, z], "axis": "y", "angle": 45})]
+    post = [el([6, 0, 6], [10, 1, 10], "iron"), el([6.5, 1, 6.5], [9.5, 15, 9.5], "iron"), el([6, 15, 6], [10, 16, 10], "iron"),
+            *spear(8, 8, 16, 1.0)]
+    side = [el([7.25, 4, 0], [8.75, 5.5, 6.5], "iron"), el([7.25, 12, 0], [8.75, 13.5, 6.5], "iron")]
+    for z in (1.75, 4.5):
+        side += [el([7.5, 1, z - 0.5], [8.5, 16, z + 0.5], "iron"), *spear(8, z, 16, 0.55)]
+    for name, elements in (("dread_iron_fence_post", post), ("dread_iron_fence_side", side)):
+        g.write(os.path.join(g.ASSETS, "models", "block", name + ".json"),
+                {"parent": "minecraft:block/block", "ambientocclusion": False, "textures": iron_tex, "elements": elements})
+    g.write(os.path.join(g.ASSETS, "blockstates", "dread_iron_fence.json"), {"multipart": [{"apply": {"model": b("dread_iron_fence_post")}}] + [
+        {"when": {d: "true"}, "apply": dict({"model": b("dread_iron_fence_side"), "uvlock": True}, **({"y": y} if y else {}))}
+        for d, y in turns]})
+    g.write(os.path.join(g.ASSETS, "items", "dread_iron_fence.json"), {"model": {"type": "minecraft:model", "model": f"{g.NS}:item/dread_iron_fence"}})
+    g.write(os.path.join(g.ASSETS, "models", "item", "dread_iron_fence.json"), {"parent": "minecraft:item/generated", "textures": {"layer0": b("dread_iron_fence")}})
+
+    # The dread iron gate: two leaves of spear-headed bars in a frame between square posts with finials, a crest over
+    # their meeting; open, each leaf swings in on its hinge.
+    def leaf(x0, x1):
+        e = [el([x0, 3, 7.25], [x1, 4.5, 8.75], "iron"), el([x0, 12.5, 7.25], [x1, 14, 8.75], "iron")]
+        span = x1 - x0
+        for k in range(3):
+            x = x0 + span * (k + 0.5) / 3
+            e += [el([x - 0.5, 1, 7.5], [x + 0.5, 15, 8.5], "iron"), *spear(x, 8, 15, 0.5)]
+        return e
+
+    posts = [el([0, 0, 6.5], [2, 16, 9.5], "iron"), el([14, 0, 6.5], [16, 16, 9.5], "iron"), *spear(1, 8, 16, 1.0), *spear(15, 8, 16, 1.0)]
+    left, right = leaf(2, 8), leaf(8, 14)
+    crest = [el([6.5, 14, 7.5], [9.5, 15, 8.5], "iron")]
+
+    def swing(elements, hx, sign):
+        """Turns a leaf a quarter round its hinge at (hx, 8), inward (toward +z)."""
+        out = []
+        for e in elements:
+            pts = [(e["from"][0], e["from"][2]), (e["to"][0], e["to"][2])]
+            turned = [(hx + (z - 8) * sign, 8 + (x - hx) * sign) for x, z in pts]
+            xs, zs = [p[0] for p in turned], [p[1] for p in turned]
+            e2 = dict(e, **{"from": [min(xs), e["from"][1], min(zs)], "to": [max(xs), e["to"][1], max(zs)]})
+            if "rotation" in e:
+                ox, oz = e["rotation"]["origin"][0], e["rotation"]["origin"][2]
+                e2["rotation"] = dict(e["rotation"], origin=[hx + (oz - 8) * sign, e["rotation"]["origin"][1], 8 + (ox - hx) * sign])
+            out.append(e2)
+        return out
+
+    closed = posts + left + right + crest
+    opened = posts + swing(left, 2, 1) + swing(right, 14, -1)
+    for name, elements in (("dread_iron_gate", closed), ("dread_iron_gate_open", opened)):
+        g.write(os.path.join(g.ASSETS, "models", "block", name + ".json"),
+                {"parent": "minecraft:block/block", "ambientocclusion": False, "textures": iron_tex, "elements": elements})
+    gate_turns = {"south": 0, "west": 90, "north": 180, "east": 270}
+    g.state("dread_iron_gate", {f"facing={f},in_wall={w},open={o}": dict({"model": b("dread_iron_gate" + ("_open" if o == "true" else "")),
+                                                                         "uvlock": True}, **({"y": y} if y else {}))
+                                for f, y in gate_turns.items() for w in ("false", "true") for o in ("false", "true")})
+    g.write(os.path.join(g.ASSETS, "items", "dread_iron_gate.json"), {"model": {"type": "minecraft:model", "model": f"{g.NS}:item/dread_iron_gate"}})
+    g.write(os.path.join(g.ASSETS, "models", "item", "dread_iron_gate.json"), {"parent": "minecraft:item/generated", "textures": {"layer0": b("dread_iron_gate")}})
+
+    # The pier stones: columns, their sides moulded, their ends cut.
+    for name in ("dreamstone_pier_base", "dreamstone_pier_capital"):
+        g.write(os.path.join(g.ASSETS, "models", "block", name + ".json"),
+                {"parent": "minecraft:block/cube_column", "textures": {"side": b(name + "_side"), "end": b("dreamstone_pier_end")}})
+        g.write(os.path.join(g.ASSETS, "models", "block", name + "_horizontal.json"),
+                {"parent": "minecraft:block/cube_column_horizontal", "textures": {"side": b(name + "_side"), "end": b("dreamstone_pier_end")}})
+        g.state(name, {"axis=y": {"model": b(name)}, "axis=z": {"model": b(name + "_horizontal"), "x": 90},
+                       "axis=x": {"model": b(name + "_horizontal"), "x": 90, "y": 90}})
+        g.item(name, b(name))
     # The dread lantern, standing and hanging: a foot in two steps, four corner posts, smoked glass between them with a
     # band of iron round its middle, a candle guttering inside, its flame lit (and the glass glowing a little with
     # it), a stepped roof with four little horns at its corners and a finial, and a hook; hanging, a link of chain up to

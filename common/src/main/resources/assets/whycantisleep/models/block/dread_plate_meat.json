@@ -1,0 +1,235 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "pewter": "whycantisleep:block/plate_pewter",
+    "bone": "whycantisleep:block/tomb_bone",
+    "meat": "whycantisleep:block/plate_meat",
+    "particle": "whycantisleep:block/plate_pewter"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        0,
+        4
+      ],
+      "to": [
+        12,
+        0.5,
+        12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#pewter"
+        },
+        "south": {
+          "texture": "#pewter"
+        },
+        "east": {
+          "texture": "#pewter"
+        },
+        "west": {
+          "texture": "#pewter"
+        },
+        "up": {
+          "texture": "#pewter"
+        },
+        "down": {
+          "texture": "#pewter"
+        }
+      }
+    },
+    {
+      "from": [
+        3.5,
+        0.5,
+        3.5
+      ],
+      "to": [
+        12.5,
+        1,
+        4.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#pewter"
+        },
+        "south": {
+          "texture": "#pewter"
+        },
+        "east": {
+          "texture": "#pewter"
+        },
+        "west": {
+          "texture": "#pewter"
+        },
+        "up": {
+          "texture": "#pewter"
+        },
+        "down": {
+          "texture": "#pewter"
+        }
+      }
+    },
+    {
+      "from": [
+        3.5,
+        0.5,
+        11.5
+      ],
+      "to": [
+        12.5,
+        1,
+        12.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#pewter"
+        },
+        "south": {
+          "texture": "#pewter"
+        },
+        "east": {
+          "texture": "#pewter"
+        },
+        "west": {
+          "texture": "#pewter"
+        },
+        "up": {
+          "texture": "#pewter"
+        },
+        "down": {
+          "texture": "#pewter"
+        }
+      }
+    },
+    {
+      "from": [
+        3.5,
+        0.5,
+        4.5
+      ],
+      "to": [
+        4.5,
+        1,
+        11.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#pewter"
+        },
+        "south": {
+          "texture": "#pewter"
+        },
+        "east": {
+          "texture": "#pewter"
+        },
+        "west": {
+          "texture": "#pewter"
+        },
+        "up": {
+          "texture": "#pewter"
+        },
+        "down": {
+          "texture": "#pewter"
+        }
+      }
+    },
+    {
+      "from": [
+        11.5,
+        0.5,
+        4.5
+      ],
+      "to": [
+        12.5,
+        1,
+        11.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#pewter"
+        },
+        "south": {
+          "texture": "#pewter"
+        },
+        "east": {
+          "texture": "#pewter"
+        },
+        "west": {
+          "texture": "#pewter"
+        },
+        "up": {
+          "texture": "#pewter"
+        },
+        "down": {
+          "texture": "#pewter"
+        }
+      }
+    },
+    {
+      "from": [
+        5.5,
+        0.5,
+        6
+      ],
+      "to": [
+        10.5,
+        2,
+        10
+      ],
+      "faces": {
+        "north": {
+          "texture": "#meat"
+        },
+        "south": {
+          "texture": "#meat"
+        },
+        "east": {
+          "texture": "#meat"
+        },
+        "west": {
+          "texture": "#meat"
+        },
+        "up": {
+          "texture": "#meat"
+        },
+        "down": {
+          "texture": "#meat"
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        2,
+        6.5
+      ],
+      "to": [
+        9.5,
+        2.5,
+        9.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#meat"
+        },
+        "south": {
+          "texture": "#meat"
+        },
+        "east": {
+          "texture": "#meat"
+        },
+        "west": {
+          "texture": "#meat"
+        },
+        "up": {
+          "texture": "#meat"
+        },
+        "down": {
+          "texture": "#meat"
+        }
+      }
+    }
+  ]
+}

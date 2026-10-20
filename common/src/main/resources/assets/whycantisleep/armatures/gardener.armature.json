@@ -5,56 +5,61 @@
   "glow_textures": [
     "whycantisleep:textures/armatures/gardener_glow.png"
   ],
+  "cloth": [
+    {
+      "joints": [
+        [
+          "cloak_0_0",
+          "cloak_1_0",
+          "cloak_2_0",
+          "cloak_3_0"
+        ],
+        [
+          "cloak_0_1",
+          "cloak_1_1",
+          "cloak_2_1",
+          "cloak_3_1"
+        ],
+        [
+          "cloak_0_2",
+          "cloak_1_2",
+          "cloak_2_2",
+          "cloak_3_2"
+        ],
+        [
+          "cloak_0_3",
+          "cloak_1_3",
+          "cloak_2_3",
+          "cloak_3_3"
+        ],
+        [
+          "cloak_0_4",
+          "cloak_1_4",
+          "cloak_2_4",
+          "cloak_3_4"
+        ],
+        [
+          "cloak_0_5",
+          "cloak_1_5",
+          "cloak_2_5",
+          "cloak_3_5"
+        ]
+      ]
+    }
+  ],
   "springs": {
-    "cloak_0": {
-      "stiffness": 70,
-      "damping": 5.5,
-      "gravity": 1.5,
-      "max_angle": 55,
-      "colliders": [
-        {
-          "point": "back_upper",
-          "radius": 5.0
-        },
-        {
-          "point": "back_lower",
-          "radius": 5.0
-        },
-        {
-          "point": "hips_back",
-          "radius": 4.8
-        },
-        {
-          "point": "right_leg_back",
-          "radius": 3.2
-        },
-        {
-          "point": "left_leg_back",
-          "radius": 3.2
-        },
-        {
-          "point": "spike_0",
-          "radius": 1.8
-        },
-        {
-          "point": "spike_1",
-          "radius": 1.8
-        },
-        {
-          "point": "spike_2",
-          "radius": 1.8
-        },
-        {
-          "point": "spike_3",
-          "radius": 1.8
-        }
-      ]
-    },
-    "cloak_1": {
-      "stiffness": 56,
-      "damping": 4.7,
+    "cloak_0_0": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
       "gravity": 3.0,
-      "max_angle": 65,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 120,
+      "max_angle": 25,
       "colliders": [
         {
           "point": "back_upper",
@@ -66,39 +71,166 @@
         },
         {
           "point": "hips_back",
-          "radius": 4.8
+          "radius": 5.4
         },
         {
           "point": "right_leg_back",
-          "radius": 3.2
+          "radius": 3.8
         },
         {
           "point": "left_leg_back",
-          "radius": 3.2
+          "radius": 3.8
         },
         {
-          "point": "spike_0",
-          "radius": 1.8
+          "point": "right_leg_calf",
+          "radius": 3.4
         },
         {
-          "point": "spike_1",
-          "radius": 1.8
+          "point": "left_leg_calf",
+          "radius": 3.4
         },
         {
-          "point": "spike_2",
-          "radius": 1.8
+          "point": "spike_0_l",
+          "radius": 2.56
         },
         {
-          "point": "spike_3",
-          "radius": 1.8
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
         }
+      ],
+      "length": 6.271,
+      "links": [
+        "cloak_1_0"
       ]
     },
-    "cloak_2": {
-      "stiffness": 42,
-      "damping": 3.9,
-      "gravity": 4.5,
-      "max_angle": 75,
+    "cloak_0_1": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 110,
+      "max_angle": 29,
       "colliders": [
         {
           "point": "back_upper",
@@ -110,39 +242,166 @@
         },
         {
           "point": "hips_back",
-          "radius": 4.8
+          "radius": 5.4
         },
         {
           "point": "right_leg_back",
-          "radius": 3.2
+          "radius": 3.8
         },
         {
           "point": "left_leg_back",
-          "radius": 3.2
+          "radius": 3.8
         },
         {
-          "point": "spike_0",
-          "radius": 1.8
+          "point": "right_leg_calf",
+          "radius": 3.4
         },
         {
-          "point": "spike_1",
-          "radius": 1.8
+          "point": "left_leg_calf",
+          "radius": 3.4
         },
         {
-          "point": "spike_2",
-          "radius": 1.8
+          "point": "spike_0_l",
+          "radius": 2.56
         },
         {
-          "point": "spike_3",
-          "radius": 1.8
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
         }
+      ],
+      "length": 3.2,
+      "links": [
+        "cloak_1_1"
       ]
     },
-    "cloak_3": {
-      "stiffness": 28,
-      "damping": 3.0999999999999996,
-      "gravity": 6.0,
-      "max_angle": 85,
+    "cloak_0_2": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 100,
+      "max_angle": 33,
       "colliders": [
         {
           "point": "back_upper",
@@ -154,33 +413,3764 @@
         },
         {
           "point": "hips_back",
-          "radius": 4.8
+          "radius": 5.4
         },
         {
           "point": "right_leg_back",
-          "radius": 3.2
+          "radius": 3.8
         },
         {
           "point": "left_leg_back",
-          "radius": 3.2
+          "radius": 3.8
         },
         {
-          "point": "spike_0",
-          "radius": 1.8
+          "point": "right_leg_calf",
+          "radius": 3.4
         },
         {
-          "point": "spike_1",
-          "radius": 1.8
+          "point": "left_leg_calf",
+          "radius": 3.4
         },
         {
-          "point": "spike_2",
-          "radius": 1.8
+          "point": "spike_0_l",
+          "radius": 2.56
         },
         {
-          "point": "spike_3",
-          "radius": 1.8
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
         }
+      ],
+      "length": 3.2,
+      "links": [
+        "cloak_1_2"
       ]
+    },
+    "cloak_0_3": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 90,
+      "max_angle": 37,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 5.4
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "right_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "left_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "spike_0_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
+        }
+      ],
+      "length": 3.2,
+      "links": [
+        "cloak_1_3"
+      ]
+    },
+    "cloak_0_4": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 80,
+      "max_angle": 41,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 5.4
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "right_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "left_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "spike_0_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
+        }
+      ],
+      "length": 4.896,
+      "links": [
+        "cloak_1_4"
+      ],
+      "wind": 0.1
+    },
+    "cloak_0_5": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 70,
+      "max_angle": 45,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 5.4
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "right_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "left_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "spike_0_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
+        }
+      ],
+      "length": 5.515,
+      "links": [
+        "cloak_1_5"
+      ],
+      "wind": 0.1
+    },
+    "cloak_1_0": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 120,
+      "max_angle": 25,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 5.4
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "right_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "left_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "spike_0_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
+        }
+      ],
+      "length": 6.271,
+      "links": [
+        "cloak_0_0",
+        "cloak_2_0"
+      ]
+    },
+    "cloak_1_1": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 110,
+      "max_angle": 29,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 5.4
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "right_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "left_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "spike_0_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
+        }
+      ],
+      "length": 3.2,
+      "links": [
+        "cloak_0_1",
+        "cloak_2_1"
+      ]
+    },
+    "cloak_1_2": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 100,
+      "max_angle": 33,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 5.4
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "right_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "left_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "spike_0_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
+        }
+      ],
+      "length": 3.2,
+      "links": [
+        "cloak_0_2",
+        "cloak_2_2"
+      ]
+    },
+    "cloak_1_3": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 90,
+      "max_angle": 37,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 5.4
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "right_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "left_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "spike_0_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
+        }
+      ],
+      "length": 3.2,
+      "links": [
+        "cloak_0_3",
+        "cloak_2_3"
+      ]
+    },
+    "cloak_1_4": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 80,
+      "max_angle": 41,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 5.4
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "right_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "left_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "spike_0_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
+        }
+      ],
+      "length": 4.896,
+      "links": [
+        "cloak_0_4",
+        "cloak_2_4"
+      ],
+      "wind": 0.1
+    },
+    "cloak_1_5": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 70,
+      "max_angle": 45,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 5.4
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "right_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "left_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "spike_0_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
+        }
+      ],
+      "length": 5.515,
+      "links": [
+        "cloak_0_5",
+        "cloak_2_5"
+      ],
+      "wind": 0.1
+    },
+    "cloak_2_0": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 120,
+      "max_angle": 25,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 5.4
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "right_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "left_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "spike_0_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
+        }
+      ],
+      "length": 6.271,
+      "links": [
+        "cloak_1_0",
+        "cloak_3_0"
+      ]
+    },
+    "cloak_2_1": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 110,
+      "max_angle": 29,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 5.4
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "right_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "left_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "spike_0_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
+        }
+      ],
+      "length": 3.2,
+      "links": [
+        "cloak_1_1",
+        "cloak_3_1"
+      ]
+    },
+    "cloak_2_2": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 100,
+      "max_angle": 33,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 5.4
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "right_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "left_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "spike_0_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
+        }
+      ],
+      "length": 3.2,
+      "links": [
+        "cloak_1_2",
+        "cloak_3_2"
+      ]
+    },
+    "cloak_2_3": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 90,
+      "max_angle": 37,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 5.4
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "right_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "left_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "spike_0_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
+        }
+      ],
+      "length": 3.2,
+      "links": [
+        "cloak_1_3",
+        "cloak_3_3"
+      ]
+    },
+    "cloak_2_4": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 80,
+      "max_angle": 41,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 5.4
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "right_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "left_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "spike_0_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
+        }
+      ],
+      "length": 4.896,
+      "links": [
+        "cloak_1_4",
+        "cloak_3_4"
+      ],
+      "wind": 0.1
+    },
+    "cloak_2_5": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 70,
+      "max_angle": 45,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 5.4
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "right_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "left_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "spike_0_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
+        }
+      ],
+      "length": 5.515,
+      "links": [
+        "cloak_1_5",
+        "cloak_3_5"
+      ],
+      "wind": 0.1
+    },
+    "cloak_3_0": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 120,
+      "max_angle": 25,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 5.4
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "right_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "left_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "spike_0_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
+        }
+      ],
+      "length": 6.271,
+      "links": [
+        "cloak_2_0"
+      ]
+    },
+    "cloak_3_1": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 110,
+      "max_angle": 29,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 5.4
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "right_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "left_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "spike_0_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
+        }
+      ],
+      "length": 3.2,
+      "links": [
+        "cloak_2_1"
+      ]
+    },
+    "cloak_3_2": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 100,
+      "max_angle": 33,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 5.4
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "right_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "left_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "spike_0_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
+        }
+      ],
+      "length": 3.2,
+      "links": [
+        "cloak_2_2"
+      ]
+    },
+    "cloak_3_3": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 90,
+      "max_angle": 37,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 5.4
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "right_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "left_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "spike_0_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
+        }
+      ],
+      "length": 3.2,
+      "links": [
+        "cloak_2_3"
+      ]
+    },
+    "cloak_3_4": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 80,
+      "max_angle": 41,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 5.4
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "right_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "left_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "spike_0_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
+        }
+      ],
+      "length": 4.896,
+      "links": [
+        "cloak_2_4"
+      ],
+      "wind": 0.1
+    },
+    "cloak_3_5": {
+      "fabric": "leaves",
+      "mass": 1.5,
+      "damping": 14.0,
+      "gravity": 3.0,
+      "follow": 0.9,
+      "air_drag": 0.015,
+      "flutter": 0.04,
+      "bend": 24.0,
+      "link_stiffness": 0.45,
+      "stiffness": 70,
+      "max_angle": 45,
+      "colliders": [
+        {
+          "point": "back_upper",
+          "radius": 5.0
+        },
+        {
+          "point": "back_lower",
+          "radius": 5.0
+        },
+        {
+          "point": "hips_back",
+          "radius": 5.4
+        },
+        {
+          "point": "right_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "left_leg_back",
+          "radius": 3.8
+        },
+        {
+          "point": "right_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "left_leg_calf",
+          "radius": 3.4
+        },
+        {
+          "point": "spike_0_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_0_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_1_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_2_r",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_l",
+          "radius": 2.56
+        },
+        {
+          "point": "spike_3_r",
+          "radius": 2.56
+        },
+        {
+          "point": "right_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "right_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "right_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "right_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "left_arm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_elbow_ball",
+          "radius": 2.9
+        },
+        {
+          "point": "left_forearm_upper",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_ball",
+          "radius": 2.8
+        },
+        {
+          "point": "left_forearm_lower",
+          "radius": 2.8
+        },
+        {
+          "point": "left_hand_ball",
+          "radius": 3.0
+        },
+        {
+          "point": "shaft_0",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_1",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_2",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_3",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_4",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_5",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_6",
+          "radius": 1.9
+        },
+        {
+          "point": "shaft_7",
+          "radius": 1.9
+        },
+        {
+          "point": "blade_0",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_1",
+          "radius": 2.0
+        },
+        {
+          "point": "blade_2",
+          "radius": 2.0
+        }
+      ],
+      "length": 5.515,
+      "links": [
+        "cloak_2_5"
+      ],
+      "wind": 0.1
     },
     "veil": {
       "stiffness": 70,

@@ -1,7 +1,7 @@
 package net.ixdarklord.whycantisleep.mixin.client;
 
 import net.ixdarklord.whycantisleep.client.SleepClient;
-import net.ixdarklord.whycantisleep.deep.client.GardenWardClient;
+import net.ixdarklord.whycantisleep.between.client.GardenWardClient;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;

@@ -1,0 +1,16 @@
+{
+  "glow_textures": [
+    "whycantisleep:textures/armatures/jack_in_the_box_glow.png"
+  ],
+  "transition": {
+    "duration": 0.2,
+    "easing": "sine_in_out"
+  },
+  "springs": {
+    "torso": {
+      "stiffness": 70,
+      "damping": 5,
+      "max_angle": 35
+    }
+  }
+}
