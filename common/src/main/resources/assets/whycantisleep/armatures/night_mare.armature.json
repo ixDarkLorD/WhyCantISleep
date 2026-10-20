@@ -1,0 +1,23 @@
+{
+  "glow_textures": [
+    "whycantisleep:textures/armatures/night_mare_glow.png"
+  ],
+  "transition": {
+    "duration": 0.2,
+    "easing": "sine_in_out"
+  },
+  "look_at": {
+    "head": {
+      "max_yaw": 30,
+      "max_pitch": 20,
+      "smoothing": 0.15
+    }
+  },
+  "springs": {
+    "tail": {
+      "stiffness": 90,
+      "damping": 8,
+      "weight": 0.5
+    }
+  }
+}

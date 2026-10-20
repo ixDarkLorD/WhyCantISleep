@@ -1,0 +1,16 @@
+{
+  "glow_textures": [
+    "whycantisleep:textures/armatures/hollow_hound_glow.png"
+  ],
+  "transition": {
+    "duration": 0.2,
+    "easing": "sine_in_out"
+  },
+  "look_at": {
+    "head": {
+      "max_yaw": 45,
+      "max_pitch": 25,
+      "smoothing": 0.2
+    }
+  }
+}

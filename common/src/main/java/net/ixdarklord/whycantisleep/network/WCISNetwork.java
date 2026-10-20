@@ -1,11 +1,11 @@
 package net.ixdarklord.whycantisleep.network;
 
 import net.ixdarklord.coolcatcore.api.network.Network;
-import net.ixdarklord.whycantisleep.deep.LucidDeep;
-import net.ixdarklord.whycantisleep.deep.client.CastleVortex;
-import net.ixdarklord.whycantisleep.deep.client.DreamRoomView;
-import net.ixdarklord.whycantisleep.deep.client.DreamTransition;
-import net.ixdarklord.whycantisleep.deep.client.GardenWardClient;
+import net.ixdarklord.whycantisleep.between.DarkBetween;
+import net.ixdarklord.whycantisleep.between.client.CastleVortex;
+import net.ixdarklord.whycantisleep.between.client.DreamRoomView;
+import net.ixdarklord.whycantisleep.between.client.DreamTransition;
+import net.ixdarklord.whycantisleep.between.client.GardenWardClient;
 import net.ixdarklord.whycantisleep.client.SleepClient;
 import net.ixdarklord.whycantisleep.client.board.SleepBoard;
 import net.ixdarklord.whycantisleep.client.fx.SleepEffects;
@@ -35,7 +35,7 @@ public final class WCISNetwork {
             if (context.getPlayer() instanceof ServerPlayer player) LurkerServer.onPreference(player, payload.scary());
         }));
         Network.registerServerbound(DreamReadyPayload.class, (payload, context) -> context.queue(() -> {
-            if (context.getPlayer() instanceof ServerPlayer player) LucidDeep.release(player);
+            if (context.getPlayer() instanceof ServerPlayer player) DarkBetween.release(player);
         }));
         Network.registerServerbound(NudgePayload.class, (payload, context) -> context.queue(() -> {
             if (context.getPlayer() instanceof ServerPlayer player) SleepBoardServer.onNudge(player, payload);

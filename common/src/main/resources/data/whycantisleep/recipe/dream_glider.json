@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "WWW",
+    "SSS",
+    " S "
+  ],
+  "key": {
+    "W": "#minecraft:wool",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "id": "whycantisleep:dream_glider",
+    "count": 1
+  }
+}

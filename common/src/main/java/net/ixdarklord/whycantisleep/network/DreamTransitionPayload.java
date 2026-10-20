@@ -4,7 +4,7 @@ import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 /**
- * Server to client: a step of going under into the Lucid Deep, for the client to show.
+ * Server to client: a step of going under into the Dark Between, for the client to show.
  *
  * @param stage {@link #DRIFT} (they are slipping into deep sleep: the camera falls away from the bed, at the eye
  *              position and facing given), {@link #CANCEL} (they woke before going under) or {@link #LANDED} (they

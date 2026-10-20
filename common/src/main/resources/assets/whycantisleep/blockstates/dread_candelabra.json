@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "whycantisleep:block/dread_candelabra"
+    },
+    "facing=east": {
+      "model": "whycantisleep:block/dread_candelabra",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "whycantisleep:block/dread_candelabra",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "whycantisleep:block/dread_candelabra",
+      "y": 270
+    }
+  }
+}

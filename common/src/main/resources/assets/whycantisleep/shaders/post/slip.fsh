@@ -2,7 +2,7 @@
 
 #moj_import <coolcatlib:screen_effect.glsl>
 
-// Slipping under into the Lucid Deep (whycantisleep:slip, driven by DreamTransition), as the view rises away from the
+// Slipping under into the Dark Between (whycantisleep:slip, driven by DreamTransition), as the view rises away from the
 // sleeper. Strength is how far under they are, 0 to 1:
 //   - the picture warps, slowly turning and rippling, its colors draining and splitting;
 //   - black smoke rolls in from every edge;

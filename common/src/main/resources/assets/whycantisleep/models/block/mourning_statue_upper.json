@@ -1,0 +1,13 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "skin": "whycantisleep:block/statue_skin",
+    "trim": "whycantisleep:block/statue_trim",
+    "ped": "whycantisleep:block/statue_pedestal",
+    "ptop": "whycantisleep:block/statue_pedestal_top",
+    "pbottom": "whycantisleep:block/statue_pedestal_bottom",
+    "under": "whycantisleep:block/statue_underside",
+    "particle": "whycantisleep:block/statue_skin"
+  },
+  "elements": []
+}

@@ -1,6 +1,6 @@
 package net.ixdarklord.whycantisleep;
 
-import net.ixdarklord.whycantisleep.deep.client.DeepClient;
+import net.ixdarklord.whycantisleep.between.client.BetweenClient;
 import net.ixdarklord.coolcatcore.api.core.ClientModConstructor;
 import net.ixdarklord.whycantisleep.client.SleepClient;
 import net.ixdarklord.whycantisleep.client.Blockers;
@@ -26,6 +26,6 @@ public final class WhyCantISleepClient implements ClientModConstructor {
         SleepEffects.init();
         LurkerHaunt.init();
         MindHud.init();
-        DeepClient.init();
+        BetweenClient.init();
     }
 }

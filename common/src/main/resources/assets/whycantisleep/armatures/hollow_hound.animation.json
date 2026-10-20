@@ -1,0 +1,179 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.hollow_hound.idle": {
+      "loop": true,
+      "animation_length": 2.0,
+      "bones": {
+        "body": {
+          "position": [
+            0,
+            "0.25 * math.sin(q.anim_time * 180.0)",
+            0
+          ]
+        },
+        "head": {
+          "rotation": [
+            "4 * math.sin(q.anim_time * 180.0)",
+            "12 * math.sin(q.anim_time * 180.0)",
+            0
+          ]
+        },
+        "jaw": {
+          "rotation": [
+            "6 + 4 * math.sin(q.anim_time * 360.0)",
+            0,
+            0
+          ]
+        },
+        "tail": {
+          "rotation": [
+            0,
+            "12 * math.sin(q.anim_time * 180.0)",
+            0
+          ]
+        }
+      }
+    },
+    "animation.hollow_hound.walk": {
+      "loop": true,
+      "animation_length": 0.6,
+      "bones": {
+        "front_right_leg": {
+          "rotation": [
+            "35 * math.sin(q.anim_time * 600.0)",
+            0,
+            0
+          ]
+        },
+        "back_left_leg": {
+          "rotation": [
+            "35 * math.sin(q.anim_time * 600.0)",
+            0,
+            0
+          ]
+        },
+        "front_left_leg": {
+          "rotation": [
+            "-35 * math.sin(q.anim_time * 600.0)",
+            0,
+            0
+          ]
+        },
+        "back_right_leg": {
+          "rotation": [
+            "-35 * math.sin(q.anim_time * 600.0)",
+            0,
+            0
+          ]
+        },
+        "body": {
+          "position": [
+            0,
+            "0.5 * math.abs(math.sin(q.anim_time * 600.0))",
+            0
+          ]
+        },
+        "head": {
+          "rotation": [
+            "4 * math.sin(q.anim_time * 1200.0)",
+            0,
+            0
+          ]
+        },
+        "jaw": {
+          "rotation": [
+            14,
+            0,
+            0
+          ]
+        },
+        "tail": {
+          "rotation": [
+            20,
+            "15 * math.sin(q.anim_time * 600.0)",
+            0
+          ]
+        }
+      }
+    },
+    "animation.hollow_hound.attack": {
+      "loop": false,
+      "animation_length": 0.4,
+      "bones": {
+        "head": {
+          "rotation": {
+            "0.0": {
+              "post": [
+                0,
+                0,
+                0
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.12": {
+              "post": [
+                -20,
+                0,
+                0
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.24": {
+              "post": [
+                15,
+                0,
+                0
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.4": {
+              "post": [
+                0,
+                0,
+                0
+              ],
+              "lerp_mode": "catmullrom"
+            }
+          }
+        },
+        "jaw": {
+          "rotation": {
+            "0.0": {
+              "post": [
+                6,
+                0,
+                0
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.12": {
+              "post": [
+                40,
+                0,
+                0
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.24": {
+              "post": [
+                0,
+                0,
+                0
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.4": {
+              "post": [
+                6,
+                0,
+                0
+              ],
+              "lerp_mode": "catmullrom"
+            }
+          }
+        }
+      }
+    }
+  }
+}

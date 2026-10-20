@@ -331,21 +331,21 @@
       "bones": {
         "body": {
           "rotation": [
-            "6 + 2 * math.sin(q.anim_time * 120)",
+            "6 + 2 * math.sin(q.anim_time * 120.0)",
             0,
             0
           ]
         },
         "head": {
           "rotation": [
-            "-4 + 4 * math.sin(q.anim_time * 60)",
-            "12 * math.sin(q.anim_time * 40)",
-            "6 * math.sin(q.anim_time * 90)"
+            "-4 + 4 * math.sin(q.anim_time * 120.0)",
+            "12 * math.sin(q.anim_time * 120.0)",
+            "6 * math.sin(q.anim_time * 120.0)"
           ]
         },
         "jaw": {
           "rotation": [
-            "10 + 8 * math.max(0, math.sin(q.anim_time * 120))",
+            "10 + 8 * math.max(0, math.sin(q.anim_time * 120.0))",
             0,
             0
           ]
@@ -366,7 +366,7 @@
         },
         "left_arm": {
           "rotation": [
-            "-6 + 3 * math.sin(q.anim_time * 120)",
+            "-6 + 3 * math.sin(q.anim_time * 120.0)",
             0,
             -6
           ]
@@ -379,14 +379,14 @@
       "bones": {
         "right_leg": {
           "rotation": [
-            "34 * math.sin(q.anim_time * 360)",
+            "34 * math.sin(q.anim_time * 327.2727)",
             0,
             0
           ]
         },
         "left_leg": {
           "rotation": [
-            "-34 * math.sin(q.anim_time * 360)",
+            "-34 * math.sin(q.anim_time * 327.2727)",
             0,
             0
           ]
@@ -400,7 +400,7 @@
         },
         "left_arm": {
           "rotation": [
-            "-10 + 24 * math.sin(q.anim_time * 360)",
+            "-10 + 24 * math.sin(q.anim_time * 327.2727)",
             0,
             0
           ]
@@ -408,20 +408,20 @@
         "body": {
           "rotation": [
             4,
-            "4 * math.sin(q.anim_time * 360)",
+            "4 * math.sin(q.anim_time * 327.2727)",
             0
           ]
         },
         "right_shin": {
           "rotation": [
-            "math.max(0, 40 * math.sin(q.anim_time * 360 + 90))",
+            "40 * math.max(0, -math.sin(q.anim_time * 327.2727 + 90))",
             0,
             0
           ]
         },
         "left_shin": {
           "rotation": [
-            "math.max(0, -40 * math.sin(q.anim_time * 360 + 90))",
+            "40 * math.max(0, math.sin(q.anim_time * 327.2727 + 90))",
             0,
             0
           ]

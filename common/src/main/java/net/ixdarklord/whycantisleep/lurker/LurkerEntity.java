@@ -1,6 +1,6 @@
 package net.ixdarklord.whycantisleep.lurker;
 
-import net.ixdarklord.whycantisleep.deep.WCISItems;
+import net.ixdarklord.whycantisleep.between.WCISItems;
 import net.ixdarklord.whycantisleep.sound.WCISSounds;
 import net.ixdarklord.whycantisleep.mind.Mind;
 import net.ixdarklord.whycantisleep.mind.MindServer;

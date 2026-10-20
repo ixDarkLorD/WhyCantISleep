@@ -15,6 +15,7 @@
   "client": [
     "client.ChatScreenMixin",
     "client.EntityMixin",
+    "client.FogRendererMixin",
     "client.GuiMixin",
     "client.InventoryScreenMixin",
     "client.MinecraftMixin",

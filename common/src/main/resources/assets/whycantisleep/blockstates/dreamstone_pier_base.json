@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "whycantisleep:block/dreamstone_pier_base"
+    },
+    "axis=z": {
+      "model": "whycantisleep:block/dreamstone_pier_base_horizontal",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "whycantisleep:block/dreamstone_pier_base_horizontal",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

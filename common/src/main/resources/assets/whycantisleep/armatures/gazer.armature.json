@@ -1,0 +1,16 @@
+{
+  "glow_textures": [
+    "whycantisleep:textures/armatures/gazer_glow.png"
+  ],
+  "transition": {
+    "duration": 0.2,
+    "easing": "sine_in_out"
+  },
+  "look_at": {
+    "eye": {
+      "max_yaw": 40,
+      "max_pitch": 55,
+      "smoothing": 0.3
+    }
+  }
+}

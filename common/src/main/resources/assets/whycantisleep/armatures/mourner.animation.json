@@ -7,14 +7,14 @@
       "bones": {
         "right_arm": {
           "rotation": [
-            "-75 + 4 * math.sin(q.anim_time * 120)",
+            "-75 + 4 * math.sin(q.anim_time * 120.0)",
             6,
             0
           ]
         },
         "left_arm": {
           "rotation": [
-            "-70 + 4 * math.sin(q.anim_time * 120 + 60)",
+            "-70 + 4 * math.sin(q.anim_time * 120.0 + 60)",
             -6,
             0
           ]
@@ -35,8 +35,8 @@
         },
         "head": {
           "rotation": [
-            "10 + 6 * math.sin(q.anim_time * 60)",
-            "14 * math.sin(q.anim_time * 40)",
+            "10 + 6 * math.sin(q.anim_time * 120.0)",
+            "14 * math.sin(q.anim_time * 120.0)",
             0
           ]
         },
@@ -49,7 +49,7 @@
         },
         "jaw": {
           "rotation": [
-            "8 + 8 * math.max(0, math.sin(q.anim_time * 120))",
+            "8 + 8 * math.max(0, math.sin(q.anim_time * 120.0))",
             0,
             0
           ]
@@ -62,28 +62,28 @@
       "bones": {
         "right_leg": {
           "rotation": [
-            "26 * math.sin(q.anim_time * 360)",
+            "26 * math.sin(q.anim_time * 276.9231)",
             0,
             0
           ]
         },
         "left_leg": {
           "rotation": [
-            "-26 * math.sin(q.anim_time * 360)",
+            "-26 * math.sin(q.anim_time * 276.9231)",
             0,
             0
           ]
         },
         "right_arm": {
           "rotation": [
-            "-78 - 8 * math.sin(q.anim_time * 360)",
+            "-78 - 8 * math.sin(q.anim_time * 276.9231)",
             0,
             0
           ]
         },
         "left_arm": {
           "rotation": [
-            "-78 + 8 * math.sin(q.anim_time * 360)",
+            "-78 + 8 * math.sin(q.anim_time * 276.9231)",
             0,
             0
           ]
@@ -91,20 +91,20 @@
         "body": {
           "rotation": [
             16,
-            "5 * math.sin(q.anim_time * 277)",
-            "4 * math.sin(q.anim_time * 277)"
+            "5 * math.sin(q.anim_time * 276.9231)",
+            "4 * math.sin(q.anim_time * 276.9231)"
           ]
         },
         "right_shin": {
           "rotation": [
-            "math.max(0, 40 * math.sin(q.anim_time * 360 + 90))",
+            "40 * math.max(0, -math.sin(q.anim_time * 276.9231 + 90))",
             0,
             0
           ]
         },
         "left_shin": {
           "rotation": [
-            "math.max(0, -40 * math.sin(q.anim_time * 360 + 90))",
+            "40 * math.max(0, math.sin(q.anim_time * 276.9231 + 90))",
             0,
             0
           ]
@@ -112,8 +112,8 @@
         "head": {
           "rotation": [
             8,
-            "10 * math.sin(q.anim_time * 277)",
-            "6 * math.sin(q.anim_time * 277)"
+            "10 * math.sin(q.anim_time * 276.9231)",
+            "6 * math.sin(q.anim_time * 276.9231)"
           ]
         },
         "jaw": {

@@ -1,12 +1,12 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "stone": "whycantisleep:block/decor_stone",
-    "post": "whycantisleep:block/dreamstone_pillar",
+    "post": "whycantisleep:block/planter_post",
+    "trim": "whycantisleep:block/planter_trim",
     "iron": "whycantisleep:block/wrought_iron",
     "coals": "whycantisleep:block/brazier_coals",
     "fire": "whycantisleep:block/brazier_fire",
-    "particle": "whycantisleep:block/dreamstone_pillar"
+    "particle": "whycantisleep:block/planter_post"
   },
   "elements": [
     {
@@ -54,22 +54,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "#stone"
+          "texture": "#post"
         },
         "south": {
-          "texture": "#stone"
+          "texture": "#post"
         },
         "east": {
-          "texture": "#stone"
+          "texture": "#post"
         },
         "west": {
-          "texture": "#stone"
+          "texture": "#post"
         },
         "up": {
-          "texture": "#stone"
+          "texture": "#post"
         },
         "down": {
-          "texture": "#stone"
+          "texture": "#post"
         }
       }
     },
@@ -86,22 +86,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "#stone"
+          "texture": "#post"
         },
         "south": {
-          "texture": "#stone"
+          "texture": "#post"
         },
         "east": {
-          "texture": "#stone"
+          "texture": "#post"
         },
         "west": {
-          "texture": "#stone"
+          "texture": "#post"
         },
         "up": {
-          "texture": "#stone"
+          "texture": "#post"
         },
         "down": {
-          "texture": "#stone"
+          "texture": "#post"
         }
       }
     },
@@ -118,22 +118,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "#stone"
+          "texture": "#post"
         },
         "south": {
-          "texture": "#stone"
+          "texture": "#post"
         },
         "east": {
-          "texture": "#stone"
+          "texture": "#post"
         },
         "west": {
-          "texture": "#stone"
+          "texture": "#post"
         },
         "up": {
-          "texture": "#stone"
+          "texture": "#post"
         },
         "down": {
-          "texture": "#stone"
+          "texture": "#post"
         }
       }
     },
@@ -150,22 +150,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "#stone"
+          "texture": "#post"
         },
         "south": {
-          "texture": "#stone"
+          "texture": "#post"
         },
         "east": {
-          "texture": "#stone"
+          "texture": "#post"
         },
         "west": {
-          "texture": "#stone"
+          "texture": "#post"
         },
         "up": {
-          "texture": "#stone"
+          "texture": "#post"
         },
         "down": {
-          "texture": "#stone"
+          "texture": "#post"
         }
       }
     },

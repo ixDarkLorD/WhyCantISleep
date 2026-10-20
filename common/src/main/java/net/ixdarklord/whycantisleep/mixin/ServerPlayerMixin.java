@@ -2,7 +2,7 @@ package net.ixdarklord.whycantisleep.mixin;
 
 import com.mojang.datafixers.util.Either;
 import net.ixdarklord.whycantisleep.lurker.LurkerServer;
-import net.ixdarklord.whycantisleep.deep.LucidDeep;
+import net.ixdarklord.whycantisleep.between.DarkBetween;
 import net.ixdarklord.whycantisleep.mind.MindServer;
 import net.ixdarklord.whycantisleep.sleep.SleepServer;
 import net.minecraft.server.level.ServerLevel;
@@ -46,8 +46,8 @@ public abstract class ServerPlayerMixin {
 
     @Inject(method = "die", at = @At("HEAD"), cancellable = true)
     private void whycantisleep$onDeath(DamageSource source, CallbackInfo ci) {
-        // Dying in the Lucid Deep only wakes a dreamer.
-        if (LucidDeep.onDeath((ServerPlayer) (Object) this)) {
+        // Dying in the Dark Between only wakes a dreamer.
+        if (DarkBetween.onDeath((ServerPlayer) (Object) this)) {
             ci.cancel();
             return;
         }

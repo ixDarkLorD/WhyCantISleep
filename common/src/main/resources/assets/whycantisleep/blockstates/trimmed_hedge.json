@@ -1,0 +1,11 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "whycantisleep:block/trimmed_hedge"
+    },
+    "axis=z": {
+      "model": "whycantisleep:block/trimmed_hedge",
+      "y": 90
+    }
+  }
+}
