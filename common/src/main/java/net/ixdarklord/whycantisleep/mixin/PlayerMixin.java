@@ -1,21 +1,29 @@
 package net.ixdarklord.whycantisleep.mixin;
 
-import net.ixdarklord.whycantisleep.between.DarkBetween;
+import net.ixdarklord.whycantisleep.api.HidingPosture;
+import net.ixdarklord.whycantisleep.hiding.Hiding;
+import net.ixdarklord.whycantisleep.hiding.HidingView;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * A sleeper slipping under into the Dark Between hasn't slept long enough to end the night, however long they have
- * lain there: otherwise the night would pass before they went under, and wake them.
+ * A hiding player lies flat under a bed or table, or curled in a chest (the crawling pose, on both sides so everyone
+ * sees it), or stands in a closet. Who can still see them
+ * is {@code TargetingConditionsMixin} and {@code LivingEntityMixin}'s business, which know who is looking.
  */
 @Mixin(Player.class)
 public abstract class PlayerMixin {
-    @Inject(method = "isSleepingLongEnough", at = @At("HEAD"), cancellable = true)
-    private void whycantisleep$notWhileSlipping(CallbackInfoReturnable<Boolean> cir) {
-        Player player = (Player) (Object) this;
-        if (!player.level().isClientSide() && DarkBetween.isSlipping(player)) cir.setReturnValue(false);
+    @Inject(method = "updatePlayerPose", at = @At("HEAD"), cancellable = true)
+    private void whycantisleep$hidingPose(CallbackInfo ci) {
+        Player self = (Player) (Object) this;
+        HidingView view = Hiding.view(self);
+        if (view != null) {
+            self.setPose(view.posture() == HidingPosture.STANDING ? Pose.STANDING : Pose.SWIMMING);
+            ci.cancel();
+        }
     }
 }

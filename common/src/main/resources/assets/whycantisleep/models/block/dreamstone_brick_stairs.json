@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/stairs",
-  "textures": {
-    "bottom": "whycantisleep:block/dreamstone_bricks",
-    "top": "whycantisleep:block/dreamstone_bricks",
-    "side": "whycantisleep:block/dreamstone_bricks"
-  }
-}

@@ -1,0 +1,9 @@
+{
+  "label": "gui.whycantisleep.quality.calm_music",
+  "points": 10,
+  "when": {
+    "calm_music": true,
+    "creepy_music": false,
+    "loud_music": false
+  }
+}

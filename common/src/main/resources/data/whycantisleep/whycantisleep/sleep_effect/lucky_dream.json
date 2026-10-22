@@ -1,0 +1,16 @@
+{
+  "kind": "positive",
+  "rarity": "rare",
+  "quality": {
+    "min": 70,
+    "max": 100
+  },
+  "effects": [
+    {
+      "id": "minecraft:luck",
+      "duration": 6000,
+      "amplifier": 0
+    }
+  ],
+  "name": "gui.whycantisleep.sleep_effect.lucky_dream"
+}

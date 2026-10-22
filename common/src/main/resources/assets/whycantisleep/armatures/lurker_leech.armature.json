@@ -1,8 +1,0 @@
-{
-  "textures": [
-    "whycantisleep:textures/entity/lurker/leech.png"
-  ],
-  "glow_textures": [
-    "whycantisleep:textures/entity/lurker/leech_eyes.png"
-  ]
-}

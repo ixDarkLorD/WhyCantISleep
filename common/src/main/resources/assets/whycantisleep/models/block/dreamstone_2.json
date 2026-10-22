@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/cube_all",
-  "textures": {
-    "all": "whycantisleep:block/dreamstone_2"
-  }
-}

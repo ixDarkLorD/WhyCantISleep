@@ -1,0 +1,12 @@
+{
+  "kind": "positive",
+  "rarity": "common",
+  "effects": [
+    {
+      "id": "minecraft:regeneration",
+      "duration": 600,
+      "amplifier": 0
+    }
+  ],
+  "name": "gui.whycantisleep.sleep_effect.sweet_dreams"
+}

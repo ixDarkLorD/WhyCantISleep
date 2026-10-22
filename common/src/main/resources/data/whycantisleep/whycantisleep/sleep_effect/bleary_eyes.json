@@ -1,0 +1,16 @@
+{
+  "kind": "negative",
+  "rarity": "rare",
+  "quality": {
+    "min": 0,
+    "max": 40
+  },
+  "effects": [
+    {
+      "id": "minecraft:blindness",
+      "duration": 100,
+      "amplifier": 0
+    }
+  ],
+  "name": "gui.whycantisleep.sleep_effect.bleary_eyes"
+}

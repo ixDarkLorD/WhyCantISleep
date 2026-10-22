@@ -1,0 +1,7 @@
+{
+  "label": "gui.whycantisleep.quality.exposed",
+  "points": -5,
+  "when": {
+    "enclosed": false
+  }
+}

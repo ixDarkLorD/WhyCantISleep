@@ -1,0 +1,12 @@
+{
+  "kind": "neutral",
+  "rarity": "uncommon",
+  "effects": [
+    {
+      "id": "minecraft:fire_resistance",
+      "duration": 2400,
+      "amplifier": 0
+    }
+  ],
+  "name": "gui.whycantisleep.sleep_effect.dream_of_fire"
+}

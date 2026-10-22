@@ -1,0 +1,12 @@
+{
+  "kind": "negative",
+  "rarity": "common",
+  "effects": [
+    {
+      "id": "minecraft:mining_fatigue",
+      "duration": 1200,
+      "amplifier": 0
+    }
+  ],
+  "name": "gui.whycantisleep.sleep_effect.stiff_back"
+}

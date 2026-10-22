@@ -1,0 +1,11 @@
+{
+  "label": "gui.whycantisleep.quality.unsettling",
+  "per": "unsettling",
+  "each": -3,
+  "most": -15,
+  "when": {
+    "unsettling": {
+      "min": 1
+    }
+  }
+}

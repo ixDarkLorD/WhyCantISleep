@@ -1,0 +1,12 @@
+{
+  "kind": "negative",
+  "rarity": "common",
+  "effects": [
+    {
+      "id": "minecraft:hunger",
+      "duration": 600,
+      "amplifier": 0
+    }
+  ],
+  "name": "gui.whycantisleep.sleep_effect.empty_stomach"
+}

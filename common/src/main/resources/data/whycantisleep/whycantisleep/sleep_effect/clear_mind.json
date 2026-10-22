@@ -1,0 +1,12 @@
+{
+  "kind": "positive",
+  "rarity": "uncommon",
+  "effects": [
+    {
+      "id": "minecraft:night_vision",
+      "duration": 2400,
+      "amplifier": 0
+    }
+  ],
+  "name": "gui.whycantisleep.sleep_effect.clear_mind"
+}

@@ -1,0 +1,12 @@
+{
+  "kind": "positive",
+  "rarity": "uncommon",
+  "effects": [
+    {
+      "id": "minecraft:saturation",
+      "duration": 10,
+      "amplifier": 1
+    }
+  ],
+  "name": "gui.whycantisleep.sleep_effect.full_belly"
+}

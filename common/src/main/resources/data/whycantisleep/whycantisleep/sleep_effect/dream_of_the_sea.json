@@ -1,0 +1,17 @@
+{
+  "kind": "neutral",
+  "rarity": "uncommon",
+  "effects": [
+    {
+      "id": "minecraft:water_breathing",
+      "duration": 3600,
+      "amplifier": 0
+    },
+    {
+      "id": "minecraft:dolphins_grace",
+      "duration": 1200,
+      "amplifier": 0
+    }
+  ],
+  "name": "gui.whycantisleep.sleep_effect.dream_of_the_sea"
+}

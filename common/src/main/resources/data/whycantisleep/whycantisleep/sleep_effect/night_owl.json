@@ -1,0 +1,12 @@
+{
+  "kind": "neutral",
+  "rarity": "common",
+  "effects": [
+    {
+      "id": "minecraft:night_vision",
+      "duration": 900,
+      "amplifier": 0
+    }
+  ],
+  "name": "gui.whycantisleep.sleep_effect.night_owl"
+}

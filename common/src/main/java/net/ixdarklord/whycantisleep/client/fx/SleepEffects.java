@@ -1,8 +1,8 @@
 package net.ixdarklord.whycantisleep.client.fx;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.ixdarklord.coolcatcanvas.api.client.camera.CameraShake;
 import net.ixdarklord.coolcatcanvas.api.client.effect.ScreenEffects;
 import net.ixdarklord.coolcatcanvas.api.client.vfx.Curve;
 import net.ixdarklord.coolcatcanvas.api.client.vfx.ParticleSpec;
@@ -16,13 +16,10 @@ import net.ixdarklord.whycantisleep.client.highlight.Highlights;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotice;
 import net.ixdarklord.whycantisleep.config.WCISClientConfig;
 import net.ixdarklord.whycantisleep.config.WCISConfigs;
-import net.ixdarklord.whycantisleep.lurker.LurkerEntity;
-import net.ixdarklord.whycantisleep.lurker.LurkerPalette;
 import net.ixdarklord.whycantisleep.sound.WCISSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.core.BlockPos;
-import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
@@ -30,51 +27,19 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * What the player sees and hears beyond the HUD, drawn with CoolCatLib: Canvas: a wash over the screen when a sleep
- * fails, wisps rising off the monsters that blocked it, whispers from where they are, and the "monster under the bed"
- * scare. Everything here is client only.
+ * What the player sees and hears beyond the HUD, drawn with CoolCatLib: Canvas: a sound and a wash over the screen when
+ * a card appears, and a dark mist on the monsters that blocked a sleep. Everything here is client only.
  */
 public final class SleepEffects {
     private static final RandomSource RANDOM = RandomSource.create();
-    // The client ticks, after the monsters were pointed out, at which a whisper comes.
-    private static final int[] WHISPER_TICKS = {8, 34};
-
-    // Two points of light for a second: eyes, the red of the Lurker's.
-    private static final ParticleSpec EYE = ParticleSpec.builder(VfxMaterial.additive(VfxMaterial.GLOW))
-            .lifetime(26, 30)
-            .size(Curve.of(0.0F, 0.07F, 0.0F).easing(Easing.EXPO_OUT, Easing.EXPO_IN))
-            .opacity(Curve.of(0.0F, 1.0F, 0.0F).easing(Easing.EXPO_OUT, Easing.SINE_IN))
-            .color(LurkerPalette.RED, LurkerPalette.CRIMSON)
-            .build();
-    // A mote of the same light, drifting up from the Lurker's eyes and thinning away.
-    private static final ParticleSpec EYE_MOTE = ParticleSpec.builder(VfxMaterial.additive(VfxMaterial.GLOW))
-            .lifetime(14, 24)
-            .size(Curve.of(0.05F, 0.035F, 0.0F))
-            .opacity(Curve.of(0.0F, 0.8F, 0.0F))
-            .color(LurkerPalette.RED, LurkerPalette.CRIMSON)
-            .drag(0.96F)
-            .build();
-    // A crackle of red light off the Lurker as it hunts: a short bright streak, gone in a few ticks.
-    private static final ParticleSpec ARC = ParticleSpec.builder(VfxMaterial.additive(VfxMaterial.STREAK))
-            .shape(ParticleSpec.Shape.SPARK)
-            .lifetime(3, 7)
-            .size(Curve.of(0.035F, 0.02F, 0.0F))
-            .opacity(Curve.of(1.0F, 0.9F, 0.0F))
-            .color(LurkerPalette.RED, LurkerPalette.MAROON)
-            .stretch(3.5F)
-            .drag(0.8F)
-            .build();
-    // Darkness pouring out from under the bed, night-dark with a little navy in it.
-    private static final ParticleSpec SHADOW = ParticleSpec.builder(VfxMaterial.alpha(VfxMaterial.SMOKE))
-            .lifetime(24, 44)
-            .size(Curve.of(0.15F, 0.55F, 0.7F).easing(Easing.EXPO_OUT, Easing.LINEAR))
-            .opacity(Curve.of(0.0F, 0.85F, 0.0F))
-            .color(0x15171F)
-            .randomRoll()
-            .drag(0.9F)
-            .build();
-    // A wisp's look for each highlight color.
-    private static final Int2ObjectMap<ParticleSpec> WISPS = new Int2ObjectOpenHashMap<>();
+    // Each layer of the mist, one look per highlight color.
+    private static final Int2ObjectMap<ParticleSpec> MIASMA = new Int2ObjectOpenHashMap<>();
+    private static final Int2ObjectMap<ParticleSpec> WISP = new Int2ObjectOpenHashMap<>();
+    private static final Int2ObjectMap<ParticleSpec> EMBER = new Int2ObjectOpenHashMap<>();
+    private static final Int2ObjectMap<ParticleSpec> EYE = new Int2ObjectOpenHashMap<>();
+    // The mist thins out over the highlight's last ticks, and the eyes glint about this often.
+    private static final float FADE_TICKS = 20.0F;
+    private static final int EYES_INTERVAL = 28;
 
     private SleepEffects() {
     }
@@ -99,113 +64,111 @@ public final class SleepEffects {
         }
     }
 
+    // The mist on a blocking monster, in layers keyed to its highlight color (its kind of threat): a miasma pooling
+    // round its feet and creeping out along the ground; shadowy wisps rising off its body, lit by the color at first
+    // and darkening to near black as they climb, swaying as they go; a few embers of the color drifting up unevenly;
+    // and now and then a pair of eyes glinting where it looks out. It thins out over the highlight's last ticks
+    // rather than stopping dead.
     private static void tick(Minecraft minecraft) {
         if (minecraft.level == null || minecraft.isPaused() || Blockers.isEmpty()) return;
-        boolean highlight = WCISConfigs.isEnabled(WCISClientConfig.HIGHLIGHT_MONSTERS);
+        if (!WCISConfigs.isEnabled(WCISClientConfig.HIGHLIGHT_MONSTERS)) return;
         int age = Math.round(Blockers.age(0.0F));
-        Entity nearest = null;
-        double nearestDistance = Double.MAX_VALUE;
+        float strength = Math.min(1.0F, Blockers.remaining(0.0F) / FADE_TICKS);
         for (Entity blocker : Blockers.entities()) {
-            // A wisp of the monster's highlight color every other tick, from somewhere in its body.
-            if (highlight && (age + blocker.getId()) % 2 == 0) {
-                AABB box = blocker.getBoundingBox();
-                WorldParticles.spawn(wisp(Highlights.color(blocker)),
-                        box.minX + RANDOM.nextDouble() * box.getXsize(), box.minY + RANDOM.nextDouble() * box.getYsize(), box.minZ + RANDOM.nextDouble() * box.getZsize(),
-                        0.0, 0.01 + RANDOM.nextDouble() * 0.02, 0.0);
-            }
-            double distance = minecraft.player == null ? 0.0 : blocker.distanceToSqr(minecraft.player);
-            if (distance < nearestDistance) {
-                nearest = blocker;
-                nearestDistance = distance;
-            }
-        }
-        if (nearest != null) {
-            for (int whisperTick : WHISPER_TICKS) {
-                if (age == whisperTick) whisper(nearest.getEyePosition());
-            }
+            int color = Highlights.color(blocker);
+            int beat = age + blocker.getId();
+            AABB box = blocker.getBoundingBox();
+            double width = Math.max(box.getXsize(), box.getZsize());
+            if (beat % 2 == 0 && RANDOM.nextFloat() < strength) miasma(blocker, color, width);
+            if (beat % 2 == 0 && RANDOM.nextFloat() < strength) wisp(box, color);
+            if (beat % 5 == 0 && RANDOM.nextFloat() < strength) ember(box, color);
+            if (beat % EYES_INTERVAL == 0 && RANDOM.nextFloat() < strength * 0.7F) eyes(blocker, color);
         }
     }
 
-    /** A whisper from a place, so it is heard from that side; nothing with whispers or scary content off. */
-    public static void whisper(Vec3 from) {
-        Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.level == null || !WCISClientConfig.SCARY_CONTENT.get() || !WCISConfigs.isEnabled(WCISClientConfig.WHISPERS)) return;
-        minecraft.level.playLocalSound(from.x, from.y, from.z, WCISSounds.WHISPER, SoundSource.AMBIENT,
-                WCISClientConfig.WHISPER_VOLUME.get() / 100.0F * 1.6F, 0.75F + RANDOM.nextFloat() * 0.3F, false);
+    // Close to the ground round its feet, drifting outwards and a little down: it pools rather than rises.
+    private static void miasma(Entity blocker, int color, double width) {
+        double angle = RANDOM.nextDouble() * Math.PI * 2.0;
+        double radius = width * (0.3 + RANDOM.nextDouble() * 0.4);
+        double outX = Math.cos(angle);
+        double outZ = Math.sin(angle);
+        WorldParticles.spawn(spec(MIASMA, color, rgb -> ParticleSpec.builder(VfxMaterial.alpha(VfxMaterial.SMOKE))
+                        .lifetime(34, 52)
+                        .size(Curve.of(0.3F, 0.85F, 1.1F).easing(Easing.EXPO_OUT, Easing.LINEAR))
+                        .opacity(Curve.of(0.0F, 0.72F, 0.0F).easing(Easing.SINE_IN_OUT))
+                        // A deep tone of the color sinking to black: near black from the start, it was lost on dark ground.
+                        .color(shade(rgb, 0.5F), 0x07070A)
+                        .colorEasing(Easing.SINE_IN)
+                        .randomRoll()
+                        .spin(Curve.constant(0.004F))
+                        .gravity(0.0004F)
+                        .drag(0.9F)
+                        .build()),
+                blocker.getX() + outX * radius, blocker.getY() + 0.05 + RANDOM.nextDouble() * 0.1, blocker.getZ() + outZ * radius,
+                outX * 0.012, 0.0, outZ * 0.012);
     }
 
-    /** Two eyes looking out from under a bed, on the side the player is on. */
-    public static void eyes(BlockPos bed) {
-        Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.player == null) return;
-        Vec3 center = Vec3.atBottomCenterOf(bed).add(0.0, 0.12, 0.0);
-        Vec3 toPlayer = minecraft.player.position().subtract(center).multiply(1.0, 0.0, 1.0);
-        toPlayer = toPlayer.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : toPlayer.normalize();
-        Vec3 side = new Vec3(-toPlayer.z, 0.0, toPlayer.x);
-        Vec3 face = center.add(toPlayer.scale(0.48));
-        WorldParticles.spawn(EYE, face.add(side.scale(0.13)), Vec3.ZERO);
-        WorldParticles.spawn(EYE, face.add(side.scale(-0.13)), Vec3.ZERO);
+    // From somewhere in its body, rising slowly and swaying to one side.
+    private static void wisp(AABB box, int color) {
+        double sway = (RANDOM.nextDouble() - 0.5) * 0.02;
+        WorldParticles.spawn(spec(WISP, color, rgb -> ParticleSpec.builder(VfxMaterial.alpha(VfxMaterial.SMOKE))
+                        .lifetime(22, 36)
+                        .size(Curve.of(0.1F, 0.3F, 0.42F).easing(Easing.EXPO_OUT, Easing.LINEAR))
+                        .opacity(Curve.of(0.0F, 0.5F, 0.0F))
+                        .color(shade(rgb, 0.85F), 0x0B0B10)
+                        .colorEasing(Easing.SINE_IN)
+                        .randomRoll()
+                        .spin(Curve.of(0.02F, 0.0F))
+                        .gravity(-0.0025F)
+                        .drag(0.95F)
+                        .build()),
+                box.minX + RANDOM.nextDouble() * box.getXsize(), box.minY + box.getYsize() * (0.2 + RANDOM.nextDouble() * 0.7), box.minZ + RANDOM.nextDouble() * box.getZsize(),
+                sway, 0.012 + RANDOM.nextDouble() * 0.015, -sway);
     }
 
-    /** A burst of darkness: something appearing, or gone. */
-    public static void shadowBurst(Vec3 at) {
-        WorldParticles.burst(SHADOW, at, 26, 0.5, 0.09);
+    // A spark of the color, lifting off unevenly and dimming as it goes.
+    private static void ember(AABB box, int color) {
+        WorldParticles.spawn(spec(EMBER, color, rgb -> ParticleSpec.builder(VfxMaterial.additive(VfxMaterial.GLOW))
+                        .lifetime(18, 32)
+                        .size(Curve.of(0.0F, 0.06F, 0.0F).easing(Easing.EXPO_OUT, Easing.SINE_IN))
+                        .opacity(Curve.FADE)
+                        .color(brighten(rgb), shade(rgb, 0.45F))
+                        .gravity(-0.003F)
+                        .drag(0.92F)
+                        .build()),
+                box.minX + RANDOM.nextDouble() * box.getXsize(), box.minY + RANDOM.nextDouble() * box.getYsize(), box.minZ + RANDOM.nextDouble() * box.getZsize(),
+                (RANDOM.nextDouble() - 0.5) * 0.03, 0.02 + RANDOM.nextDouble() * 0.02, (RANDOM.nextDouble() - 0.5) * 0.03);
     }
 
-    /** What hangs about the Lurker: darkness clinging to its body, and motes of cold light bleeding up from its eyes. */
-    public static void lurkerAura(Entity entity) {
-        shadowTrail(entity);
-        if (!(entity instanceof LurkerEntity living)) return;
-        // Hunting, it crackles: arcs leap off its body, thick and fast as the hunt begins and steadily after.
-        if (living.isHunting()) {
-            AABB box = entity.getBoundingBox();
-            int arcs = living.huntAmount(1.0F) < 0.6F ? 5 : (entity.tickCount % 2 == 0 ? 1 : 0);
-            for (int i = 0; i < arcs; i++) {
-                WorldParticles.spawn(ARC, box.minX + RANDOM.nextDouble() * box.getXsize(), box.minY + RANDOM.nextDouble() * box.getYsize() * 1.3, box.minZ + RANDOM.nextDouble() * box.getZsize(),
-                        (RANDOM.nextDouble() - 0.5) * 0.5, (RANDOM.nextDouble() - 0.2) * 0.4, (RANDOM.nextDouble() - 0.5) * 0.5);
-            }
-        }
-        if (entity.tickCount % 3 != 0) return;
-        // The eyes sit at the front of its head, either side of the way it faces.
-        float yaw = living.yHeadRot * Mth.DEG_TO_RAD;
+    // Two points of the color at its eyes, either side of where it looks, there and gone.
+    private static void eyes(Entity blocker, int color) {
+        float yaw = blocker.getYHeadRot() * Mth.DEG_TO_RAD;
         Vec3 forward = new Vec3(-Mth.sin(yaw), 0.0, Mth.cos(yaw));
         Vec3 side = new Vec3(forward.z, 0.0, -forward.x);
-        Vec3 face = entity.position().add(0.0, 0.66, 0.0).add(forward.scale(0.95));
-        double offset = RANDOM.nextBoolean() ? 0.15 : -0.15;
-        WorldParticles.spawn(EYE_MOTE, face.add(side.scale(offset)), new Vec3(0.0, 0.012 + RANDOM.nextDouble() * 0.01, 0.0));
-    }
-
-    /** The darkness that clings to the creature as it moves. */
-    public static void shadowTrail(Entity entity) {
-        if (entity.tickCount % 2 != 0) return;
-        AABB box = entity.getBoundingBox();
-        WorldParticles.spawn(SHADOW, box.minX + RANDOM.nextDouble() * box.getXsize(), box.minY + RANDOM.nextDouble() * box.getYsize(), box.minZ + RANDOM.nextDouble() * box.getZsize(),
-                0.0, 0.01, 0.0);
-    }
-
-    private static ParticleSpec wisp(int color) {
-        return WISPS.computeIfAbsent(color, rgb -> ParticleSpec.builder(VfxMaterial.alpha(VfxMaterial.SMOKE))
-                .lifetime(16, 28)
-                .size(Curve.of(0.08F, 0.26F, 0.32F).easing(Easing.EXPO_OUT, Easing.LINEAR))
-                .opacity(Curve.of(0.0F, 0.45F, 0.0F))
-                .color(rgb)
-                .randomRoll()
-                .gravity(-0.002F)
-                .drag(0.95F)
+        Vec3 face = blocker.getEyePosition().add(forward.scale(blocker.getBbWidth() * 0.5 + 0.02));
+        double apart = Math.max(0.08, blocker.getBbWidth() * 0.18);
+        ParticleSpec glint = spec(EYE, color, rgb -> ParticleSpec.builder(VfxMaterial.additive(VfxMaterial.GLOW))
+                .lifetime(14, 20)
+                .size(Curve.of(0.0F, 0.075F, 0.0F).easing(Easing.EXPO_OUT, Easing.EXPO_IN))
+                .opacity(Curve.of(0.0F, 1.0F, 0.0F).easing(Easing.EXPO_OUT, Easing.SINE_IN))
+                .color(brighten(rgb), rgb)
                 .build());
+        WorldParticles.spawn(glint, face.add(side.scale(apart)), Vec3.ZERO);
+        WorldParticles.spawn(glint, face.add(side.scale(-apart)), Vec3.ZERO);
     }
 
-    /** The "monster under the bed" scare: eyes at the bed's edge, darkness pouring out, a shriek and a jolt. */
-    public static void scare(BlockPos bed) {
-        Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.level == null || minecraft.player == null) return;
-        if (!WCISClientConfig.SCARY_CONTENT.get() || !WCISConfigs.isEnabled(WCISClientConfig.UNDER_THE_BED_SCARES)) return;
-        Vec3 center = Vec3.atBottomCenterOf(bed).add(0.0, 0.12, 0.0);
-        eyes(bed);
-        shadowBurst(center);
+    // One look per layer and highlight color, made the first time it is needed.
+    private static ParticleSpec spec(Int2ObjectMap<ParticleSpec> layer, int color, Int2ObjectFunction<ParticleSpec> make) {
+        return layer.computeIfAbsent(color, make);
+    }
 
-        minecraft.level.playLocalSound(center.x, center.y, center.z, WCISSounds.SCARE, SoundSource.HOSTILE, 1.0F, 0.6F + RANDOM.nextFloat() * 0.15F, false);
-        ScreenEffects.tint(WhyCantISleep.id("scare"), 0xB0000000).fade(1, 26, Easing.QUAD_OUT).enableFor(2);
-        if (WCISConfigs.isEnabled(WCISClientConfig.SCREEN_SHAKE)) CameraShake.shake(3.0F, 16);
+    // A color darker by a share (0 black, 1 as it is).
+    private static int shade(int rgb, float share) {
+        return ARGB.color(0, Math.round(ARGB.red(rgb) * share), Math.round(ARGB.green(rgb) * share), Math.round(ARGB.blue(rgb) * share)) & 0xFFFFFF;
+    }
+
+    // A color pushed halfway to white, for the hot middle of an ember or an eye.
+    private static int brighten(int rgb) {
+        return ARGB.color(0, (ARGB.red(rgb) + 255) / 2, (ARGB.green(rgb) + 255) / 2, (ARGB.blue(rgb) + 255) / 2) & 0xFFFFFF;
     }
 }
