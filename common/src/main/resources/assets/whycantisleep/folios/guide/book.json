@@ -1,0 +1,15 @@
+{
+  "name": "guide.whycantisleep.guide.name",
+  "subtitle": "guide.whycantisleep.guide.subtitle",
+  "summary": "guide.whycantisleep.guide.summary",
+  "style": "screen",
+  "accent": "#7AA7D9",
+  "cover": "#1B1F2E",
+  "icon": "minecraft:red_bed",
+  "landing": "guide.whycantisleep.guide.landing",
+  "reveal": {
+    "effect": "folios:ink",
+    "seconds": 1.0,
+    "unread": true
+  }
+}

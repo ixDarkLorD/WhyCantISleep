@@ -1,0 +1,17 @@
+{
+  "name": "guide.whycantisleep.guide.entry.hiding.quiet.name",
+  "icon": "minecraft:sculk_sensor",
+  "sort": 2,
+  "pages": [
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.hiding.quiet.page1.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.quiet.page1.text"
+    },
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.hiding.quiet.page2.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.quiet.page2.text"
+    }
+  ]
+}

@@ -3,6 +3,8 @@ apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/grad
 dependencies {
     // CoolCatLib (NeoForge). Its common classes are inside this jar.
     implementation "net.ixdarklord.coolcatlib:coolcatlib-neoforge:${coolcatlib_version}"
+    // Folios: the mod's guide book is a Folios book.
+    implementation("net.ixdarklord.folios:folios-neoforge:${folios_version}") { transitive = false }
 
     // Dev runs only, never published: MCP Bridge lets the game be driven from outside. Not transitive, because it still points
     // at CoolCatLib's old coordinates and would load a second copy of it.

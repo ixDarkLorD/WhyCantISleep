@@ -1,0 +1,23 @@
+{
+  "name": "guide.whycantisleep.guide.entry.quality.trouble.name",
+  "icon": "minecraft:phantom_membrane",
+  "sort": 4,
+  "pages": [
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.quality.trouble.page1.title",
+      "text": "guide.whycantisleep.guide.entry.quality.trouble.page1.text"
+    },
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.quality.trouble.page2.title",
+      "text": "guide.whycantisleep.guide.entry.quality.trouble.page2.text"
+    },
+    {
+      "type": "spotlight",
+      "item": "minecraft:clock",
+      "title": "guide.whycantisleep.guide.entry.quality.trouble.page3.title",
+      "text": "guide.whycantisleep.guide.entry.quality.trouble.page3.text"
+    }
+  ]
+}

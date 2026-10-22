@@ -1,0 +1,12 @@
+{
+  "name": "guide.whycantisleep.guide.entry.sleeping.room.name",
+  "icon": "minecraft:iron_sword",
+  "sort": 2,
+  "pages": [
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.sleeping.room.page1.title",
+      "text": "guide.whycantisleep.guide.entry.sleeping.room.page1.text"
+    }
+  ]
+}

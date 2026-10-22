@@ -1,0 +1,27 @@
+{
+  "name": "guide.whycantisleep.guide.build.double_closet",
+  "pattern": [
+    [
+      "    ",
+      " PP ",
+      "    "
+    ],
+    [
+      " PP ",
+      "P  P",
+      " AB "
+    ],
+    [
+      " PP ",
+      "P  P",
+      " ab "
+    ]
+  ],
+  "mapping": {
+    "P": "minecraft:oak_planks",
+    "A": "minecraft:oak_door[facing=south,half=upper,hinge=left,open=false]",
+    "a": "minecraft:oak_door[facing=south,half=lower,hinge=left,open=false]",
+    "B": "minecraft:oak_door[facing=south,half=upper,hinge=right,open=false]",
+    "b": "minecraft:oak_door[facing=south,half=lower,hinge=right,open=false]"
+  }
+}

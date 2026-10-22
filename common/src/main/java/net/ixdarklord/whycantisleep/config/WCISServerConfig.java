@@ -106,6 +106,12 @@ public final class WCISServerConfig {
             .comment("Whether the mod's advancements can be earned.").build();
     static {
         BUILDER.pop();
+        BUILDER.push("guide", "The mod's guide book, read in Folios.");
+    }
+    public static final ConfigValue<Boolean> GIVE_GUIDE_BOOK = BUILDER.bool("giveGuideBook", true)
+            .comment("Gives each player the mod's guide book the first time they join.").build();
+    static {
+        BUILDER.pop();
     }
 
     public static final Config CONFIG = BUILDER.build();

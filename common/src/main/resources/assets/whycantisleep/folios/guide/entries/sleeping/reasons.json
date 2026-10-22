@@ -1,0 +1,12 @@
+{
+  "name": "guide.whycantisleep.guide.entry.sleeping.reasons.name",
+  "icon": "minecraft:barrier",
+  "sort": 1,
+  "pages": [
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.sleeping.reasons.page1.title",
+      "text": "guide.whycantisleep.guide.entry.sleeping.reasons.page1.text"
+    }
+  ]
+}

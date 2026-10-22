@@ -1,0 +1,13 @@
+{
+  "name": "guide.whycantisleep.guide.entry.quality.music.name",
+  "icon": "minecraft:jukebox",
+  "sort": 3,
+  "pages": [
+    {
+      "type": "spotlight",
+      "item": "minecraft:jukebox",
+      "title": "guide.whycantisleep.guide.entry.quality.music.page1.title",
+      "text": "guide.whycantisleep.guide.entry.quality.music.page1.text"
+    }
+  ]
+}

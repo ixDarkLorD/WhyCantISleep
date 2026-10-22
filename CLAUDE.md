@@ -12,6 +12,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **CoolCatLib is one mod since 2026-10-14 (version 26.1.2-5):** Core and Canvas merged into **CoolCatLib**, mod id `coolcatlib`. This project now depends on `net.ixdarklord.coolcatlib:coolcatlib-{common,fabric,neoforge}` (`coolcatlib_version`, no `coolcatcanvas_version`), requires `coolcatlib` in `fabric.mod.json` / `neoforge.mods.toml`, and lists its constructors under the `coolcatlib:common` / `coolcatlib:client` entrypoints. The packages are unchanged (`net.ixdarklord.coolcatcore`, `net.ixdarklord.coolcatcanvas`); its sources are `../CoolCatLib-26.1.2/{common,fabric,neoforge}`. Where the notes below say Core, Canvas, `coolcatcore`, `coolcatcanvas` or `coolcatlib-core-*` / `coolcatlib-canvas-*`, read them as this one mod.
 
+> **Folios is a required dependency since 2026-10-22 (the author's pick)**: the mod's guide book is a Folios screen book, `assets/whycantisleep/folios/guide/` (book, five categories, entries; its words are `guide.whycantisleep.guide.*` in the lang file), on the mod's own item, `whycantisleep:guide_book` ("Insomniac's Handbook", `compat/WCISItems`; Folios' cover model, a recipe of a book and any bed), given to each player once on first join (`compat/GuideBookGift`, remembered by a player tag; server config `giveGuideBook`). Folios (`folios_version`, `26.1.2+2.0` since 2026-10-22, `net.ixdarklord.folios:folios-{common,fabric,neoforge}`) comes from Maven Local, published from `../Folios-26.1.2` with `gradlew assemble publishToMavenLocal`, and needs CoolCatLib `26.1.2-6`. The closets the book shows are build files (`folios/guide/builds/*.json`: wooden, trapdoor, double), all in one `build` element on the Hiding Spots entry. Keep the book in step with the features: a Folios tab shows at most five entries. The first upload is a **beta** (`project_release_type=beta`).
+
 A multiloader mod built on the author's libraries **CoolCatLib: Core** (`coolcatcore`, package `net.ixdarklord.coolcatcore`) and **CoolCatLib: Canvas** (`coolcatcanvas`, package `net.ixdarklord.coolcatcanvas`; required since 2026-10-13, at the author's request, for the visuals). The repository is private until the first release.
 
 ### Rules for every session
@@ -21,7 +23,7 @@ A multiloader mod built on the author's libraries **CoolCatLib: Core** (`coolcat
 - **Build every loader before committing** (`gradlew build`), and fix errors before moving on.
 - **Keep config names and defaults in sync with the mod page** (the list under "Config" below is the page's). Renaming or re-defaulting an option is a mod page change: ask first.
 - Shared logic goes in `common`; loader modules hold only loader glue.
-- **The mod registers nothing** (no blocks, items, entities or attachments): the server only sends payloads and runs the sleep board, and sounds are unregistered `SoundEvent`s (`sound/WCISSounds`). `assets/whycantisleep/sounds.json` is **generated**: the author drops `.ogg` files into `assets/whycantisleep/sounds/` (see its `readme.txt` for the names) and `tools/gen_sounds_json.ps1` rewrites the file, using a sound's own files when present and a vanilla stand-in otherwise. Add a new sound in three places: `WCISSounds`, the script's table, the readme's table.
+- **The mod registers one item and nothing else** (the guide book, `whycantisleep:guide_book`, "Insomniac's Handbook", in `compat/WCISItems`: a Folios `GuideBookItem` with its own name, crafted from a book and any bed; the author's request, 2026-10-22). No blocks, entities or attachments: the server only sends payloads and runs the sleep board, and sounds are unregistered `SoundEvent`s (`sound/WCISSounds`). `assets/whycantisleep/sounds.json` is **generated**: the author drops `.ogg` files into `assets/whycantisleep/sounds/` (see its `readme.txt` for the names) and `tools/gen_sounds_json.ps1` rewrites the file, using a sound's own files when present and a vanilla stand-in otherwise. Add a new sound in three places: `WCISSounds`, the script's table, the readme's table.
 - Commits follow the user's `github-commit` skill: their identity only, no Claude attribution, and push only when asked.
 
 ## Versions
@@ -209,6 +211,7 @@ Server (`WCISServerConfig`, `config/whycantisleep-server.toml`, synced):
 | Sleep effect chance | 50% (0–100) (**new, not on the mod page yet**) |
 | Shared bed tolerance | 2 (0–10) (**new, not on the mod page yet**) |
 | Advancements | on (its own `advancements` group since the split; none exist yet) |
+| Give the guide book (`giveGuideBook`) | on (**new, not on the mod page yet**) |
 
 Moved to Behind Closed Eyes with the split (a mod page change: the author updates the page): Scary content, Whispers, Whisper volume, Under-the-bed scares, Screen shake, Status indicators, Inventory status; Scare chance, Bed creature, Mood and lucidity, PvP guilt.
 

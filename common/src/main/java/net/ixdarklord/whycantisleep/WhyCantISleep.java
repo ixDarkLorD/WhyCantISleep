@@ -2,6 +2,8 @@ package net.ixdarklord.whycantisleep;
 
 import net.ixdarklord.coolcatcore.api.core.ModConstructor;
 import net.ixdarklord.coolcatcore.api.platform.Platform;
+import net.ixdarklord.whycantisleep.compat.GuideBookGift;
+import net.ixdarklord.whycantisleep.compat.WCISItems;
 import net.ixdarklord.whycantisleep.config.WCISConfigs;
 import net.ixdarklord.whycantisleep.hiding.HidingServer;
 import net.ixdarklord.whycantisleep.network.WCISNetwork;
@@ -30,6 +32,7 @@ public final class WhyCantISleep implements ModConstructor {
         LOGGER.info("Loading {} on {}", MOD_NAME, Platform.isFabric() ? "Fabric" : "NeoForge");
 
         WCISConfigs.register();
+        WCISItems.register();
         WCISNetwork.register();
         SleepBoardServer.init();
         SleepTroubles.init();
@@ -37,6 +40,7 @@ public final class WhyCantISleep implements ModConstructor {
         RoomClearing.init();
         SleepVotes.init();
         HidingServer.init();
+        GuideBookGift.init();
     }
 
     public static Identifier id(String path) {

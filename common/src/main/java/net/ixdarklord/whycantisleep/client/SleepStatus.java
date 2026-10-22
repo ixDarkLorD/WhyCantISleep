@@ -35,16 +35,26 @@ import java.util.Locale;
  * The server sends the trouble ({@link TroublePayload}, every 5 s) and each waking ({@link WokePayload}).
  */
 public final class SleepStatus {
-    // The button: a slate tile with a crescent moon, lighter under the pointer, gold-rimmed while open (tools/gen_status_button.py).
+    // The button: a dark tile with a sleeping moon face, lighter under the pointer and lighter still while open
+    // (tools/gen_status_button.py); its rim is drawn in the sleep trouble's color.
     private static final Identifier BUTTON_SPRITE = WhyCantISleep.id("hud/status_button");
     private static final Identifier BUTTON_HOVER = WhyCantISleep.id("hud/status_button_hover");
     private static final Identifier BUTTON_OPEN = WhyCantISleep.id("hud/status_button_open");
+    // The same, sad: a frown and a tear, while sleep is awful.
+    private static final Identifier BUTTON_SAD = WhyCantISleep.id("hud/status_button_sad");
+    private static final Identifier BUTTON_SAD_HOVER = WhyCantISleep.id("hud/status_button_sad_hover");
+    private static final Identifier BUTTON_SAD_OPEN = WhyCantISleep.id("hud/status_button_sad_open");
+    // Tired: bags under the eyes, while restless or after a poor night.
+    private static final Identifier BUTTON_TIRED = WhyCantISleep.id("hud/status_button_tired");
+    private static final Identifier BUTTON_TIRED_HOVER = WhyCantISleep.id("hud/status_button_tired_hover");
+    private static final Identifier BUTTON_TIRED_OPEN = WhyCantISleep.id("hud/status_button_tired_open");
+    // A last night scored under these is awful, or poor (the morning card's words for them).
+    private static final int AWFUL_BELOW = 25;
+    private static final int POOR_BELOW = 45;
     private static final int DAY = 24000;
     private static final int HOUR = 1000;
     // The button: a square in the preview's top right corner, and the moon in it.
-    private static final int BUTTON = 10;
-    // The trouble's light in the button's corner, 2 across inside a dark outline.
-    private static final int LIGHT = 2;
+    private static final int BUTTON = 8;
     // The popup: its content width, rows, the details shown, and the room their points take.
     private static final int WIDTH = 164;
     private static final int LINE = 10;
@@ -127,14 +137,23 @@ public final class SleepStatus {
         boolean hover = over(left, top, mouseX, mouseY);
         SleepTrouble.Level level = new SleepTrouble(failedAttempts, ticksSinceRest).level();
         int color = color(level);
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, open ? BUTTON_OPEN : hover ? BUTTON_HOVER : BUTTON_SPRITE, x, y, BUTTON, BUTTON);
-        // The trouble's light in the corner, outlined dark against the tile; sleepless, it throbs.
-        int lightX = x + BUTTON - 1 - LIGHT;
-        int lightY = y + BUTTON - 1 - LIGHT;
-        float glow = level == SleepTrouble.Level.SLEEPLESS ? 0.65F + 0.35F * Mth.sin(Util.getMillis() / 160.0F) : 1.0F;
-        graphics.fill(lightX - 1, lightY - 1, lightX + LIGHT, lightY + LIGHT, 0xFF111317);
-        graphics.fill(lightX, lightY, lightX + LIGHT, lightY + LIGHT, HudStyle.color(color, glow));
-        graphics.fill(lightX, lightY, lightX + 1, lightY + 1, HudStyle.color(0xFFFFFF, 0.45F * glow));
+        // The moon's face follows how you are sleeping: sad when sleepless or after an awful night, tired when restless
+        // or after a poor one, else content.
+        boolean awful = level == SleepTrouble.Level.SLEEPLESS || (lastNight != null && lastNight.score() < AWFUL_BELOW);
+        boolean tired = level == SleepTrouble.Level.RESTLESS || (lastNight != null && lastNight.score() < POOR_BELOW);
+        Identifier sprite = awful ? (open ? BUTTON_SAD_OPEN : hover ? BUTTON_SAD_HOVER : BUTTON_SAD)
+                : tired ? (open ? BUTTON_TIRED_OPEN : hover ? BUTTON_TIRED_HOVER : BUTTON_TIRED)
+                : open ? BUTTON_OPEN : hover ? BUTTON_HOVER : BUTTON_SPRITE;
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, y, BUTTON, BUTTON);
+        // The rim round the tile, its corners left out, in the trouble's color: green rested, amber restless, red
+        // sleepless, when it throbs.
+        float glow = level == SleepTrouble.Level.SLEEPLESS ? 0.6F + 0.4F * Mth.sin(Util.getMillis() / 160.0F) : 1.0F;
+        int rim = HudStyle.color(color, glow);
+        int last = BUTTON - 1;
+        graphics.fill(x + 1, y, x + last, y + 1, rim);
+        graphics.fill(x + 1, y + last, x + last, y + BUTTON, rim);
+        graphics.fill(x, y + 1, x + 1, y + last, rim);
+        graphics.fill(x + last, y + 1, x + BUTTON, y + last, rim);
         if (open) popup(graphics, font, x + BUTTON + 4, y, level, color);
         else if (hover) graphics.setTooltipForNextFrame(font, Component.translatable("gui.whycantisleep.status.button"), mouseX, mouseY);
     }

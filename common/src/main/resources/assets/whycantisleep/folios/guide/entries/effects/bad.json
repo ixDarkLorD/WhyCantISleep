@@ -1,0 +1,12 @@
+{
+  "name": "guide.whycantisleep.guide.entry.effects.bad.name",
+  "icon": "minecraft:rotten_flesh",
+  "sort": 2,
+  "pages": [
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.effects.bad.page1.title",
+      "text": "guide.whycantisleep.guide.entry.effects.bad.page1.text"
+    }
+  ]
+}

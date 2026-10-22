@@ -1,0 +1,12 @@
+{
+  "name": "guide.whycantisleep.guide.entry.effects.odd.name",
+  "icon": "minecraft:prismarine_crystals",
+  "sort": 3,
+  "pages": [
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.effects.odd.page1.title",
+      "text": "guide.whycantisleep.guide.entry.effects.odd.page1.text"
+    }
+  ]
+}

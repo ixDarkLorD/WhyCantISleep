@@ -1,0 +1,22 @@
+{
+  "name": "guide.whycantisleep.guide.entry.hiding.how.name",
+  "icon": "minecraft:gray_bed",
+  "sort": 0,
+  "pages": [
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.hiding.how.page1.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.how.page1.text"
+    },
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.hiding.how.page2.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.how.page2.text"
+    },
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.hiding.how.page3.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.how.page3.text"
+    }
+  ]
+}

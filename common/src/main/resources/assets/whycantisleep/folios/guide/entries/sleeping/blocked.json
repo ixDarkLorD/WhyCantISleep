@@ -1,0 +1,18 @@
+{
+  "name": "guide.whycantisleep.guide.entry.sleeping.blocked.name",
+  "icon": "minecraft:creeper_head",
+  "sort": 0,
+  "pages": [
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.sleeping.blocked.page1.title",
+      "text": "guide.whycantisleep.guide.entry.sleeping.blocked.page1.text"
+    },
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.sleeping.blocked.page2.title",
+      "text": "guide.whycantisleep.guide.entry.sleeping.blocked.page2.text"
+    }
+  ],
+  "featured": true
+}

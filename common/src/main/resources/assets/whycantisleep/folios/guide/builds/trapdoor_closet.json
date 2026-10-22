@@ -1,0 +1,28 @@
+{
+  "name": "guide.whycantisleep.guide.build.trapdoor_closet",
+  "pattern": [
+    [
+      "   ",
+      " t ",
+      "   "
+    ],
+    [
+      " n ",
+      "w e",
+      " D "
+    ],
+    [
+      " n ",
+      "w e",
+      " d "
+    ]
+  ],
+  "mapping": {
+    "t": "minecraft:spruce_trapdoor[half=bottom,open=false]",
+    "n": "minecraft:spruce_trapdoor[facing=north,open=true]",
+    "w": "minecraft:spruce_trapdoor[facing=west,open=true]",
+    "e": "minecraft:spruce_trapdoor[facing=east,open=true]",
+    "D": "minecraft:spruce_door[facing=south,half=upper,hinge=left,open=false]",
+    "d": "minecraft:spruce_door[facing=south,half=lower,hinge=left,open=false]"
+  }
+}
