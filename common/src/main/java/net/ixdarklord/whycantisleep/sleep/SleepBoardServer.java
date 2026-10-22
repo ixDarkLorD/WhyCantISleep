@@ -29,7 +29,8 @@ import java.util.UUID;
 
 /**
  * The sleep board's server side: while someone is in bed, it tells them once a second who is still awake and why, and
- * how far the dimension is from the {@code playersSleepingPercentage} rule. It also carries out nudges.
+ * how far the dimension is from the {@code playersSleepingPercentage} rule, and how a vote to skip the night stands
+ * ({@link SleepVotes}). It also carries out nudges.
  */
 public final class SleepBoardServer {
     private static final int UPDATE_TICKS = 20;
@@ -63,6 +64,9 @@ public final class SleepBoardServer {
     private static void tick(ServerLevel level) {
         MinecraftServer server = level.getServer();
         if (server.getTickCount() % UPDATE_TICKS != 0 || !WCISServerConfig.SLEEP_BOARD.get()) return;
+        SleepVotes.tick(level);
+        // The panel is for sleeping together: alone (singleplayer, or the only one on a server) there is nobody to show.
+        if (server.getPlayerList().getPlayerCount() < 2) return;
         List<ServerPlayer> viewers = new ArrayList<>();
         for (ServerPlayer player : level.players()) {
             if (player.isSleeping() && WCISNetwork.hasMod(player)) viewers.add(player);
@@ -78,6 +82,10 @@ public final class SleepBoardServer {
             if (player.isSleeping()) sleeping++;
         }
         int needed = Math.max(1, Mth.ceil(active * level.getGameRules().get(GameRules.PLAYERS_SLEEPING_PERCENTAGE) / 100.0F));
+        List<ServerPlayer> up = new ArrayList<>();
+        for (ServerPlayer player : level.players()) {
+            if (!player.isSpectator() && !player.isSleeping()) up.add(player);
+        }
 
         List<SleepBoardPayload.Entry> awake = new ArrayList<>();
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -85,8 +93,9 @@ public final class SleepBoardServer {
             boolean counted = player.level() == level;
             awake.add(new SleepBoardPayload.Entry(player.getUUID(), player.getScoreboardName(), reason(player, counted, server.getTickCount()), counted));
         }
-        SleepBoardPayload payload = new SleepBoardPayload(sleeping, needed, awake);
-        for (ServerPlayer viewer : viewers) WCISNetwork.sendToPlayer(viewer, payload);
+        for (ServerPlayer viewer : viewers) {
+            WCISNetwork.sendToPlayer(viewer, new SleepBoardPayload(sleeping, needed, awake, SleepVotes.state(level, viewer, sleeping, needed, up)));
+        }
     }
 
     private static AwakeReason reason(ServerPlayer player, boolean sameDimension, int serverTick) {

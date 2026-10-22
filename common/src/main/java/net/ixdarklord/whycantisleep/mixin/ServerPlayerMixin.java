@@ -1,56 +1,52 @@
 package net.ixdarklord.whycantisleep.mixin;
 
 import com.mojang.datafixers.util.Either;
-import net.ixdarklord.whycantisleep.lurker.LurkerServer;
-import net.ixdarklord.whycantisleep.between.DarkBetween;
-import net.ixdarklord.whycantisleep.mind.MindServer;
+import net.ixdarklord.whycantisleep.sleep.SleepChecks;
+import net.ixdarklord.whycantisleep.sleep.SleepNights;
 import net.ixdarklord.whycantisleep.sleep.SleepServer;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.damagesource.DamageSource;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Unit;
+
+import java.util.List;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * What the server needs to hear from a player that CoolCatLib has no event for: why a sleep failed (the game's own
- * answer), waking after a night's sleep, being hurt and dying.
+ * Hears how a try to sleep went (the game's own answer, which CoolCatLib has no event for), and when a sleeper wakes:
+ * every way of waking up passes through {@code stopSleepInBed}.
  */
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin {
+    @Inject(method = "startSleepInBed", at = @At("HEAD"))
+    private void whycantisleep$beforeSleep(BlockPos pos, CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir) {
+        // Lying down wipes the time since rest; how badly they had been sleeping is taken first.
+        SleepNights.beforeSleep((ServerPlayer) (Object) this);
+    }
+
     @Inject(method = "startSleepInBed", at = @At("RETURN"))
     private void whycantisleep$onSleepResult(BlockPos pos, CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir) {
-        cir.getReturnValue().ifRight(unit -> LurkerServer.onSlept((ServerPlayer) (Object) this, pos)).ifLeft(problem -> {
-            ServerPlayer player = (ServerPlayer) (Object) this;
-            if (problem == Player.BedSleepingProblem.NOT_SAFE) SleepServer.onBlockedByMonsters(player, pos);
-            // "Other problem" is a player already asleep or dead, not a sleep that failed.
-            if (problem != Player.BedSleepingProblem.OTHER_PROBLEM) SleepServer.onSleepFailed(player, pos);
-        });
+        ServerPlayer player = (ServerPlayer) (Object) this;
+        cir.getReturnValue().ifRight(unit -> SleepServer.onLayDown(player, pos)).ifLeft(problem -> SleepServer.onSleepFailed(player, pos, problem));
+    }
+
+    // The mod's rules over the game's monster check: the tags, and a shared bed's tolerance (SleepChecks).
+    @ModifyVariable(method = "startSleepInBed", at = @At("STORE"), ordinal = 0)
+    private List<Monster> whycantisleep$sleepRules(List<Monster> monsters, BlockPos pos) {
+        @SuppressWarnings("unchecked")
+        List<Monster> ruled = (List<Monster>) (List<?>) SleepChecks.applyRules((ServerPlayer) (Object) this, pos, monsters);
+        return ruled;
     }
 
     @Inject(method = "stopSleepInBed", at = @At("HEAD"))
     private void whycantisleep$onWake(boolean forcefulWakeUp, boolean updateLevelList, CallbackInfo ci) {
         ServerPlayer player = (ServerPlayer) (Object) this;
-        if (player.isSleepingLongEnough()) MindServer.onRested(player);
-    }
-
-    @Inject(method = "hurtServer", at = @At("RETURN"))
-    private void whycantisleep$onHurt(ServerLevel level, DamageSource source, float damage, CallbackInfoReturnable<Boolean> cir) {
-        if (cir.getReturnValue()) MindServer.onHurt((ServerPlayer) (Object) this, source, damage);
-    }
-
-    @Inject(method = "die", at = @At("HEAD"), cancellable = true)
-    private void whycantisleep$onDeath(DamageSource source, CallbackInfo ci) {
-        // Dying in the Dark Between only wakes a dreamer.
-        if (DarkBetween.onDeath((ServerPlayer) (Object) this)) {
-            ci.cancel();
-            return;
-        }
-        MindServer.onPlayerDied((ServerPlayer) (Object) this, source);
+        if (player.isSleeping()) SleepNights.onWake(player, forcefulWakeUp);
     }
 }

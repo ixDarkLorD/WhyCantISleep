@@ -23,9 +23,10 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Arrows around the crosshair, one for each blocking monster the player can't see: a solid one for a monster outside
- * the view, a hollow one for a monster in view but behind blocks. A monster in plain sight has its glow and needs no
- * arrow. Nearer monsters get larger arrows, and arrows that would overlap are fanned apart.
+ * Pointers to the blocking monsters the player can't see. One outside the view gets an arrow around the crosshair,
+ * pointing its way; nearer monsters get larger arrows, and arrows that would overlap are fanned apart. One in view but
+ * behind blocks, one the player would hear rather than see, gets a ring where it is, pulsing out like a sound. A
+ * monster in plain sight has its glow and needs neither. The greatest threat's pointer is larger.
  */
 public final class BlockerArrows {
     // Two frames side by side, drawn by tools/gen_arrow_texture.ps1: solid, then hollow.
@@ -40,6 +41,13 @@ public final class BlockerArrows {
     private static final float FADE_OUT_TICKS = 12.0F;
     // Beyond this many blocks an arrow is at its smallest.
     private static final double FAR_DISTANCE = 16.0;
+    // The ring round a monster behind blocks, its size in GUI pixels, and its pulse: a ring going out every PULSE_TICKS.
+    private static final Identifier RING = WhyCantISleep.id("hud/blocker_ring");
+    private static final int RING_SIZE = 16;
+    private static final float PULSE_TICKS = 24.0F;
+    private static final float PULSE_GROWTH = 1.4F;
+    // How much larger the greatest threat's pointer is.
+    private static final float TOP_SCALE = 1.3F;
 
     private BlockerArrows() {
     }
@@ -53,8 +61,9 @@ public final class BlockerArrows {
         if (Blockers.isEmpty() || minecraft.player == null || minecraft.options.hideGui) return;
         if (!WCISConfigs.isEnabled(WCISClientConfig.OFF_SCREEN_ARROWS)) return;
         float partialTick = delta.getGameTimeDeltaPartialTick(true);
-        List<Arrow> arrows = collect(minecraft, graphics, partialTick);
-        if (arrows.isEmpty()) return;
+        List<Ring> rings = new ArrayList<>();
+        List<Arrow> arrows = collect(minecraft, graphics, partialTick, rings);
+        if (arrows.isEmpty() && rings.isEmpty()) return;
 
         float size = WCISClientConfig.ARROW_SIZE.get().scale();
         fanOut(arrows, SPACING / RADIUS);
@@ -79,10 +88,21 @@ public final class BlockerArrows {
                     FRAME_SIZE, FRAME_SIZE, SHEET_WIDTH, FRAME_SIZE, ARGB.color(Math.round(alpha * 255.0F), arrow.color));
             graphics.pose().popMatrix();
         }
+        float pulse = (age % PULSE_TICKS) / PULSE_TICKS;
+        for (Ring ring : rings) {
+            float scale = size * ring.scale;
+            int half = Math.round(RING_SIZE * scale / 2.0F);
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, RING, Math.round(ring.x) - half, Math.round(ring.y) - half, half * 2, half * 2,
+                    ARGB.color(Math.round(alpha * 220.0F), ring.color));
+            int out = Math.round(half * (1.0F + PULSE_GROWTH * pulse));
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, RING, Math.round(ring.x) - out, Math.round(ring.y) - out, out * 2, out * 2,
+                    ARGB.color(Math.round(alpha * 200.0F * (1.0F - pulse)), ring.color));
+        }
     }
 
-    // An arrow for each blocker the player can't see, with the angle on the screen that points to it.
-    private static List<Arrow> collect(Minecraft minecraft, GuiGraphicsExtractor graphics, float partialTick) {
+    // An arrow for each blocker the player can't see outside the view, with the angle on the screen that points to it;
+    // a ring, into the list given, for each one in view behind blocks, where it is on the screen.
+    private static List<Arrow> collect(Minecraft minecraft, GuiGraphicsExtractor graphics, float partialTick, List<Ring> rings) {
         Camera camera = minecraft.gameRenderer.getMainCamera();
         Vec3 eye = camera.position();
         Vector3fc forward = camera.forwardVector();
@@ -102,10 +122,17 @@ public final class BlockerArrows {
             boolean inView = ahead > 0.0 && Math.abs(right) <= ahead * tanH && Math.abs(above) <= ahead * tanV;
             if (inView && minecraft.player.hasLineOfSight(blocker)) continue;
 
+            float nearness = 1.0F - (float) Mth.clamp(to.length() / FAR_DISTANCE, 0.0, 1.0);
+            float scale = Mth.lerp(nearness, 0.8F, 1.15F) * (Blockers.isTop(blocker) ? TOP_SCALE : 1.0F);
+            if (inView) {
+                float x = (float) (graphics.guiWidth() / 2.0 * (1.0 + right / (ahead * tanH)));
+                float y = (float) (graphics.guiHeight() / 2.0 * (1.0 - above / (ahead * tanV)));
+                rings.add(new Ring(x, y, scale, Highlights.color(blocker)));
+                continue;
+            }
             // On the screen up is negative; a monster straight behind points down.
             float angle = Math.abs(right) < 1.0E-4 && Math.abs(above) < 1.0E-4 ? Mth.HALF_PI : (float) Math.atan2(-above, right);
-            float nearness = 1.0F - (float) Mth.clamp(to.length() / FAR_DISTANCE, 0.0, 1.0);
-            arrows.add(new Arrow(angle, Mth.lerp(nearness, 0.8F, 1.15F), inView, Highlights.color(blocker)));
+            arrows.add(new Arrow(angle, scale, false, Highlights.color(blocker)));
         }
         return arrows;
     }
@@ -131,6 +158,9 @@ public final class BlockerArrows {
             }
             if (!moved) break;
         }
+    }
+
+    private record Ring(float x, float y, float scale, int color) {
     }
 
     private static final class Arrow {

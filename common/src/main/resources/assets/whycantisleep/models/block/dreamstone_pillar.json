@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:block/cube_column",
-  "textures": {
-    "side": "whycantisleep:block/dreamstone_pillar",
-    "end": "whycantisleep:block/dreamstone_pillar_top"
-  }
-}

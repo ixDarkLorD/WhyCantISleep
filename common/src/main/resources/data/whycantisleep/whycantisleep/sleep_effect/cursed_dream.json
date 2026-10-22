@@ -1,0 +1,21 @@
+{
+  "kind": "negative",
+  "rarity": "legendary",
+  "quality": {
+    "min": 0,
+    "max": 20
+  },
+  "effects": [
+    {
+      "id": "minecraft:poison",
+      "duration": 100,
+      "amplifier": 0
+    },
+    {
+      "id": "minecraft:weakness",
+      "duration": 2400,
+      "amplifier": 0
+    }
+  ],
+  "name": "gui.whycantisleep.sleep_effect.cursed_dream"
+}

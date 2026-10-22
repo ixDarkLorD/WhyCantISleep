@@ -1,0 +1,23 @@
+{
+  "values": [
+    "minecraft:cat",
+    "minecraft:chirp",
+    "minecraft:far",
+    "minecraft:mall",
+    "minecraft:stal",
+    "minecraft:strad",
+    "minecraft:wait",
+    {
+      "id": "minecraft:creator_music_box",
+      "required": false
+    },
+    {
+      "id": "minecraft:precipice",
+      "required": false
+    },
+    {
+      "id": "minecraft:tears",
+      "required": false
+    }
+  ]
+}

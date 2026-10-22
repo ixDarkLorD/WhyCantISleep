@@ -4,19 +4,29 @@ import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 
-/** The kind of threat a blocking monster is, which picks its highlight color when threat colors are on. */
+/**
+ * The kind of threat a blocking monster is, which picks its highlight color when threat colors are on, and how
+ * dangerous it is, which picks the one pointed out above the rest.
+ */
 public enum ThreatType {
-    EXPLOSIVE(0x55FF55),
-    UNDEAD(0xFF5555),
-    ARTHROPOD(0xAA55FF),
-    ENDER(0xFF55FF),
-    RAIDER(0x5599FF),
-    OTHER(0xFFAA00);
+    EXPLOSIVE(0x55FF55, 5),
+    UNDEAD(0xFF5555, 3),
+    ARTHROPOD(0xAA55FF, 2),
+    ENDER(0xFF55FF, 4),
+    RAIDER(0x5599FF, 4),
+    OTHER(0xFFAA00, 2);
 
     private final int color;
+    private final int danger;
 
-    ThreatType(int color) {
+    ThreatType(int color, int danger) {
         this.color = color;
+        this.danger = danger;
+    }
+
+    /** How dangerous this kind is, 1 to 5: a creeper above all. */
+    public int danger() {
+        return this.danger;
     }
 
     /** The highlight color, as {@code 0xRRGGBB}. */

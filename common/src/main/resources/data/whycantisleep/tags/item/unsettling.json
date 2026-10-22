@@ -1,0 +1,33 @@
+{
+  "values": [
+    {
+      "id": "#minecraft:skulls",
+      "required": false
+    },
+    "minecraft:cobweb",
+    "minecraft:sculk",
+    "minecraft:sculk_vein",
+    "minecraft:sculk_sensor",
+    "minecraft:calibrated_sculk_sensor",
+    "minecraft:sculk_shrieker",
+    "minecraft:sculk_catalyst",
+    "minecraft:spawner",
+    "minecraft:wither_rose",
+    "minecraft:bone_block",
+    "minecraft:soul_lantern",
+    "minecraft:soul_torch",
+    "minecraft:soul_campfire",
+    {
+      "id": "minecraft:creaking_heart",
+      "required": false
+    },
+    {
+      "id": "minecraft:pale_hanging_moss",
+      "required": false
+    },
+    {
+      "id": "minecraft:open_eyeblossom",
+      "required": false
+    }
+  ]
+}

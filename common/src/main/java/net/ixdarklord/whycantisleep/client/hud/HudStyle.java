@@ -6,51 +6,38 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 
 /**
- * The look the mod's HUD shares: panels and bars of its own, drawn in the game's manner (beveled, pixel for pixel,
- * with the chat's colors for text). They are GUI sprites that stretch to any size, drawn by
- * {@code tools/gen_hud_textures.ps1}; a resource pack can restyle them like any of the game's.
+ * The look the mod's HUD shares: flat and dark (the author's request, 2026-10-21): charcoal panels with a hairline
+ * border, split by thin dividers; flat bars; icons in small squares tinted the color of what they stand for; text
+ * without shadows. The panels and the bars are GUI sprites that stretch to any size, drawn by
+ * {@code tools/gen_hud_textures.ps1}, so a resource pack can restyle them like any of the game's; the dividers, dots and
+ * icon squares are small flat fills.
  */
 public final class HudStyle {
-    /** The message card and the sleep board: dusk plum, outlined, shaded and shadowed the way the gauges are. */
+    /** A night's sleep card and the status popup: charcoal, with a hairline border and softly rounded corners. */
     public static final Identifier CARD = WhyCantISleep.id("hud/card");
-    /**
-     * The mood gauge: a gold coin for its icon, and a round capsule of blocks for its bar. A bar is three layers: the
-     * track (its outline and empty blocks), the fill, and the frame over both (the outline again, seams and glints).
-     */
-    public static final Identifier MOOD_MEDAL = WhyCantISleep.id("hud/mood_medal");
-    public static final Identifier MOOD_TRACK = WhyCantISleep.id("hud/mood_track");
-    public static final Identifier MOOD_FRAME = WhyCantISleep.id("hud/mood_frame");
-    /** The lucidity gauge: a rose diamond for its icon, and a capsule that runs on into a point. */
-    public static final Identifier LUCIDITY_MEDAL = WhyCantISleep.id("hud/lucidity_medal");
-    public static final Identifier LUCIDITY_TRACK = WhyCantISleep.id("hud/lucidity_track");
-    public static final Identifier LUCIDITY_FRAME = WhyCantISleep.id("hud/lucidity_frame");
-    /** A medal's size, and a track's (the bar, and a pixel more each way for its shadow): drawn as they are, never stretched. */
-    public static final int MEDAL_SIZE = 19;
-    public static final int TRACK_WIDTH = 73;
-    public static final int TRACK_HEIGHT = 12;
-    /** A gauge's fill: it runs along the track from 2 in, 1 down, eight blocks of 8 long. */
-    public static final int GAUGE_FILL_WIDTH = 64;
-    public static final int GAUGE_FILL_HEIGHT = 9;
-    /** How far in from a medal's corner its 9 by 9 icon sits. */
-    public static final int MEDAL_INSET = 5;
-    /** The sunk slot a card's icon sits in: {@link #SLOT_SIZE} square, for a 16 by 16 item 2 in from its corner. */
-    public static final Identifier SLOT = WhyCantISleep.id("hud/slot");
-    public static final int SLOT_SIZE = 20;
-    private static final Identifier BAR_BACK = WhyCantISleep.id("hud/bar_back");
-    /** The plaque that hangs under each gauge with its reading on: a panel like the card, in the gauge's colors. */
-    public static final Identifier MOOD_SIGN = WhyCantISleep.id("hud/mood_sign");
-    public static final Identifier LUCIDITY_SIGN = WhyCantISleep.id("hud/lucidity_sign");
-    /** What covers the part of a gauge the other bar closes off: dim diagonal stripes, tiled along it. */
-    public static final Identifier MOOD_LIMIT = WhyCantISleep.id("hud/mood_limit");
-    public static final Identifier LUCIDITY_LIMIT = WhyCantISleep.id("hud/lucidity_limit");
-    public static final Identifier MOOD_FILL = WhyCantISleep.id("hud/mood_fill");
-    public static final Identifier LUCIDITY_FILL = WhyCantISleep.id("hud/lucidity_fill");
+    /** The other message cards, the sleep board and the breath minigame: soft as a pillow, a two pixel border with round corners, a lighter line along the top. */
+    public static final Identifier NOTICE = WhyCantISleep.id("hud/notice");
+    /** The wash of a notice's color over its left side, fading to the right; how far across it reaches, how strong, and its specks. */
+    public static final Identifier WASH = WhyCantISleep.id("hud/wash");
+    private static final float WASH_SHARE = 0.55F;
+    private static final float WASH_ALPHA = 0.24F;
+    private static final int WASH_CLIMB = 6;
+    /** The wash's foot, fading downwards as well, over this many rows. */
+    public static final Identifier WASH_FADE = WhyCantISleep.id("hud/wash_fade");
+    private static final int WASH_FADE_ROWS = 6;
+    /** A notice's timer, frame and all, is this tall: an outline round a bar two high. */
+    public static final int TIMER_HEIGHT = 4;
+    /** A bar's empty track, and the sleep board's fill. */
+    public static final Identifier BAR_BACK = WhyCantISleep.id("hud/bar_back");
     public static final Identifier SLEEP_FILL = WhyCantISleep.id("hud/sleep_fill");
-    /** How far a panel reaches beyond what it holds: its border, and a pixel of air inside it. */
-    public static final int PANEL_PADDING = 5;
-    public static final int BAR_HEIGHT = 5;
+    /** The square a card's icon sits in: {@link #SLOT_SIZE} across, for a 16 by 16 item 2 in from its corner. */
+    public static final int SLOT_SIZE = 20;
+    /** How far a panel reaches beyond what it holds: its border, and room to breathe inside it. */
+    public static final int PANEL_PADDING = 6;
+    public static final int BAR_HEIGHT = 3;
 
     // The chat's colors.
     public static final int WHITE = 0xFFFFFF;
@@ -62,6 +49,12 @@ public final class HudStyle {
     public static final int GREEN = 0x55FF55;
     public static final int AQUA = 0x55FFFF;
     public static final int LIGHT_PURPLE = 0xFF55FF;
+    // The dark theme's own: a soft white for quiet titles, labels and hints a step back, the dimmest text, and lines.
+    public static final int SILVER = 0xD4D4D4;
+    public static final int MUTED = 0x6B6F78;
+    public static final int FAINT = 0x4B4F57;
+    public static final int DIVIDER = 0x22252B;
+    public static final int TRACK = 0x1C1F24;
 
     private HudStyle() {
     }
@@ -73,8 +66,7 @@ public final class HudStyle {
 
     /** A panel around a content area, which it pads by {@link #PANEL_PADDING} on every side. */
     public static void panel(GuiGraphicsExtractor graphics, Identifier sprite, int x, int y, int width, int height, float alpha) {
-        // A pixel more each way than the panel itself, for the shadow it casts.
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x - PANEL_PADDING, y - PANEL_PADDING, width + PANEL_PADDING * 2 + 1, height + PANEL_PADDING * 2 + 1,
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x - PANEL_PADDING, y - PANEL_PADDING, width + PANEL_PADDING * 2, height + PANEL_PADDING * 2,
                 ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F)));
     }
 
@@ -83,24 +75,181 @@ public final class HudStyle {
         panel(graphics, CARD, x, y, width, height, alpha);
     }
 
-    /** A medal, to hold a 9 by 9 icon {@link #MEDAL_INSET} in from its corner. */
-    public static void medal(GuiGraphicsExtractor graphics, Identifier sprite, int x, int y, float alpha) {
-        // The picture is a pixel bigger each way than the medal, for the shadow it casts.
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, y, MEDAL_SIZE + 1, MEDAL_SIZE + 1, ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F)));
+    /** How thick the notice's border is (soft, two pixels) and the card's (a hairline): a wash keeps inside it. */
+    public static final int NOTICE_BORDER = 2;
+    public static final int CARD_BORDER = 1;
+
+    /** The notice frame around a content area. */
+    public static void notice(GuiGraphicsExtractor graphics, int x, int y, int width, int height, float alpha) {
+        panel(graphics, NOTICE, x, y, width, height, alpha);
     }
 
-    /** An icon's slot, drawn as it is. */
-    public static void slot(GuiGraphicsExtractor graphics, int x, int y, float alpha) {
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT, x, y, SLOT_SIZE, SLOT_SIZE, ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F)));
+    /**
+     * A wash of color over a notice's left side, fading out to the right ({@link #WASH}) and, over its last few rows,
+     * downwards too ({@link #WASH_FADE}), drawn to a share of its reach, and specks of light drifting along it towards
+     * where it fades, fading with it. It starts under the frame's top line and ends as far under the content (the
+     * text) as it starts over it. The notice's content area given as for {@link #panel}, to where its text ends; age in
+     * ticks, and a seed so each notice's specks are its own.
+     */
+    public static void wash(GuiGraphicsExtractor graphics, int x, int y, int width, int contentBottom, float reach, int rgb, float alpha, float age,
+                            long seed) {
+        wash(graphics, x, y, width, contentBottom, reach, rgb, alpha, age, seed, 0.5F, NOTICE_BORDER);
     }
 
-    /** A bar of a width, {@link #BAR_HEIGHT} tall, filled to a share with one of the fills. */
-    public static void bar(GuiGraphicsExtractor graphics, Identifier fill, int x, int y, int width, float filled, float alpha) {
-        int tint = ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F));
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BAR_BACK, x, y, width, BAR_HEIGHT, tint);
-        // The fill keeps inside the track's outline, and shows at least a sliver of anything above nothing.
+    /**
+     * A wash as above, its specks as lively as a share, 0 to 1 (a notice's are 0.5): livelier, there are more of them,
+     * brighter, quicker, more of them little crosses, and they rise as they drift; duller, fewer, dimmer and slower,
+     * and they sink. A night's sleep card gives its score. It keeps inside a frame's border, as thick as given
+     * ({@link #NOTICE_BORDER}, {@link #CARD_BORDER}).
+     */
+    public static void wash(GuiGraphicsExtractor graphics, int x, int y, int width, int contentBottom, float reach, int rgb, float alpha, float age,
+                            long seed, float liveliness, int border) {
+        float lively = Mth.clamp(liveliness, 0.0F, 1.0F);
+        int specks = Math.round(3 + lively * 12);
+        float pace = 0.4F + 1.2F * lively;
+        float crossChance = 0.5F * lively;
+        float glow = Math.min(1.0F, 0.5F + lively);
+        int speckRgb = lively >= 0.5F ? brighten(rgb) : rgb;
+        // How far a speck rises (or, dull, sinks) over the wash's length.
+        float climb = (lively - 0.5F) * 2.0F * WASH_CLIMB;
+        // Just in from the border, its top left corner rounded off by a pixel to sit in the frame's round corner.
+        int left = x - PANEL_PADDING + border;
+        int top = y - PANEL_PADDING + border;
+        // As far under the content as over it, less the pixel it moved up by, so it keeps its height.
+        int bottom = contentBottom + (y - top) - 2;
+        int fadeRows = Math.min(WASH_FADE_ROWS, (bottom - top) / 2);
+        int body = bottom - fadeRows;
+        int full = Math.round((width + PANEL_PADDING) * WASH_SHARE);
+        int span = Math.round(full * Mth.clamp(reach, 0.0F, 1.0F));
+        if (span <= 0) return;
+        int tint = color(rgb, alpha * WASH_ALPHA);
+        // Its top row starts a pixel in, rounding the corner.
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, WASH, left + 1, top, span - 1, 1, tint);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, WASH, left, top + 1, span, body - top - 1, tint);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, WASH_FADE, left, body, span, fadeRows, tint);
+        RandomSource random = RandomSource.create(seed);
+        for (int i = 0; i < specks; i++) {
+            float speed = (0.25F + random.nextFloat() * 0.45F) * pace;
+            float phase = random.nextFloat() * full;
+            int startY = top + 1 + random.nextInt(Math.max(1, bottom - top - 2));
+            boolean big = random.nextFloat() < crossChance;
+            float twinkle = 0.6F + 0.4F * Mth.sin(age * (0.2F + random.nextFloat() * 0.3F) * pace + i);
+            // Along the wash and round again from its edge; as bright as the wash is where the speck is.
+            float along = (age * speed + phase) % full;
+            if (along > span) continue;
+            int speckY = Mth.clamp(startY - Math.round(climb * along / full), top + 1, bottom - 2);
+            float down = speckY < body ? 1.0F : 1.0F - (speckY - body + 0.5F) / fadeRows;
+            float fade = (float) Math.pow(1.0F - along / full, 1.6F) * down * glow;
+            int speckX = left + Math.round(along);
+            int speck = color(speckRgb, alpha * fade * twinkle);
+            graphics.fill(speckX, speckY, speckX + 1, speckY + 1, speck);
+            if (big && fade > 0.3F) {
+                // A little cross of light for some, its arms dimmer.
+                int arm = color(speckRgb, alpha * fade * twinkle * 0.45F);
+                graphics.fill(speckX - 1, speckY, speckX, speckY + 1, arm);
+                graphics.fill(speckX + 1, speckY, speckX + 2, speckY + 1, arm);
+                graphics.fill(speckX, speckY - 1, speckX + 1, speckY, arm);
+                graphics.fill(speckX, speckY + 1, speckX + 1, speckY + 2, arm);
+            }
+        }
+    }
+
+    // A color halfway to white.
+    private static int brighten(int rgb) {
+        return ARGB.color(0, (ARGB.red(rgb) + 255) / 2, (ARGB.green(rgb) + 255) / 2, (ARGB.blue(rgb) + 255) / 2) & 0xFFFFFF;
+    }
+
+    /**
+     * A notice's timer across its content's width, {@link #TIMER_HEIGHT} tall from a top: a frame with rounded
+     * corners (its corner pixels left out) round a bar two high, filled to a share, with a brighter head where the
+     * fill ends.
+     */
+    public static void timer(GuiGraphicsExtractor graphics, int x, int top, int width, float share, int rgb, float alpha) {
+        int right = x + width;
+        int bottom = top + TIMER_HEIGHT;
+        int edge = color(FAINT, alpha);
+        graphics.fill(x + 1, top, right - 1, top + 1, edge);
+        graphics.fill(x + 1, bottom - 1, right - 1, bottom, edge);
+        graphics.fill(x, top + 1, x + 1, bottom - 1, edge);
+        graphics.fill(right - 1, top + 1, right, bottom - 1, edge);
         int inner = width - 2;
-        int filledWidth = filled <= 0.0F ? 0 : Math.max(1, Math.round(inner * Mth.clamp(filled, 0.0F, 1.0F)));
-        if (filledWidth > 0) graphics.blitSprite(RenderPipelines.GUI_TEXTURED, fill, x + 1, y, filledWidth, BAR_HEIGHT, tint);
+        graphics.fill(x + 1, top + 1, right - 1, bottom - 1, color(TRACK, alpha));
+        int filled = Math.round(inner * Mth.clamp(share, 0.0F, 1.0F));
+        if (filled <= 0) return;
+        graphics.fill(x + 1, top + 1, x + 1 + filled, bottom - 1, color(rgb, alpha * 0.85F));
+        graphics.fill(x + 1 + Math.max(0, filled - 2), top + 1, x + 1 + filled, bottom - 1, color(0xFFFFFF, alpha * 0.85F));
+    }
+
+    /** A line across a panel at a height, from border to border; the panel's content area given as for {@link #panel}. */
+    public static void divider(GuiGraphicsExtractor graphics, int x, int width, int lineY, float alpha) {
+        graphics.fill(x - PANEL_PADDING + 1, lineY, x + width + PANEL_PADDING - 1, lineY + 1, color(DIVIDER, alpha));
+    }
+
+    /** The square an icon sits in, tinted the color of what it stands for: a faint wash inside a stronger outline. */
+    public static void iconSquare(GuiGraphicsExtractor graphics, int x, int y, int rgb, float alpha) {
+        int last = SLOT_SIZE - 1;
+        int edge = color(rgb, alpha * 0.45F);
+        // The outline, its corner pixels left out so the square's corners are soft like the card's.
+        graphics.fill(x + 1, y, x + last, y + 1, edge);
+        graphics.fill(x + 1, y + last, x + last, y + SLOT_SIZE, edge);
+        graphics.fill(x, y + 1, x + 1, y + last, edge);
+        graphics.fill(x + last, y + 1, x + SLOT_SIZE, y + last, edge);
+        graphics.fill(x + 1, y + 1, x + last, y + last, color(rgb, alpha * 0.14F));
+    }
+
+    /** A small round dot, 4 across (a square with its corners left out), its top left corner at a point. */
+    public static void dot(GuiGraphicsExtractor graphics, int x, int y, int rgb, float alpha) {
+        int fill = color(rgb, alpha);
+        graphics.fill(x + 1, y, x + 3, y + 4, fill);
+        graphics.fill(x, y + 1, x + 4, y + 3, fill);
+    }
+
+    /** A bar of a width and height, filled to a share with one of the fills. */
+    public static void bar(GuiGraphicsExtractor graphics, Identifier fill, int x, int y, int width, int height, float filled, float alpha) {
+        int tint = ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F));
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BAR_BACK, x, y, width, height, tint);
+        // The fill shows at least a sliver of anything above nothing.
+        int filledWidth = filled <= 0.0F ? 0 : Math.max(1, Math.round(width * Mth.clamp(filled, 0.0F, 1.0F)));
+        if (filledWidth > 0) graphics.blitSprite(RenderPipelines.GUI_TEXTURED, fill, x, y, filledWidth, height, tint);
+    }
+
+    /**
+     * A bar in segments, one for each of a count, the first few of them filled: so many out of so many, readable at a
+     * glance. Past what fits with a gap of a pixel or more between them, it is drawn as one bar.
+     */
+    public static void segments(GuiGraphicsExtractor graphics, Identifier fill, int x, int y, int width, int height, int filled, int count, float alpha) {
+        int gap = 2;
+        if (count <= 1 || (width - gap * (count - 1)) / count < 3) {
+            bar(graphics, fill, x, y, width, height, filled / (float) Math.max(1, count), alpha);
+            return;
+        }
+        int tint = ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F));
+        int room = width - gap * (count - 1);
+        for (int i = 0; i < count; i++) {
+            // Spread the leftover pixels over the segments, so the bar ends exactly at its width.
+            int left = x + i * room / count + i * gap;
+            int right = x + (i + 1) * room / count + i * gap;
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, i < filled ? fill : BAR_BACK, left, y, right - left, height, tint);
+        }
+    }
+
+    /**
+     * A meter of ten pips across a width, lit to a share: the whole ones full, the next one in part, the rest dark; a
+     * full pip has a lighter top edge, so the meter reads as lit rather than flat. How well a night was slept.
+     */
+    public static void pips(GuiGraphicsExtractor graphics, int x, int y, int width, int height, float share, int rgb, float alpha) {
+        int count = 10;
+        int gap = 2;
+        int room = width - gap * (count - 1);
+        float lit = share * count;
+        for (int i = 0; i < count; i++) {
+            int left = x + i * room / count + i * gap;
+            int right = x + (i + 1) * room / count + i * gap;
+            graphics.fill(left, y, right, y + height, color(TRACK, alpha));
+            float part = Mth.clamp(lit - i, 0.0F, 1.0F);
+            int filled = Math.round((right - left) * part);
+            if (filled > 0) graphics.fill(left, y, left + filled, y + height, color(rgb, alpha));
+            if (part >= 1.0F) graphics.fill(left, y, right, y + 1, color(0xFFFFFF, alpha * 0.35F));
+        }
     }
 }

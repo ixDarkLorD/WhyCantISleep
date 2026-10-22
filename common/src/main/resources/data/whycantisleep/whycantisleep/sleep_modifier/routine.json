@@ -1,0 +1,11 @@
+{
+  "label": "gui.whycantisleep.quality.routine",
+  "points": 10,
+  "when": {
+    "reason": [
+      "morning"
+    ],
+    "enclosed": true,
+    "lit": true
+  }
+}

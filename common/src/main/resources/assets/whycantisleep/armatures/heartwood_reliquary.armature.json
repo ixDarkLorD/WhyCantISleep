@@ -1,9 +1,0 @@
-{
-  "glow_textures": [
-    "whycantisleep:textures/armatures/heartwood_reliquary_glow.png"
-  ],
-  "transition": {
-    "duration": 0.12,
-    "easing": "sine_in_out"
-  }
-}

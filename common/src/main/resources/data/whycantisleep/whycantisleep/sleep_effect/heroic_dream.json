@@ -1,0 +1,21 @@
+{
+  "kind": "positive",
+  "rarity": "epic",
+  "quality": {
+    "min": 80,
+    "max": 100
+  },
+  "effects": [
+    {
+      "id": "minecraft:absorption",
+      "duration": 2400,
+      "amplifier": 1
+    },
+    {
+      "id": "minecraft:resistance",
+      "duration": 1200,
+      "amplifier": 0
+    }
+  ],
+  "name": "gui.whycantisleep.sleep_effect.heroic_dream"
+}

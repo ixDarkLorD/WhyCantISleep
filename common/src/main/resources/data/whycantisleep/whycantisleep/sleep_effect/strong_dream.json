@@ -1,0 +1,16 @@
+{
+  "kind": "positive",
+  "rarity": "rare",
+  "quality": {
+    "min": 60,
+    "max": 100
+  },
+  "effects": [
+    {
+      "id": "minecraft:strength",
+      "duration": 1200,
+      "amplifier": 0
+    }
+  ],
+  "name": "gui.whycantisleep.sleep_effect.strong_dream"
+}

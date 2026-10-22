@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/slab_top",
-  "textures": {
-    "bottom": "whycantisleep:block/sleepwood_planks",
-    "top": "whycantisleep:block/sleepwood_planks",
-    "side": "whycantisleep:block/sleepwood_planks"
-  }
-}

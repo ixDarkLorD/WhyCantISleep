@@ -2,14 +2,15 @@ package net.ixdarklord.whycantisleep.client;
 
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientPlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
-import net.ixdarklord.whycantisleep.client.fx.SleepEffects;
 import net.ixdarklord.whycantisleep.client.hud.BlockerInfo;
 import net.ixdarklord.whycantisleep.client.hud.Explanations;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotice;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotices;
 import net.ixdarklord.whycantisleep.config.WCISClientConfig;
-import net.ixdarklord.whycantisleep.lurker.client.LurkerHaunt;
 import net.ixdarklord.whycantisleep.config.WCISServerConfig;
+import net.ixdarklord.whycantisleep.hiding.Hiding;
+import net.ixdarklord.whycantisleep.hiding.HidingServer;
+import net.ixdarklord.whycantisleep.network.RoomSafePayload;
 import net.ixdarklord.whycantisleep.network.SleepBlockedPayload;
 import net.ixdarklord.whycantisleep.sleep.SleepChecks;
 import net.minecraft.client.Minecraft;
@@ -39,6 +40,7 @@ public final class SleepClient {
     // How long after the warning a second use of the bed goes through.
     private static final int WARNING_TICKS = 60;
     private static final String NUDGE_KEYS = "gui.whycantisleep.nudge.";
+    private static final String HIDE_KEYS = "gui.whycantisleep.hide.";
 
     private static long tick;
     private static long lastReport = Long.MIN_VALUE;
@@ -70,9 +72,10 @@ public final class SleepClient {
     public static boolean onUseBlock(LocalPlayer player, BlockPos pos) {
         BlockState state = player.level().getBlockState(pos);
         if (!(state.getBlock() instanceof BedBlock)) return false;
+        // Crawling under it, not lying in it; or already under it, where HidingServer refuses every use.
+        if (HidingServer.canHide(player) || Hiding.isHiding(player)) return false;
         BlockPos bed = state.getValue(BedBlock.PART) == BedPart.HEAD ? pos.immutable() : pos.relative(state.getValue(BedBlock.FACING));
         lastBed = bed;
-        LurkerHaunt.onBedUsed(bed);
 
         if (!WCISClientConfig.DIMENSION_WARNING.get()) return false;
         // Sneaking with an item in hand uses the item, not the bed.
@@ -93,6 +96,13 @@ public final class SleepClient {
     }
 
     /** The server's report: these monsters blocked the sleep. */
+    /** The player dealt with every monster that blocked their sleep: the room is safe, and they may be lying down. */
+    public static void onRoomSafe(RoomSafePayload payload) {
+        Blockers.set(List.of());
+        SleepNotices.show(new SleepNotice(SleepNotice.Kind.ROOM_SAFE, Component.translatable("gui.whycantisleep.room_safe.title"),
+                Component.translatable(payload.lyingDown() ? "gui.whycantisleep.room_safe.lying_down" : "gui.whycantisleep.room_safe.hint")));
+    }
+
     public static void onBlockedByServer(SleepBlockedPayload payload) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.level == null) return;
@@ -119,6 +129,10 @@ public final class SleepClient {
             SleepNotices.show(new SleepNotice(SleepNotice.Kind.NUDGE, message, null));
             return true;
         }
+        if (key.startsWith(HIDE_KEYS)) {
+            SleepNotices.show(new SleepNotice(SleepNotice.Kind.HIDING, message, null));
+            return true;
+        }
 
         SleepNotice notice = null;
         int ticks = SleepNotices.DEFAULT_TICKS;
@@ -133,11 +147,6 @@ public final class SleepClient {
         if (notice == null && WCISClientConfig.SLEEP_EXPLANATIONS.get()) notice = Explanations.explain(contents);
         if (notice == null) return false;
         SleepNotices.show(notice, ticks);
-        // On a server without the mod nobody rolls for the scare, so the client does, by its own server settings.
-        if (lastBed != null && !minecraft.hasSingleplayerServer() && !WCISServerConfig.CONFIG.isRemote() && notice.kind() != SleepNotice.Kind.PLAYERS_AWAKE
-                && minecraft.level.getRandom().nextInt(100) < WCISServerConfig.SCARE_CHANCE.get()) {
-            SleepEffects.scare(lastBed);
-        }
         return true;
     }
 }

@@ -1,0 +1,7 @@
+{
+  "label": "gui.whycantisleep.quality.creepy_music",
+  "points": -20,
+  "when": {
+    "creepy_music": true
+  }
+}

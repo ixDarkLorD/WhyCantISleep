@@ -1,0 +1,26 @@
+{
+  "kind": "positive",
+  "rarity": "legendary",
+  "quality": {
+    "min": 90,
+    "max": 100
+  },
+  "effects": [
+    {
+      "id": "minecraft:slow_falling",
+      "duration": 1200,
+      "amplifier": 0
+    },
+    {
+      "id": "minecraft:jump_boost",
+      "duration": 1200,
+      "amplifier": 1
+    },
+    {
+      "id": "minecraft:speed",
+      "duration": 1200,
+      "amplifier": 1
+    }
+  ],
+  "name": "gui.whycantisleep.sleep_effect.dream_of_flight"
+}

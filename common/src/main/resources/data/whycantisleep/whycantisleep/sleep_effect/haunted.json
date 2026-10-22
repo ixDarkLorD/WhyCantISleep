@@ -1,0 +1,21 @@
+{
+  "kind": "negative",
+  "rarity": "epic",
+  "quality": {
+    "min": 0,
+    "max": 30
+  },
+  "effects": [
+    {
+      "id": "minecraft:darkness",
+      "duration": 600,
+      "amplifier": 0
+    },
+    {
+      "id": "minecraft:unluck",
+      "duration": 6000,
+      "amplifier": 0
+    }
+  ],
+  "name": "gui.whycantisleep.sleep_effect.haunted"
+}

@@ -1,0 +1,12 @@
+{
+  "label": "gui.whycantisleep.quality.woke_early",
+  "points": -25,
+  "when": {
+    "reason": [
+      "got_up",
+      "hurt",
+      "bed_gone",
+      "other"
+    ]
+  }
+}

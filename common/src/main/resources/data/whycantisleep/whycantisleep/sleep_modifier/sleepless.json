@@ -1,0 +1,9 @@
+{
+  "label": "gui.whycantisleep.quality.sleepless",
+  "points": -20,
+  "when": {
+    "trouble": [
+      "sleepless"
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "label": "gui.whycantisleep.quality.monsters",
+  "per": "monsters",
+  "each": -6,
+  "most": -30,
+  "when": {
+    "monsters": {
+      "min": 1
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "label": "gui.whycantisleep.quality.nightmare",
+  "points": -15,
+  "when": {
+    "nightmare": true
+  }
+}

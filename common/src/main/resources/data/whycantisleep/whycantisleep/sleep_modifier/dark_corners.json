@@ -1,0 +1,8 @@
+{
+  "label": "gui.whycantisleep.quality.dark_corners",
+  "points": -10,
+  "when": {
+    "enclosed": true,
+    "lit": false
+  }
+}

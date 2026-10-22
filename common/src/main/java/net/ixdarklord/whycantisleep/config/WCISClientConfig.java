@@ -24,6 +24,8 @@ public final class WCISClientConfig {
             .comment("Colors each highlight by the kind of threat. Off, every highlight uses the highlight color.").enabledWhen(HIGHLIGHT_MONSTERS).build();
     public static final ConfigValue<Integer> HIGHLIGHT_COLOR = BUILDER.color("highlightColor", 0xFF5555)
             .comment("The highlight color when threat colors are off.").enabledWhen(THREAT_COLORS, enabled -> !enabled).build();
+    public static final ConfigValue<Boolean> BLOCKER_TRAILS = BUILDER.bool("blockerTrails", true)
+            .comment("Leaves faint footprints where the blocking monsters walked, for a while after their highlight is gone.").enabledWhen(HIGHLIGHT_MONSTERS).build();
     static {
         BUILDER.pop();
         BUILDER.push("hud", "Arrows around the crosshair and the action bar text.");
@@ -32,6 +34,12 @@ public final class WCISClientConfig {
             .comment("Draws arrows around the crosshair pointing to blocking monsters that are off-screen or behind walls.").enabledWhen(WCISServerConfig.ALLOW_ARROWS).build();
     public static final ConfigValue<ArrowSize> ARROW_SIZE = BUILDER.enumValue("arrowSize", ArrowSize.MEDIUM)
             .comment("How large the arrows are.").enabledWhen(OFF_SCREEN_ARROWS).build();
+    public static final ConfigValue<Boolean> SLEEP_DEBT_MOON = BUILDER.bool("sleepDebtMoon", true)
+            .comment("Shows a moon in the corner of the screen that fills up with each day you go without sleep. Needs the mod on the server.").build();
+    public static final ConfigValue<Boolean> MORNING_CARD = BUILDER.bool("morningCard", true)
+            .comment("Tells you in the morning how well you slept, and what woke you if something did. Needs the mod on the server.").enabledWhen(WCISServerConfig.SLEEP_QUALITY).build();
+    public static final ConfigValue<Boolean> STATUS_BUTTON = BUILDER.bool("statusButton", true)
+            .comment("Shows a moon button on your player in the inventory, which opens how you have been sleeping. Needs the mod on the server.").build();
     public static final ConfigValue<Boolean> ACTION_BAR_INFO = BUILDER.bool("actionBarInfo", true)
             .comment("Shows how many monsters are nearby and where the closest one is, above the hotbar.").build();
     static {
@@ -44,32 +52,10 @@ public final class WCISClientConfig {
             .comment("Warns before you use a bed where beds explode, such as the Nether and the End.").build();
     static {
         BUILDER.pop();
-        BUILDER.push("sleepBoard", "The multiplayer sleep board.");
+        BUILDER.push("sleepBoard", "The multiplayer bedtime panel.");
     }
     public static final ConfigValue<Boolean> SLEEP_BOARD = BUILDER.bool("sleepBoard", true)
             .comment("While you're in bed, shows who is still awake and why. Needs the mod on the server.").enabledWhen(WCISServerConfig.SLEEP_BOARD).build();
-    static {
-        BUILDER.pop();
-        BUILDER.push("spooky", "Whispers, scares and the thing under the bed.");
-    }
-    public static final ConfigValue<Boolean> SCARY_CONTENT = BUILDER.bool("scaryContent", true)
-            .comment("Off, nothing frightening happens to you: no whispers, no scares, no dark flashes, and the thing under the bed leaves you alone.").build();
-    public static final ConfigValue<Boolean> WHISPERS = BUILDER.bool("whispers", true)
-            .comment("Plays whispers from the direction of the nearest blocking monster.").build();
-    public static final ConfigValue<Integer> WHISPER_VOLUME = BUILDER.intValue("whisperVolume", 70)
-            .range(0, 100).slider().comment("How loud the whispers are, in percent.").enabledWhen(WHISPERS).build();
-    public static final ConfigValue<Boolean> UNDER_THE_BED_SCARES = BUILDER.bool("underTheBedScares", true)
-            .comment("Allows the rare \"monster under the bed\" scare on a failed sleep.").enabledWhen(WCISServerConfig.SCARE_CHANCE, chance -> chance > 0).build();
-    public static final ConfigValue<Boolean> SCREEN_SHAKE = BUILDER.bool("screenShake", true)
-            .comment("Shakes the screen during a scare.").enabledWhen(UNDER_THE_BED_SCARES).build();
-    static {
-        BUILDER.pop();
-        BUILDER.push("mind", "Mood and lucidity.");
-    }
-    public static final ConfigValue<Boolean> STATUS_INDICATORS = BUILDER.bool("statusIndicators", true)
-            .comment("Shows an icon under the crosshair, and a word of warning, when your mood or your lucidity is low.").enabledWhen(WCISServerConfig.MIND_SYSTEM).build();
-    public static final ConfigValue<Boolean> INVENTORY_STATUS = BUILDER.bool("inventoryStatus", true)
-            .comment("Shows your mood and your lucidity as bars above your inventory.").enabledWhen(WCISServerConfig.MIND_SYSTEM).build();
     static {
         BUILDER.pop();
     }

@@ -1,0 +1,9 @@
+{
+  "label": "gui.whycantisleep.quality.too_bright",
+  "points": -5,
+  "when": {
+    "pillow_light": {
+      "min": 13
+    }
+  }
+}

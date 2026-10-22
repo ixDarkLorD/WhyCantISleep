@@ -1,0 +1,11 @@
+{
+  "label": "gui.whycantisleep.quality.soothing",
+  "per": "soothing",
+  "each": 2,
+  "most": 10,
+  "when": {
+    "soothing": {
+      "min": 1
+    }
+  }
+}

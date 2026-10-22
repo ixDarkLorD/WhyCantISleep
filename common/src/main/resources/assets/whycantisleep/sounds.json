@@ -5,46 +5,32 @@
       { "name": "minecraft:entity.warden.heartbeat", "type": "event" }
     ]
   },
-  "lurker.ambient": {
-    "subtitle": "subtitles.whycantisleep.lurker.ambient",
+  "heartbeat.beat": {
+    "subtitle": "subtitles.whycantisleep.heartbeat.beat",
     "sounds": [
-      { "name": "minecraft:entity.warden.nearby_close", "type": "event" }
+      { "name": "minecraft:entity.warden.heartbeat", "type": "event" }
     ]
   },
-  "lurker.death": {
-    "subtitle": "subtitles.whycantisleep.lurker.death",
+  "heartbeat.calm": {
     "sounds": [
-      { "name": "minecraft:entity.phantom.death", "type": "event" }
+      { "name": "minecraft:block.amethyst_block.chime", "type": "event" }
     ]
   },
-  "lurker.emerge": {
-    "subtitle": "subtitles.whycantisleep.lurker.emerge",
+  "heartbeat.click": {
     "sounds": [
-      { "name": "minecraft:entity.warden.emerge", "type": "event" }
+      { "name": "minecraft:ui.button.click", "type": "event" }
     ]
   },
-  "lurker.hurt": {
-    "subtitle": "subtitles.whycantisleep.lurker.hurt",
+  "heartbeat.gasp": {
+    "subtitle": "subtitles.whycantisleep.heartbeat.gasp",
     "sounds": [
-      { "name": "minecraft:entity.phantom.hurt", "type": "event" }
+      { "name": "minecraft:entity.player.hurt_drown", "type": "event" }
     ]
   },
-  "lurker.lure": {
-    "subtitle": "subtitles.whycantisleep.lurker.lure",
+  "heartbeat.heart_lost": {
+    "subtitle": "subtitles.whycantisleep.heartbeat.heart_lost",
     "sounds": [
-      { "name": "minecraft:entity.warden.listening_angry", "type": "event" }
-    ]
-  },
-  "lurker.notice": {
-    "subtitle": "subtitles.whycantisleep.lurker.notice",
-    "sounds": [
-      { "name": "minecraft:entity.warden.roar", "type": "event" }
-    ]
-  },
-  "lurker.vanish": {
-    "subtitle": "subtitles.whycantisleep.lurker.vanish",
-    "sounds": [
-      { "name": "minecraft:entity.enderman.teleport", "type": "event" }
+      { "name": "minecraft:entity.item.break", "type": "event" }
     ]
   },
   "notice": {
@@ -58,23 +44,10 @@
       { "name": "minecraft:block.note_block.bell", "type": "event" }
     ]
   },
-  "scare": {
-    "subtitle": "subtitles.whycantisleep.scare",
-    "sounds": [
-      { "name": "minecraft:entity.enderman.stare", "type": "event" },
-      { "name": "minecraft:block.sculk_shrieker.shriek", "type": "event" }
-    ]
-  },
   "warning": {
     "subtitle": "subtitles.whycantisleep.warning",
     "sounds": [
       { "name": "minecraft:block.note_block.bass", "type": "event" }
-    ]
-  },
-  "whisper": {
-    "subtitle": "subtitles.whycantisleep.whisper",
-    "sounds": [
-      { "name": "minecraft:particle.soul_escape", "type": "event" }
     ]
   }
 }

@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientPlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
 import net.ixdarklord.whycantisleep.config.WCISServerConfig;
+import net.ixdarklord.whycantisleep.sleep.ThreatType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 
@@ -14,7 +15,8 @@ import java.util.List;
 
 /**
  * The monsters that blocked the player's last sleep, by network id, for as long as they are pointed out (the server's
- * highlight duration). The highlights and the arrows both read this.
+ * highlight duration). The highlights and the arrows both read this. Of them, the greatest threat (the most dangerous
+ * kind, then the nearest) is pointed out above the rest.
  */
 public final class Blockers {
     // Entity id to the client tick it stops being pointed out at.
@@ -22,6 +24,8 @@ public final class Blockers {
     private static long tick;
     private static long start;
     private static long end;
+    // The network id of the greatest threat, or -1.
+    private static int top = -1;
 
     private Blockers() {
     }
@@ -30,8 +34,12 @@ public final class Blockers {
         ClientTickEvents.END.register(minecraft -> {
             tick++;
             if (!ENDS.isEmpty()) ENDS.int2LongEntrySet().removeIf(entry -> entry.getLongValue() <= tick);
+            top = rankTop(minecraft);
         });
-        ClientPlayerEvents.LEAVE.register(player -> ENDS.clear());
+        ClientPlayerEvents.LEAVE.register(player -> {
+            ENDS.clear();
+            top = -1;
+        });
     }
 
     /** Points these monsters out, replacing those of an earlier sleep. */
@@ -54,6 +62,26 @@ public final class Blockers {
 
     public static boolean isEmpty() {
         return ENDS.isEmpty();
+    }
+
+    /** Whether this is the greatest threat of those pointed out. */
+    public static boolean isTop(Entity entity) {
+        return top == entity.getId() && contains(entity);
+    }
+
+    // The most dangerous kind of the pointed-out monsters, the nearest of them where two are as dangerous.
+    private static int rankTop(Minecraft minecraft) {
+        if (ENDS.isEmpty() || minecraft.player == null) return -1;
+        int best = -1;
+        double bestScore = Double.NEGATIVE_INFINITY;
+        for (Entity entity : entities()) {
+            double score = ThreatType.of(entity).danger() * 100.0 - entity.distanceTo(minecraft.player);
+            if (score > bestScore) {
+                bestScore = score;
+                best = entity.getId();
+            }
+        }
+        return best;
     }
 
     public static boolean contains(Entity entity) {

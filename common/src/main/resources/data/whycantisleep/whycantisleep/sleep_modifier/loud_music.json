@@ -1,0 +1,7 @@
+{
+  "label": "gui.whycantisleep.quality.loud_music",
+  "points": -15,
+  "when": {
+    "loud_music": true
+  }
+}

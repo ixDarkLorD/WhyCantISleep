@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:block/cube_column_horizontal",
-  "textures": {
-    "side": "whycantisleep:block/sleepwood_log",
-    "end": "whycantisleep:block/sleepwood_log_top"
-  }
-}

@@ -1,0 +1,12 @@
+{
+  "kind": "negative",
+  "rarity": "uncommon",
+  "effects": [
+    {
+      "id": "minecraft:nausea",
+      "duration": 200,
+      "amplifier": 0
+    }
+  ],
+  "name": "gui.whycantisleep.sleep_effect.headache"
+}
