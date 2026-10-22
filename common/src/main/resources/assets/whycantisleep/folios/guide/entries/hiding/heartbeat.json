@@ -1,0 +1,12 @@
+{
+  "name": "guide.whycantisleep.guide.entry.hiding.heartbeat.name",
+  "icon": "minecraft:heart_of_the_sea",
+  "sort": 3,
+  "pages": [
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.hiding.heartbeat.page1.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.heartbeat.page1.text"
+    }
+  ]
+}

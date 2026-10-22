@@ -1,0 +1,17 @@
+{
+  "name": "guide.whycantisleep.guide.entry.hiding.search.name",
+  "icon": "minecraft:spyglass",
+  "sort": 4,
+  "pages": [
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.hiding.search.page1.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.search.page1.text"
+    },
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.hiding.search.page2.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.search.page2.text"
+    }
+  ]
+}

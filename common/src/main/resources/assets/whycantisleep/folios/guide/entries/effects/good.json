@@ -1,0 +1,12 @@
+{
+  "name": "guide.whycantisleep.guide.entry.effects.good.name",
+  "icon": "minecraft:golden_apple",
+  "sort": 1,
+  "pages": [
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.effects.good.page1.title",
+      "text": "guide.whycantisleep.guide.entry.effects.good.page1.text"
+    }
+  ]
+}

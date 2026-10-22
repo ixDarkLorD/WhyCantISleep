@@ -1,0 +1,46 @@
+{
+  "name": "guide.whycantisleep.guide.entry.hiding.spots.name",
+  "icon": "minecraft:chest",
+  "sort": 1,
+  "pages": [
+    {
+      "type": "spotlight",
+      "item": "minecraft:red_bed",
+      "title": "guide.whycantisleep.guide.entry.hiding.spots.page1.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.spots.page1.text"
+    },
+    {
+      "type": "spotlight",
+      "item": "minecraft:oak_slab",
+      "title": "guide.whycantisleep.guide.entry.hiding.spots.page2.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.spots.page2.text"
+    },
+    {
+      "type": "spotlight",
+      "item": "minecraft:chest",
+      "title": "guide.whycantisleep.guide.entry.hiding.spots.page3.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.spots.page3.text"
+    },
+    {
+      "type": "spotlight",
+      "item": "minecraft:oak_door",
+      "title": "guide.whycantisleep.guide.entry.hiding.spots.page4.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.spots.page4.text"
+    },
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.hiding.spots.page5.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.spots.page5.text"
+    },
+    {
+      "type": "build",
+      "title": "guide.whycantisleep.guide.entry.hiding.spots.page6.title",
+      "builds": [
+        "closet",
+        "trapdoor_closet",
+        "double_closet"
+      ],
+      "text": "guide.whycantisleep.guide.entry.hiding.spots.page6.text"
+    }
+  ]
+}

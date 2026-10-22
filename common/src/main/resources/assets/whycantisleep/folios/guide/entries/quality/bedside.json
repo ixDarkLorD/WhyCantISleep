@@ -1,0 +1,19 @@
+{
+  "name": "guide.whycantisleep.guide.entry.quality.bedside.name",
+  "icon": "minecraft:poppy",
+  "sort": 2,
+  "pages": [
+    {
+      "type": "spotlight",
+      "item": "minecraft:poppy",
+      "title": "guide.whycantisleep.guide.entry.quality.bedside.page1.title",
+      "text": "guide.whycantisleep.guide.entry.quality.bedside.page1.text"
+    },
+    {
+      "type": "spotlight",
+      "item": "minecraft:skeleton_skull",
+      "title": "guide.whycantisleep.guide.entry.quality.bedside.page2.title",
+      "text": "guide.whycantisleep.guide.entry.quality.bedside.page2.text"
+    }
+  ]
+}

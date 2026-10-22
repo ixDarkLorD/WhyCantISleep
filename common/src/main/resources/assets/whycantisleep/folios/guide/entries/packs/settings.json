@@ -1,0 +1,12 @@
+{
+  "name": "guide.whycantisleep.guide.entry.packs.settings.name",
+  "icon": "minecraft:comparator",
+  "sort": 0,
+  "pages": [
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.packs.settings.page1.title",
+      "text": "guide.whycantisleep.guide.entry.packs.settings.page1.text"
+    }
+  ]
+}

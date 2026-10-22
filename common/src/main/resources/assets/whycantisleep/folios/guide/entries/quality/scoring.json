@@ -1,0 +1,17 @@
+{
+  "name": "guide.whycantisleep.guide.entry.quality.scoring.name",
+  "icon": "minecraft:clock",
+  "sort": 0,
+  "pages": [
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.quality.scoring.page1.title",
+      "text": "guide.whycantisleep.guide.entry.quality.scoring.page1.text"
+    },
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.quality.scoring.page2.title",
+      "text": "guide.whycantisleep.guide.entry.quality.scoring.page2.text"
+    }
+  ]
+}

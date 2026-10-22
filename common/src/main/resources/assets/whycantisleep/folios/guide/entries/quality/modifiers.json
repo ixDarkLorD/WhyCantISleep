@@ -1,0 +1,22 @@
+{
+  "name": "guide.whycantisleep.guide.entry.quality.modifiers.name",
+  "icon": "minecraft:compass",
+  "sort": 1,
+  "pages": [
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.quality.modifiers.page1.title",
+      "text": "guide.whycantisleep.guide.entry.quality.modifiers.page1.text"
+    },
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.quality.modifiers.page2.title",
+      "text": "guide.whycantisleep.guide.entry.quality.modifiers.page2.text"
+    },
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.quality.modifiers.page3.title",
+      "text": "guide.whycantisleep.guide.entry.quality.modifiers.page3.text"
+    }
+  ]
+}

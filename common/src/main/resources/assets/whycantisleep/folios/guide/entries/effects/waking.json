@@ -1,0 +1,12 @@
+{
+  "name": "guide.whycantisleep.guide.entry.effects.waking.name",
+  "icon": "minecraft:glowstone_dust",
+  "sort": 0,
+  "pages": [
+    {
+      "type": "text",
+      "title": "guide.whycantisleep.guide.entry.effects.waking.page1.title",
+      "text": "guide.whycantisleep.guide.entry.effects.waking.page1.text"
+    }
+  ]
+}

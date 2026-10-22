@@ -1,0 +1,25 @@
+{
+  "name": "guide.whycantisleep.guide.build.closet",
+  "pattern": [
+    [
+      "   ",
+      " P ",
+      "   "
+    ],
+    [
+      " P ",
+      "P P",
+      " D "
+    ],
+    [
+      " P ",
+      "P P",
+      " d "
+    ]
+  ],
+  "mapping": {
+    "P": "minecraft:oak_planks",
+    "D": "minecraft:oak_door[facing=south,half=upper,hinge=left,open=false]",
+    "d": "minecraft:oak_door[facing=south,half=lower,hinge=left,open=false]"
+  }
+}

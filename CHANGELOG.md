@@ -1,7 +1,7 @@
 # Changelog
 This file is for listing all the changes to this project
 
-## v26.1.2-1 Release | Unreleased
+## v26.1.2-1 Beta | Unreleased
 ### ✨ New Features
 - Project set up for Fabric and NeoForge (Minecraft 26.1 to 26.1.2), built on CoolCatLib: Core and CoolCatLib: Canvas.
 - **Monster highlights**: when monsters keep you from sleeping, exactly the ones that blocked it (the game's own check range) glow for a few seconds, colored by the kind of threat or in one color. Only you see it; a server can also show it to players without the mod through the game's glowing effect.
@@ -27,7 +27,7 @@ This file is for listing all the changes to this project
 - **Well rested**: sleeping through the night in a closed room lit all through (doors shut, no dark corners) leaves you well rested, with a little regeneration.
 - **Sleep effects**: waking in the morning can leave you with a sleep effect: one of nine positive dreams after good nights (Sweet Dreams, Early Bird, a Heroic Dream, the legendary Dream of Flight), eight negative ones after bad nights (Groggy, Stiff Back, a Pounding Headache, the legendary Cursed Dream), or five neutral ones after any (Vivid Dream, Dream of the Sea). Each has a rarity, common to legendary, that sets its weight in the draw and the color it is named in; the rarer good ones need better nights, the rarer bad ones worse. The morning card and the sleep status show it with a buff, debuff or neutral icon. 50% chance by default.
 - **Things by the bed**: soothing things placed near the bed (flowers, potted ones too, amethyst, candles, moss, bookshelves) help you sleep; unsettling ones (skulls and heads, cobwebs, sculk, spawners, wither roses) keep you up. Their tooltips say so, with a buff or debuff icon, the points each is worth, and a meter of how many count. The `#whycantisleep:soothing` and `#whycantisleep:unsettling` item tags decide which are which.
-- **Sleep status**: a small moon button in the corner of the inventory's player preview, its dot the color of your sleep trouble, opens a popup with how badly you are sleeping (rested, restless or sleepless, how long you have been awake, refused sleeps in a row) and how your last night went: its score as a meter of pips, what mattered most, the sleep effect you woke with, and whether you woke shaken or well rested.
+- **Sleep status**: a small moon button in the corner of the inventory's player preview, its rim the color of your sleep trouble and its moon smiling when you're rested, tired when restless and sad when sleepless, opens a popup with how badly you are sleeping (rested, restless or sleepless, how long you have been awake, refused sleeps in a row) and how your last night went: its score as a meter of pips, what mattered most, the sleep effect you woke with, and whether you woke shaken or well rested.
 - **Wake-up reasons**: woken before morning, a card says what woke you: something hurt you, or your bed was broken.
 - **Sleep debt moon**: a moon in the top left corner fills up with each day you go without sleep, full at three days when phantoms come.
 - **Threat ranking**: of the monsters that blocked a sleep, the most dangerous (a creeper above all, then the nearest) gets a brighter, throbbing outline and a larger pointer.
@@ -48,6 +48,7 @@ This file is for listing all the changes to this project
 - **A chest's view**: peering out of a chest, you can only turn so far.
 - **Everyone has to hide**: the monsters about your spot vanish when the hide time is up only if every other player near is hiding too; else they lose you and stay. A server setting turns the vanishing off.
 - **The hiding card's timer** shows only with monsters about, counting down the time left to hold out.
+- **Guide book**: the **Insomniac's Handbook**, a book in Folios, given to every player when they first join and crafted from a book and any bed, with everything about sleeping, hiding spots, sleep quality and its modifiers, the sleep effects, and the settings and tags for packs and servers.
 - Client and server configs, with client options locked while the server turns their feature off. Hiding under beds or tables and in chests or closets, the heartbeat minigame, monsters searching, monsters vanishing and the sleep status button can each be turned off.
 
 ### 🐛 Bug Fixes
@@ -56,4 +57,5 @@ This file is for listing all the changes to this project
 - Breaking a hiding spot brings whoever hides there out at once.
 
 ### 🛠️ Changes
+- Needs **Folios** for the guide book, and CoolCatLib 26.1.2-6.
 - The Lurker, the Dark Between, boss combat, and mood and lucidity moved to a mod of their own, **Behind Closed Eyes**, along with the whispers and the "monster under the bed" scare. Why Can't I Sleep? keeps the sleep features and no longer needs anything registered.

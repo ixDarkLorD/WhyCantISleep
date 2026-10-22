@@ -35,3 +35,11 @@ type = "required"
 versionRange = "[${coolcatlib_version},)"
 ordering = "AFTER"
 side = "BOTH"
+
+# The guide book is a Folios book.
+[[dependencies.${modid}]]
+modId = "folios"
+type = "required"
+versionRange = "[${folios_version},)"
+ordering = "NONE"
+side = "BOTH"
