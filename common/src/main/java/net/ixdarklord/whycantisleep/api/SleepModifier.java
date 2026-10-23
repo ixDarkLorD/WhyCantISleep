@@ -1,7 +1,7 @@
 package net.ixdarklord.whycantisleep.api;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.ToIntFunction;
 
@@ -18,7 +18,7 @@ import java.util.function.ToIntFunction;
  */
 public interface SleepModifier {
     /** What it is; registering another with the same id replaces it. */
-    Identifier id();
+    ResourceLocation id();
 
     /** How a player is told of it, on the morning card and in the sleep status: a name, in Title Case. */
     Component label();
@@ -27,10 +27,10 @@ public interface SleepModifier {
     int points(SleepContext context);
 
     /** A modifier from a function of the night. */
-    static SleepModifier of(Identifier id, Component label, ToIntFunction<SleepContext> points) {
+    static SleepModifier of(ResourceLocation id, Component label, ToIntFunction<SleepContext> points) {
         return new SleepModifier() {
             @Override
-            public Identifier id() {
+            public ResourceLocation id() {
                 return id;
             }
 

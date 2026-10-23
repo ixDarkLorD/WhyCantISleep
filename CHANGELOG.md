@@ -1,6 +1,14 @@
 # Changelog
 This file is for listing all the changes to this project
 
+## v1.20.1-1 Beta | Unreleased
+### ✨ New Features
+- Backported to Minecraft 1.20.1 for Forge and Fabric, with every feature of the 26.1.2 version below (built on CoolCatLib 1.20.1-2001.4.0.1 and Folios 1.20.1+2.1).
+
+### 🛠️ Changes
+- On 1.20.1 the music tags (`#whycantisleep:creepy`, `calm`, `loud`) are item tags of music discs, as 1.20.1 has no jukebox songs.
+- On 1.20.1 the sleep tooltip shows its icon and meter as colored symbols, and a fading card's icon fades only for flat items.
+
 ## v26.1.2-1 Beta | Unreleased
 ### ✨ New Features
 - Project set up for Fabric and NeoForge (Minecraft 26.1 to 26.1.2), built on CoolCatLib: Core and CoolCatLib: Canvas.

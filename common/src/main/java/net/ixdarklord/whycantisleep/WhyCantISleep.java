@@ -12,7 +12,7 @@ import net.ixdarklord.whycantisleep.sleep.RoomClearing;
 import net.ixdarklord.whycantisleep.sleep.SleepNights;
 import net.ixdarklord.whycantisleep.sleep.SleepVotes;
 import net.ixdarklord.whycantisleep.sleep.SleepTroubles;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +20,7 @@ import java.util.Locale;
 
 /**
  * Common mod constructor (CoolCatLib). Fabric lists it under the {@code coolcatlib:common} entrypoint, and
- * NeoForge's {@code WhyCantISleepNeoForge} passes it to {@code common(...)}. The client half is {@link WhyCantISleepClient}.
+ * Forge's {@code WhyCantISleepForge} passes it to {@code common(...)}. The client half is {@link WhyCantISleepClient}.
  */
 public final class WhyCantISleep implements ModConstructor {
     public static final String MOD_ID = "whycantisleep";
@@ -29,7 +29,7 @@ public final class WhyCantISleep implements ModConstructor {
 
     @Override
     public void onConstructMod() {
-        LOGGER.info("Loading {} on {}", MOD_NAME, Platform.isFabric() ? "Fabric" : "NeoForge");
+        LOGGER.info("Loading {} on {}", MOD_NAME, Platform.isFabric() ? "Fabric" : "Forge");
 
         WCISConfigs.register();
         WCISItems.register();
@@ -43,7 +43,7 @@ public final class WhyCantISleep implements ModConstructor {
         GuideBookGift.init();
     }
 
-    public static Identifier id(String path) {
-        return Identifier.fromNamespaceAndPath(MOD_ID, path.toLowerCase(Locale.ROOT));
+    public static ResourceLocation id(String path) {
+        return new ResourceLocation(MOD_ID, path.toLowerCase(Locale.ROOT));
     }
 }

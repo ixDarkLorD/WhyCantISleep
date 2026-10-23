@@ -1,0 +1,14 @@
+apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v4/forge.gradle"
+
+dependencies {
+    // CoolCatLib (Forge). Its common classes are inside this jar.
+    modImplementation "net.ixdarklord.coolcatlib:coolcatlib-forge:${libs.versions.minecraft.get()}-${coolcatlib_version}"
+    // Folios: the mod's guide book is a Folios book.
+    modImplementation("net.ixdarklord.folios:folios-forge:${folios_version}") { transitive = false }
+}
+
+// A dev run straight into a singleplayer world of run/saves when asked (-Ptest_world="<world folder>"), to test without
+// clicking through the menus.
+if (project.findProperty("test_world") != null) {
+    loom.runs.client.programArgs("--quickPlaySingleplayer", project.findProperty("test_world").toString())
+}

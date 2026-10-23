@@ -1,7 +1,7 @@
 package net.ixdarklord.whycantisleep.network;
 
 import net.ixdarklord.whycantisleep.WhyCantISleep;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.ixdarklord.coolcatcore.api.network.CustomPacketPayload;
 
 /** Server to client: the player has a night terror as they fall asleep (start), or woke from one. */
 public record TerrorPayload(boolean start) implements CustomPacketPayload {

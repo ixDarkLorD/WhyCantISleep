@@ -3,7 +3,8 @@ package net.ixdarklord.whycantisleep.api.datagen;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.ixdarklord.whycantisleep.api.SleepEffect;
-import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 
 /**
@@ -14,7 +15,7 @@ import net.minecraft.world.effect.MobEffect;
  *         .rarity(SleepEffect.Rarity.EPIC)
  *         .quality(70, 100)
  *         .effect(MobEffects.NIGHT_VISION, 300)
- *         .effect(MobEffects.SPEED, 60, 1);
+ *         .effect(MobEffects.MOVEMENT_SPEED, 60, 1);
  * }</pre>
  */
 public final class SleepEffectBuilder {
@@ -72,15 +73,16 @@ public final class SleepEffectBuilder {
     }
 
     /** A mob effect it gives, for a number of seconds, at level I. */
-    public SleepEffectBuilder effect(Holder<MobEffect> effect, int seconds) {
+    public SleepEffectBuilder effect(MobEffect effect, int seconds) {
         return this.effect(effect, seconds, 0);
     }
 
     /** A mob effect it gives, for a number of seconds, at an amplifier (0 for level I). */
-    public SleepEffectBuilder effect(Holder<MobEffect> effect, int seconds, int amplifier) {
+    public SleepEffectBuilder effect(MobEffect effect, int seconds, int amplifier) {
         JsonObject entry = new JsonObject();
-        entry.addProperty("id", effect.unwrapKey().orElseThrow(() -> new IllegalArgumentException("An unregistered mob effect"))
-                .identifier().toString());
+        ResourceLocation id = BuiltInRegistries.MOB_EFFECT.getKey(effect);
+        if (id == null) throw new IllegalArgumentException("An unregistered mob effect");
+        entry.addProperty("id", id.toString());
         entry.addProperty("duration", seconds * 20);
         entry.addProperty("amplifier", amplifier);
         this.effects.add(entry);

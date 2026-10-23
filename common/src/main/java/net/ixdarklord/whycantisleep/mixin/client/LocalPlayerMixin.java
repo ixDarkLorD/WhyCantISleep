@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /** Under a bed the player can look around but not move or jump; sneaking brings them out ({@code HidingClient}). */
 @Mixin(LocalPlayer.class)
 public abstract class LocalPlayerMixin {
-    @Inject(method = "applyInput", at = @At("TAIL"))
+    @Inject(method = "serverAiStep", at = @At("TAIL"))
     private void whycantisleep$stillWhileHiding(CallbackInfo ci) {
         if (!HidingClient.isLocalHiding()) return;
         LocalPlayer self = (LocalPlayer) (Object) this;

@@ -1,7 +1,6 @@
 package net.ixdarklord.whycantisleep.mixin;
 
 import net.ixdarklord.whycantisleep.hiding.Hiding;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import org.jetbrains.annotations.Nullable;
@@ -17,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(TargetingConditions.class)
 public abstract class TargetingConditionsMixin {
     @Inject(method = "test", at = @At("HEAD"), cancellable = true)
-    private void whycantisleep$hiddenUnderTheBed(ServerLevel level, @Nullable LivingEntity targeter, LivingEntity target, CallbackInfoReturnable<Boolean> cir) {
+    private void whycantisleep$hiddenUnderTheBed(@Nullable LivingEntity targeter, LivingEntity target, CallbackInfoReturnable<Boolean> cir) {
         if (Hiding.hiddenFrom(targeter, target)) cir.setReturnValue(false);
     }
 }

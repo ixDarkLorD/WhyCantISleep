@@ -2,7 +2,7 @@ package net.ixdarklord.whycantisleep.network;
 
 import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.whycantisleep.sleep.AwakeReason;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.ixdarklord.coolcatcore.api.network.CustomPacketPayload;
 
 import java.util.List;
 import java.util.UUID;

@@ -5,6 +5,8 @@ import net.ixdarklord.whycantisleep.sleep.SleepChecks;
 import net.ixdarklord.whycantisleep.sleep.SleepNights;
 import net.ixdarklord.whycantisleep.sleep.SleepServer;
 import net.minecraft.core.BlockPos;
+import net.ixdarklord.whycantisleep.hiding.HidingServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Unit;
 
@@ -42,6 +44,12 @@ public abstract class ServerPlayerMixin {
         @SuppressWarnings("unchecked")
         List<Monster> ruled = (List<Monster>) (List<?>) SleepChecks.applyRules((ServerPlayer) (Object) this, pos, monsters);
         return ruled;
+    }
+
+    // CoolCatLib 1.20.1 has no dimension change event; both ways of changing dimension (a portal, a command) end here.
+    @Inject(method = "triggerDimensionChangeTriggers", at = @At("TAIL"))
+    private void whycantisleep$onChangedDimension(ServerLevel from, CallbackInfo ci) {
+        HidingServer.onChangedDimension((ServerPlayer) (Object) this);
     }
 
     @Inject(method = "stopSleepInBed", at = @At("HEAD"))

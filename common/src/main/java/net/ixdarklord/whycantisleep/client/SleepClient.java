@@ -18,7 +18,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -80,7 +79,7 @@ public final class SleepClient {
         if (!WCISClientConfig.DIMENSION_WARNING.get()) return false;
         // Sneaking with an item in hand uses the item, not the bed.
         if (player.isSecondaryUseActive() && !(player.getMainHandItem().isEmpty() && player.getOffhandItem().isEmpty())) return false;
-        if (!player.level().environmentAttributes().getValue(EnvironmentAttributes.BED_RULE, bed).explodes()) return false;
+        if (BedBlock.canSetSpawn(player.level())) return false;
 
         if (bed.equals(warnedBed) && tick - warnedAt <= WARNING_TICKS) {
             // The other hand's turn in the same click is stopped like the first.

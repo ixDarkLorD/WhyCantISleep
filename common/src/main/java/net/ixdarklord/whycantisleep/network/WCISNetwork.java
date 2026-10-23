@@ -10,7 +10,7 @@ import net.ixdarklord.whycantisleep.client.board.SleepBoard;
 import net.ixdarklord.whycantisleep.hiding.HidingServer;
 import net.ixdarklord.whycantisleep.sleep.SleepBoardServer;
 import net.ixdarklord.whycantisleep.sleep.SleepVotes;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.ixdarklord.coolcatcore.api.network.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
 /**

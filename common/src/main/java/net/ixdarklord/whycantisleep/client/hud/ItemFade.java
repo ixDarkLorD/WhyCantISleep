@@ -1,33 +1,28 @@
 package net.ixdarklord.whycantisleep.client.hud;
 
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Items drawn faded on the HUD. The game draws GUI items from an atlas at full opacity, with no way to ask for less, so
- * a card fading in or out had to hide its icon instead. Drawn through here, an item remembers the opacity it was asked
- * for ({@code GuiItemRenderStateMixin}) and is blitted with it ({@code GuiRendererMixin}).
+ * Items drawn faded on the HUD, so a card fading in or out fades its icon with it. On 1.20.1 a GUI item is drawn at
+ * once, through the shaders' color, so the opacity is that color for the one item: items drawn translucent (most flat
+ * ones) fade, and solid block models only darken.
  */
 public final class ItemFade {
-    /** The opacity of items being drawn right now; 1 outside {@link #item}. Read by the mixins. */
-    public static float alpha = 1.0F;
-
     private ItemFade() {
     }
 
-    /** Draws an item, as {@code fakeItem} does, at an opacity from 0 to 1. */
-    public static void item(GuiGraphicsExtractor graphics, ItemStack stack, int x, int y, float opacity) {
+    /** Draws an item, as {@code renderFakeItem} does, at an opacity from 0 to 1. */
+    public static void item(GuiGraphics graphics, ItemStack stack, int x, int y, float opacity) {
         if (opacity <= 0.0F) return;
-        alpha = Math.min(opacity, 1.0F);
+        float alpha = Math.min(opacity, 1.0F);
+        RenderSystem.enableBlend();
+        RenderSystem.setShaderColor(alpha, alpha, alpha, alpha);
         try {
-            graphics.fakeItem(stack, x, y);
+            graphics.renderFakeItem(stack, x, y);
         } finally {
-            alpha = 1.0F;
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
-    }
-
-    /** An item render state that knows the opacity it was drawn at. */
-    public interface Faded {
-        float whycantisleep$alpha();
     }
 }

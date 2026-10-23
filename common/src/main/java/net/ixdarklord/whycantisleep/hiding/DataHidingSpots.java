@@ -1,5 +1,6 @@
 package net.ixdarklord.whycantisleep.hiding;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -14,12 +15,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.player.Player;
@@ -43,15 +42,15 @@ import java.util.TreeMap;
  * in {@link net.ixdarklord.whycantisleep.api.HidingSpots}). Loaded on the server with its data; a client never has them,
  * and lets the server decide what a sneak-use of such a block does.
  */
-public final class DataHidingSpots extends SimpleJsonResourceReloadListener<JsonElement> {
+public final class DataHidingSpots extends SimpleJsonResourceReloadListener {
     public static final DataHidingSpots INSTANCE = new DataHidingSpots();
     private static List<DataType> types = List.of();
 
     private DataHidingSpots() {
-        super(ExtraCodecs.JSON, FileToIdConverter.json("whycantisleep/hiding_spot"));
+        super(new Gson(), "whycantisleep/hiding_spot");
     }
 
-    public static @Nullable HidingSpotType get(Identifier id) {
+    public static @Nullable HidingSpotType get(ResourceLocation id) {
         for (DataType type : types) {
             if (type.id.equals(id)) return type;
         }
@@ -66,7 +65,7 @@ public final class DataHidingSpots extends SimpleJsonResourceReloadListener<Json
     }
 
     @Override
-    protected void apply(@NotNull Map<Identifier, JsonElement> files, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
+    protected void apply(@NotNull Map<ResourceLocation, JsonElement> files, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
         List<DataType> loaded = new ArrayList<>();
         new TreeMap<>(files).forEach((id, json) -> Definition.CODEC.parse(JsonOps.INSTANCE, json)
                 .resultOrPartial(error -> WhyCantISleep.LOGGER.error("Skipping the hiding spot {}: {}", id, error))
@@ -114,22 +113,22 @@ public final class DataHidingSpots extends SimpleJsonResourceReloadListener<Json
     }
 
     private static final class DataType implements HidingSpotType {
-        private final Identifier id;
+        private final ResourceLocation id;
         private final Definition definition;
-        private final List<Identifier> blocks = new ArrayList<>();
+        private final List<ResourceLocation> blocks = new ArrayList<>();
         private final List<TagKey<Block>> tags = new ArrayList<>();
 
-        private DataType(Identifier id, Definition definition) {
+        private DataType(ResourceLocation id, Definition definition) {
             this.id = id;
             this.definition = definition;
             for (String entry : definition.blocks()) {
-                if (entry.startsWith("#")) this.tags.add(TagKey.create(Registries.BLOCK, Identifier.parse(entry.substring(1))));
-                else this.blocks.add(Identifier.parse(entry));
+                if (entry.startsWith("#")) this.tags.add(TagKey.create(Registries.BLOCK, new ResourceLocation(entry.substring(1))));
+                else this.blocks.add(new ResourceLocation(entry));
             }
         }
 
         @Override
-        public Identifier id() {
+        public ResourceLocation id() {
             return this.id;
         }
 

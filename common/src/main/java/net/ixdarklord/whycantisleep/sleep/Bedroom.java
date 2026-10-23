@@ -5,11 +5,11 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.JukeboxSong;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
@@ -26,12 +26,13 @@ import java.util.Deque;
  * round it that soothes or unsettles ({@link SleepDecor}), and what music plays near it.
  */
 public record Bedroom(boolean enclosed, boolean lit, int pillowLight, SleepDecor.Count decor) {
-    /** Songs that keep a sleeper up: the eerie discs (11, 13, ward, 5, mellohi) and any a pack adds. */
-    public static final TagKey<JukeboxSong> CREEPY = TagKey.create(Registries.JUKEBOX_SONG, WhyCantISleep.id("creepy"));
-    /** Songs that lull a sleeper off. */
-    public static final TagKey<JukeboxSong> CALM = TagKey.create(Registries.JUKEBOX_SONG, WhyCantISleep.id("calm"));
-    /** Songs too loud and lively to sleep through (Pigstep, Otherside, Blocks, Creator). */
-    public static final TagKey<JukeboxSong> LOUD = TagKey.create(Registries.JUKEBOX_SONG, WhyCantISleep.id("loud"));
+    // 1.20.1 has no jukebox songs: the tags are of the music disc items instead.
+    /** Discs that keep a sleeper up: the eerie ones (11, 13, ward, 5, mellohi) and any a pack adds. */
+    public static final TagKey<Item> CREEPY = TagKey.create(Registries.ITEM, WhyCantISleep.id("creepy"));
+    /** Discs that lull a sleeper off. */
+    public static final TagKey<Item> CALM = TagKey.create(Registries.ITEM, WhyCantISleep.id("calm"));
+    /** Discs too loud and lively to sleep through (Pigstep, Otherside). */
+    public static final TagKey<Item> LOUD = TagKey.create(Registries.ITEM, WhyCantISleep.id("loud"));
     // A room is the air round the bed reached without passing walls or shut doors; one bigger than ROOM_LIMIT blocks,
     // or reaching further than ROOM_RADIUS, or under the open sky, isn't closed.
     private static final int ROOM_LIMIT = 600;
@@ -81,18 +82,15 @@ public record Bedroom(boolean enclosed, boolean lit, int pillowLight, SleepDecor
         int chunkX = bed.getX() >> 4;
         int chunkZ = bed.getZ() >> 4;
         int reach = ((int) MUSIC_RANGE >> 4) + 1;
-        var songs = level.registryAccess().lookupOrThrow(Registries.JUKEBOX_SONG);
         for (int dx = -reach; dx <= reach; dx++) {
             for (int dz = -reach; dz <= reach; dz++) {
                 LevelChunk chunk = level.getChunkSource().getChunkNow(chunkX + dx, chunkZ + dz);
                 if (chunk == null) continue;
                 for (BlockEntity entity : chunk.getBlockEntities().values()) {
-                    if (!(entity instanceof JukeboxBlockEntity jukebox) || !jukebox.getSongPlayer().isPlaying()) continue;
+                    if (!(entity instanceof JukeboxBlockEntity jukebox) || !jukebox.isRecordPlaying()) continue;
                     if (jukebox.getBlockPos().distSqr(bed) > MUSIC_RANGE * MUSIC_RANGE) continue;
-                    JukeboxSong song = jukebox.getSongPlayer().getSong();
-                    if (song == null) continue;
-                    Holder<JukeboxSong> holder = songs.wrapAsHolder(song);
-                    Music music = holder.is(CREEPY) ? Music.CREEPY : holder.is(LOUD) ? Music.LOUD : holder.is(CALM) ? Music.CALM : Music.OTHER;
+                    ItemStack disc = jukebox.getFirstItem();
+                    Music music = disc.is(CREEPY) ? Music.CREEPY : disc.is(LOUD) ? Music.LOUD : disc.is(CALM) ? Music.CALM : Music.OTHER;
                     if (music.ordinal() > heard.ordinal()) heard = music;
                 }
             }

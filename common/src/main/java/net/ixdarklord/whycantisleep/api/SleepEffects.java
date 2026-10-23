@@ -1,7 +1,7 @@
 package net.ixdarklord.whycantisleep.api;
 
 import net.ixdarklord.whycantisleep.sleep.DataSleepEffects;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,7 +23,7 @@ import java.util.Map;
  * }</pre>
  */
 public final class SleepEffects {
-    private static final Map<Identifier, SleepEffect> REGISTERED = new LinkedHashMap<>();
+    private static final Map<ResourceLocation, SleepEffect> REGISTERED = new LinkedHashMap<>();
     // How likely each kind is after a night: positive with its score above 40, negative below 60, neutral always a little.
     private static final int POSITIVE_FROM = 40;
     private static final int NEGATIVE_BELOW = 60;
@@ -39,12 +39,12 @@ public final class SleepEffects {
 
     /** Every sleep effect, registered and from data packs. */
     public static Collection<SleepEffect> all() {
-        Map<Identifier, SleepEffect> all = new LinkedHashMap<>(REGISTERED);
+        Map<ResourceLocation, SleepEffect> all = new LinkedHashMap<>(REGISTERED);
         for (SleepEffect effect : DataSleepEffects.all()) all.put(effect.id(), effect);
         return all.values();
     }
 
-    public static @Nullable SleepEffect get(Identifier id) {
+    public static @Nullable SleepEffect get(ResourceLocation id) {
         for (SleepEffect effect : all()) {
             if (effect.id().equals(id)) return effect;
         }
@@ -82,6 +82,6 @@ public final class SleepEffects {
             roll -= effect.weight();
             if (roll < 0) return effect;
         }
-        return fitting.getLast();
+        return fitting.get(fitting.size() - 1);
     }
 }
