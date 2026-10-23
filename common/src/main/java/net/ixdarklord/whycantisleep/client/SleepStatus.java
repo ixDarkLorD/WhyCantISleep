@@ -11,15 +11,13 @@ import net.ixdarklord.whycantisleep.network.TroublePayload;
 import net.ixdarklord.whycantisleep.network.WokePayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -37,17 +35,17 @@ import java.util.Locale;
 public final class SleepStatus {
     // The button: a dark tile with a sleeping moon face, lighter under the pointer and lighter still while open
     // (tools/gen_status_button.py); its rim is drawn in the sleep trouble's color.
-    private static final Identifier BUTTON_SPRITE = WhyCantISleep.id("hud/status_button");
-    private static final Identifier BUTTON_HOVER = WhyCantISleep.id("hud/status_button_hover");
-    private static final Identifier BUTTON_OPEN = WhyCantISleep.id("hud/status_button_open");
+    private static final ResourceLocation BUTTON_SPRITE = WhyCantISleep.id("hud/status_button");
+    private static final ResourceLocation BUTTON_HOVER = WhyCantISleep.id("hud/status_button_hover");
+    private static final ResourceLocation BUTTON_OPEN = WhyCantISleep.id("hud/status_button_open");
     // The same, sad: a frown and a tear, while sleep is awful.
-    private static final Identifier BUTTON_SAD = WhyCantISleep.id("hud/status_button_sad");
-    private static final Identifier BUTTON_SAD_HOVER = WhyCantISleep.id("hud/status_button_sad_hover");
-    private static final Identifier BUTTON_SAD_OPEN = WhyCantISleep.id("hud/status_button_sad_open");
+    private static final ResourceLocation BUTTON_SAD = WhyCantISleep.id("hud/status_button_sad");
+    private static final ResourceLocation BUTTON_SAD_HOVER = WhyCantISleep.id("hud/status_button_sad_hover");
+    private static final ResourceLocation BUTTON_SAD_OPEN = WhyCantISleep.id("hud/status_button_sad_open");
     // Tired: bags under the eyes, while restless or after a poor night.
-    private static final Identifier BUTTON_TIRED = WhyCantISleep.id("hud/status_button_tired");
-    private static final Identifier BUTTON_TIRED_HOVER = WhyCantISleep.id("hud/status_button_tired_hover");
-    private static final Identifier BUTTON_TIRED_OPEN = WhyCantISleep.id("hud/status_button_tired_open");
+    private static final ResourceLocation BUTTON_TIRED = WhyCantISleep.id("hud/status_button_tired");
+    private static final ResourceLocation BUTTON_TIRED_HOVER = WhyCantISleep.id("hud/status_button_tired_hover");
+    private static final ResourceLocation BUTTON_TIRED_OPEN = WhyCantISleep.id("hud/status_button_tired_open");
     // A last night scored under these is awful, or poor (the morning card's words for them).
     private static final int AWFUL_BELOW = 25;
     private static final int POOR_BELOW = 45;
@@ -130,7 +128,7 @@ public final class SleepStatus {
     }
 
     /** Draws the button, and the popup when open ({@code InventoryScreenMixin}, after the screen). */
-    public static void render(GuiGraphicsExtractor graphics, Font font, int left, int top, int mouseX, int mouseY) {
+    public static void render(GuiGraphics graphics, Font font, int left, int top, int mouseX, int mouseY) {
         if (!WCISClientConfig.STATUS_BUTTON.get()) return;
         int x = buttonX(left);
         int y = buttonY(top);
@@ -141,10 +139,10 @@ public final class SleepStatus {
         // or after a poor one, else content.
         boolean awful = level == SleepTrouble.Level.SLEEPLESS || (lastNight != null && lastNight.score() < AWFUL_BELOW);
         boolean tired = level == SleepTrouble.Level.RESTLESS || (lastNight != null && lastNight.score() < POOR_BELOW);
-        Identifier sprite = awful ? (open ? BUTTON_SAD_OPEN : hover ? BUTTON_SAD_HOVER : BUTTON_SAD)
+        ResourceLocation sprite = awful ? (open ? BUTTON_SAD_OPEN : hover ? BUTTON_SAD_HOVER : BUTTON_SAD)
                 : tired ? (open ? BUTTON_TIRED_OPEN : hover ? BUTTON_TIRED_HOVER : BUTTON_TIRED)
                 : open ? BUTTON_OPEN : hover ? BUTTON_HOVER : BUTTON_SPRITE;
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, y, BUTTON, BUTTON);
+        HudStyle.sprite(graphics, sprite, x, y, BUTTON, BUTTON);
         // The rim round the tile, its corners left out, in the trouble's color: green rested, amber restless, red
         // sleepless, when it throbs.
         float glow = level == SleepTrouble.Level.SLEEPLESS ? 0.6F + 0.4F * Mth.sin(Util.getMillis() / 160.0F) : 1.0F;
@@ -155,10 +153,10 @@ public final class SleepStatus {
         graphics.fill(x, y + 1, x + 1, y + last, rim);
         graphics.fill(x + last, y + 1, x + BUTTON, y + last, rim);
         if (open) popup(graphics, font, x + BUTTON + 4, y, level, color);
-        else if (hover) graphics.setTooltipForNextFrame(font, Component.translatable("gui.whycantisleep.status.button"), mouseX, mouseY);
+        else if (hover) graphics.renderTooltip(font, Component.translatable("gui.whycantisleep.status.button"), mouseX, mouseY);
     }
 
-    private static void popup(GuiGraphicsExtractor graphics, Font font, int x, int y, SleepTrouble.Level level, int color) {
+    private static void popup(GuiGraphics graphics, Font font, int x, int y, SleepTrouble.Level level, int color) {
         List<Row> rows = rows(level);
         int height = 0;
         for (Row row : rows) height += row.height;
@@ -185,11 +183,11 @@ public final class SleepStatus {
         int color = color(level);
         // The trouble: the title, its level at the right, and what that means.
         rows.add(new Row(LINE, (graphics, font, x, y, width) -> {
-            graphics.text(font, Component.translatable("gui.whycantisleep.status.title"), x, y, HudStyle.color(HudStyle.WHITE, 1.0F), false);
+            HudStyle.text(graphics, font, Component.translatable("gui.whycantisleep.status.title"), x, y, HudStyle.color(HudStyle.WHITE, 1.0F), false);
             Component name = Component.translatable("gui.whycantisleep.status.level." + levelName);
-            graphics.text(font, name, x + width - font.width(name), y, HudStyle.color(color, 1.0F), false);
+            HudStyle.text(graphics, font, name, x + width - font.width(name), y, HudStyle.color(color, 1.0F), false);
         }));
-        rows.add(new Row(LINE + GAP, (graphics, font, x, y, width) -> graphics.text(font,
+        rows.add(new Row(LINE + GAP, (graphics, font, x, y, width) -> HudStyle.text(graphics, font,
                 Component.translatable("gui.whycantisleep.status.level." + levelName + ".hint"), x, y, HudStyle.color(HudStyle.GRAY, 1.0F), false)));
         rows.add(divider());
         rows.add(pair(Component.translatable("gui.whycantisleep.status.awake_for"), awakeFor(), HudStyle.WHITE));
@@ -209,12 +207,12 @@ public final class SleepStatus {
         }
         int nightColor = night.score() >= 65 ? HudStyle.GREEN : night.score() >= 45 ? HudStyle.YELLOW : HudStyle.RED;
         rows.add(new Row(LINE + 1, (graphics, font, x, y, width) -> {
-            graphics.text(font, Component.translatable("gui.whycantisleep.status.last_night"), x, y, HudStyle.color(HudStyle.MUTED, 1.0F), false);
+            HudStyle.text(graphics, font, Component.translatable("gui.whycantisleep.status.last_night"), x, y, HudStyle.color(HudStyle.MUTED, 1.0F), false);
             Component out = Component.literal("/100");
             Component score = Component.literal(String.valueOf(night.score()));
             int outX = x + width - font.width(out);
-            graphics.text(font, out, outX, y, HudStyle.color(HudStyle.MUTED, 1.0F), false);
-            graphics.text(font, score, outX - font.width(score) - 1, y, HudStyle.color(HudStyle.WHITE, 1.0F), false);
+            HudStyle.text(graphics, font, out, outX, y, HudStyle.color(HudStyle.MUTED, 1.0F), false);
+            HudStyle.text(graphics, font, score, outX - font.width(score) - 1, y, HudStyle.color(HudStyle.WHITE, 1.0F), false);
         }));
         rows.add(new Row(PIP_HEIGHT + GAP, (graphics, font, x, y, width) ->
                 HudStyle.pips(graphics, x, y, width, PIP_HEIGHT, night.score() / 100.0F, nightColor, 1.0F)));
@@ -227,8 +225,8 @@ public final class SleepStatus {
             rows.add(new Row(LINE, (graphics, font, x, y, width) -> {
                 Component points = Component.literal((line.points() > 0 ? "+" : "−") + Math.abs(line.points()));
                 SleepTooltip.icon(graphics, x, y - 1, line.points());
-                graphics.text(font, points, x + POINTS_WIDTH - font.width(points), y, HudStyle.color(line.points() > 0 ? HudStyle.GREEN : HudStyle.RED, 1.0F), false);
-                graphics.text(font, font.split(line.label(), width - POINTS_WIDTH - 6).getFirst(), x + POINTS_WIDTH + 6, y,
+                HudStyle.text(graphics, font, points, x + POINTS_WIDTH - font.width(points), y, HudStyle.color(line.points() > 0 ? HudStyle.GREEN : HudStyle.RED, 1.0F), false);
+                HudStyle.text(graphics, font, font.split(line.label(), width - POINTS_WIDTH - 6).getFirst(), x + POINTS_WIDTH + 6, y,
                         HudStyle.color(HudStyle.SILVER, 1.0F), false);
             }));
         }
@@ -236,13 +234,13 @@ public final class SleepStatus {
             SleepTooltip.icon(graphics, x, y + 1, dream.kind());
             Component rarity = Component.translatable("gui.whycantisleep.rarity." + dream.rarity().getSerializedName());
             int rarityX = x + width - font.width(rarity);
-            graphics.text(font, font.split(dream.name(), rarityX - x - SleepTooltip.ICON_SIZE - 8).getFirst(), x + SleepTooltip.ICON_SIZE + 4, y + 2,
+            HudStyle.text(graphics, font, font.split(dream.name(), rarityX - x - SleepTooltip.ICON_SIZE - 8).getFirst(), x + SleepTooltip.ICON_SIZE + 4, y + 2,
                     HudStyle.color(dream.rarity().color(), 1.0F), false);
-            graphics.text(font, rarity, rarityX, y + 2, HudStyle.color(dream.rarity().color(), 0.7F), false);
+            HudStyle.text(graphics, font, rarity, rarityX, y + 2, HudStyle.color(dream.rarity().color(), 0.7F), false);
         })));
         Component note = note(night);
         if (note != null) {
-            rows.add(new Row(LINE + 2, (graphics, font, x, y, width) -> graphics.text(font, note, x, y + 2, HudStyle.color(HudStyle.MUTED, 1.0F), false)));
+            rows.add(new Row(LINE + 2, (graphics, font, x, y, width) -> HudStyle.text(graphics, font, note, x, y + 2, HudStyle.color(HudStyle.MUTED, 1.0F), false)));
         }
         return rows;
     }
@@ -275,8 +273,8 @@ public final class SleepStatus {
 
     private static Row pair(Component label, Component value, int valueColor) {
         return new Row(LINE, (graphics, font, x, y, width) -> {
-            graphics.text(font, label, x, y, HudStyle.color(HudStyle.MUTED, 1.0F), false);
-            graphics.text(font, value, x + width - font.width(value), y, HudStyle.color(valueColor, 1.0F), false);
+            HudStyle.text(graphics, font, label, x, y, HudStyle.color(HudStyle.MUTED, 1.0F), false);
+            HudStyle.text(graphics, font, value, x + width - font.width(value), y, HudStyle.color(valueColor, 1.0F), false);
         });
     }
 
@@ -289,6 +287,6 @@ public final class SleepStatus {
 
     @FunctionalInterface
     private interface Draw {
-        void draw(GuiGraphicsExtractor graphics, Font font, int x, int y, int width);
+        void draw(GuiGraphics graphics, Font font, int x, int y, int width);
     }
 }

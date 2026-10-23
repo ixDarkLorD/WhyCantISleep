@@ -1,0 +1,10 @@
+{
+  "providers": [
+    {"type": "bitmap", "file": "whycantisleep:gui/sprites/hud/buff.png", "ascent": 8, "height": 9, "chars": [""]},
+    {"type": "bitmap", "file": "whycantisleep:gui/sprites/hud/debuff.png", "ascent": 8, "height": 9, "chars": [""]},
+    {"type": "bitmap", "file": "whycantisleep:gui/sprites/hud/neutral.png", "ascent": 8, "height": 9, "chars": [""]},
+    {"type": "bitmap", "file": "whycantisleep:gui/sprites/hud/pip_soothing.png", "ascent": 7, "height": 8, "chars": [""]},
+    {"type": "bitmap", "file": "whycantisleep:gui/sprites/hud/pip_unsettling.png", "ascent": 7, "height": 8, "chars": [""]},
+    {"type": "bitmap", "file": "whycantisleep:gui/sprites/hud/pip_empty.png", "ascent": 7, "height": 8, "chars": [""]}
+  ]
+}

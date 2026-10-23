@@ -12,7 +12,7 @@ import net.ixdarklord.whycantisleep.sleep.RoomClearing;
 import net.ixdarklord.whycantisleep.sleep.SleepNights;
 import net.ixdarklord.whycantisleep.sleep.SleepVotes;
 import net.ixdarklord.whycantisleep.sleep.SleepTroubles;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,7 @@ public final class WhyCantISleep implements ModConstructor {
         GuideBookGift.init();
     }
 
-    public static Identifier id(String path) {
-        return Identifier.fromNamespaceAndPath(MOD_ID, path.toLowerCase(Locale.ROOT));
+    public static ResourceLocation id(String path) {
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path.toLowerCase(Locale.ROOT));
     }
 }

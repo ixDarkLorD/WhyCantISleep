@@ -4,8 +4,8 @@ import net.ixdarklord.whycantisleep.client.Blockers;
 import net.ixdarklord.whycantisleep.config.WCISClientConfig;
 import net.ixdarklord.whycantisleep.config.WCISConfigs;
 import net.ixdarklord.whycantisleep.sleep.ThreatType;
-import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
+import net.minecraft.util.FastColor.ARGB32;
 import net.minecraft.world.entity.Entity;
 
 /**
@@ -33,6 +33,6 @@ public final class Highlights {
         int color = WCISClientConfig.THREAT_COLORS.get() ? ThreatType.of(entity).color() : WCISClientConfig.HIGHLIGHT_COLOR.get() & 0xFFFFFF;
         if (!Blockers.isTop(entity)) return color;
         float bright = TOP_BRIGHTEN + TOP_THROB * Mth.sin(Blockers.age(0.0F) * TOP_THROB_SPEED);
-        return ARGB.srgbLerp(bright, color, 0xFFFFFF) & 0xFFFFFF;
+        return ARGB32.lerp(bright, color, 0xFFFFFF) & 0xFFFFFF;
     }
 }

@@ -1,5 +1,6 @@
 package net.ixdarklord.whycantisleep.client;
 
+import net.ixdarklord.whycantisleep.client.hud.HudStyle;
 import com.mojang.blaze3d.platform.InputConstants;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -23,11 +24,10 @@ import net.ixdarklord.whycantisleep.network.NoisePayload;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -50,7 +50,7 @@ import java.util.Map;
 public final class HidingClient {
     /** Held while hiding, the player holds their breath: they make no noise, until they run out and gasp. */
     public static final KeyMapping HOLD_BREATH = new KeyMapping("key.whycantisleep.hold_breath", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V,
-            KeyMapping.Category.GAMEPLAY);
+            "key.categories.gameplay");
     // A card that stays up for as long as the player hides; it is taken down when they come out.
     private static final int CARD_TICKS = 20 * 60 * 60;
     // How near a monster must be for a hiding player to tremble, and for their card to warn; and how often to look.
@@ -70,7 +70,7 @@ public final class HidingClient {
     private static final float PEEK_DOWN = 35.0F;
     private static final Map<BlockPos, Lid> LIDS = new HashMap<>();
     // The eyelids' texture, and how many of the opening's middle half-heights it spans top to bottom.
-    private static final Identifier EYELIDS = WhyCantISleep.id("hud/eyelids");
+    private static final ResourceLocation EYELIDS = WhyCantISleep.id("hud/eyelids");
     private static final float EYELIDS_SPAN = 2.5F;
     // The squint's ease from one amount to another, and when it began.
     private static float squintFrom;
@@ -411,7 +411,7 @@ public final class HidingClient {
      * tighter squint with monsters about, a blink now and then. Drawn first in the HUD ({@code GuiMixin}), so the
      * HUD stays over it, and drawn with the HUD hidden too: it is the player's eyes, not part of the HUD.
      */
-    public static void renderEyelids(GuiGraphicsExtractor graphics, DeltaTracker delta) {
+    public static void renderEyelids(GuiGraphics graphics, DeltaTracker delta) {
         Minecraft minecraft = Minecraft.getInstance();
         if (!minecraft.options.getCameraType().isFirstPerson()) return;
         float squint = livingSquint(delta.getGameTimeDeltaPartialTick(true));
@@ -422,7 +422,7 @@ public final class HidingClient {
         float open = height / 2.0F * (1.0F - squint);
         int lids = Math.max(2, Math.round(open * EYELIDS_SPAN));
         int top = (height - lids) / 2;
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, EYELIDS, 0, top, width, lids);
+        HudStyle.sprite(graphics, EYELIDS, 0, top, width, lids);
         if (top > 0) {
             graphics.fill(0, 0, width, top, 0xFF000000);
             graphics.fill(0, top + lids, width, height, 0xFF000000);

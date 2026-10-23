@@ -51,7 +51,7 @@ public final class RoomClearing {
     private static void check(ServerPlayer player) {
         Clearing clearing = CLEARING.get(player.getUUID());
         if (clearing == null) return;
-        ServerLevel level = player.level();
+        ServerLevel level = player.serverLevel();
         if (level.getGameTime() - clearing.since > WCISServerConfig.CLEARING_TIME.get() * 20L || player.isSleeping()) {
             CLEARING.remove(player.getUUID());
             return;

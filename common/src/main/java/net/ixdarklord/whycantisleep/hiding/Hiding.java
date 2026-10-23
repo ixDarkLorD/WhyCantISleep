@@ -52,7 +52,7 @@ public final class Hiding {
      * @param looker what is looking, or null when the game doesn't say
      */
     public static boolean hiddenFrom(@Nullable LivingEntity looker, LivingEntity target) {
-        return target instanceof Player player && isHiding(player) && (looker == null || !looker.is(HidingServer.IGNORES_HIDING));
+        return target instanceof Player player && isHiding(player) && (looker == null || !looker.getType().is(HidingServer.IGNORES_HIDING));
     }
 
     /**

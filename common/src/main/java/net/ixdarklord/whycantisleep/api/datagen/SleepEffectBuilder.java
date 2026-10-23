@@ -14,7 +14,7 @@ import net.minecraft.world.effect.MobEffect;
  *         .rarity(SleepEffect.Rarity.EPIC)
  *         .quality(70, 100)
  *         .effect(MobEffects.NIGHT_VISION, 300)
- *         .effect(MobEffects.SPEED, 60, 1);
+ *         .effect(MobEffects.MOVEMENT_SPEED, 60, 1);
  * }</pre>
  */
 public final class SleepEffectBuilder {
@@ -80,7 +80,7 @@ public final class SleepEffectBuilder {
     public SleepEffectBuilder effect(Holder<MobEffect> effect, int seconds, int amplifier) {
         JsonObject entry = new JsonObject();
         entry.addProperty("id", effect.unwrapKey().orElseThrow(() -> new IllegalArgumentException("An unregistered mob effect"))
-                .identifier().toString());
+                .location().toString());
         entry.addProperty("duration", seconds * 20);
         entry.addProperty("amplifier", amplifier);
         this.effects.add(entry);

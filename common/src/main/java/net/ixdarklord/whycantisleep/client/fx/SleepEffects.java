@@ -19,7 +19,7 @@ import net.ixdarklord.whycantisleep.config.WCISConfigs;
 import net.ixdarklord.whycantisleep.sound.WCISSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.util.ARGB;
+import net.minecraft.util.FastColor.ARGB32;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
@@ -164,11 +164,11 @@ public final class SleepEffects {
 
     // A color darker by a share (0 black, 1 as it is).
     private static int shade(int rgb, float share) {
-        return ARGB.color(0, Math.round(ARGB.red(rgb) * share), Math.round(ARGB.green(rgb) * share), Math.round(ARGB.blue(rgb) * share)) & 0xFFFFFF;
+        return ARGB32.color(0, Math.round(ARGB32.red(rgb) * share), Math.round(ARGB32.green(rgb) * share), Math.round(ARGB32.blue(rgb) * share)) & 0xFFFFFF;
     }
 
     // A color pushed halfway to white, for the hot middle of an ember or an eye.
     private static int brighten(int rgb) {
-        return ARGB.color(0, (ARGB.red(rgb) + 255) / 2, (ARGB.green(rgb) + 255) / 2, (ARGB.blue(rgb) + 255) / 2) & 0xFFFFFF;
+        return ARGB32.color(0, (ARGB32.red(rgb) + 255) / 2, (ARGB32.green(rgb) + 255) / 2, (ARGB32.blue(rgb) + 255) / 2) & 0xFFFFFF;
     }
 }

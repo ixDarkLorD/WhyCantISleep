@@ -18,8 +18,8 @@ import net.ixdarklord.whycantisleep.sound.WCISSounds;
 import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Util;
-import net.minecraft.world.level.gamerules.GameRules;
+import net.minecraft.Util;
+import net.minecraft.world.level.GameRules;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,7 +81,7 @@ public final class SleepBoardServer {
             active++;
             if (player.isSleeping()) sleeping++;
         }
-        int needed = Math.max(1, Mth.ceil(active * level.getGameRules().get(GameRules.PLAYERS_SLEEPING_PERCENTAGE) / 100.0F));
+        int needed = Math.max(1, Mth.ceil(active * level.getGameRules().getInt(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE) / 100.0F));
         List<ServerPlayer> up = new ArrayList<>();
         for (ServerPlayer player : level.players()) {
             if (!player.isSpectator() && !player.isSleeping()) up.add(player);

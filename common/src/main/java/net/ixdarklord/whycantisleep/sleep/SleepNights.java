@@ -1,10 +1,8 @@
 package net.ixdarklord.whycantisleep.sleep;
 
 import net.ixdarklord.coolcatcore.api.event.v2.common.CommandEvents;
-import net.ixdarklord.coolcatcore.api.event.v2.common.LivingEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.PlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.ServerLifecycleEvents;
-import net.ixdarklord.coolcatcore.api.event.v2.core.EventResult;
 import net.ixdarklord.coolcatcore.api.registry.ReloadListeners;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.whycantisleep.api.SleepEffect;
@@ -73,14 +71,10 @@ public final class SleepNights {
         });
         // /whycantisleep nightmare [players]: a night terror on demand, for operators.
         CommandEvents.REGISTER.register((dispatcher, context, selection) -> dispatcher.register(Commands.literal("whycantisleep")
-                .then(Commands.literal("nightmare").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .then(Commands.literal("nightmare").requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS))
                         .executes(command -> nightmare(command.getSource(), List.of(command.getSource().getPlayerOrException())))
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .executes(command -> nightmare(command.getSource(), EntityArgument.getPlayers(command, "targets")))))));
-        LivingEvents.DAMAGE.register((entity, source, amount) -> {
-            if (entity instanceof ServerPlayer player && player.isSleeping()) HURT_AT.put(player.getUUID(), player.level().getGameTime());
-            return EventResult.PASS;
-        });
         PlayerEvents.LEAVE.register(player -> {
             NIGHTS.remove(player.getUUID());
             BEFORE_SLEEP.remove(player.getUUID());
@@ -96,6 +90,11 @@ public final class SleepNights {
         });
     }
 
+    /** A player is being hurt ({@code LivingEntityMixin}): a sleeper woken by it woke hurt. */
+    public static void onHurt(ServerPlayer player) {
+        if (player.isSleeping()) HURT_AT.put(player.getUUID(), player.level().getGameTime());
+    }
+
     /** How well a player slept last, or null when they haven't slept since the server started. */
     public static @Nullable SleepQuality last(ServerPlayer player) {
         return LAST.get(player.getUUID());
@@ -108,7 +107,7 @@ public final class SleepNights {
 
     /** They lay down: the night begins. */
     public static void onLayDown(ServerPlayer player, BlockPos bed) {
-        ServerLevel level = player.level();
+        ServerLevel level = player.serverLevel();
         SleepTrouble trouble = BEFORE_SLEEP.remove(player.getUUID());
         if (trouble == null) trouble = SleepTroubles.get(player);
         Night night = new Night(bed.immutable(), level.getGameTime(), trouble, Bedroom.of(level, bed));
@@ -170,7 +169,7 @@ public final class SleepNights {
         Night night = NIGHTS.remove(player.getUUID());
         boolean morning = MORNING.remove(player.getUUID());
         if (night == null) return;
-        ServerLevel level = player.level();
+        ServerLevel level = player.serverLevel();
         WakeReason reason = reason(player, level, night, morning, forceful);
         int slept = (int) (level.getGameTime() - night.since);
 
@@ -188,8 +187,8 @@ public final class SleepNights {
                 && quality.factors().stream().anyMatch(factor -> factor.id().equals(SleepQuality.ROUTINE) && factor.points() > 0);
 
         if (night.terror) {
-            player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, SHAKEN_NAUSEA_TICKS, 0, false, false, true));
-            player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SHAKEN_SLOWNESS_TICKS, 0, false, false, true));
+            player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, SHAKEN_NAUSEA_TICKS, 0, false, false, true));
+            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, SHAKEN_SLOWNESS_TICKS, 0, false, false, true));
         }
         if (wellRested) player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, RESTED_REGENERATION_TICKS, 0, false, true, true));
         if (night.terror) WCISNetwork.sendToPlayer(player, new TerrorPayload(false));
@@ -219,7 +218,7 @@ public final class SleepNights {
     }
 
     private static WakeReason reason(ServerPlayer player, ServerLevel level, Night night, boolean morning, boolean forceful) {
-        if (morning || level.isBrightOutside()) return WakeReason.MORNING;
+        if (morning || level.isDay()) return WakeReason.MORNING;
         Long hurt = HURT_AT.remove(player.getUUID());
         if (hurt != null && level.getGameTime() - hurt <= 1) return WakeReason.HURT;
         if (!(level.getBlockState(night.bed).getBlock() instanceof BedBlock)) return WakeReason.BED_GONE;
@@ -230,7 +229,7 @@ public final class SleepNights {
     // Through the night: the monsters about, at their most, and the music heard.
     private static void look(ServerPlayer player) {
         Night night = NIGHTS.get(player.getUUID());
-        if (night != null && player.isSleeping()) night.observe(player.level());
+        if (night != null && player.isSleeping()) night.observe(player.serverLevel());
     }
 
     private static final class Night {

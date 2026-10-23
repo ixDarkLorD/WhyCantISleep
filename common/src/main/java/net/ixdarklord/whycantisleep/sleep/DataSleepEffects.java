@@ -1,5 +1,6 @@
 package net.ixdarklord.whycantisleep.sleep;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
@@ -7,11 +8,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.whycantisleep.api.SleepEffect;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,12 +24,12 @@ import java.util.TreeMap;
  * The sleep effects data packs describe, at {@code data/<namespace>/whycantisleep/sleep_effect/<name>.json} (the
  * format is in {@link SleepEffect}), the mod's own among them. Loaded on the server with its data.
  */
-public final class DataSleepEffects extends SimpleJsonResourceReloadListener<JsonElement> {
+public final class DataSleepEffects extends SimpleJsonResourceReloadListener {
     public static final DataSleepEffects INSTANCE = new DataSleepEffects();
     private static List<SleepEffect> effects = List.of();
 
     private DataSleepEffects() {
-        super(ExtraCodecs.JSON, FileToIdConverter.json("whycantisleep/sleep_effect"));
+        super(new Gson(), "whycantisleep/sleep_effect");
     }
 
     public static List<SleepEffect> all() {
@@ -38,7 +37,7 @@ public final class DataSleepEffects extends SimpleJsonResourceReloadListener<Jso
     }
 
     @Override
-    protected void apply(@NotNull Map<Identifier, JsonElement> files, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
+    protected void apply(@NotNull Map<ResourceLocation, JsonElement> files, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
         List<SleepEffect> loaded = new ArrayList<>();
         new TreeMap<>(files).forEach((id, json) -> Definition.CODEC.parse(JsonOps.INSTANCE, json)
                 .resultOrPartial(error -> WhyCantISleep.LOGGER.error("Skipping the sleep effect {}: {}", id, error))
@@ -65,7 +64,7 @@ public final class DataSleepEffects extends SimpleJsonResourceReloadListener<Jso
                 Codec.STRING.fieldOf("name").forGetter(Definition::name)
         ).apply(instance, Definition::new));
 
-        private SleepEffect effect(Identifier id) {
+        private SleepEffect effect(ResourceLocation id) {
             // A plain sentence works as well as a translation key.
             return new SleepEffect(id, this.kind, this.rarity, this.weight.orElse(this.rarity.weight()), this.quality.min(), this.quality.max(),
                     this.effects, Component.translatableWithFallback(this.name, this.name), null);

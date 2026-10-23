@@ -1,12 +1,18 @@
 apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v4/fabric.gradle"
 
+// Fabric API 0.116.5+1.21.1 publishes fabric-loot-api-v2 with dependencies on modules of a newer Minecraft
+// (fabric-resource-loader-v0 2.0.0, fabric-api-base 0.4.43), which Gradle then picks over the ones the API itself
+// ships, and a dev run then fails to load (as in FTB Ultimine Addition). Those two are dropped from that module: the
+// API brings its own. Jars are not affected.
+dependencies.components.withModule("net.fabricmc.fabric-api:fabric-loot-api-v2") {
+    allVariants {
+        withDependencies { deps -> deps.removeAll { it.name in ["fabric-resource-loader-v0", "fabric-api-base"] } }
+    }
+}
+
 dependencies {
     // CoolCatLib (Fabric). Its common classes are inside this jar.
-    implementation "net.ixdarklord.coolcatlib:coolcatlib-fabric:${coolcatlib_version}"
+    modImplementation("net.ixdarklord.coolcatlib:coolcatlib-fabric:${coolcatlib_version}") { transitive = false }
     // Folios: the mod's guide book is a Folios book.
-    implementation("net.ixdarklord.folios:folios-fabric:${folios_version}") { transitive = false }
-
-    // Dev runs only, never published: MCP Bridge lets the game be driven from outside. Not transitive, because it still points
-    // at CoolCatLib's old coordinates and would load a second copy of it.
-    localRuntime("net.ixdarklord.mcp_bridge:mcp_bridge-fabric:${mcp_bridge_version}") { transitive = false }
+    modImplementation("net.ixdarklord.folios:folios-fabric:${folios_version}") { transitive = false }
 }

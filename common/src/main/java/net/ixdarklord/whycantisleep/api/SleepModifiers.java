@@ -1,7 +1,7 @@
 package net.ixdarklord.whycantisleep.api;
 
 import net.ixdarklord.whycantisleep.sleep.DataSleepModifiers;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -43,7 +43,7 @@ import java.util.Map;
  * Mods that need more than this register one in code with {@link #register}.
  */
 public final class SleepModifiers {
-    private static final Map<Identifier, SleepModifier> MODIFIERS = new LinkedHashMap<>();
+    private static final Map<ResourceLocation, SleepModifier> MODIFIERS = new LinkedHashMap<>();
 
     private SleepModifiers() {
     }
@@ -54,11 +54,11 @@ public final class SleepModifiers {
     }
 
     /** Takes out a modifier registered in code. Returns false when there was none with this id (the mod's own are data: turn them off with a data pack). */
-    public static boolean remove(Identifier id) {
+    public static boolean remove(ResourceLocation id) {
         return MODIFIERS.remove(id) != null;
     }
 
-    public static @Nullable SleepModifier get(Identifier id) {
+    public static @Nullable SleepModifier get(ResourceLocation id) {
         for (SleepModifier modifier : all()) {
             if (modifier.id().equals(id)) return modifier;
         }
@@ -67,9 +67,9 @@ public final class SleepModifiers {
 
     /** Every modifier in play: those registered in code, then those from data packs, less any a data pack turned off. */
     public static Collection<SleepModifier> all() {
-        Map<Identifier, SleepModifier> all = new LinkedHashMap<>(MODIFIERS);
+        Map<ResourceLocation, SleepModifier> all = new LinkedHashMap<>(MODIFIERS);
         for (SleepModifier modifier : DataSleepModifiers.all()) all.put(modifier.id(), modifier);
-        for (Identifier off : DataSleepModifiers.disabled()) all.remove(off);
+        for (ResourceLocation off : DataSleepModifiers.disabled()) all.remove(off);
         return Collections.unmodifiableCollection(all.values());
     }
 

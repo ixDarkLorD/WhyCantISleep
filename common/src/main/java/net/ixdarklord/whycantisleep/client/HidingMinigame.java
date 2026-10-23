@@ -8,10 +8,9 @@ import net.ixdarklord.whycantisleep.sound.WCISSounds;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -66,16 +65,16 @@ public final class HidingMinigame {
     private static final int BEAT_PEAK = 5;
     // The game's own mouse (the tutorial toast's), 20 square, at the panel's left; its left button's pixels in it:
     // three across on the top two rows, two across on the two under.
-    private static final Identifier MOUSE = Identifier.withDefaultNamespace("toast/mouse");
+    private static final ResourceLocation MOUSE = ResourceLocation.withDefaultNamespace("toast/mouse");
     private static final int MOUSE_SIZE = 20;
     private static final int MOUSE_GAP = 8;
     private static final int BUTTON_X = 6;
     private static final int BUTTON_Y = 6;
     // The game's own hearts, 9 square, overlapping by one as on the health bar.
-    private static final Identifier HEART = Identifier.withDefaultNamespace("hud/heart/full");
-    private static final Identifier HEART_BLINKING = Identifier.withDefaultNamespace("hud/heart/full_blinking");
-    private static final Identifier HEART_EMPTY = Identifier.withDefaultNamespace("hud/heart/container");
-    private static final Identifier HEART_EMPTY_BLINKING = Identifier.withDefaultNamespace("hud/heart/container_blinking");
+    private static final ResourceLocation HEART = ResourceLocation.withDefaultNamespace("hud/heart/full");
+    private static final ResourceLocation HEART_BLINKING = ResourceLocation.withDefaultNamespace("hud/heart/full_blinking");
+    private static final ResourceLocation HEART_EMPTY = ResourceLocation.withDefaultNamespace("hud/heart/container");
+    private static final ResourceLocation HEART_EMPTY_BLINKING = ResourceLocation.withDefaultNamespace("hud/heart/container_blinking");
     private static final int HEART_SIZE = 9;
     private static final int HEART_STEP = 8;
 
@@ -202,7 +201,7 @@ public final class HidingMinigame {
     }
 
     /** The panel under the crosshair: the mouse at the left; what to do and the hearts on top, the pulse line under. */
-    public static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
+    public static void render(GuiGraphics graphics, DeltaTracker delta) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.options.hideGui) return;
         float partial = delta.getGameTimeDeltaPartialTick(true);
@@ -232,7 +231,7 @@ public final class HidingMinigame {
         int textWidth = WIDTH - MOUSE_SIZE - MOUSE_GAP;
         int heartsWidth = HEART_STEP * (STRIKES - 1) + HEART_SIZE;
         Component title = Component.translatable(gasped ? "gui.whycantisleep.hide.gasped" : "gui.whycantisleep.hide.steady");
-        graphics.text(font, font.split(title, textWidth - heartsWidth - 6).getFirst(), textX, y, HudStyle.color(gasped ? HudStyle.RED : HudStyle.SILVER, alpha),
+        HudStyle.text(graphics, font, font.split(title, textWidth - heartsWidth - 6).getFirst(), textX, y, HudStyle.color(gasped ? HudStyle.RED : HudStyle.SILVER, alpha),
                 false);
         renderHearts(graphics, x + WIDTH - heartsWidth, y - 1, now, flash, strikeFlash, alpha);
         renderLine(graphics, textX, y + 12, textWidth, along, flash, strikeFlash, alpha);
@@ -241,18 +240,18 @@ public final class HidingMinigame {
 
     // The mouse: it swells at a click and shows its left button pressed in (darker along its top edge, lit below, the
     // mouse a pixel lower), breathes a little while a beat is in the window with its button lit, and rests dim.
-    private static void renderMouse(GuiGraphicsExtractor graphics, int x, int y, float now, boolean inWindow, float alpha) {
+    private static void renderMouse(GuiGraphics graphics, int x, int y, float now, boolean inWindow, float alpha) {
         float press = Mth.clamp((now - pressedAt) / PRESS_TICKS, 0.0F, 1.0F);
         boolean pressing = press < 1.0F;
         float swell = pressing ? PRESS_SWELL * Mth.sin(Easing.QUAD_OUT.apply(press) * Mth.PI) : 0.0F;
         if (inWindow && !pressing) swell += HINT_SWELL * (0.5F + 0.5F * Mth.sin(now * 0.9F));
         float centerX = x + MOUSE_SIZE / 2.0F;
         float centerY = y + MOUSE_SIZE / 2.0F + (pressing ? 1.0F : 0.0F);
-        graphics.pose().pushMatrix();
-        graphics.pose().translate(centerX, centerY);
-        graphics.pose().scale(1.0F + swell, 1.0F + swell);
-        graphics.pose().translate(-MOUSE_SIZE / 2.0F, -MOUSE_SIZE / 2.0F);
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, MOUSE, 0, 0, MOUSE_SIZE, MOUSE_SIZE, HudStyle.color(HudStyle.WHITE, alpha));
+        graphics.pose().pushPose();
+        graphics.pose().translate(centerX, centerY, 0.0F);
+        graphics.pose().scale(1.0F + swell, 1.0F + swell, 1.0F);
+        graphics.pose().translate(-MOUSE_SIZE / 2.0F, -MOUSE_SIZE / 2.0F, 0.0F);
+        HudStyle.sprite(graphics, MOUSE, 0, 0, MOUSE_SIZE, MOUSE_SIZE, HudStyle.color(HudStyle.WHITE, alpha));
         if (!gasped) {
             float lit = pressing ? 1.0F : inWindow ? 0.85F : 0.3F;
             int glow = HudStyle.color(CALM, alpha * lit);
@@ -265,12 +264,12 @@ public final class HidingMinigame {
             }
             graphics.fill(BUTTON_X, BUTTON_Y + 2, BUTTON_X + 2, BUTTON_Y + 4, glow);
         }
-        graphics.pose().popMatrix();
+        graphics.pose().popPose();
     }
 
     // Three of the game's hearts, one broken (an empty container) for each strike; the one just broken blinks and
     // trembles, and at a hit the whole ones give a beat.
-    private static void renderHearts(GuiGraphicsExtractor graphics, int x, int y, float now, float flash, boolean strikeFlash, float alpha) {
+    private static void renderHearts(GuiGraphics graphics, int x, int y, float now, float flash, boolean strikeFlash, float alpha) {
         int whole = STRIKES - strikes;
         int tint = HudStyle.color(HudStyle.WHITE, alpha);
         float beat = flashGood && flash > 0.0F ? 0.25F * Mth.sin((1.0F - flash) * Mth.PI) : 0.0F;
@@ -279,34 +278,34 @@ public final class HidingMinigame {
             boolean broken = i >= whole;
             boolean justBroken = strikeFlash && i == whole;
             int dx = justBroken ? Math.round(Mth.sin(now * 3.0F) * flash) : 0;
-            graphics.pose().pushMatrix();
-            graphics.pose().translate(heartX + dx + HEART_SIZE / 2.0F, y + HEART_SIZE / 2.0F);
+            graphics.pose().pushPose();
+            graphics.pose().translate(heartX + dx + HEART_SIZE / 2.0F, y + HEART_SIZE / 2.0F, 0.0F);
             float scale = broken ? 1.0F : 1.0F + beat;
-            graphics.pose().scale(scale, scale);
-            graphics.pose().translate(-HEART_SIZE / 2.0F, -HEART_SIZE / 2.0F);
+            graphics.pose().scale(scale, scale, 1.0F);
+            graphics.pose().translate(-HEART_SIZE / 2.0F, -HEART_SIZE / 2.0F, 0.0F);
             boolean blink = justBroken && ((int) (now / 2.0F)) % 2 == 0;
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, blink ? HEART_EMPTY_BLINKING : HEART_EMPTY, 0, 0, HEART_SIZE, HEART_SIZE, tint);
-            if (!broken) graphics.blitSprite(RenderPipelines.GUI_TEXTURED, HEART, 0, 0, HEART_SIZE, HEART_SIZE, tint);
-            else if (blink) graphics.blitSprite(RenderPipelines.GUI_TEXTURED, HEART_BLINKING, 0, 0, HEART_SIZE, HEART_SIZE, tint);
-            graphics.pose().popMatrix();
+            HudStyle.sprite(graphics, blink ? HEART_EMPTY_BLINKING : HEART_EMPTY, 0, 0, HEART_SIZE, HEART_SIZE, tint);
+            if (!broken) HudStyle.sprite(graphics, HEART, 0, 0, HEART_SIZE, HEART_SIZE, tint);
+            else if (blink) HudStyle.sprite(graphics, HEART_BLINKING, 0, 0, HEART_SIZE, HEART_SIZE, tint);
+            graphics.pose().popPose();
         }
         // The heart just broken pops out of its place: a whole heart swelling and fading away over it.
         float pop = (now - brokenAt) / POP_TICKS;
         if (pop >= 0.0F && pop < 1.0F) {
             float eased = Easing.QUAD_OUT.apply(pop);
             float scale = 1.0F + 1.2F * eased;
-            graphics.pose().pushMatrix();
-            graphics.pose().translate(x + brokenHeart * HEART_STEP + HEART_SIZE / 2.0F, y + HEART_SIZE / 2.0F);
-            graphics.pose().scale(scale, scale);
-            graphics.pose().translate(-HEART_SIZE / 2.0F, -HEART_SIZE / 2.0F);
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, HEART, 0, 0, HEART_SIZE, HEART_SIZE, HudStyle.color(HudStyle.WHITE, alpha * (1.0F - eased)));
-            graphics.pose().popMatrix();
+            graphics.pose().pushPose();
+            graphics.pose().translate(x + brokenHeart * HEART_STEP + HEART_SIZE / 2.0F, y + HEART_SIZE / 2.0F, 0.0F);
+            graphics.pose().scale(scale, scale, 1.0F);
+            graphics.pose().translate(-HEART_SIZE / 2.0F, -HEART_SIZE / 2.0F, 0.0F);
+            HudStyle.sprite(graphics, HEART, 0, 0, HEART_SIZE, HEART_SIZE, HudStyle.color(HudStyle.WHITE, alpha * (1.0F - eased)));
+            graphics.pose().popPose();
         }
     }
 
     // A caught beat's echo: the beat's own shape swelling out from where it was caught, wider and taller, and a ring of
     // light opening round its peak, both fading; free to spread past the line, over the panel and beyond.
-    private static void renderEcho(GuiGraphicsExtractor graphics, int x, int y, int width, float now, float alpha) {
+    private static void renderEcho(GuiGraphics graphics, int x, int y, int width, float now, float alpha) {
         float echo = (now - hitAt) / ECHO_TICKS;
         if (echo < 0.0F || echo >= 1.0F) return;
         float eased = Easing.QUAD_OUT.apply(echo);
@@ -342,7 +341,7 @@ public final class HidingMinigame {
     // The pulse line: the calm window in its middle, the rest line across it, and the beat crossing it from right to
     // left, drawn a column at a time and joined up so it reads as one line; brighter about the beat. A hit lights the
     // window, a strike washes the line red; gasped, it lies flat and red.
-    private static void renderLine(GuiGraphicsExtractor graphics, int x, int y, int width, float along, float flash, boolean strikeFlash, float alpha) {
+    private static void renderLine(GuiGraphics graphics, int x, int y, int width, float along, float flash, boolean strikeFlash, float alpha) {
         graphics.fill(x, y, x + width, y + LINE_HEIGHT, HudStyle.color(HudStyle.TRACK, alpha * 0.8F));
         int zoneWidth = Math.round(width * ZONE);
         int zoneX = x + (width - zoneWidth) / 2;

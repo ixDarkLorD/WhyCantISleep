@@ -1,10 +1,13 @@
 package net.ixdarklord.whycantisleep.client.hud;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.ARGB;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor.ARGB32;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 
@@ -17,22 +20,22 @@ import net.minecraft.util.RandomSource;
  */
 public final class HudStyle {
     /** A night's sleep card and the status popup: charcoal, with a hairline border and softly rounded corners. */
-    public static final Identifier CARD = WhyCantISleep.id("hud/card");
+    public static final ResourceLocation CARD = WhyCantISleep.id("hud/card");
     /** The other message cards, the sleep board and the breath minigame: soft as a pillow, a two pixel border with round corners, a lighter line along the top. */
-    public static final Identifier NOTICE = WhyCantISleep.id("hud/notice");
+    public static final ResourceLocation NOTICE = WhyCantISleep.id("hud/notice");
     /** The wash of a notice's color over its left side, fading to the right; how far across it reaches, how strong, and its specks. */
-    public static final Identifier WASH = WhyCantISleep.id("hud/wash");
+    public static final ResourceLocation WASH = WhyCantISleep.id("hud/wash");
     private static final float WASH_SHARE = 0.55F;
     private static final float WASH_ALPHA = 0.24F;
     private static final int WASH_CLIMB = 6;
     /** The wash's foot, fading downwards as well, over this many rows. */
-    public static final Identifier WASH_FADE = WhyCantISleep.id("hud/wash_fade");
+    public static final ResourceLocation WASH_FADE = WhyCantISleep.id("hud/wash_fade");
     private static final int WASH_FADE_ROWS = 6;
     /** A notice's timer, frame and all, is this tall: an outline round a bar two high. */
     public static final int TIMER_HEIGHT = 4;
     /** A bar's empty track, and the sleep board's fill. */
-    public static final Identifier BAR_BACK = WhyCantISleep.id("hud/bar_back");
-    public static final Identifier SLEEP_FILL = WhyCantISleep.id("hud/sleep_fill");
+    public static final ResourceLocation BAR_BACK = WhyCantISleep.id("hud/bar_back");
+    public static final ResourceLocation SLEEP_FILL = WhyCantISleep.id("hud/sleep_fill");
     /** The square a card's icon sits in: {@link #SLOT_SIZE} across, for a 16 by 16 item 2 in from its corner. */
     public static final int SLOT_SIZE = 20;
     /** How far a panel reaches beyond what it holds: its border, and room to breathe inside it. */
@@ -59,19 +62,84 @@ public final class HudStyle {
     private HudStyle() {
     }
 
-    /** A color with an opacity, 0 to 1. Text drawn with almost no alpha is skipped by the game, which is what a fade wants. */
+    /** A color with an opacity, 0 to 1. Text drawn with almost no alpha is skipped ({@link #text}), which is what a fade wants. */
     public static int color(int rgb, float alpha) {
-        return ARGB.color(Math.round(Mth.clamp(alpha, 0.0F, 1.0F) * 255.0F), rgb);
+        return Math.round(Mth.clamp(alpha, 0.0F, 1.0F) * 255.0F) << 24 | rgb & 0xFFFFFF;
+    }
+
+    /** White at an opacity, 0 to 1: a sprite drawn as it is, faded. */
+    public static int white(float alpha) {
+        return color(0xFFFFFF, alpha);
+    }
+
+    /**
+     * A GUI sprite stretched over an area in a color, its alpha the color's. 1.21.1's {@code blitSprite} takes no
+     * color, so it goes through the shader color, with blending on for the alpha.
+     */
+    public static void sprite(GuiGraphics graphics, ResourceLocation sprite, int x, int y, int width, int height, int argb) {
+        if (width <= 0 || height <= 0 || ARGB32.alpha(argb) == 0) return;
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        graphics.setColor(ARGB32.red(argb) / 255.0F, ARGB32.green(argb) / 255.0F, ARGB32.blue(argb) / 255.0F, ARGB32.alpha(argb) / 255.0F);
+        graphics.blitSprite(sprite, x, y, width, height);
+        graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.disableBlend();
+    }
+
+    /** A part of a texture in a color, as {@link #sprite} draws a sprite. */
+    public static void blit(GuiGraphics graphics, ResourceLocation texture, int x, int y, float u, float v, int width, int height, int textureWidth,
+                            int textureHeight, int argb) {
+        if (ARGB32.alpha(argb) == 0) return;
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        graphics.setColor(ARGB32.red(argb) / 255.0F, ARGB32.green(argb) / 255.0F, ARGB32.blue(argb) / 255.0F, ARGB32.alpha(argb) / 255.0F);
+        graphics.blit(texture, x, y, u, v, width, height, textureWidth, textureHeight);
+        graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.disableBlend();
+    }
+
+    /** A GUI sprite drawn as it is. */
+    public static void sprite(GuiGraphics graphics, ResourceLocation sprite, int x, int y, int width, int height) {
+        sprite(graphics, sprite, x, y, width, height, 0xFFFFFFFF);
+    }
+
+    /**
+     * Text, with a shadow or without. 1.21.1's font draws a color with an alpha under 4 fully opaque, so such text (the
+     * last moments of a fade) is left out instead, as the game itself leaves it out on later versions.
+     */
+    public static void text(GuiGraphics graphics, Font font, FormattedCharSequence text, int x, int y, int argb, boolean shadow) {
+        if ((argb & 0xFC000000) == 0) return;
+        graphics.drawString(font, text, x, y, argb, shadow);
+    }
+
+    public static void text(GuiGraphics graphics, Font font, FormattedCharSequence text, int x, int y, int argb) {
+        text(graphics, font, text, x, y, argb, true);
+    }
+
+    public static void text(GuiGraphics graphics, Font font, Component text, int x, int y, int argb, boolean shadow) {
+        text(graphics, font, text.getVisualOrderText(), x, y, argb, shadow);
+    }
+
+    public static void text(GuiGraphics graphics, Font font, Component text, int x, int y, int argb) {
+        text(graphics, font, text, x, y, argb, true);
+    }
+
+    public static void text(GuiGraphics graphics, Font font, String text, int x, int y, int argb, boolean shadow) {
+        if ((argb & 0xFC000000) == 0) return;
+        graphics.drawString(font, text, x, y, argb, shadow);
+    }
+
+    public static void text(GuiGraphics graphics, Font font, String text, int x, int y, int argb) {
+        text(graphics, font, text, x, y, argb, true);
     }
 
     /** A panel around a content area, which it pads by {@link #PANEL_PADDING} on every side. */
-    public static void panel(GuiGraphicsExtractor graphics, Identifier sprite, int x, int y, int width, int height, float alpha) {
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x - PANEL_PADDING, y - PANEL_PADDING, width + PANEL_PADDING * 2, height + PANEL_PADDING * 2,
-                ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F)));
+    public static void panel(GuiGraphics graphics, ResourceLocation sprite, int x, int y, int width, int height, float alpha) {
+        sprite(graphics, sprite, x - PANEL_PADDING, y - PANEL_PADDING, width + PANEL_PADDING * 2, height + PANEL_PADDING * 2, white(alpha));
     }
 
     /** The card around a content area. */
-    public static void box(GuiGraphicsExtractor graphics, int x, int y, int width, int height, float alpha) {
+    public static void box(GuiGraphics graphics, int x, int y, int width, int height, float alpha) {
         panel(graphics, CARD, x, y, width, height, alpha);
     }
 
@@ -80,7 +148,7 @@ public final class HudStyle {
     public static final int CARD_BORDER = 1;
 
     /** The notice frame around a content area. */
-    public static void notice(GuiGraphicsExtractor graphics, int x, int y, int width, int height, float alpha) {
+    public static void notice(GuiGraphics graphics, int x, int y, int width, int height, float alpha) {
         panel(graphics, NOTICE, x, y, width, height, alpha);
     }
 
@@ -91,7 +159,7 @@ public final class HudStyle {
      * text) as it starts over it. The notice's content area given as for {@link #panel}, to where its text ends; age in
      * ticks, and a seed so each notice's specks are its own.
      */
-    public static void wash(GuiGraphicsExtractor graphics, int x, int y, int width, int contentBottom, float reach, int rgb, float alpha, float age,
+    public static void wash(GuiGraphics graphics, int x, int y, int width, int contentBottom, float reach, int rgb, float alpha, float age,
                             long seed) {
         wash(graphics, x, y, width, contentBottom, reach, rgb, alpha, age, seed, 0.5F, NOTICE_BORDER);
     }
@@ -102,7 +170,7 @@ public final class HudStyle {
      * and they sink. A night's sleep card gives its score. It keeps inside a frame's border, as thick as given
      * ({@link #NOTICE_BORDER}, {@link #CARD_BORDER}).
      */
-    public static void wash(GuiGraphicsExtractor graphics, int x, int y, int width, int contentBottom, float reach, int rgb, float alpha, float age,
+    public static void wash(GuiGraphics graphics, int x, int y, int width, int contentBottom, float reach, int rgb, float alpha, float age,
                             long seed, float liveliness, int border) {
         float lively = Mth.clamp(liveliness, 0.0F, 1.0F);
         int specks = Math.round(3 + lively * 12);
@@ -124,9 +192,9 @@ public final class HudStyle {
         if (span <= 0) return;
         int tint = color(rgb, alpha * WASH_ALPHA);
         // Its top row starts a pixel in, rounding the corner.
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, WASH, left + 1, top, span - 1, 1, tint);
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, WASH, left, top + 1, span, body - top - 1, tint);
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, WASH_FADE, left, body, span, fadeRows, tint);
+        sprite(graphics, WASH, left + 1, top, span - 1, 1, tint);
+        sprite(graphics, WASH, left, top + 1, span, body - top - 1, tint);
+        sprite(graphics, WASH_FADE, left, body, span, fadeRows, tint);
         RandomSource random = RandomSource.create(seed);
         for (int i = 0; i < specks; i++) {
             float speed = (0.25F + random.nextFloat() * 0.45F) * pace;
@@ -156,7 +224,7 @@ public final class HudStyle {
 
     // A color halfway to white.
     private static int brighten(int rgb) {
-        return ARGB.color(0, (ARGB.red(rgb) + 255) / 2, (ARGB.green(rgb) + 255) / 2, (ARGB.blue(rgb) + 255) / 2) & 0xFFFFFF;
+        return ARGB32.color(0, (ARGB32.red(rgb) + 255) / 2, (ARGB32.green(rgb) + 255) / 2, (ARGB32.blue(rgb) + 255) / 2) & 0xFFFFFF;
     }
 
     /**
@@ -164,7 +232,7 @@ public final class HudStyle {
      * corners (its corner pixels left out) round a bar two high, filled to a share, with a brighter head where the
      * fill ends.
      */
-    public static void timer(GuiGraphicsExtractor graphics, int x, int top, int width, float share, int rgb, float alpha) {
+    public static void timer(GuiGraphics graphics, int x, int top, int width, float share, int rgb, float alpha) {
         int right = x + width;
         int bottom = top + TIMER_HEIGHT;
         int edge = color(FAINT, alpha);
@@ -181,12 +249,12 @@ public final class HudStyle {
     }
 
     /** A line across a panel at a height, from border to border; the panel's content area given as for {@link #panel}. */
-    public static void divider(GuiGraphicsExtractor graphics, int x, int width, int lineY, float alpha) {
+    public static void divider(GuiGraphics graphics, int x, int width, int lineY, float alpha) {
         graphics.fill(x - PANEL_PADDING + 1, lineY, x + width + PANEL_PADDING - 1, lineY + 1, color(DIVIDER, alpha));
     }
 
     /** The square an icon sits in, tinted the color of what it stands for: a faint wash inside a stronger outline. */
-    public static void iconSquare(GuiGraphicsExtractor graphics, int x, int y, int rgb, float alpha) {
+    public static void iconSquare(GuiGraphics graphics, int x, int y, int rgb, float alpha) {
         int last = SLOT_SIZE - 1;
         int edge = color(rgb, alpha * 0.45F);
         // The outline, its corner pixels left out so the square's corners are soft like the card's.
@@ -198,38 +266,38 @@ public final class HudStyle {
     }
 
     /** A small round dot, 4 across (a square with its corners left out), its top left corner at a point. */
-    public static void dot(GuiGraphicsExtractor graphics, int x, int y, int rgb, float alpha) {
+    public static void dot(GuiGraphics graphics, int x, int y, int rgb, float alpha) {
         int fill = color(rgb, alpha);
         graphics.fill(x + 1, y, x + 3, y + 4, fill);
         graphics.fill(x, y + 1, x + 4, y + 3, fill);
     }
 
     /** A bar of a width and height, filled to a share with one of the fills. */
-    public static void bar(GuiGraphicsExtractor graphics, Identifier fill, int x, int y, int width, int height, float filled, float alpha) {
-        int tint = ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F));
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BAR_BACK, x, y, width, height, tint);
+    public static void bar(GuiGraphics graphics, ResourceLocation fill, int x, int y, int width, int height, float filled, float alpha) {
+        int tint = white(alpha);
+        sprite(graphics, BAR_BACK, x, y, width, height, tint);
         // The fill shows at least a sliver of anything above nothing.
         int filledWidth = filled <= 0.0F ? 0 : Math.max(1, Math.round(width * Mth.clamp(filled, 0.0F, 1.0F)));
-        if (filledWidth > 0) graphics.blitSprite(RenderPipelines.GUI_TEXTURED, fill, x, y, filledWidth, height, tint);
+        if (filledWidth > 0) sprite(graphics, fill, x, y, filledWidth, height, tint);
     }
 
     /**
      * A bar in segments, one for each of a count, the first few of them filled: so many out of so many, readable at a
      * glance. Past what fits with a gap of a pixel or more between them, it is drawn as one bar.
      */
-    public static void segments(GuiGraphicsExtractor graphics, Identifier fill, int x, int y, int width, int height, int filled, int count, float alpha) {
+    public static void segments(GuiGraphics graphics, ResourceLocation fill, int x, int y, int width, int height, int filled, int count, float alpha) {
         int gap = 2;
         if (count <= 1 || (width - gap * (count - 1)) / count < 3) {
             bar(graphics, fill, x, y, width, height, filled / (float) Math.max(1, count), alpha);
             return;
         }
-        int tint = ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F));
+        int tint = white(alpha);
         int room = width - gap * (count - 1);
         for (int i = 0; i < count; i++) {
             // Spread the leftover pixels over the segments, so the bar ends exactly at its width.
             int left = x + i * room / count + i * gap;
             int right = x + (i + 1) * room / count + i * gap;
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, i < filled ? fill : BAR_BACK, left, y, right - left, height, tint);
+            sprite(graphics, i < filled ? fill : BAR_BACK, left, y, right - left, height, tint);
         }
     }
 
@@ -237,7 +305,7 @@ public final class HudStyle {
      * A meter of ten pips across a width, lit to a share: the whole ones full, the next one in part, the rest dark; a
      * full pip has a lighter top edge, so the meter reads as lit rather than flat. How well a night was slept.
      */
-    public static void pips(GuiGraphicsExtractor graphics, int x, int y, int width, int height, float share, int rgb, float alpha) {
+    public static void pips(GuiGraphics graphics, int x, int y, int width, int height, float share, int rgb, float alpha) {
         int count = 10;
         int gap = 2;
         int room = width - gap * (count - 1);

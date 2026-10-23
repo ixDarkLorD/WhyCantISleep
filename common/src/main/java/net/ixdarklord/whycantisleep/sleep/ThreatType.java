@@ -35,11 +35,11 @@ public enum ThreatType {
     }
 
     public static ThreatType of(Entity entity) {
-        if (entity.is(EntityType.CREEPER)) return EXPLOSIVE;
-        if (entity.is(EntityType.ENDERMAN) || entity.is(EntityType.ENDERMITE)) return ENDER;
-        if (entity.is(EntityTypeTags.UNDEAD)) return UNDEAD;
-        if (entity.is(EntityTypeTags.ARTHROPOD)) return ARTHROPOD;
-        if (entity.is(EntityTypeTags.RAIDERS) || entity.is(EntityTypeTags.ILLAGER)) return RAIDER;
+        if (entity.getType() == EntityType.CREEPER) return EXPLOSIVE;
+        if (entity.getType() == EntityType.ENDERMAN || entity.getType() == EntityType.ENDERMITE) return ENDER;
+        if (entity.getType().is(EntityTypeTags.UNDEAD)) return UNDEAD;
+        if (entity.getType().is(EntityTypeTags.ARTHROPOD)) return ARTHROPOD;
+        if (entity.getType().is(EntityTypeTags.RAIDERS) || entity.getType().is(EntityTypeTags.ILLAGER)) return RAIDER;
         return OTHER;
     }
 }

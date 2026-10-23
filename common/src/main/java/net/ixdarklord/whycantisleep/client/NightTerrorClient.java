@@ -11,7 +11,7 @@ import net.ixdarklord.whycantisleep.network.TerrorPayload;
 import net.ixdarklord.whycantisleep.sound.WCISSounds;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -80,7 +80,7 @@ public final class NightTerrorClient {
         }
     }
 
-    private static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
+    private static void render(GuiGraphics graphics, DeltaTracker delta) {
         if (since < 0) return;
         float age = tick - since + delta.getGameTimeDeltaPartialTick(true);
         int width = graphics.guiWidth();
@@ -101,7 +101,7 @@ public final class NightTerrorClient {
     }
 
     // A pair of glinting red eyes, a little apart, with a faint glow round each.
-    private static void eyes(GuiGraphicsExtractor graphics, int x, int y, int scale, float open) {
+    private static void eyes(GuiGraphics graphics, int x, int y, int scale, float open) {
         int alpha = Mth.clamp(Math.round(open * 255), 0, 255);
         int glow = alpha / 4;
         int eyeWidth = 4 * scale;

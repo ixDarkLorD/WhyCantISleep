@@ -3,7 +3,7 @@ package net.ixdarklord.whycantisleep.mixin.client;
 import net.ixdarklord.whycantisleep.client.HidingClient;
 import net.ixdarklord.whycantisleep.client.SleepClient;
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,8 +24,8 @@ public abstract class GuiMixin {
         if (SleepClient.onOverlayMessage(message)) ci.cancel();
     }
 
-    @Inject(method = "extractRenderState", at = @At("HEAD"))
-    private void whycantisleep$squint(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
+    @Inject(method = "render", at = @At("HEAD"))
+    private void whycantisleep$squint(GuiGraphics graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         HidingClient.renderEyelids(graphics, deltaTracker);
     }
 }

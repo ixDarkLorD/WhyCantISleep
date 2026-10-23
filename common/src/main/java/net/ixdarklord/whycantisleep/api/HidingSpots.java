@@ -2,7 +2,7 @@ package net.ixdarklord.whycantisleep.api;
 
 import net.ixdarklord.whycantisleep.hiding.DataHidingSpots;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -50,7 +50,7 @@ public final class HidingSpots {
     }
 
     /** The type with this id, registered or from a data pack, or null. */
-    public static @Nullable HidingSpotType get(Identifier id) {
+    public static @Nullable HidingSpotType get(ResourceLocation id) {
         for (HidingSpotType type : TYPES) {
             if (type.id().equals(id)) return type;
         }
