@@ -33,7 +33,7 @@ One folder per Minecraft version, each on its own branch of the same repo (the a
 | Minecraft | Loaders | Folder / branch | CoolCatLib: Core (Maven Local) | State |
 |---|---|---|---|---|
 | 26.1 – 26.1.2 | Fabric, NeoForge | `../WhyCantISleep-26.1.2`, `main` | `26.1.2-6` (Folios `26.1.2+2.0`) | first version, feature complete |
-| 26.3 | Fabric, NeoForge | this folder, `26.3` | `26.3-6` (Folios `26.3+2.0`, MCP Bridge `26.3-1`, catalog `26.3-v1`) | ported 2026-10-23 |
+| 26.3 | Fabric, NeoForge | this folder, `26.3` | `26.3-7` (Folios `26.3+2.0`, MCP Bridge `26.3-1`, catalog `26.3-v1`) | ported 2026-10-23 |
 | 1.21.1 | Forge, Fabric, NeoForge | `../WhyCantISleep-1.21.1` (not created) | `1.21.1-2100.2.0.1` | backport, after 26.1.2 is feature complete |
 | 1.20.1 | Forge, Fabric (no NeoForge) | `../WhyCantISleep-1.20.1` (empty folder) | `1.20.1-2001.2.0.1` | backport |
 | 26.2 | Fabric, NeoForge | `../WhyCantISleep-26.2`, `26.2` | `26.2-6` | being ported |

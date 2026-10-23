@@ -57,5 +57,5 @@ This file is for listing all the changes to this project
 - Breaking a hiding spot brings whoever hides there out at once.
 
 ### 🛠️ Changes
-- Ported to Minecraft 26.3 (from the 26.1.2 version): needs **Folios** 26.3+2.0 for the guide book, and CoolCatLib 26.3-6.
+- Ported to Minecraft 26.3 (from the 26.1.2 version): needs **Folios** 26.3+2.0 for the guide book, and CoolCatLib 26.3-7 (its screen effect fix).
 - The Lurker, the Dark Between, boss combat, and mood and lucidity moved to a mod of their own, **Behind Closed Eyes**, along with the whispers and the "monster under the bed" scare. Why Can't I Sleep? keeps the sleep features and no longer needs anything registered.
