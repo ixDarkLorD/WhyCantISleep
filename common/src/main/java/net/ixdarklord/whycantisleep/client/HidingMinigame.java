@@ -4,6 +4,7 @@ import net.ixdarklord.coolcatcanvas.api.utils.Easing;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientGuiEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
 import net.ixdarklord.whycantisleep.client.hud.HudStyle;
+import net.ixdarklord.whycantisleep.client.hud.SleepNotices;
 import net.ixdarklord.whycantisleep.sound.WCISSounds;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -58,6 +59,7 @@ public final class HidingMinigame {
     private static final int LINE_HEIGHT = 16;
     private static final int REST = 10;
     private static final int BELOW_CROSSHAIR = 28;
+    private static final int CARD_GAP = 4;
     private static final int CALM = 0x4ADE80;
     private static final int CALM_DARK = 0x2F9E57;
     // A heartbeat on the line, by columns from its peak: a little bump, a dip, the tall spike, the drop under the rest
@@ -218,7 +220,8 @@ public final class HidingMinigame {
         int shake = strikeFlash ? Math.round(Mth.sin(now * 2.5F) * 2.0F * flash) : 0;
         int height = 9 + 3 + LINE_HEIGHT;
         int x = (graphics.guiWidth() - WIDTH) / 2 + shake;
-        int y = graphics.guiHeight() / 2 + BELOW_CROSSHAIR;
+        // Under the crosshair, but always clear of the hiding card below (a tall card on a short screen reaches up to it).
+        int y = Math.min(graphics.guiHeight() / 2 + BELOW_CROSSHAIR, SleepNotices.top() - CARD_GAP - HudStyle.PANEL_PADDING - height);
         int accent = gasped ? HudStyle.RED : CALM;
         HudStyle.notice(graphics, x, y, WIDTH, height, alpha);
         HudStyle.wash(graphics, x, y, WIDTH, y + height, 1.0F, accent, alpha, now, startedAt, 1.0F - strikes / (float) STRIKES,
