@@ -119,7 +119,7 @@ public final class SleepNotices {
     private static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
         SleepNotice shown = notice;
         Minecraft minecraft = Minecraft.getInstance();
-        if (shown == null || minecraft.options.hideGui) return;
+        if (shown == null || minecraft.gui.hud.isHidden()) return;
         float age = tick - shownAt + delta.getGameTimeDeltaPartialTick(true);
         float left = duration - age;
         if (left <= 0.0F) return;

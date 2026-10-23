@@ -37,7 +37,7 @@ public final class SleepDebtMoon {
     private static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
         Minecraft minecraft = Minecraft.getInstance();
         int ticksSinceRest = SleepStatus.ticksSinceRest();
-        if (ticksSinceRest < DAY || minecraft.options.hideGui || !WCISConfigs.isEnabled(WCISClientConfig.SLEEP_DEBT_MOON)) return;
+        if (ticksSinceRest < DAY || minecraft.gui.hud.isHidden() || !WCISConfigs.isEnabled(WCISClientConfig.SLEEP_DEBT_MOON)) return;
         float fill = Mth.clamp(ticksSinceRest / (float) (DAY * FULL_DAYS), 0.0F, 1.0F);
         int x = MARGIN;
         int y = MARGIN;

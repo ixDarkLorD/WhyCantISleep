@@ -81,7 +81,7 @@ public final class SleepBoard {
     private static boolean isShown() {
         Minecraft minecraft = Minecraft.getInstance();
         return board != null && tick - receivedAt <= STALE_TICKS && minecraft.player != null && minecraft.player.isSleeping()
-                && !minecraft.options.hideGui && WCISConfigs.isEnabled(WCISClientConfig.SLEEP_BOARD);
+                && !minecraft.gui.hud.isHidden() && WCISConfigs.isEnabled(WCISClientConfig.SLEEP_BOARD);
     }
 
     private static int rows() {
@@ -149,7 +149,7 @@ public final class SleepBoard {
         }
         graphics.text(font, Component.translatable("gui.whycantisleep.board.awake"), X, Y + LABEL_Y, HudStyle.color(HudStyle.MUTED, alpha), false);
         int rowY = Y + HEADER_HEIGHT;
-        int hovered = nudges && minecraft.screen != null
+        int hovered = nudges && minecraft.gui.screen() != null
                 ? rowAt(minecraft.mouseHandler.getScaledXPos(minecraft.getWindow()), minecraft.mouseHandler.getScaledYPos(minecraft.getWindow())) : -1;
         for (int i = 0; i < rows; i++) {
             SleepBoardPayload.Entry entry = board.awake().get(i);
@@ -181,7 +181,7 @@ public final class SleepBoard {
             HudStyle.divider(graphics, X, WIDTH, footerY - 1, alpha);
             int textY = footerY + 3;
             voteY = textY;
-            boolean hover = minecraft.screen != null
+            boolean hover = minecraft.gui.screen() != null
                     && overVote(minecraft.mouseHandler.getScaledXPos(minecraft.getWindow()), minecraft.mouseHandler.getScaledYPos(minecraft.getWindow()));
             if (hover) graphics.fill(X - HudStyle.PANEL_PADDING + 1, textY - 2, X + WIDTH + HudStyle.PANEL_PADDING - 1, textY - 2 + VOTE_HEIGHT,
                     HudStyle.color(HudStyle.WHITE, alpha * 0.06F));

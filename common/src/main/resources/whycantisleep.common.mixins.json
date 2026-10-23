@@ -22,7 +22,7 @@
     "client.EntityMixin",
     "client.GameRendererMixin",
     "client.GuiItemRenderStateMixin",
-    "client.GuiMixin",
+    "client.HudMixin",
     "client.GuiRendererMixin",
     "client.HumanoidModelMixin",
     "client.InventoryScreenMixin",

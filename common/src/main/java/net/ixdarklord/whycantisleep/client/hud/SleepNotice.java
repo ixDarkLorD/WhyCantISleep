@@ -2,6 +2,7 @@ package net.ixdarklord.whycantisleep.client.hud;
 
 import net.ixdarklord.whycantisleep.network.WokePayload;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -66,18 +67,18 @@ public record SleepNotice(Kind kind, Component title, @Nullable Component hint, 
         WRONG_TIME(HudStyle.YELLOW, () -> Items.CLOCK),
         TOO_FAR(HudStyle.YELLOW, () -> Items.SPYGLASS),
         OBSTRUCTED(HudStyle.YELLOW, () -> Items.COBBLESTONE),
-        OCCUPIED(HudStyle.YELLOW, () -> Items.RED_BED),
+        OCCUPIED(HudStyle.YELLOW, () -> Items.BED.pick(DyeColor.RED)),
         PLAYERS_AWAKE(HudStyle.AQUA, () -> Items.PLAYER_HEAD),
         NOT_POSSIBLE(HudStyle.WHITE, () -> Items.BARRIER),
         DANGER(HudStyle.RED, () -> Items.TNT),
         NUDGE(HudStyle.GREEN, () -> Items.BELL),
-        HIDING(HudStyle.SILVER, () -> Items.GRAY_BED),
+        HIDING(HudStyle.SILVER, () -> Items.BED.pick(DyeColor.GRAY)),
         // Hiding, with monsters about.
-        HIDING_DANGER(HudStyle.RED, () -> Items.GRAY_BED),
+        HIDING_DANGER(HudStyle.RED, () -> Items.BED.pick(DyeColor.GRAY)),
         // Waking: a good night, a middling one, a bad one; woken early; shaken from a night terror.
-        WOKE_GOOD(HudStyle.GREEN, () -> Items.LIME_BED),
-        WOKE_FAIR(HudStyle.YELLOW, () -> Items.YELLOW_BED),
-        WOKE_POOR(HudStyle.RED, () -> Items.RED_BED),
+        WOKE_GOOD(HudStyle.GREEN, () -> Items.BED.pick(DyeColor.LIME)),
+        WOKE_FAIR(HudStyle.YELLOW, () -> Items.BED.pick(DyeColor.YELLOW)),
+        WOKE_POOR(HudStyle.RED, () -> Items.BED.pick(DyeColor.RED)),
         WOKE_EARLY(HudStyle.GOLD, () -> Items.CLOCK),
         SHAKEN(HudStyle.LIGHT_PURPLE, () -> Items.ENDER_EYE),
         // The monsters that blocked a sleep, all dealt with.

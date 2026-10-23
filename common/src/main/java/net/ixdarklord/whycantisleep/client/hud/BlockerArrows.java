@@ -58,7 +58,7 @@ public final class BlockerArrows {
 
     private static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
         Minecraft minecraft = Minecraft.getInstance();
-        if (Blockers.isEmpty() || minecraft.player == null || minecraft.options.hideGui) return;
+        if (Blockers.isEmpty() || minecraft.player == null || minecraft.gui.hud.isHidden()) return;
         if (!WCISConfigs.isEnabled(WCISClientConfig.OFF_SCREEN_ARROWS)) return;
         float partialTick = delta.getGameTimeDeltaPartialTick(true);
         List<Ring> rings = new ArrayList<>();
@@ -103,7 +103,7 @@ public final class BlockerArrows {
     // An arrow for each blocker the player can't see outside the view, with the angle on the screen that points to it;
     // a ring, into the list given, for each one in view behind blocks, where it is on the screen.
     private static List<Arrow> collect(Minecraft minecraft, GuiGraphicsExtractor graphics, float partialTick, List<Ring> rings) {
-        Camera camera = minecraft.gameRenderer.getMainCamera();
+        Camera camera = minecraft.gameRenderer.mainCamera();
         Vec3 eye = camera.position();
         Vector3fc forward = camera.forwardVector();
         Vector3fc up = camera.upVector();

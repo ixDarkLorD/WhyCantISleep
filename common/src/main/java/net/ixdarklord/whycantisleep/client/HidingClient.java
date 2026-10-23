@@ -36,7 +36,6 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +48,7 @@ import java.util.Map;
  */
 public final class HidingClient {
     /** Held while hiding, the player holds their breath: they make no noise, until they run out and gasp. */
-    public static final KeyMapping HOLD_BREATH = new KeyMapping("key.whycantisleep.hold_breath", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V,
+    public static final KeyMapping HOLD_BREATH = new KeyMapping("key.whycantisleep.hold_breath", InputConstants.Type.KEYBOARD, InputConstants.KEY_V,
             KeyMapping.Category.GAMEPLAY);
     // A card that stays up for as long as the player hides; it is taken down when they come out.
     private static final int CARD_TICKS = 20 * 60 * 60;
@@ -408,7 +407,7 @@ public final class HidingClient {
      * The eyes narrowed: dark lids close in from above and below, leaving an almond of view, widest in the middle and
      * pinched at the sides, its edges shading off: one texture, stretched taller or shorter with the squint. The squint
      * eases in and out, so the lids slide rather than snap, and lives while it is held: a slow sway with the breath, a
-     * tighter squint with monsters about, a blink now and then. Drawn first in the HUD ({@code GuiMixin}), so the
+     * tighter squint with monsters about, a blink now and then. Drawn first in the HUD ({@code HudMixin}), so the
      * HUD stays over it, and drawn with the HUD hidden too: it is the player's eyes, not part of the HUD.
      */
     public static void renderEyelids(GuiGraphicsExtractor graphics, DeltaTracker delta) {

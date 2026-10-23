@@ -1,9 +1,9 @@
 # Changelog
 This file is for listing all the changes to this project
 
-## v26.1.2-1 Beta | Unreleased
+## v26.3-1 Beta | Unreleased
 ### ✨ New Features
-- Project set up for Fabric and NeoForge (Minecraft 26.1 to 26.1.2), built on CoolCatLib: Core and CoolCatLib: Canvas.
+- Project set up for Fabric and NeoForge (Minecraft 26.3), built on CoolCatLib (Core and Canvas).
 - **Monster highlights**: when monsters keep you from sleeping, exactly the ones that blocked it (the game's own check range) glow for a few seconds, colored by the kind of threat or in one color. Only you see it; a server can also show it to players without the mod through the game's glowing effect.
 - **Off-screen arrows**: arrows around the crosshair point to the blocking monsters you can't see, those outside your view and those behind blocks, in the same colors as their highlights and in three sizes. A solid arrow is a monster outside your view, a hollow one a monster behind blocks; nearer monsters get larger arrows, and arrows that would overlap fan apart.
 - **Sleep HUD**: sleep messages no longer use the line above the hotbar. A soft, round-cornered dark card of the mod's own rises into place, with a wash of the message's color over its left side and specks of light drifting along it, an item for an icon in a square tinted that color, what happened and what to do about it; a blocked sleep reads "3 monsters nearby" over "Closest: Zombie, 6 blocks below". On a warning the wash throbs. The bedtime panel is a card in the same style, with each awake player's face beside their name.
@@ -57,5 +57,5 @@ This file is for listing all the changes to this project
 - Breaking a hiding spot brings whoever hides there out at once.
 
 ### 🛠️ Changes
-- Needs **Folios** for the guide book, and CoolCatLib 26.1.2-6.
+- Ported to Minecraft 26.3 (from the 26.1.2 version): needs **Folios** 26.3+2.0 for the guide book, and CoolCatLib 26.3-6.
 - The Lurker, the Dark Between, boss combat, and mood and lucidity moved to a mod of their own, **Behind Closed Eyes**, along with the whispers and the "monster under the bed" scare. Why Can't I Sleep? keeps the sleep features and no longer needs anything registered.
