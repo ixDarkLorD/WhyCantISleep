@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Generates sleep effect and sleep quality modifier files for a mod's data, from {@link SleepEffectBuilder}s and
- * {@link SleepModifierBuilder}s: a plain {@link DataProvider}, for Fabric's and NeoForge's data generation alike.
+ * {@link SleepModifierBuilder}s: a plain {@link DataProvider}, for Fabric's and Forge's data generation alike.
  * <pre>{@code
  * public final class MySleepData extends SleepDataProvider {
  *     public MySleepData(PackOutput output) {
@@ -30,15 +30,15 @@ import java.util.concurrent.CompletableFuture;
  *     }
  * }
  * // Fabric:   pack.addProvider((FabricDataOutput output) -> new MySleepData(output));
- * // NeoForge: event.createProvider(MySleepData::new);
+ * // Forge:    event.getGenerator().addProvider(event.includeServer(), MySleepData::new);
  * }</pre>
  * The files land in {@code data/<namespace>/whycantisleep/sleep_effect/} and {@code .../sleep_modifier/}, named by id.
  */
 public abstract class SleepDataProvider implements DataProvider {
     private final PackOutput.PathProvider effects;
     private final PackOutput.PathProvider modifiers;
-    private final Map<Identifier, JsonObject> effectFiles = new LinkedHashMap<>();
-    private final Map<Identifier, JsonObject> modifierFiles = new LinkedHashMap<>();
+    private final Map<ResourceLocation, JsonObject> effectFiles = new LinkedHashMap<>();
+    private final Map<ResourceLocation, JsonObject> modifierFiles = new LinkedHashMap<>();
 
     protected SleepDataProvider(PackOutput output) {
         this.effects = output.createPathProvider(PackOutput.Target.DATA_PACK, "whycantisleep/sleep_effect");
@@ -49,12 +49,12 @@ public abstract class SleepDataProvider implements DataProvider {
     protected abstract void generate();
 
     /** A sleep effect, at its id. */
-    protected final void effect(Identifier id, SleepEffectBuilder effect) {
+    protected final void effect(ResourceLocation id, SleepEffectBuilder effect) {
         if (this.effectFiles.put(id, effect.toJson()) != null) throw new IllegalStateException("Two sleep effects with the id " + id);
     }
 
     /** A sleep quality modifier, at its id (the id of another, to replace it or, {@link SleepModifierBuilder#disabled}, to take it out). */
-    protected final void modifier(Identifier id, SleepModifierBuilder modifier) {
+    protected final void modifier(ResourceLocation id, SleepModifierBuilder modifier) {
         if (this.modifierFiles.put(id, modifier.toJson()) != null) throw new IllegalStateException("Two sleep modifiers with the id " + id);
     }
 

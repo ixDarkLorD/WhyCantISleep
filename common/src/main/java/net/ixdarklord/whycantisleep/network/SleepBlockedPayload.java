@@ -2,7 +2,7 @@ package net.ixdarklord.whycantisleep.network;
 
 import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.ixdarklord.coolcatcore.api.network.CustomPacketPayload;
 
 import java.util.List;
 

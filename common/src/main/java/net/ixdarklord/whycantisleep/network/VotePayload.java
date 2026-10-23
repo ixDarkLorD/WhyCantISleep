@@ -1,7 +1,7 @@
 package net.ixdarklord.whycantisleep.network;
 
 import net.ixdarklord.whycantisleep.WhyCantISleep;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.ixdarklord.coolcatcore.api.network.CustomPacketPayload;
 
 /** Client to server: the player, in bed, votes from the sleep board to skip the night. */
 public record VotePayload(boolean skip) implements CustomPacketPayload {

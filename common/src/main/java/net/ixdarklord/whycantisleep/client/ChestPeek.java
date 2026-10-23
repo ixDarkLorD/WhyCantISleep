@@ -3,9 +3,9 @@ package net.ixdarklord.whycantisleep.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.entity.state.AvatarRenderState;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 
@@ -42,22 +42,24 @@ public final class ChestPeek {
     private ChestPeek() {
     }
 
-    public static void submit(AvatarRenderState state, PoseStack poseStack, SubmitNodeCollector collector, float rise, boolean trembling) {
+    public static void render(AbstractClientPlayer player, float partialTicks, PoseStack poseStack, MultiBufferSource buffers, int light, float rise,
+                              boolean trembling) {
+        float bodyRot = Mth.rotLerp(partialTicks, player.yBodyRotO, player.yBodyRot);
+        float headRot = Mth.wrapDegrees(Mth.rotLerp(partialTicks, player.yHeadRotO, player.yHeadRot) - bodyRot);
         poseStack.pushPose();
         // Local +z is the way the player faces (out of the chest's front), +x their left.
-        poseStack.mulPose(Axis.YP.rotationDegrees(-state.bodyRot));
-        float age = state.ageInTicks;
+        poseStack.mulPose(Axis.YP.rotationDegrees(-bodyRot));
+        float age = player.tickCount + partialTicks;
         float bob = Mth.sin(age * BOB_SPEED) * BOB;
         float shiver = trembling ? Mth.sin(age * 2.9F) * SHIVER : 0.0F;
         poseStack.translate(shiver, -(1.0F - rise) * SUNK + bob * rise, BACK);
         // Turned about the head's middle, after the look.
-        poseStack.mulPose(Axis.YP.rotationDegrees(-Mth.clamp(state.yRot, -LOOK, LOOK)));
-        int light = state.lightCoords;
-        collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(state.skin.body().texturePath()), (pose, buffer) -> {
-            band(pose, buffer, light, 4.0F, 0.0F);
-            // The hat layer, half a pixel out all round, as the game draws it.
-            band(pose, buffer, light, 4.5F, 32.0F);
-        });
+        poseStack.mulPose(Axis.YP.rotationDegrees(-Mth.clamp(headRot, -LOOK, LOOK)));
+        VertexConsumer buffer = buffers.getBuffer(RenderType.entityCutout(player.getSkinTextureLocation()));
+        PoseStack.Pose pose = poseStack.last();
+        band(pose, buffer, light, 4.0F, 0.0F);
+        // The hat layer, half a pixel out all round, as the game draws it.
+        band(pose, buffer, light, 4.5F, 32.0F);
         poseStack.popPose();
     }
 
@@ -88,6 +90,7 @@ public final class ChestPeek {
     }
 
     private static void vertex(PoseStack.Pose pose, VertexConsumer buffer, int light, float x, float y, float z, float u, float v, float nx, float ny, float nz) {
-        buffer.addVertex(pose, x, y, z).setColor(-1).setUv(u, v).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, nx, ny, nz);
+        buffer.vertex(pose.pose(), x, y, z).color(255, 255, 255, 255).uv(u, v).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), nx, ny, nz)
+                .endVertex();
     }
 }

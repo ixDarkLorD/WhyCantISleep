@@ -37,9 +37,9 @@
 
   "depends": {
     "java": ">=${versions.java.get()}",
-    "minecraft": ">=${project.supported_min_mc_version} <=${max_mc_version}",
+    "minecraft": ">=${mc_version} <=${max_mc_version}",
     "fabricloader": ">=${min_fabric_version}",
-    "fabric-api": ">=${project.supported_min_fabric_api_version}",
+    "fabric-api": ">=${min_fabric_api_version}",
     "coolcatlib": ">=${coolcatlib_version}",
     "folios": ">=${folios_version}"
   }

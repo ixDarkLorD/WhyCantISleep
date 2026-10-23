@@ -4,7 +4,7 @@ import net.ixdarklord.coolcatcore.api.event.v2.common.PlayerEvents;
 import net.ixdarklord.folios.api.GuideBooks;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.whycantisleep.config.WCISServerConfig;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
@@ -15,7 +15,7 @@ import net.minecraft.world.item.ItemStack;
  */
 public final class GuideBookGift {
     /** The guide book's id. */
-    public static final Identifier BOOK = WhyCantISleep.id("guide");
+    public static final ResourceLocation BOOK = WhyCantISleep.id("guide");
     private static final String GIVEN = "whycantisleep.guide_given";
 
     private GuideBookGift() {
@@ -23,10 +23,9 @@ public final class GuideBookGift {
 
     public static void init() {
         PlayerEvents.JOIN.register(player -> {
-            if (!(player instanceof ServerPlayer serverPlayer) || !WCISServerConfig.GIVE_GUIDE_BOOK.get()) return;
-            if (serverPlayer.entityTags().contains(GIVEN)) return;
-            give(serverPlayer);
-            serverPlayer.addTag(GIVEN);
+            if (!WCISServerConfig.GIVE_GUIDE_BOOK.get() || player.getTags().contains(GIVEN)) return;
+            give(player);
+            player.addTag(GIVEN);
         });
     }
 

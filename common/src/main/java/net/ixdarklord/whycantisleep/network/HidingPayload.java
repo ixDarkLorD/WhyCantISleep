@@ -4,7 +4,7 @@ import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.whycantisleep.api.HidingPosture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.ixdarklord.coolcatcore.api.network.CustomPacketPayload;
 import net.minecraft.world.item.ItemStack;
 
 /**

@@ -9,7 +9,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.zombie.ZombifiedPiglin;
+import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -49,7 +49,7 @@ public final class SleepChecks {
 
     /** Server side: exactly the mobs that keep this player from sleeping in the bed, the mod's rules applied. */
     public static List<Mob> blockers(ServerPlayer player, BlockPos bed) {
-        return applyRules(player, bed, player.level().getEntitiesOfClass(Monster.class, box(bed), monster -> monster.isPreventingPlayerRest(player.level(), player)));
+        return applyRules(player, bed, player.level().getEntitiesOfClass(Monster.class, box(bed), monster -> monster.isPreventingPlayerRest(player)));
     }
 
     /**
@@ -59,9 +59,9 @@ public final class SleepChecks {
     public static List<Mob> applyRules(ServerPlayer player, BlockPos bed, List<? extends Mob> found) {
         List<Mob> blockers = new ArrayList<>();
         for (Mob mob : found) {
-            if (!mob.is(DOES_NOT_BLOCK_SLEEP)) blockers.add(mob);
+            if (!mob.getType().is(DOES_NOT_BLOCK_SLEEP)) blockers.add(mob);
         }
-        for (Mob mob : player.level().getEntitiesOfClass(Mob.class, box(bed), mob -> mob.isAlive() && mob.is(BLOCKS_SLEEP))) {
+        for (Mob mob : player.level().getEntitiesOfClass(Mob.class, box(bed), mob -> mob.isAlive() && mob.getType().is(BLOCKS_SLEEP))) {
             if (!blockers.contains(mob)) blockers.add(mob);
         }
         return blockers.size() <= tolerance(player, bed) ? List.of() : blockers;
@@ -69,7 +69,7 @@ public final class SleepChecks {
 
     // How many blockers a bed lets by: none, or a few when another player sleeps in a bed beside it.
     private static int tolerance(ServerPlayer player, BlockPos bed) {
-        for (ServerPlayer other : player.level().players()) {
+        for (ServerPlayer other : player.serverLevel().players()) {
             if (other == player || !other.isSleeping()) continue;
             BlockPos theirs = other.getSleepingPos().orElse(null);
             if (theirs != null && theirs.closerThan(bed, SHARED_RANGE)) return WCISServerConfig.SHARED_BED_TOLERANCE.get();

@@ -74,7 +74,7 @@ public final class HidingAmbience {
                 }
             } else if (moved < 0.01 && random.nextInt(SHUFFLE_ODDS) == 0) {
                 // Standing about: a shuffle of feet, a scrape of cloth.
-                SoundEvent shuffle = random.nextBoolean() ? SoundEvents.WOOL_STEP : SoundEvents.ARMOR_EQUIP_LEATHER.value();
+                SoundEvent shuffle = random.nextBoolean() ? SoundEvents.WOOL_STEP : SoundEvents.ARMOR_EQUIP_LEATHER;
                 play(minecraft, at, shuffle, volume * 0.8F, 0.5F + random.nextFloat() * 0.15F);
             }
         }

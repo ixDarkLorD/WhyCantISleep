@@ -1,8 +1,9 @@
 package net.ixdarklord.whycantisleep.api;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
@@ -23,13 +24,13 @@ import net.minecraft.world.phys.Vec3;
  * @param icon          what the hiding card shows
  * @param where         how the card says where they are, after "Hiding": "under the bed", "in the chest"
  */
-public record HidingSpot(Identifier type, BlockPos anchor, Vec3 position, float yaw, HidingPosture posture, float eyeHeight, float squint,
+public record HidingSpot(ResourceLocation type, BlockPos anchor, Vec3 position, float yaw, HidingPosture posture, float eyeHeight, float squint,
                          float hideTimeScale, ItemStack icon, Component where) {
     /** The squint a spot has unless it says otherwise. */
     public static final float DEFAULT_SQUINT = 0.5F;
 
     public HidingSpot {
-        squint = Math.clamp(squint, 0.0F, 1.0F);
+        squint = Mth.clamp(squint, 0.0F, 1.0F);
     }
 
     /** The same spot with the eyes closed this far (0 to 1). */

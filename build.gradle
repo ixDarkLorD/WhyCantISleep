@@ -1,8 +1,15 @@
 plugins {
-    alias libs.plugins.architectury.loom.noremap apply false
+    alias libs.plugins.architectury.loom apply false
     alias libs.plugins.architectury.plugin apply false
     alias libs.plugins.shadow apply false
     alias libs.plugins.modpublisher apply false
+}
+
+// Java 17's tools default to the platform charset (not UTF-8 as from Java 18): Javadoc must read the sources as UTF-8.
+allprojects {
+    tasks.withType(Javadoc).configureEach {
+        options.encoding = "UTF-8"
+    }
 }
 
 // Every project's Java, jar, resource and publishing setup.

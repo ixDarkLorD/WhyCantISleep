@@ -15,9 +15,8 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.clock.ClockTimeMarkers;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.gamerules.GameRules;
+import net.minecraft.world.level.GameRules;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,7 +66,7 @@ public final class SleepVotes {
 
     /** A player in bed votes to skip the night (from the board). */
     public static void onVote(ServerPlayer player) {
-        ServerLevel level = player.level();
+        ServerLevel level = player.serverLevel();
         if (!player.isSleeping()) return;
         Census census = census(level);
         if (!canVote(census.sleeping, census.needed, census.awake)) return;
@@ -94,13 +93,13 @@ public final class SleepVotes {
 
     private static MutableComponent button(String key, String command, ChatFormatting color) {
         return Component.literal("[").append(Component.translatable(key)).append("]").withStyle(style -> style.withColor(color)
-                .withClickEvent(new ClickEvent.RunCommand(command))
-                .withHoverEvent(new HoverEvent.ShowText(Component.translatable(key + ".hover"))));
+                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable(key + ".hover"))));
     }
 
     // An awake player's answer, from the buttons in chat.
     private static int answer(ServerPlayer player, boolean yes) {
-        ServerLevel level = player.level();
+        ServerLevel level = player.serverLevel();
         Vote vote = VOTES.get(level.dimension());
         if (vote == null || vote.askedAt < 0 || !vote.asked.remove(player.getUUID())) {
             player.sendSystemMessage(Component.translatable("gui.whycantisleep.vote.none"), true);
@@ -142,9 +141,10 @@ public final class SleepVotes {
         Vote vote = VOTES.remove(level.dimension());
         if (vote == null) return;
         for (ServerPlayer player : level.players()) player.sendSystemMessage(Component.translatable("gui.whycantisleep.vote.skipped"), true);
-        level.dimensionType().defaultClock().ifPresent(clock -> {
-            if (level.getGameRules().get(GameRules.ADVANCE_TIME)) level.getServer().clockManager().moveToTimeMarker(clock, ClockTimeMarkers.WAKE_UP_FROM_SLEEP);
-        });
+        if (level.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)) {
+            long time = level.getDayTime() + 24000L;
+            level.setDayTime(time - time % 24000L);
+        }
         ((ServerLevelAccessor) level).whycantisleep$wakeUpAllPlayers();
         SleepEvents.NIGHT_VOTED.invoke(new SleepEvents.NightVoted(level, census.sleepers));
     }
@@ -160,7 +160,7 @@ public final class SleepVotes {
             if (player.isSleeping()) sleepers.add(player);
             else awake.add(player);
         }
-        int needed = Math.max(1, (int) Math.ceil(active * level.getGameRules().get(GameRules.PLAYERS_SLEEPING_PERCENTAGE) / 100.0F));
+        int needed = Math.max(1, (int) Math.ceil(active * level.getGameRules().getInt(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE) / 100.0F));
         return new Census(sleepers, awake, sleepers.size(), needed);
     }
 

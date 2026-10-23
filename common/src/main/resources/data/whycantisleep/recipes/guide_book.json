@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "minecraft:book"
+    },
+    {
+      "tag": "minecraft:beds"
+    }
+  ],
+  "result": {
+    "item": "whycantisleep:guide_book",
+    "count": 1
+  }
+}

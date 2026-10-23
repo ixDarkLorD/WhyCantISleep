@@ -2,9 +2,9 @@ package net.ixdarklord.whycantisleep.api;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.effect.MobEffect;
@@ -46,14 +46,14 @@ import java.util.function.Consumer;
  * @param name       how the player is told of it
  * @param action     something more to do on waking, for those registered in code; null for none
  */
-public record SleepEffect(Identifier id, Kind kind, Rarity rarity, int weight, int minQuality, int maxQuality, List<Effect> effects, Component name,
+public record SleepEffect(ResourceLocation id, Kind kind, Rarity rarity, int weight, int minQuality, int maxQuality, List<Effect> effects, Component name,
                           @Nullable Consumer<ServerPlayer> action) {
     public SleepEffect {
         effects = List.copyOf(effects);
     }
 
     /** One without an action of its own, its weight the rarity's. */
-    public static SleepEffect of(Identifier id, Kind kind, Rarity rarity, Component name, Effect... effects) {
+    public static SleepEffect of(ResourceLocation id, Kind kind, Rarity rarity, Component name, Effect... effects) {
         return new SleepEffect(id, kind, rarity, rarity.weight(), 0, 100, List.of(effects), name, null);
     }
 
@@ -132,9 +132,9 @@ public record SleepEffect(Identifier id, Kind kind, Rarity rarity, int weight, i
      *
      * @param duration in ticks
      */
-    public record Effect(Holder<MobEffect> effect, int duration, int amplifier) {
+    public record Effect(MobEffect effect, int duration, int amplifier) {
         public static final Codec<Effect> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                MobEffect.CODEC.fieldOf("id").forGetter(Effect::effect),
+                BuiltInRegistries.MOB_EFFECT.byNameCodec().fieldOf("id").forGetter(Effect::effect),
                 Codec.intRange(1, 20 * 60 * 60).optionalFieldOf("duration", 600).forGetter(Effect::duration),
                 Codec.intRange(0, 9).optionalFieldOf("amplifier", 0).forGetter(Effect::amplifier)
         ).apply(instance, Effect::new));

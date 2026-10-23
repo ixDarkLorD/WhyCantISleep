@@ -3,6 +3,8 @@ package net.ixdarklord.whycantisleep.sleep;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobType;
 
 /**
  * The kind of threat a blocking monster is, which picks its highlight color when threat colors are on, and how
@@ -35,11 +37,14 @@ public enum ThreatType {
     }
 
     public static ThreatType of(Entity entity) {
-        if (entity.is(EntityType.CREEPER)) return EXPLOSIVE;
-        if (entity.is(EntityType.ENDERMAN) || entity.is(EntityType.ENDERMITE)) return ENDER;
-        if (entity.is(EntityTypeTags.UNDEAD)) return UNDEAD;
-        if (entity.is(EntityTypeTags.ARTHROPOD)) return ARTHROPOD;
-        if (entity.is(EntityTypeTags.RAIDERS) || entity.is(EntityTypeTags.ILLAGER)) return RAIDER;
+        EntityType<?> type = entity.getType();
+        if (type == EntityType.CREEPER) return EXPLOSIVE;
+        if (type == EntityType.ENDERMAN || type == EntityType.ENDERMITE) return ENDER;
+        // 1.20.1 has no undead or arthropod tags: a mob's type says so instead.
+        MobType mobType = entity instanceof LivingEntity living ? living.getMobType() : MobType.UNDEFINED;
+        if (mobType == MobType.UNDEAD) return UNDEAD;
+        if (mobType == MobType.ARTHROPOD) return ARTHROPOD;
+        if (type.is(EntityTypeTags.RAIDERS) || mobType == MobType.ILLAGER) return RAIDER;
         return OTHER;
     }
 }

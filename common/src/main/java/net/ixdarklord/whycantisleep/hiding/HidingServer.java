@@ -1,7 +1,6 @@
 package net.ixdarklord.whycantisleep.hiding;
 
 import net.ixdarklord.coolcatcore.api.event.v2.common.InteractionEvents;
-import net.ixdarklord.coolcatcore.api.event.v2.common.LivingEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.PlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.ServerLifecycleEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.core.EventResult;
@@ -29,7 +28,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Pose;
@@ -144,14 +142,22 @@ public final class HidingServer {
         PlayerEvents.END_TICK.register(player -> {
             if (player instanceof ServerPlayer serverPlayer) tick(serverPlayer);
         });
-        LivingEvents.DAMAGE.register((entity, source, amount) -> {
-            if (entity instanceof ServerPlayer player && amount > 0.0F) stop(player, HidingEvents.Reason.HURT);
-            return EventResult.PASS;
-        });
         PlayerEvents.JOIN.register(HidingServer::tellOfHiders);
-        PlayerEvents.CHANGE_DIMENSION.register((player, from, to) -> tellOfHiders(player));
         PlayerEvents.LEAVE.register(player -> stop(player, HidingEvents.Reason.INTERRUPTED));
         ServerLifecycleEvents.STOPPED.register(server -> HIDING.clear());
+    }
+
+    /** A player is being hurt (CoolCatLib 1.20.1 has no damage event: {@code LivingEntityMixin}): it brings them out. */
+    public static void onHurt(ServerPlayer player, float amount) {
+        if (amount > 0.0F) stop(player, HidingEvents.Reason.HURT);
+    }
+
+    /**
+     * A player came into another dimension (CoolCatLib 1.20.1 has no event for it: {@code ServerPlayerMixin}): they are
+     * told who in it is hiding.
+     */
+    public static void onChangedDimension(ServerPlayer player) {
+        tellOfHiders(player);
     }
 
     /** Whether the player, with what they hold and what they are doing, may hide in a spot they use. Both sides. */
@@ -199,7 +205,7 @@ public final class HidingServer {
 
     /** Puts a player in a spot. Returns false when they can't hide (they already are, or a listener said no). */
     public static boolean start(ServerPlayer player, HidingSpot spot) {
-        ServerLevel level = player.level();
+        ServerLevel level = player.serverLevel();
         if (isHiding(player)) return false;
         HidingSpotType type = HidingSpots.get(spot.type());
         if (type == null) return false;
@@ -224,7 +230,7 @@ public final class HidingServer {
 
         int hideTicks = Math.max(20, Mth.floor(WCISServerConfig.HIDE_TIME.get() * 20 * spot.hideTimeScale() * coverScale(level, spot, type)));
         Hide hide = new Hide(type, spot, level.dimension(), player.position(), hideTicks);
-        for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(HUNTER_RANGE), mob -> mob.getTarget() == player && !mob.is(IGNORES_HIDING))) {
+        for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(HUNTER_RANGE), mob -> mob.getTarget() == player && !mob.getType().is(IGNORES_HIDING))) {
             hide.hunters.add(mob.getUUID());
             mob.setTarget(null);
         }
@@ -236,10 +242,10 @@ public final class HidingServer {
         player.stopUsingItem();
         player.setDeltaMovement(Vec3.ZERO);
         Vec3 at = spot.position();
-        player.teleportTo(at.x, at.y, at.z);
         // Standing in a closet, they face its door, and in a chest its front (their look kept near it by the client);
         // under a bed, the view is theirs to turn.
-        if (spot.posture() != HidingPosture.LYING) player.forceSetRotation(spot.yaw(), false, 0.0F, false);
+        if (spot.posture() != HidingPosture.LYING) player.connection.teleport(at.x, at.y, at.z, spot.yaw(), 0.0F);
+        else player.teleportTo(at.x, at.y, at.z);
         enterSound(level, spot, player, true);
         broadcast(level, player, hide);
         return true;
@@ -249,7 +255,7 @@ public final class HidingServer {
     public static boolean stop(ServerPlayer player, HidingEvents.Reason reason) {
         Hide hide = HIDING.remove(player.getUUID());
         if (hide == null) return false;
-        ServerLevel level = player.level();
+        ServerLevel level = player.serverLevel();
         if (level.dimension() == hide.dimension) {
             Vec3 out = exit(level, player, hide);
             player.teleportTo(out.x, out.y, out.z);
@@ -279,7 +285,7 @@ public final class HidingServer {
         hide.noise = noise;
         HidingEvents.NOISE_CHANGED.invoke(new HidingEvents.NoiseChanged(player, hide.spot, noise, previous));
         if (noise < 1.0F || !WCISServerConfig.NOISE_GIVES_AWAY.get()) return;
-        ServerLevel level = player.level();
+        ServerLevel level = player.serverLevel();
         // Whatever chased them in hears it at once, wherever it has got to, and so does the nearest monster about the
         // spot: they all turn on them again.
         List<Mob> heard = new ArrayList<>();
@@ -301,7 +307,7 @@ public final class HidingServer {
     private static void tick(ServerPlayer player) {
         Hide hide = HIDING.get(player.getUUID());
         if (hide == null) return;
-        ServerLevel level = player.level();
+        ServerLevel level = player.serverLevel();
         // The server turning hiding off brings out whoever is hidden; so does the spot being broken, the moment it is
         // (checked every tick, however it went: broken by a player or a mob, blown up, or set by a command).
         if (!WCISServerConfig.ALLOW_HIDING.get() || !player.isAlive() || player.isSleeping() || player.isSpectator() || level.dimension() != hide.dimension
@@ -316,7 +322,7 @@ public final class HidingServer {
         Hiding.holdBody(player);
         // Anything that had them in its sights loses them, and is remembered as having been after them.
         if (player.tickCount % 5 == 0) {
-            for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(HUNTER_RANGE), mob -> mob.getTarget() == player && !mob.is(IGNORES_HIDING))) {
+            for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(HUNTER_RANGE), mob -> mob.getTarget() == player && !mob.getType().is(IGNORES_HIDING))) {
                 hide.hunters.add(mob.getUUID());
                 mob.setTarget(null);
             }
@@ -368,12 +374,12 @@ public final class HidingServer {
     // at the spot's mouth (the spot itself may be in a block, as a bed or chest is), leaping at them, after them.
     private static boolean startle(ServerLevel level, ServerPlayer player, HidingSpot spot) {
         boolean spider = level.getRandom().nextBoolean();
-        Mob critter = (spider ? EntityType.CAVE_SPIDER : EntityType.SILVERFISH).create(level, EntitySpawnReason.EVENT);
+        Mob critter = (spider ? EntityType.CAVE_SPIDER : EntityType.SILVERFISH).create(level);
         if (critter == null) return false;
         Vec3 at = mouth(level, critter, spot.position(), player.position());
         Vec3 toward = player.position().subtract(at);
         float yaw = (float) (Mth.atan2(toward.z, toward.x) * Mth.RAD_TO_DEG) - 90.0F;
-        critter.snapTo(at.x, at.y, at.z, yaw, 0.0F);
+        critter.moveTo(at.x, at.y, at.z, yaw, 0.0F);
         Vec3 leap = toward.horizontalDistanceSqr() > 1.0E-4 ? toward.multiply(1.0, 0.0, 1.0).normalize().scale(CRITTER_LEAP) : Vec3.ZERO;
         critter.setDeltaMovement(leap.x, 0.25, leap.z);
         level.addFreshEntity(critter);
@@ -467,7 +473,7 @@ public final class HidingServer {
 
     // Whoever hides in a chest or closet whose block another player just opened is found and comes out.
     private static void discover(ServerPlayer opener, BlockPos pos) {
-        ServerLevel level = opener.level();
+        ServerLevel level = opener.serverLevel();
         List<ServerPlayer> found = new ArrayList<>();
         for (Map.Entry<UUID, Hide> entry : HIDING.entrySet()) {
             Hide hide = entry.getValue();
@@ -634,7 +640,7 @@ public final class HidingServer {
 
     // A mob that wouldn't despawn on its own (named, tamed, kept) stays, and so do bosses and anything in the tag.
     private static boolean mayVanish(Entity entity) {
-        return !entity.is(IGNORES_HIDING) && !(entity instanceof Mob mob && mob.isPersistenceRequired()) && !(entity instanceof Player);
+        return !entity.getType().is(IGNORES_HIDING) && !(entity instanceof Mob mob && mob.isPersistenceRequired()) && !(entity instanceof Player);
     }
 
     private static HidingPayload payload(ServerPlayer hider, Hide hide) {
@@ -654,7 +660,7 @@ public final class HidingServer {
 
     // A player new to a level is told who in it is hiding, and how, so they are drawn in their spots.
     private static void tellOfHiders(ServerPlayer player) {
-        for (ServerPlayer other : player.level().players()) {
+        for (ServerPlayer other : player.serverLevel().players()) {
             Hide hide = HIDING.get(other.getUUID());
             if (other != player && hide != null) WCISNetwork.sendToPlayer(player, payload(other, hide));
         }

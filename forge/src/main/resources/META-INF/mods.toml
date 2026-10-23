@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[${min_neoforge_fml_version},)"
+loaderVersion = "[${min_forge_fml_version},)"
 issueTrackerURL = "${mod_issue_url}"
 license = "${mod_license}"
 
@@ -10,28 +10,26 @@ version = "${mc_version}-${mod_version}"
 description = "${mod_description}"
 authors = "${mod_author}"
 displayURL = "${mod_page_url}"
-updateJSONURL = "${mod_neoforge_update_url}"
-
-[[mixins]]
-config = "${modid}.common.mixins.json"
+updateJSONURL = "${mod_forge_update_url}"
+displayTest = "${mod_forge_display_test}"
 
 [[dependencies.${modid}]]
-modId = "neoforge"
-type = "required"
-versionRange = "[${project.supported_min_neoforge_version},)"
+modId = "forge"
+mandatory = true
+versionRange = "[${min_forge_version},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.${modid}]]
 modId = "minecraft"
-type = "required"
-versionRange = "[${project.supported_min_mc_version},${max_mc_version}]"
+mandatory = true
+versionRange = "[${mc_version},) , (,${max_mc_version}]"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.${modid}]]
 modId = "coolcatlib"
-type = "required"
+mandatory = true
 versionRange = "[${coolcatlib_version},)"
 ordering = "AFTER"
 side = "BOTH"
@@ -39,7 +37,7 @@ side = "BOTH"
 # The guide book is a Folios book.
 [[dependencies.${modid}]]
 modId = "folios"
-type = "required"
+mandatory = true
 versionRange = "[${folios_version},)"
 ordering = "NONE"
 side = "BOTH"

@@ -3,7 +3,7 @@ package net.ixdarklord.whycantisleep.api;
 import net.ixdarklord.coolcatcore.api.event.v1.Event;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
@@ -103,12 +103,12 @@ public final class SleepEvents {
             this.factors.add(factor);
         }
 
-        public void add(Identifier id, Component label, int points) {
+        public void add(ResourceLocation id, Component label, int points) {
             this.add(new SleepQuality.Factor(id, label, points));
         }
 
         /** Takes out the factor with this id, if there is one: a mod that makes, say, creepy music soothing. */
-        public void remove(Identifier id) {
+        public void remove(ResourceLocation id) {
             this.factors.removeIf(factor -> factor.id().equals(id));
         }
     }
