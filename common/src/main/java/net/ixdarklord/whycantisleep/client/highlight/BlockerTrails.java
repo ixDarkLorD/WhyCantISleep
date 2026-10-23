@@ -70,7 +70,7 @@ public final class BlockerTrails {
             // Fading: older prints are shown less and less often.
             float left = 1.0F - (tick - print.at) / (float) LIFE;
             if (random.nextFloat() > Mth.clamp(left * 1.4F, 0.0F, 1.0F)) continue;
-            minecraft.level.addParticle(new DustParticleOptions(print.color, 0.5F + 0.3F * left), print.pos.x, print.pos.y + 0.05, print.pos.z, 0.0, 0.0, 0.0);
+            minecraft.level.addParticle(new DustParticleOptions(Vec3.fromRGB24(print.color).toVector3f(), 0.5F + 0.3F * left), print.pos.x, print.pos.y + 0.05, print.pos.z, 0.0, 0.0, 0.0);
         }
     }
 

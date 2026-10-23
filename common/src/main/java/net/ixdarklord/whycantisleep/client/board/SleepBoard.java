@@ -14,8 +14,8 @@ import net.ixdarklord.whycantisleep.network.VotePayload;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.PlayerFaceExtractor;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -114,7 +114,7 @@ public final class SleepBoard {
         return row >= 0 && row < rows() ? row : -1;
     }
 
-    private static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
+    private static void render(GuiGraphics graphics, DeltaTracker delta) {
         if (!isShown() || shownSince == Long.MIN_VALUE) return;
         Minecraft minecraft = Minecraft.getInstance();
         Font font = minecraft.font;
@@ -135,22 +135,22 @@ public final class SleepBoard {
         HudStyle.wash(graphics, X, Y, WIDTH, Y + height, alpha, 0x4ADE80, alpha, tick + delta.getGameTimeDeltaPartialTick(true), shownSince);
 
         // Header: the title and the count, a divider, and the night's sleepers as segments, filled for those asleep.
-        graphics.text(font, Component.translatable("gui.whycantisleep.board.title"), X, Y, HudStyle.color(HudStyle.WHITE, alpha), false);
+        HudStyle.text(graphics, font, Component.translatable("gui.whycantisleep.board.title"), X, Y, HudStyle.color(HudStyle.WHITE, alpha), false);
         Component count = Component.translatable("gui.whycantisleep.board.progress", board.sleeping(), board.needed());
-        graphics.text(font, count, X + WIDTH - font.width(count), Y, HudStyle.color(enough ? HudStyle.GREEN : HudStyle.SILVER, alpha), false);
+        HudStyle.text(graphics, font, count, X + WIDTH - font.width(count), Y, HudStyle.color(enough ? HudStyle.GREEN : HudStyle.SILVER, alpha), false);
         HudStyle.divider(graphics, X, WIDTH, Y + 12, alpha);
         HudStyle.segments(graphics, HudStyle.SLEEP_FILL, X, Y + 18, WIDTH, SEGMENTS_HEIGHT, board.sleeping(), board.needed(), alpha);
 
         if (rows == 0) {
             // Nobody is awake; if that still isn't enough, the rule asks for more players than there are.
             String key = enough ? "gui.whycantisleep.board.everyone_asleep" : "gui.whycantisleep.board.not_possible";
-            graphics.text(font, Component.translatable(key), X, Y + LABEL_Y, HudStyle.color(HudStyle.GRAY, alpha), false);
+            HudStyle.text(graphics, font, Component.translatable(key), X, Y + LABEL_Y, HudStyle.color(HudStyle.GRAY, alpha), false);
             return;
         }
-        graphics.text(font, Component.translatable("gui.whycantisleep.board.awake"), X, Y + LABEL_Y, HudStyle.color(HudStyle.MUTED, alpha), false);
+        HudStyle.text(graphics, font, Component.translatable("gui.whycantisleep.board.awake"), X, Y + LABEL_Y, HudStyle.color(HudStyle.MUTED, alpha), false);
         int rowY = Y + HEADER_HEIGHT;
         int hovered = nudges && minecraft.screen != null
-                ? rowAt(minecraft.mouseHandler.getScaledXPos(minecraft.getWindow()), minecraft.mouseHandler.getScaledYPos(minecraft.getWindow())) : -1;
+                ? rowAt(mouseX(minecraft), mouseY(minecraft)) : -1;
         for (int i = 0; i < rows; i++) {
             SleepBoardPayload.Entry entry = board.awake().get(i);
             int y = rowY + i * ROW_HEIGHT;
@@ -160,19 +160,24 @@ public final class SleepBoard {
             // A player in another dimension isn't counted toward the rule, and is drawn dimmer.
             float rowAlpha = entry.counted() ? alpha : alpha * 0.6F;
             PlayerInfo info = minecraft.getConnection() == null ? null : minecraft.getConnection().getPlayerInfo(entry.id());
-            if (info != null) PlayerFaceExtractor.extractRenderState(graphics, info.getSkin(), X, y, FACE_SIZE, HudStyle.color(HudStyle.WHITE, rowAlpha));
+            if (info != null) {
+                // 1.21.1's face takes no color: its fade goes through the shader color.
+                graphics.setColor(1.0F, 1.0F, 1.0F, rowAlpha);
+                PlayerFaceRenderer.draw(graphics, info.getSkin(), X, y, FACE_SIZE);
+                graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+            }
             Component reason = Component.translatable(entry.reason().translationKey());
             int reasonWidth = font.width(reason);
             int reasonX = X + WIDTH - reasonWidth;
-            graphics.text(font, reason, reasonX, y, HudStyle.color(entry.reason().color(), alpha), false);
+            HudStyle.text(graphics, font, reason, reasonX, y, HudStyle.color(entry.reason().color(), alpha), false);
             HudStyle.dot(graphics, reasonX - DOT_GAP - 4, y + 2, entry.reason().color(), alpha);
             String name = font.plainSubstrByWidth(entry.name(), reasonX - DOT_GAP - 4 - 6 - (X + FACE_SIZE + 4));
-            graphics.text(font, name, X + FACE_SIZE + 4, y, HudStyle.color(entry.counted() ? HudStyle.WHITE : HudStyle.GRAY, rowAlpha), false);
+            HudStyle.text(graphics, font, name, X + FACE_SIZE + 4, y, HudStyle.color(entry.counted() ? HudStyle.WHITE : HudStyle.GRAY, rowAlpha), false);
         }
 
         int footerY = rowY + rows * ROW_HEIGHT;
         if (more > 0) {
-            graphics.text(font, Component.translatable("gui.whycantisleep.board.more", more), X, footerY, HudStyle.color(HudStyle.MUTED, alpha), false);
+            HudStyle.text(graphics, font, Component.translatable("gui.whycantisleep.board.more", more), X, footerY, HudStyle.color(HudStyle.MUTED, alpha), false);
             footerY += ROW_HEIGHT;
         }
         if (voting) {
@@ -182,7 +187,7 @@ public final class SleepBoard {
             int textY = footerY + 3;
             voteY = textY;
             boolean hover = minecraft.screen != null
-                    && overVote(minecraft.mouseHandler.getScaledXPos(minecraft.getWindow()), minecraft.mouseHandler.getScaledYPos(minecraft.getWindow()));
+                    && overVote(mouseX(minecraft), mouseY(minecraft));
             if (hover) graphics.fill(X - HudStyle.PANEL_PADDING + 1, textY - 2, X + WIDTH + HudStyle.PANEL_PADDING - 1, textY - 2 + VOTE_HEIGHT,
                     HudStyle.color(HudStyle.WHITE, alpha * 0.06F));
             Component label;
@@ -197,21 +202,21 @@ public final class SleepBoard {
                 label = Component.translatable("gui.whycantisleep.board.vote");
                 color = HudStyle.AQUA;
             }
-            graphics.text(font, label, X, textY, HudStyle.color(color, alpha), false);
+            HudStyle.text(graphics, font, label, X, textY, HudStyle.color(color, alpha), false);
             Component tally = Component.translatable("gui.whycantisleep.board.vote_count", vote.votes(), vote.voters());
-            graphics.text(font, tally, X + WIDTH - font.width(tally), textY, HudStyle.color(HudStyle.SILVER, alpha), false);
+            HudStyle.text(graphics, font, tally, X + WIDTH - font.width(tally), textY, HudStyle.color(HudStyle.SILVER, alpha), false);
             footerY += VOTE_HEIGHT;
         }
         if (footer) {
             // The footer: how to nudge on the left, and on the right whether a nudge is ready or how long until it is.
             HudStyle.divider(graphics, X, WIDTH, footerY - 1, alpha);
             int textY = footerY + 4;
-            graphics.text(font, Component.translatable("gui.whycantisleep.board.nudge_hint"), X, textY, HudStyle.color(HudStyle.MUTED, alpha), false);
+            HudStyle.text(graphics, font, Component.translatable("gui.whycantisleep.board.nudge_hint"), X, textY, HudStyle.color(HudStyle.MUTED, alpha), false);
             long cooldown = cooldown();
             Component state = cooldown > 0
                     ? Component.translatable("gui.whycantisleep.board.nudge_cooldown", Mth.ceil(cooldown / 20.0F))
                     : Component.translatable("gui.whycantisleep.board.nudge_ready");
-            graphics.text(font, state, X + WIDTH - font.width(state), textY, HudStyle.color(HudStyle.FAINT, alpha), false);
+            HudStyle.text(graphics, font, state, X + WIDTH - font.width(state), textY, HudStyle.color(HudStyle.FAINT, alpha), false);
         }
     }
 
@@ -233,5 +238,14 @@ public final class SleepBoard {
             Network.sendToServer(new NudgePayload(board.awake().get(row).id()));
         }
         return true;
+    }
+
+    // Where the mouse is, in GUI pixels.
+    private static double mouseX(Minecraft minecraft) {
+        return minecraft.mouseHandler.xpos() * minecraft.getWindow().getGuiScaledWidth() / minecraft.getWindow().getScreenWidth();
+    }
+
+    private static double mouseY(Minecraft minecraft) {
+        return minecraft.mouseHandler.ypos() * minecraft.getWindow().getGuiScaledHeight() / minecraft.getWindow().getScreenHeight();
     }
 }

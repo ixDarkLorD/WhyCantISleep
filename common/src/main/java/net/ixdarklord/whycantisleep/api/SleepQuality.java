@@ -2,7 +2,7 @@ package net.ixdarklord.whycantisleep.api;
 
 import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 
@@ -22,35 +22,35 @@ public record SleepQuality(int score, List<Factor> factors) {
 
     // The mod's own factors.
     /** Sleeping in a closed room: walled, roofed, its doors shut. */
-    public static final Identifier ENCLOSED = WhyCantISleep.id("enclosed");
+    public static final ResourceLocation ENCLOSED = WhyCantISleep.id("enclosed");
     /** Sleeping somewhere open: the sky over the bed, or a way out of the room. */
-    public static final Identifier EXPOSED = WhyCantISleep.id("exposed");
+    public static final ResourceLocation EXPOSED = WhyCantISleep.id("exposed");
     /** Dark corners in the room, where monsters could spawn. */
-    public static final Identifier DARK_CORNERS = WhyCantISleep.id("dark_corners");
+    public static final ResourceLocation DARK_CORNERS = WhyCantISleep.id("dark_corners");
     /** A bright light right at the pillow. */
-    public static final Identifier TOO_BRIGHT = WhyCantISleep.id("too_bright");
+    public static final ResourceLocation TOO_BRIGHT = WhyCantISleep.id("too_bright");
     /** Monsters prowling near the bed through the night. */
-    public static final Identifier MONSTERS = WhyCantISleep.id("monsters");
+    public static final ResourceLocation MONSTERS = WhyCantISleep.id("monsters");
     /** Calm music from a jukebox near the bed. */
-    public static final Identifier CALM_MUSIC = WhyCantISleep.id("calm_music");
+    public static final ResourceLocation CALM_MUSIC = WhyCantISleep.id("calm_music");
     /** Creepy music from a jukebox near the bed ({@code #whycantisleep:creepy} songs). */
-    public static final Identifier CREEPY_MUSIC = WhyCantISleep.id("creepy_music");
+    public static final ResourceLocation CREEPY_MUSIC = WhyCantISleep.id("creepy_music");
     /** Loud, lively music from a jukebox near the bed ({@code #whycantisleep:loud} songs). */
-    public static final Identifier LOUD_MUSIC = WhyCantISleep.id("loud_music");
+    public static final ResourceLocation LOUD_MUSIC = WhyCantISleep.id("loud_music");
     /** Soothing things placed by the bed (the {@code #whycantisleep:soothing} item tag): flowers, amethyst, candles. */
-    public static final Identifier SOOTHING = WhyCantISleep.id("soothing");
+    public static final ResourceLocation SOOTHING = WhyCantISleep.id("soothing");
     /** Unsettling things placed by the bed (the {@code #whycantisleep:unsettling} item tag): skulls, cobwebs, sculk. */
-    public static final Identifier UNSETTLING = WhyCantISleep.id("unsettling");
+    public static final ResourceLocation UNSETTLING = WhyCantISleep.id("unsettling");
     /** Restless before lying down. */
-    public static final Identifier RESTLESS = WhyCantISleep.id("restless");
+    public static final ResourceLocation RESTLESS = WhyCantISleep.id("restless");
     /** Sleepless before lying down: three days or five refusals, when phantoms come. */
-    public static final Identifier SLEEPLESS = WhyCantISleep.id("sleepless");
+    public static final ResourceLocation SLEEPLESS = WhyCantISleep.id("sleepless");
     /** A night terror. */
-    public static final Identifier NIGHTMARE = WhyCantISleep.id("nightmare");
+    public static final ResourceLocation NIGHTMARE = WhyCantISleep.id("nightmare");
     /** Woken before morning. */
-    public static final Identifier WOKE_EARLY = WhyCantISleep.id("woke_early");
+    public static final ResourceLocation WOKE_EARLY = WhyCantISleep.id("woke_early");
     /** A bedtime routine kept: a closed, lit room. */
-    public static final Identifier ROUTINE = WhyCantISleep.id("routine");
+    public static final ResourceLocation ROUTINE = WhyCantISleep.id("routine");
 
     public SleepQuality {
         factors = List.copyOf(factors);
@@ -88,6 +88,6 @@ public record SleepQuality(int score, List<Factor> factors) {
      * @param label  how a player is told of it: "creepy music", "monsters prowling"
      * @param points how much it adds (or takes, below 0)
      */
-    public record Factor(Identifier id, Component label, int points) {
+    public record Factor(ResourceLocation id, Component label, int points) {
     }
 }

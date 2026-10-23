@@ -32,12 +32,62 @@ One folder per Minecraft version, each on its own branch of the same repo (the a
 
 | Minecraft | Loaders | Folder / branch | CoolCatLib: Core (Maven Local) | State |
 |---|---|---|---|---|
-| 26.1 – 26.1.2 | Fabric, NeoForge | this folder, `main` | `26.1.2-4` | in progress (first version) |
-| 1.21.1 | Forge, Fabric, NeoForge | `../WhyCantISleep-1.21.1` (not created) | `1.21.1-2100.2.0.1` | backport, after 26.1.2 is feature complete |
+| 26.1 – 26.1.2 | Fabric, NeoForge | `../WhyCantISleep-26.1.2`, `main` | `26.1.2-4` | in progress (first version) |
+| 1.21.1 | Forge, Fabric, NeoForge | this folder, branch `1.21.1` | `1.21.1-2100.4.0.0` | ported 2026-10-23 (see "1.21.1 port" below), not tested in game |
 | 1.20.1 | Forge, Fabric (no NeoForge) | `../WhyCantISleep-1.20.1` (empty folder) | `1.20.1-2001.2.0.1` | backport |
 | 26.2, 26.3 | Fabric, NeoForge | — | **none: CoolCatLib has no build for them** | blocked until CoolCatLib is ported |
 
 The shared catalogs `26.2-v1` and `26.3-v1` exist (Glazed Menu uses them), but this mod requires Core at runtime, so 26.2+ waits on a CoolCatLib port. Finish all features on 26.1.2 before backporting.
+
+## 1.21.1 port (2026-10-23)
+
+This branch is `main` at `5692d22` ported to 1.21.1; behaviour and design unchanged where 1.21.1 allows. The rest of this
+file was written for `main` (26.1 names, no-remap Loom, `items/` models): read it with the differences below in mind.
+
+- **Build**: catalog `1.21.1-v10` (Minecraft 1.21.1, Java 21, Forge 52.1.0, NeoForge 21.1.200, Fabric API 0.116.5),
+  Architectury Loom **with remapping** (Mojang mappings, `mod*` configurations, mixin refmaps, the access widener's
+  header `named`), copied from `../WhereDidIPutIt-1.21.1`. `forge/` holds `WhyCantISleepForge extends ForgeModEntrypoint`
+  and `META-INF/mods.toml`. `coolcatlib_version=1.21.1-2100.4.0.0` (metadata requires `coolcatlib_min_version`,
+  `2100.4.0.0`), `folios_version=1.21.1+2.1`, both from Maven Local (`../CoolCatLib-1.21`, `../Folios-1.21`, published
+  with `gradlew assemble publishToMavenLocal`). `fabric/build.gradle` drops `fabric-loot-api-v2`'s stray dependencies on a
+  newer Fabric API (as in Where Did I Put It?). Both TOMLs say `[1.21.1,1.21.2)` (NeoForge refuses equal ends);
+  `pack.mcmeta` has `pack_format`. MCP Bridge and Glazed Menu have no 1.21.1 build, so neither is in the dev runs.
+- **Names**: `ResourceLocation`, `GuiGraphics` (`drawString`, `blitSprite`, `renderFakeItem`, `renderTooltip`; the
+  pose is a `PoseStack`), `FastColor.ARGB32`, `net.minecraft.Util`, `GameRules.RULE_*` / `getInt`, `MobEffects.CONFUSION`
+  / `MOVEMENT_SLOWDOWN` / `MOVEMENT_SPEED`, `ServerPlayer.serverLevel()`, `entity.getType().is(tag)`, `EntityType.create(level)`,
+  `moveTo`, `new ClickEvent(Action, ...)` / `new HoverEvent(Action, ...)`, `source.hasPermission(2)`,
+  `registryOrThrow`, `ResourceKey.location()`, `isPreventingPlayerRest(player)`, `level.isDay()`; a night is skipped by
+  setting the day time to the next morning (no world clocks). `SimpleJsonResourceReloadListener` takes a `Gson` and a folder.
+- **GUI**: `blitSprite` and `blit` take no color, so `HudStyle.sprite` / `HudStyle.blit` tint through the shader color
+  with blending, and `HudStyle.text` draws text (shadow or not) and leaves out text whose alpha is under 4, which
+  1.21.1's font would draw fully opaque. There is no GUI item atlas: `ItemFade.item` fades an item through the shader
+  color (flat items fade; solid block items can't, so every item is left out below 35% opacity), and the atlas mixins
+  (`GuiItemRenderStateMixin`, `GuiRendererMixin`) are gone. `PlayerFaceRenderer.draw` (faded by the shader color),
+  `GameRendererAccessor.getFov` for the arrows (the 1.21.1 camera has no FOV), the mouse in GUI pixels from
+  `MouseHandler.xpos()`. Screens: `InventoryScreen.render` / `mouseClicked(double, double, int)` (no
+  `AbstractRecipeBookScreen`), `ChatScreen.mouseClicked(double, double, int)`; the squint at the head of `Gui.render`.
+- **Tooltip icons**: 1.21.1's text can't hold sprites (`Component.object`), so the buff, debuff and pip icons in item
+  tooltips are glyphs of the mod's font `whycantisleep:icons` (`font/icons.json`, bitmap glyphs U+E000 to U+E005 over
+  the same PNGs as the sprites).
+- **Players drawn hiding**: no render states. `PlayerRendererMixin.getRenderOffset` lowers and trembles a hider,
+  `HumanoidModelMixin.setupAnim(LivingEntity, ...)` poses them (head clamped from `netHeadYaw` / `headPitch`), and
+  `LivingEntityRendererMixin.render` HEAD draws a player in a chest as `ChestPeek.render` (straight into the buffer,
+  `RenderType.entityCutout` of their skin) and skips the rest, name tag included. `AvatarRendererMixin`,
+  `AvatarRenderStateMixin` and `HidingPose` are gone.
+- **Camera**: `CameraMixin` at the tail of `Camera.setup`; the near plane under a bed is `GameRendererMixin`'s
+  `@ModifyArg` on `getProjectionMatrix`'s `Matrix4f.perspective`. Movement is held at the tail of
+  `LocalPlayer.serverAiStep` (there is no `applyInput`).
+- **CoolCatLib-1.21 lacks** `LivingEvents.DAMAGE` and `PlayerEvents.CHANGE_DIMENSION`. Damage is heard by
+  `LivingEntityMixin` at the head of `LivingEntity.hurt` (skipping damage the player is immune to), which calls
+  `SleepNights.onHurt` and `HidingServer.onHurt`; a dimension change is noticed in `HidingServer`'s player tick (the
+  level each player was last seen in).
+- **Guide book**: Folios-1.21 draws a book's cover in code and registers that renderer for its own item only, with no
+  API for a mod's item. `models/item/guide_book.json` is `builtin/entity` (parent `folios:item/guide_book`) and
+  `compat/GuideBookModel` registers Folios' internal `GuideBookItemModel::render` for it through CoolCatLib's
+  `ItemRendererRegistry`: an internal class, so recheck it when Folios changes. The recipe uses 1.21.1's ingredient
+  objects (`{"item": ...}`, `{"tag": ...}`). The guide's pages (text, spotlight, build) are as on `main`.
+- **Not tested in game** (no MCP Bridge for 1.21.1): everything above builds on all three loaders, but none of it has
+  been run. Tags naming later blocks and discs (Pale Garden, Tears, Lava Chicken) already mark them optional.
 
 ## Build setup (copied from `../Starwoven-26.1.2` and `../GlazedMenu-26.1.2`; do not restructure)
 
@@ -227,7 +277,7 @@ After each feature: build every loader, test in game when possible, add a `CHANG
 
 ## Code conventions (from the author's other mods)
 
-- These are **26.1 names**: `net.minecraft.resources.Identifier` (not `ResourceLocation`), `GuiGraphicsExtractor` and `extract*` (not `GuiGraphics` / `render*`), GUI text colors need alpha bits. If unsure of a vanilla API, read the decompiled 26.1.2 source (`gradlew :common:genSourcesWithVineflower`, then the `*-sources.jar` under `.gradle/loom-cache/minecraftMaven/`) rather than guessing from older versions. If that jar is empty, the Fabric one at `~/.gradle/caches/fabric-loom/minecraftMaven/net/minecraft/minecraft-merged-deobf/26.1.2/*-sources.jar` has the sources.
+- On this branch the names are **1.21.1's** (see "1.21.1 port"); the rest of this bullet is about `main`. These are **26.1 names**: `net.minecraft.resources.Identifier` (not `ResourceLocation`), `GuiGraphicsExtractor` and `extract*` (not `GuiGraphics` / `render*`), GUI text colors need alpha bits. If unsure of a vanilla API, read the decompiled 26.1.2 source (`gradlew :common:genSourcesWithVineflower`, then the `*-sources.jar` under `.gradle/loom-cache/minecraftMaven/`) rather than guessing from older versions. If that jar is empty, the Fabric one at `~/.gradle/caches/fabric-loom/minecraftMaven/net/minecraft/minecraft-merged-deobf/26.1.2/*-sources.jar` has the sources.
 - Classes are `final` with a private constructor when they only hold statics; a short Javadoc on each class says what it is for. Comments explain why, in plain sentences.
 - Config classes are `WCIS<Scope>Config`; all user-facing text is a translation key in `assets/whycantisleep/lang/en_us.json`, kept sorted by key. Keys: `config.whycantisleep.*`, `gui.whycantisleep.*`, `advancements.whycantisleep.*`, `subtitles.whycantisleep.*`.
 - The server is authoritative: clients send intentions (a nudge), and the server checks permission, cooldown and state. Size-cap every serverbound payload.

@@ -13,23 +13,20 @@
   ],
   "client": [
     "client.AbstractContainerScreenAccessor",
-    "client.AbstractRecipeBookScreenMixin",
-    "client.AvatarRenderStateMixin",
-    "client.AvatarRendererMixin",
     "client.ChestBlockEntityMixin",
     "client.CameraMixin",
     "client.ChatScreenMixin",
     "client.EntityMixin",
+    "client.GameRendererAccessor",
     "client.GameRendererMixin",
-    "client.GuiItemRenderStateMixin",
     "client.GuiMixin",
-    "client.GuiRendererMixin",
     "client.HumanoidModelMixin",
     "client.InventoryScreenMixin",
     "client.LivingEntityRendererMixin",
     "client.LocalPlayerMixin",
     "client.MinecraftMixin",
-    "client.MultiPlayerGameModeMixin"
+    "client.MultiPlayerGameModeMixin",
+    "client.PlayerRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -1,5 +1,6 @@
 package net.ixdarklord.whycantisleep.sleep;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -15,14 +16,12 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -44,13 +43,13 @@ import java.util.TreeSet;
  * (the format is in {@link net.ixdarklord.whycantisleep.api.SleepModifiers}), the mod's own among them. A file with the
  * id of a modifier takes its place; one with {@code "disabled": true} takes it out. Loaded on the server with its data.
  */
-public final class DataSleepModifiers extends SimpleJsonResourceReloadListener<JsonElement> {
+public final class DataSleepModifiers extends SimpleJsonResourceReloadListener {
     public static final DataSleepModifiers INSTANCE = new DataSleepModifiers();
     private static List<SleepModifier> modifiers = List.of();
-    private static Set<Identifier> disabled = Set.of();
+    private static Set<ResourceLocation> disabled = Set.of();
 
     private DataSleepModifiers() {
-        super(ExtraCodecs.JSON, FileToIdConverter.json("whycantisleep/sleep_modifier"));
+        super(new Gson(), "whycantisleep/sleep_modifier");
     }
 
     /** The modifiers data packs add or replace. */
@@ -59,14 +58,14 @@ public final class DataSleepModifiers extends SimpleJsonResourceReloadListener<J
     }
 
     /** The ids data packs turned off, the mod's own or another mod's. */
-    public static Set<Identifier> disabled() {
+    public static Set<ResourceLocation> disabled() {
         return disabled;
     }
 
     @Override
-    protected void apply(@NotNull Map<Identifier, JsonElement> files, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
+    protected void apply(@NotNull Map<ResourceLocation, JsonElement> files, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
         List<SleepModifier> loaded = new ArrayList<>();
-        Set<Identifier> off = new TreeSet<>();
+        Set<ResourceLocation> off = new TreeSet<>();
         new TreeMap<>(files).forEach((id, json) -> Definition.CODEC.parse(JsonOps.INSTANCE, json)
                 .resultOrPartial(error -> WhyCantISleep.LOGGER.error("Skipping the sleep modifier {}: {}", id, error))
                 .ifPresent(definition -> {
@@ -119,11 +118,11 @@ public final class DataSleepModifiers extends SimpleJsonResourceReloadListener<J
         ).apply(instance, NearBlocks::new));
 
         private int count(ServerLevel level, BlockPos bed) {
-            List<Identifier> ids = new ArrayList<>();
+            List<ResourceLocation> ids = new ArrayList<>();
             List<TagKey<Block>> tags = new ArrayList<>();
             for (String entry : this.blocks) {
-                if (entry.startsWith("#")) tags.add(TagKey.create(Registries.BLOCK, Identifier.parse(entry.substring(1))));
-                else ids.add(Identifier.parse(entry));
+                if (entry.startsWith("#")) tags.add(TagKey.create(Registries.BLOCK, ResourceLocation.parse(entry.substring(1))));
+                else ids.add(ResourceLocation.parse(entry));
             }
             int count = 0;
             int up = Math.min(this.range, 4);
@@ -165,7 +164,7 @@ public final class DataSleepModifiers extends SimpleJsonResourceReloadListener<J
         ).apply(instance, Conditions::new));
 
         private boolean test(SleepContext context) {
-            ServerLevel level = context.player().level();
+            ServerLevel level = context.player().serverLevel();
             if (this.enclosed.isPresent() && this.enclosed.get() != context.enclosed()) return false;
             if (this.lit.isPresent() && this.lit.get() != context.lit()) return false;
             if (this.pillowLight.isPresent() && !this.pillowLight.get().test(context.pillowLight())) return false;
@@ -186,8 +185,8 @@ public final class DataSleepModifiers extends SimpleJsonResourceReloadListener<J
 
         private static boolean biome(ServerLevel level, BlockPos bed, String biome) {
             Holder<Biome> here = level.getBiome(bed);
-            if (biome.startsWith("#")) return here.is(TagKey.create(Registries.BIOME, Identifier.parse(biome.substring(1))));
-            return here.is(Identifier.parse(biome));
+            if (biome.startsWith("#")) return here.is(TagKey.create(Registries.BIOME, ResourceLocation.parse(biome.substring(1))));
+            return here.is(ResourceLocation.parse(biome));
         }
 
         private static Weather weather(ServerLevel level) {
@@ -207,7 +206,7 @@ public final class DataSleepModifiers extends SimpleJsonResourceReloadListener<J
         ).apply(instance, Definition::new));
     }
 
-    private record DataModifier(Identifier id, Definition definition) implements SleepModifier {
+    private record DataModifier(ResourceLocation id, Definition definition) implements SleepModifier {
         @Override
         public Component label() {
             // A plain sentence works as well as a translation key.
@@ -235,7 +234,7 @@ public final class DataSleepModifiers extends SimpleJsonResourceReloadListener<J
                 case PILLOW_LIGHT -> context.pillowLight();
                 case NEAR_BLOCKS -> {
                     NearBlocks near = this.definition.when().nearBlocks().orElse(null);
-                    yield near == null ? 0 : near.count(context.player().level(), context.bed());
+                    yield near == null ? 0 : near.count(context.player().serverLevel(), context.bed());
                 }
             };
         }

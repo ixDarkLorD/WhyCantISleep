@@ -2,7 +2,7 @@ package net.ixdarklord.whycantisleep.api;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
  * {@link HidingSpots}).
  * <pre>{@code
  * HidingSpots.register(new HidingSpotType() {
- *     public Identifier id() { return MyMod.id("wardrobe"); }
+ *     public ResourceLocation id() { return MyMod.id("wardrobe"); }
  *     public boolean matches(BlockState state) { return state.is(MyBlocks.WARDROBE); }
  *     public Lookup find(Level level, BlockPos pos, BlockState state, Player player) {
  *         Direction facing = state.getValue(WardrobeBlock.FACING);
@@ -27,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
  * and {@link #stillValid} run on the server.
  */
 public interface HidingSpotType {
-    Identifier id();
+    ResourceLocation id();
 
     /** Whether this type is about the block at all: a cheap check by block, before {@link #find}. */
     boolean matches(BlockState state);

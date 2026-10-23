@@ -81,7 +81,7 @@ public record Bedroom(boolean enclosed, boolean lit, int pillowLight, SleepDecor
         int chunkX = bed.getX() >> 4;
         int chunkZ = bed.getZ() >> 4;
         int reach = ((int) MUSIC_RANGE >> 4) + 1;
-        var songs = level.registryAccess().lookupOrThrow(Registries.JUKEBOX_SONG);
+        var songs = level.registryAccess().registryOrThrow(Registries.JUKEBOX_SONG);
         for (int dx = -reach; dx <= reach; dx++) {
             for (int dz = -reach; dz <= reach; dz++) {
                 LevelChunk chunk = level.getChunkSource().getChunkNow(chunkX + dx, chunkZ + dz);

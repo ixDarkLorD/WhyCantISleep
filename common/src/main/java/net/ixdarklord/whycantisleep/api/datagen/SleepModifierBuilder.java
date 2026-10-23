@@ -153,12 +153,12 @@ public final class SleepModifierBuilder {
     }
 
     public SleepModifierBuilder dimension(ResourceKey<Level> dimension) {
-        this.when.addProperty("dimension", dimension.identifier().toString());
+        this.when.addProperty("dimension", dimension.location().toString());
         return this;
     }
 
     public SleepModifierBuilder biome(ResourceKey<Biome> biome) {
-        this.when.addProperty("biome", biome.identifier().toString());
+        this.when.addProperty("biome", biome.location().toString());
         return this;
     }
 
@@ -176,7 +176,7 @@ public final class SleepModifierBuilder {
     /** Only with at least so many of these blocks within a range of the bed (and counted for {@link #perNearBlocks}). */
     public SleepModifierBuilder nearBlocks(int range, int atLeast, Block... blocks) {
         JsonArray array = new JsonArray();
-        for (Block block : blocks) array.add(block.builtInRegistryHolder().key().identifier().toString());
+        for (Block block : blocks) array.add(block.builtInRegistryHolder().key().location().toString());
         return this.nearBlocks(range, atLeast, array);
     }
 

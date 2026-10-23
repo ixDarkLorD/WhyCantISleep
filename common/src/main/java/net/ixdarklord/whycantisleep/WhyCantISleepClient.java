@@ -13,6 +13,7 @@ import net.ixdarklord.whycantisleep.client.fx.SleepEffects;
 import net.ixdarklord.whycantisleep.client.hud.BlockerArrows;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotices;
 import net.ixdarklord.whycantisleep.client.hud.SleepTooltip;
+import net.ixdarklord.whycantisleep.compat.GuideBookModel;
 
 /**
  * Client mod constructor (CoolCatLib): highlights, HUD layers and other client-only setup.
@@ -33,5 +34,6 @@ public final class WhyCantISleepClient implements ClientModConstructor {
         SleepStatus.init();
         SleepTooltip.init();
         NightTerrorClient.init();
+        GuideBookModel.register();
     }
 }

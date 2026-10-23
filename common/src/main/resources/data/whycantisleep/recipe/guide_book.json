@@ -2,8 +2,12 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    "minecraft:book",
-    "#minecraft:beds"
+    {
+      "item": "minecraft:book"
+    },
+    {
+      "tag": "minecraft:beds"
+    }
   ],
   "result": {
     "id": "whycantisleep:guide_book",

@@ -6,7 +6,6 @@ import net.ixdarklord.folios.api.GuideBookItem;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
@@ -20,8 +19,7 @@ public final class WCISItems {
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(WhyCantISleep.MOD_ID, Registries.ITEM);
 
     public static final RegistryEntry<GuideBookItem> GUIDE_BOOK = ITEMS.register("guide_book",
-            () -> new Handbook(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)
-                    .setId(ResourceKey.create(Registries.ITEM, WhyCantISleep.id("guide_book")))));
+            () -> new Handbook(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
 
     private WCISItems() {
     }

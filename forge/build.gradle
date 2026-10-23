@@ -1,0 +1,8 @@
+apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v4/forge.gradle"
+
+dependencies {
+    // CoolCatLib (Forge). Its common classes are inside this jar.
+    modImplementation("net.ixdarklord.coolcatlib:coolcatlib-forge:${coolcatlib_version}") { transitive = false }
+    // Folios: the mod's guide book is a Folios book.
+    modImplementation("net.ixdarklord.folios:folios-forge:${folios_version}") { transitive = false }
+}

@@ -9,7 +9,7 @@ import net.ixdarklord.whycantisleep.config.WCISServerConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
@@ -50,10 +50,10 @@ import java.util.Set;
  * </ul>
  */
 public final class BuiltinHidingSpots {
-    public static final Identifier BED = WhyCantISleep.id("bed");
-    public static final Identifier TABLE = WhyCantISleep.id("table");
-    public static final Identifier CHEST = WhyCantISleep.id("chest");
-    public static final Identifier CLOSET = WhyCantISleep.id("closet");
+    public static final ResourceLocation BED = WhyCantISleep.id("bed");
+    public static final ResourceLocation TABLE = WhyCantISleep.id("table");
+    public static final ResourceLocation CHEST = WhyCantISleep.id("chest");
+    public static final ResourceLocation CLOSET = WhyCantISleep.id("closet");
     // The view under a bed sits midway between the floor and its underside (3/16); under a table, low in its half block.
     private static final float BED_EYE = 1.5F / 16.0F;
     private static final float TABLE_EYE = 0.2F;
@@ -84,7 +84,7 @@ public final class BuiltinHidingSpots {
 
     private static final class Bed implements HidingSpotType {
         @Override
-        public Identifier id() {
+        public ResourceLocation id() {
             return BED;
         }
 
@@ -110,7 +110,7 @@ public final class BuiltinHidingSpots {
 
     private static final class Table implements HidingSpotType {
         @Override
-        public Identifier id() {
+        public ResourceLocation id() {
             return TABLE;
         }
 
@@ -152,7 +152,7 @@ public final class BuiltinHidingSpots {
 
     private static final class Chest implements HidingSpotType {
         @Override
-        public Identifier id() {
+        public ResourceLocation id() {
             return CHEST;
         }
 
@@ -218,7 +218,7 @@ public final class BuiltinHidingSpots {
         private static final double FLOOR_LIFT = 0.25;
 
         @Override
-        public Identifier id() {
+        public ResourceLocation id() {
             return CLOSET;
         }
 

@@ -9,10 +9,10 @@ import net.ixdarklord.whycantisleep.config.WCISConfigs;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.ARGB;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
+import com.mojang.math.Axis;
+import net.ixdarklord.whycantisleep.mixin.client.GameRendererAccessor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
@@ -30,7 +30,7 @@ import java.util.List;
  */
 public final class BlockerArrows {
     // Two frames side by side, drawn by tools/gen_arrow_texture.ps1: solid, then hollow.
-    private static final Identifier ARROWS = WhyCantISleep.id("textures/gui/blocker_arrow.png");
+    private static final ResourceLocation ARROWS = WhyCantISleep.id("textures/gui/blocker_arrow.png");
     private static final int FRAME_SIZE = 16;
     private static final int SHEET_WIDTH = FRAME_SIZE * 2;
     // How far from the crosshair the arrows sit, in GUI pixels at the medium size.
@@ -42,7 +42,7 @@ public final class BlockerArrows {
     // Beyond this many blocks an arrow is at its smallest.
     private static final double FAR_DISTANCE = 16.0;
     // The ring round a monster behind blocks, its size in GUI pixels, and its pulse: a ring going out every PULSE_TICKS.
-    private static final Identifier RING = WhyCantISleep.id("hud/blocker_ring");
+    private static final ResourceLocation RING = WhyCantISleep.id("hud/blocker_ring");
     private static final int RING_SIZE = 16;
     private static final float PULSE_TICKS = 24.0F;
     private static final float PULSE_GROWTH = 1.4F;
@@ -56,7 +56,7 @@ public final class BlockerArrows {
         ClientGuiEvents.RENDER_HUD.register(BlockerArrows::render);
     }
 
-    private static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
+    private static void render(GuiGraphics graphics, DeltaTracker delta) {
         Minecraft minecraft = Minecraft.getInstance();
         if (Blockers.isEmpty() || minecraft.player == null || minecraft.options.hideGui) return;
         if (!WCISConfigs.isEnabled(WCISClientConfig.OFF_SCREEN_ARROWS)) return;
@@ -79,37 +79,38 @@ public final class BlockerArrows {
         float centerY = graphics.guiHeight() / 2.0F;
         for (Arrow arrow : arrows) {
             float scale = size * arrow.scale;
-            graphics.pose().pushMatrix();
-            graphics.pose().translate(centerX, centerY);
-            graphics.pose().rotate(arrow.angle);
-            graphics.pose().translate(radius, 0.0F);
-            graphics.pose().scale(scale, scale);
-            graphics.blit(RenderPipelines.GUI_TEXTURED, ARROWS, -FRAME_SIZE / 2, -FRAME_SIZE / 2, arrow.hollow ? FRAME_SIZE : 0.0F, 0.0F,
-                    FRAME_SIZE, FRAME_SIZE, SHEET_WIDTH, FRAME_SIZE, ARGB.color(Math.round(alpha * 255.0F), arrow.color));
-            graphics.pose().popMatrix();
+            graphics.pose().pushPose();
+            graphics.pose().translate(centerX, centerY, 0.0F);
+            graphics.pose().mulPose(Axis.ZP.rotation(arrow.angle));
+            graphics.pose().translate(radius, 0.0F, 0.0F);
+            graphics.pose().scale(scale, scale, 1.0F);
+            HudStyle.blit(graphics, ARROWS, -FRAME_SIZE / 2, -FRAME_SIZE / 2, arrow.hollow ? FRAME_SIZE : 0.0F, 0.0F,
+                    FRAME_SIZE, FRAME_SIZE, SHEET_WIDTH, FRAME_SIZE, HudStyle.color(arrow.color, alpha));
+            graphics.pose().popPose();
         }
         float pulse = (age % PULSE_TICKS) / PULSE_TICKS;
         for (Ring ring : rings) {
             float scale = size * ring.scale;
             int half = Math.round(RING_SIZE * scale / 2.0F);
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, RING, Math.round(ring.x) - half, Math.round(ring.y) - half, half * 2, half * 2,
-                    ARGB.color(Math.round(alpha * 220.0F), ring.color));
+            HudStyle.sprite(graphics, RING, Math.round(ring.x) - half, Math.round(ring.y) - half, half * 2, half * 2,
+                    HudStyle.color(ring.color, alpha * 220.0F / 255.0F));
             int out = Math.round(half * (1.0F + PULSE_GROWTH * pulse));
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, RING, Math.round(ring.x) - out, Math.round(ring.y) - out, out * 2, out * 2,
-                    ARGB.color(Math.round(alpha * 200.0F * (1.0F - pulse)), ring.color));
+            HudStyle.sprite(graphics, RING, Math.round(ring.x) - out, Math.round(ring.y) - out, out * 2, out * 2,
+                    HudStyle.color(ring.color, alpha * 200.0F / 255.0F * (1.0F - pulse)));
         }
     }
 
     // An arrow for each blocker the player can't see outside the view, with the angle on the screen that points to it;
     // a ring, into the list given, for each one in view behind blocks, where it is on the screen.
-    private static List<Arrow> collect(Minecraft minecraft, GuiGraphicsExtractor graphics, float partialTick, List<Ring> rings) {
+    private static List<Arrow> collect(Minecraft minecraft, GuiGraphics graphics, float partialTick, List<Ring> rings) {
         Camera camera = minecraft.gameRenderer.getMainCamera();
-        Vec3 eye = camera.position();
-        Vector3fc forward = camera.forwardVector();
-        Vector3fc up = camera.upVector();
-        Vector3fc left = camera.leftVector();
-        // Half the view's angles, as tangents: the vertical one from the camera's FOV, the horizontal one by the window's shape.
-        double tanV = Math.tan(Math.toRadians(camera.getFov()) / 2.0);
+        Vec3 eye = camera.getPosition();
+        Vector3fc forward = camera.getLookVector();
+        Vector3fc up = camera.getUpVector();
+        Vector3fc left = camera.getLeftVector();
+        // Half the view's angles, as tangents: the vertical one from the FOV the world is drawn with (1.21.1's camera
+        // doesn't keep it), the horizontal one by the window's shape.
+        double tanV = Math.tan(Math.toRadians(((GameRendererAccessor) minecraft.gameRenderer).whycantisleep$getFov(camera, partialTick, true)) / 2.0);
         double tanH = tanV * graphics.guiWidth() / graphics.guiHeight();
 
         List<Arrow> arrows = new ArrayList<>();

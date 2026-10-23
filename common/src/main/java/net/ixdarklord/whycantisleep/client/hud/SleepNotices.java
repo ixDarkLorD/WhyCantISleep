@@ -10,7 +10,7 @@ import net.ixdarklord.whycantisleep.network.WokePayload;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
@@ -116,7 +116,7 @@ public final class SleepNotices {
         duration = ticks;
     }
 
-    private static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
+    private static void render(GuiGraphics graphics, DeltaTracker delta) {
         SleepNotice shown = notice;
         Minecraft minecraft = Minecraft.getInstance();
         if (shown == null || minecraft.options.hideGui) return;
@@ -166,13 +166,13 @@ public final class SleepNotices {
         int textX = x + SLOT_SIZE + SLOT_GAP;
         int lineY = y + (contentHeight - textHeight) / 2;
         for (FormattedCharSequence line : title) {
-            graphics.text(font, line, textX, lineY, HudStyle.color(rgb, alpha), false);
+            HudStyle.text(graphics, font, line, textX, lineY, HudStyle.color(rgb, alpha), false);
             lineY += LINE_HEIGHT;
         }
         if (hint.isEmpty()) return;
         lineY += HINT_GAP;
         for (FormattedCharSequence line : hint) {
-            graphics.text(font, line, textX, lineY, HudStyle.color(HudStyle.GRAY, alpha), false);
+            HudStyle.text(graphics, font, line, textX, lineY, HudStyle.color(HudStyle.GRAY, alpha), false);
             lineY += LINE_HEIGHT;
         }
     }
@@ -185,7 +185,7 @@ public final class SleepNotices {
      * effect woken with, a sheen crossing it, and its rarity on a tag of its color; and last the hint, if any. The whole
      * card rises a little as it comes in.
      */
-    private static void renderQuality(GuiGraphicsExtractor graphics, Font font, SleepNotice shown, SleepNotice.Quality quality, float age, float alpha) {
+    private static void renderQuality(GuiGraphics graphics, Font font, SleepNotice shown, SleepNotice.Quality quality, float age, float alpha) {
         int rgb = shown.kind().color();
         int width = QUALITY_WIDTH;
         List<SleepNotice.Detail> details = quality.details().subList(0, Math.min(QUALITY_DETAILS, quality.details().size()));
@@ -213,15 +213,15 @@ public final class SleepNotices {
         ItemFade.item(graphics, shown.icon(), x + 2, y + 2, alpha);
         String score = Math.round(quality.score() * fill) + "%";
         int scoreX = x + width - font.width(score) * 2;
-        graphics.pose().pushMatrix();
-        graphics.pose().translate(scoreX, y + 3);
-        graphics.pose().scale(2.0F, 2.0F);
-        graphics.text(font, score, 0, 0, HudStyle.color(HudStyle.WHITE, alpha), false);
-        graphics.pose().popMatrix();
+        graphics.pose().pushPose();
+        graphics.pose().translate(scoreX, y + 3, 0.0F);
+        graphics.pose().scale(2.0F, 2.0F, 1.0F);
+        HudStyle.text(graphics, font, score, 0, 0, HudStyle.color(HudStyle.WHITE, alpha), false);
+        graphics.pose().popPose();
         int textX = x + SLOT_SIZE + SLOT_GAP;
         int textWidth = scoreX - textX - 6;
-        graphics.text(font, font.split(shown.title(), textWidth).getFirst(), textX, y + 1, HudStyle.color(rgb, alpha), false);
-        graphics.text(font, font.split(Component.translatable("gui.whycantisleep.woke.quality.label"), textWidth).getFirst(), textX, y + 11,
+        HudStyle.text(graphics, font, font.split(shown.title(), textWidth).getFirst(), textX, y + 1, HudStyle.color(rgb, alpha), false);
+        HudStyle.text(graphics, font, font.split(Component.translatable("gui.whycantisleep.woke.quality.label"), textWidth).getFirst(), textX, y + 11,
                 HudStyle.color(HudStyle.MUTED, alpha), false);
         int cursor = y + SLOT_SIZE + 5;
         HudStyle.pips(graphics, x, cursor, width, QUALITY_PIP_HEIGHT, quality.score() / 100.0F * fill, rgb, alpha);
@@ -231,10 +231,10 @@ public final class SleepNotices {
         int row = 0;
         if (!details.isEmpty()) {
             cursor = partDivider(graphics, x, width, cursor, alpha);
-            graphics.text(font, Component.translatable("gui.whycantisleep.woke.factors"), x, cursor, HudStyle.color(HudStyle.MUTED, alpha), false);
+            HudStyle.text(graphics, font, Component.translatable("gui.whycantisleep.woke.factors"), x, cursor, HudStyle.color(HudStyle.MUTED, alpha), false);
             if (more > 0) {
                 Component moreText = Component.translatable("gui.whycantisleep.woke.more", more);
-                graphics.text(font, moreText, x + width - font.width(moreText), cursor, HudStyle.color(HudStyle.FAINT, alpha), false);
+                HudStyle.text(graphics, font, moreText, x + width - font.width(moreText), cursor, HudStyle.color(HudStyle.FAINT, alpha), false);
             }
             cursor += LINE_HEIGHT;
             int biggest = 1;
@@ -254,8 +254,8 @@ public final class SleepNotices {
                 Component points = Component.literal((detail.points() > 0 ? "+" : "\u2212") + shownPoints);
                 int pointsX = x + width - 2 - font.width(points);
                 int labelX = x + 4 + SleepTooltip.ICON_SIZE + 4 + slide;
-                graphics.text(font, font.split(detail.label(), pointsX - labelX - 4).getFirst(), labelX, cursor + 2, HudStyle.color(HudStyle.SILVER, rowAlpha), false);
-                graphics.text(font, points, pointsX, cursor + 2, HudStyle.color(pointsColor, rowAlpha), false);
+                HudStyle.text(graphics, font, font.split(detail.label(), pointsX - labelX - 4).getFirst(), labelX, cursor + 2, HudStyle.color(HudStyle.SILVER, rowAlpha), false);
+                HudStyle.text(graphics, font, points, pointsX, cursor + 2, HudStyle.color(pointsColor, rowAlpha), false);
                 // A hairline between rows, short of the card's edges.
                 if (i < details.size() - 1) {
                     graphics.fill(x + 4, cursor + QUALITY_ROW - 1, x + width - 4, cursor + QUALITY_ROW, HudStyle.color(HudStyle.DIVIDER, alpha));
@@ -274,24 +274,24 @@ public final class SleepNotices {
             Component rarity = Component.translatable("gui.whycantisleep.rarity." + dream.rarity().getSerializedName());
             int tagX = x + width - font.width(rarity) - 4;
             graphics.fill(tagX, cursor, x + width, cursor + QUALITY_ROW - 2, HudStyle.color(rarityColor, rowAlpha * 0.16F));
-            graphics.text(font, rarity, tagX + 2, cursor + 2, HudStyle.color(rarityColor, rowAlpha), false);
+            HudStyle.text(graphics, font, rarity, tagX + 2, cursor + 2, HudStyle.color(rarityColor, rowAlpha), false);
             SleepTooltip.icon(graphics, x + slide, cursor + 1, dream.kind());
             int nameX = x + SleepTooltip.ICON_SIZE + 4 + slide;
-            graphics.text(font, font.split(dream.name(), tagX - nameX - 4).getFirst(), nameX, cursor + 2, HudStyle.color(rarityColor, rowAlpha), false);
+            HudStyle.text(graphics, font, font.split(dream.name(), tagX - nameX - 4).getFirst(), nameX, cursor + 2, HudStyle.color(rarityColor, rowAlpha), false);
             sheen(graphics, x, cursor, width, QUALITY_ROW - 2, age - rowStart(row), dream.rarity().ordinal() >= SleepEffect.Rarity.EPIC.ordinal(), rowAlpha);
             cursor += QUALITY_ROW - 2;
         }
         if (!hint.isEmpty()) {
             cursor = partDivider(graphics, x, width, cursor, alpha);
             for (FormattedCharSequence line : hint) {
-                graphics.text(font, line, x + (width - font.width(line)) / 2, cursor, HudStyle.color(HudStyle.MUTED, alpha), false);
+                HudStyle.text(graphics, font, line, x + (width - font.width(line)) / 2, cursor, HudStyle.color(HudStyle.MUTED, alpha), false);
                 cursor += LINE_HEIGHT;
             }
         }
     }
 
     // A divider with room on both sides, after the part that ends at a height; returns where the next part starts.
-    private static int partDivider(GuiGraphicsExtractor graphics, int x, int width, int cursor, float alpha) {
+    private static int partDivider(GuiGraphics graphics, int x, int width, int cursor, float alpha) {
         HudStyle.divider(graphics, x, width, cursor + QUALITY_GAP, alpha);
         return cursor + QUALITY_GAP * 2 + 1;
     }
@@ -306,7 +306,7 @@ public final class SleepNotices {
     }
 
     // A slanted band of light crossing a row from left to right, once as it comes in, or over and over for the rarest.
-    private static void sheen(GuiGraphicsExtractor graphics, int x, int y, int width, int height, float since, boolean repeat, float alpha) {
+    private static void sheen(GuiGraphics graphics, int x, int y, int width, int height, float since, boolean repeat, float alpha) {
         if (since < 0.0F) return;
         float t = repeat ? since % SHEEN_EVERY : since;
         if (t > SHEEN_TICKS) return;
