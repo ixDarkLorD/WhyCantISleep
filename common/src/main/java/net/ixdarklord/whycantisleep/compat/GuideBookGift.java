@@ -6,6 +6,7 @@ import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.whycantisleep.config.WCISServerConfig;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -38,6 +39,6 @@ public final class GuideBookGift {
     /** Puts a copy of the guide in a player's inventory, or at their feet when it is full. */
     public static void give(ServerPlayer player) {
         ItemStack book = stack();
-        if (!player.getInventory().add(book)) player.drop(book, false);
+        if (!player.getInventory().add(book)) player.drop(book, false, Prediction.SERVER_ONLY);
     }
 }

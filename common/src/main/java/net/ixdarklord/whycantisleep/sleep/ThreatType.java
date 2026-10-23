@@ -2,7 +2,7 @@ package net.ixdarklord.whycantisleep.sleep;
 
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 
 /**
  * The kind of threat a blocking monster is, which picks its highlight color when threat colors are on, and how
@@ -35,8 +35,8 @@ public enum ThreatType {
     }
 
     public static ThreatType of(Entity entity) {
-        if (entity.is(EntityType.CREEPER)) return EXPLOSIVE;
-        if (entity.is(EntityType.ENDERMAN) || entity.is(EntityType.ENDERMITE)) return ENDER;
+        if (entity.is(EntityTypes.CREEPER)) return EXPLOSIVE;
+        if (entity.is(EntityTypes.ENDERMAN) || entity.is(EntityTypes.ENDERMITE)) return ENDER;
         if (entity.is(EntityTypeTags.UNDEAD)) return UNDEAD;
         if (entity.is(EntityTypeTags.ARTHROPOD)) return ARTHROPOD;
         if (entity.is(EntityTypeTags.RAIDERS) || entity.is(EntityTypeTags.ILLAGER)) return RAIDER;

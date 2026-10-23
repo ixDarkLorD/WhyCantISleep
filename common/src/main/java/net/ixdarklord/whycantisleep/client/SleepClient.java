@@ -20,7 +20,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.AbstractBedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import org.jetbrains.annotations.Nullable;
@@ -71,16 +71,16 @@ public final class SleepClient {
      */
     public static boolean onUseBlock(LocalPlayer player, BlockPos pos) {
         BlockState state = player.level().getBlockState(pos);
-        if (!(state.getBlock() instanceof BedBlock)) return false;
+        if (!(state.getBlock() instanceof AbstractBedBlock bedBlock)) return false;
         // Crawling under it, not lying in it; or already under it, where HidingServer refuses every use.
         if (HidingServer.canHide(player) || Hiding.isHiding(player)) return false;
-        BlockPos bed = state.getValue(BedBlock.PART) == BedPart.HEAD ? pos.immutable() : pos.relative(state.getValue(BedBlock.FACING));
+        BlockPos bed = state.getValue(AbstractBedBlock.PART) == BedPart.HEAD ? pos.immutable() : pos.relative(state.getValue(AbstractBedBlock.FACING));
         lastBed = bed;
 
         if (!WCISClientConfig.DIMENSION_WARNING.get()) return false;
         // Sneaking with an item in hand uses the item, not the bed.
         if (player.isSecondaryUseActive() && !(player.getMainHandItem().isEmpty() && player.getOffhandItem().isEmpty())) return false;
-        if (!player.level().environmentAttributes().getValue(EnvironmentAttributes.BED_RULE, bed).explodes()) return false;
+        if (!bedBlock.getBedRule(player.level(), bed).destroyOnUse()) return false;
 
         if (bed.equals(warnedBed) && tick - warnedAt <= WARNING_TICKS) {
             // The other hand's turn in the same click is stopped like the first.
@@ -116,7 +116,7 @@ public final class SleepClient {
     }
 
     /**
-     * A message is about to be put above the hotbar ({@code GuiMixin}). One of the game's sleep messages is a failed
+     * A message is about to be put above the hotbar ({@code HudMixin}). One of the game's sleep messages is a failed
      * sleep: "monsters nearby" also points the monsters out. Returns true when the sleep HUD shows it instead.
      */
     public static boolean onOverlayMessage(Component message) {

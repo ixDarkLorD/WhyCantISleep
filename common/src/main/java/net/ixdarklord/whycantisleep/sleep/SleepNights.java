@@ -29,7 +29,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.AbstractBedBlock;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
@@ -222,7 +222,7 @@ public final class SleepNights {
         if (morning || level.isBrightOutside()) return WakeReason.MORNING;
         Long hurt = HURT_AT.remove(player.getUUID());
         if (hurt != null && level.getGameTime() - hurt <= 1) return WakeReason.HURT;
-        if (!(level.getBlockState(night.bed).getBlock() instanceof BedBlock)) return WakeReason.BED_GONE;
+        if (!(level.getBlockState(night.bed).getBlock() instanceof AbstractBedBlock)) return WakeReason.BED_GONE;
         return forceful ? WakeReason.OTHER : WakeReason.GOT_UP;
     }
 

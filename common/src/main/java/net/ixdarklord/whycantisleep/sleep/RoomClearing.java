@@ -11,7 +11,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.AbstractBedBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.HashMap;
@@ -69,12 +70,15 @@ public final class RoomClearing {
         }
         if (!left.isEmpty()) return;
         CLEARING.remove(player.getUUID());
-        boolean byTheBed = level.getBlockState(clearing.bed).getBlock() instanceof BedBlock
+        BlockState bedState = level.getBlockState(clearing.bed);
+        boolean byTheBed = bedState.getBlock() instanceof AbstractBedBlock
                 && player.position().distanceTo(Vec3.atBottomCenterOf(clearing.bed)) <= BED_REACH;
         boolean lieDown = WCISServerConfig.AUTO_SLEEP.get() && byTheBed;
         SleepEvents.ROOM_SAFE.invoke(new SleepEvents.RoomSafe(player, clearing.bed, clearing.blockers.size()));
         WCISNetwork.sendToPlayer(player, new RoomSafePayload(lieDown));
-        if (lieDown) player.startSleepInBed(clearing.bed);
+        if (lieDown && bedState.getBlock() instanceof AbstractBedBlock bed) {
+            player.startSleepInBed(bed, bedState, bed.getBedRule(level, clearing.bed), clearing.bed);
+        }
     }
 
     private record Clearing(BlockPos bed, List<UUID> blockers, long since) {
