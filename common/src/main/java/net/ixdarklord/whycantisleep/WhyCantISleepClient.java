@@ -2,6 +2,7 @@ package net.ixdarklord.whycantisleep;
 
 import net.ixdarklord.coolcatcore.api.core.ClientModConstructor;
 import net.ixdarklord.whycantisleep.client.HidingClient;
+import net.ixdarklord.whycantisleep.client.HidingMinigame;
 import net.ixdarklord.whycantisleep.client.NightTerrorClient;
 import net.ixdarklord.whycantisleep.client.SleepDebtMoon;
 import net.ixdarklord.whycantisleep.client.SleepStatus;
@@ -27,6 +28,8 @@ public final class WhyCantISleepClient implements ClientModConstructor {
         BlockerTrails.init();
         BlockerArrows.init();
         SleepNotices.init();
+        // After the cards, so the minigame draws over the hiding card and knows where it sits this frame.
+        HidingMinigame.init();
         SleepBoard.init();
         SleepEffects.init();
         SleepDebtMoon.init();
