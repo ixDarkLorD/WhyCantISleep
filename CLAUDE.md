@@ -30,14 +30,15 @@ A multiloader mod built on the author's libraries **CoolCatLib: Core** (`coolcat
 
 One folder per Minecraft version, each on its own branch of the same repo (the author's convention, e.g. `../GlazedMenu-26.1.2`, `../GlazedMenu-1.20`). The targets are the loader/version pairs CoolCatLib: Core actually ships:
 
-| Minecraft | Loaders | Folder / branch | CoolCatLib: Core (Maven Local) | State |
-|---|---|---|---|---|
-| 26.1 – 26.1.2 | Fabric, NeoForge | this folder, `main` | `26.1.2-4` | in progress (first version) |
-| 1.21.1 | Forge, Fabric, NeoForge | `../WhyCantISleep-1.21.1` (not created) | `1.21.1-2100.2.0.1` | backport, after 26.1.2 is feature complete |
-| 1.20.1 | Forge, Fabric (no NeoForge) | `../WhyCantISleep-1.20.1` (empty folder) | `1.20.1-2001.2.0.1` | backport |
-| 26.2, 26.3 | Fabric, NeoForge | — | **none: CoolCatLib has no build for them** | blocked until CoolCatLib is ported |
+| Minecraft | Loaders | Folder / branch | CoolCatLib (Maven Local) | Folios (Maven Local) | State |
+|---|---|---|---|---|---|
+| 26.2 | Fabric, NeoForge | **this folder**, `../WhyCantISleep-26.2`, branch `26.2` | `26.2-6` | `26.2+2.0` (from `../Folios-26.2`) | ported 2026-10-23 from `main` at 5692d22 |
+| 26.1 – 26.1.2 | Fabric, NeoForge | `../WhyCantISleep-26.1.2`, `main` | `26.1.2-6` | `26.1.2+2.0` | feature complete (first version) |
+| 1.21.1 | Forge, Fabric, NeoForge | `../WhyCantISleep-1.21.1`, branch `1.21.1` | `1.21.1-2100.2.0.1` | | backport (its own session) |
+| 1.20.1 | Forge, Fabric (no NeoForge) | `../WhyCantISleep-1.20.1`, branch `1.20.1` | `1.20.1-2001.2.0.1` | | backport (its own session) |
+| 26.3 | Fabric, NeoForge | `../WhyCantISleep-26.3`, branch `26.3` | `26.3-6` | `26.3+2.0` | port (its own session) |
 
-The shared catalogs `26.2-v1` and `26.3-v1` exist (Glazed Menu uses them), but this mod requires Core at runtime, so 26.2+ waits on a CoolCatLib port. Finish all features on 26.1.2 before backporting.
+This branch builds on the shared catalog `26.2-v1` (NeoForge 26.2.0.84+, Fabric API 0.159.0+), CoolCatLib `26.2-6` and Folios `26.2+2.0` (publish it from `../Folios-26.2` with `gradlew assemble publishToMavenLocal`; its API is the 26.1.2 one), and MCP Bridge `26.2-1`. Vanilla changes met in the port, for the next one: entity types are constants of `EntityTypes` (not `EntityType`); dyed items and blocks are `ColorCollection`s (`Items.BED.red()`, not `Items.RED_BED`; the ids are unchanged); the HUD is `Gui.hud` (`net.minecraft.client.gui.Hud`: `setOverlayMessage`, `extractRenderState(GuiGraphicsExtractor, DeltaTracker)` and `isHidden()`, which replaces `options.hideGui`), so `GuiMixin` targets `Hud`; the open screen is `minecraft.gui.screen()`; `GameRenderer.getMainCamera()` is `mainCamera()`.
 
 ## Build setup (copied from `../Starwoven-26.1.2` and `../GlazedMenu-26.1.2`; do not restructure)
 

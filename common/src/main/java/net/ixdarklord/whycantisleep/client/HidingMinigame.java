@@ -204,7 +204,7 @@ public final class HidingMinigame {
     /** The panel under the crosshair: the mouse at the left; what to do and the hearts on top, the pulse line under. */
     public static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.options.hideGui) return;
+        if (minecraft.gui.hud.isHidden()) return;
         float partial = delta.getGameTimeDeltaPartialTick(true);
         float now = tick + partial;
         float alpha = active ? Mth.clamp((now - startedAt) / FADE_TICKS, 0.0F, 1.0F)
