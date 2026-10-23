@@ -68,6 +68,8 @@ public final class SleepNotices {
     private static long tick;
     private static long shownAt;
     private static int duration;
+    // The top of the card's frame where it settles, from the last frame drawn; what sits over the card keeps above it.
+    private static int top = Integer.MAX_VALUE;
 
     private SleepNotices() {
     }
@@ -79,6 +81,11 @@ public final class SleepNotices {
         });
         ClientPlayerEvents.LEAVE.register(player -> notice = null);
         ClientGuiEvents.RENDER_HUD.register(SleepNotices::render);
+    }
+
+    /** The top edge of the card's frame on screen, or {@link Integer#MAX_VALUE} while no card is shown. */
+    public static int top() {
+        return top;
     }
 
     public static void show(SleepNotice notice) {
@@ -119,6 +126,7 @@ public final class SleepNotices {
     private static void render(GuiGraphics graphics, DeltaTracker delta) {
         SleepNotice shown = notice;
         Minecraft minecraft = Minecraft.getInstance();
+        top = Integer.MAX_VALUE;
         if (shown == null || minecraft.options.hideGui) return;
         float age = tick - shownAt + delta.getGameTimeDeltaPartialTick(true);
         float left = duration - age;
@@ -145,6 +153,7 @@ public final class SleepNotices {
         float rise = 1.0F - Easing.CUBIC_OUT.apply(Mth.clamp(age / NOTICE_IN_TICKS, 0.0F, 1.0F));
         int x = (graphics.guiWidth() - width) / 2;
         int y = graphics.guiHeight() - BOTTOM_OFFSET - height + Math.round(NOTICE_RISE * rise);
+        top = graphics.guiHeight() - BOTTOM_OFFSET - height - HudStyle.PANEL_PADDING;
         int rgb = shown.kind().color();
 
         HudStyle.notice(graphics, x, y, width, height, alpha);
@@ -202,6 +211,7 @@ public final class SleepNotices {
         float rise = 1.0F - Easing.CUBIC_OUT.apply(Mth.clamp(age / (APPEAR_TICKS * 2.0F), 0.0F, 1.0F));
         int x = (graphics.guiWidth() - width) / 2;
         int y = graphics.guiHeight() - BOTTOM_OFFSET - height + Math.round(QUALITY_RISE * rise);
+        top = graphics.guiHeight() - BOTTOM_OFFSET - height - HudStyle.PANEL_PADDING;
         HudStyle.box(graphics, x, y, width, height, alpha);
         float fill = Easing.QUAD_OUT.apply(Mth.clamp(age / QUALITY_FILL_TICKS, 0.0F, 1.0F));
         // The wash over the head, sweeping in as the meter fills, its specks as lively as the night was good.
