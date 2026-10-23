@@ -154,7 +154,6 @@ public final class HidingClient {
             squintTo = 0.0F;
         });
         HidingAmbience.init();
-        HidingMinigame.init();
     }
 
     /** Whether the local player is hiding. */
