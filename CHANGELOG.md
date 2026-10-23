@@ -1,6 +1,10 @@
 # Changelog
 This file is for listing all the changes to this project
 
+## v26.2-1 Beta | Unreleased
+### 🛠️ Changes
+- Ported to Minecraft 26.2 (Fabric and NeoForge), with every feature of v26.1.2-1, on CoolCatLib 26.2-6 and Folios 26.2+2.0.
+
 ## v26.1.2-1 Beta | Unreleased
 ### ✨ New Features
 - Project set up for Fabric and NeoForge (Minecraft 26.1 to 26.1.2), built on CoolCatLib: Core and CoolCatLib: Canvas.

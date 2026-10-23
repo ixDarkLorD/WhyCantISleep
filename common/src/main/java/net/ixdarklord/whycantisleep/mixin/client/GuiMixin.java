@@ -4,7 +4,7 @@ import net.ixdarklord.whycantisleep.client.HidingClient;
 import net.ixdarklord.whycantisleep.client.SleepClient;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * player's squint ({@link HidingClient#renderEyelids}) before anything else, under the hotbar and the rest of the HUD,
  * and with the HUD hidden (F1) too.
  */
-@Mixin(Gui.class)
+@Mixin(Hud.class)
 public abstract class GuiMixin {
     @Inject(method = "setOverlayMessage", at = @At("HEAD"), cancellable = true)
     private void whycantisleep$onOverlayMessage(Component message, boolean animate, CallbackInfo ci) {

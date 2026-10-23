@@ -31,6 +31,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.monster.Monster;
@@ -368,7 +369,7 @@ public final class HidingServer {
     // at the spot's mouth (the spot itself may be in a block, as a bed or chest is), leaping at them, after them.
     private static boolean startle(ServerLevel level, ServerPlayer player, HidingSpot spot) {
         boolean spider = level.getRandom().nextBoolean();
-        Mob critter = (spider ? EntityType.CAVE_SPIDER : EntityType.SILVERFISH).create(level, EntitySpawnReason.EVENT);
+        Mob critter = (spider ? EntityTypes.CAVE_SPIDER : EntityTypes.SILVERFISH).create(level, EntitySpawnReason.EVENT);
         if (critter == null) return false;
         Vec3 at = mouth(level, critter, spot.position(), player.position());
         Vec3 toward = player.position().subtract(at);
@@ -549,7 +550,7 @@ public final class HidingServer {
         BlockPos anchor = hide.spot.anchor();
         BlockState state = level.getBlockState(anchor);
         if (state.getBlock() instanceof BedBlock) {
-            return BedBlock.findStandUpPosition(EntityType.PLAYER, level, anchor, state.getValue(BedBlock.FACING), player.getYRot())
+            return BedBlock.findStandUpPosition(EntityTypes.PLAYER, level, anchor, state.getValue(BedBlock.FACING), player.getYRot())
                     .orElse(Vec3.atBottomCenterOf(anchor.above()));
         }
         for (Direction side : Direction.Plane.HORIZONTAL) {
