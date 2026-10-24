@@ -16,6 +16,8 @@ import net.ixdarklord.whycantisleep.api.HidingPosture;
 import net.ixdarklord.whycantisleep.client.hud.Explanations;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotice;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotices;
+import net.ixdarklord.whycantisleep.config.EyelidStyle;
+import net.ixdarklord.whycantisleep.config.WCISClientConfig;
 import net.ixdarklord.whycantisleep.hiding.Hiding;
 import net.ixdarklord.whycantisleep.hiding.HidingView;
 import net.ixdarklord.whycantisleep.network.HidingPayload;
@@ -69,11 +71,15 @@ public final class HidingClient {
     private static final float PEEK_UP = 25.0F;
     private static final float PEEK_DOWN = 35.0F;
     private static final Map<BlockPos, Lid> LIDS = new HashMap<>();
-    // The eyelids' texture, and how many of the opening's middle half-heights it spans top to bottom.
-    private static final ResourceLocation EYELIDS = WhyCantISleep.id("hud/eyelids");
+    // The eyelids' textures, one pair per style (the lids, and the glow along their edge), and how many of the
+    // opening's middle half-heights they span top to bottom.
+    private static final ResourceLocation[] EYELIDS = eyelidSprites("");
+    private static final ResourceLocation[] EYELIDS_GLOW = eyelidSprites("_glow");
     private static final float EYELIDS_SPAN = 2.5F;
-    // A soft band along the lids' edge, drawn in this red over them only while the heartbeat minigame runs.
-    private static final ResourceLocation EYELIDS_GLOW = WhyCantISleep.id("hud/eyelids_glow");
+    // How much wider the opening is than the screen once the lids are fully open: enough that the almond's pinched
+    // corners (PINCH in tools/gen_eyelids.py) are past the screen's edges.
+    private static final float EYELIDS_CLEAR = 1.6F;
+    // The glow along the lids' edge is drawn in this red over them, only while the heartbeat minigame runs.
     private static final int EYELIDS_DANGER = 0xFF3A28;
     // The squint's ease from one amount to another, and when it began.
     private static float squintFrom;
@@ -260,7 +266,8 @@ public final class HidingClient {
         }
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null || payload.player() != minecraft.player.getId()) return;
-        squintFrom = squint(0.0F);
+        // Coming out, the lids slide open from where they are, sway and blink included, so they don't jump first.
+        squintFrom = payload.hiding() ? squint(0.0F) : livingSquint(0.0F);
         squintTo = payload.hiding() ? payload.squint() : 0.0F;
         squintAt = tick;
         if (payload.hiding()) {
@@ -422,19 +429,32 @@ public final class HidingClient {
         int width = graphics.guiWidth();
         int height = graphics.guiHeight();
         // One stretched texture holds the almond and its soft edge (tools/gen_eyelids.py); above and below it, black.
-        float open = height / 2.0F * (1.0F - squint);
+        // Sliding in or out, the opening also widens until the pinched corners and the soft edge are off the screen,
+        // so the lids leave it smoothly rather than vanish with their corners still showing.
+        float peak = Math.max(squintFrom, squintTo);
+        float in = peak > 0.0F ? Mth.clamp(squint(delta.getGameTimeDeltaPartialTick(true)) / peak, 0.0F, 1.0F) : 0.0F;
+        float open = height / 2.0F * (1.0F - squint) * Mth.lerp(in, EYELIDS_CLEAR, 1.0F);
         int lids = Math.max(2, Math.round(open * EYELIDS_SPAN));
         int top = (height - lids) / 2;
-        HudStyle.sprite(graphics, EYELIDS, 0, top, width, lids);
+        int style = WCISClientConfig.EYELID_STYLE.get().ordinal();
+        HudStyle.sprite(graphics, EYELIDS[style], 0, top, width, lids);
         // The edge glows red only with the heartbeat minigame, fading in and out with it.
         float danger = HidingMinigame.shown(delta.getGameTimeDeltaPartialTick(true));
         if (danger > 0.0F) {
-            HudStyle.sprite(graphics, EYELIDS_GLOW, 0, top, width, lids, Math.round(danger * 255.0F) << 24 | EYELIDS_DANGER);
+            HudStyle.sprite(graphics, EYELIDS_GLOW[style], 0, top, width, lids, Math.round(danger * 255.0F) << 24 | EYELIDS_DANGER);
         }
         if (top > 0) {
             graphics.fill(0, 0, width, top, 0xFF000000);
             graphics.fill(0, top + lids, width, height, 0xFF000000);
         }
+    }
+
+    // Each style's sprite of the eyelids' textures with this suffix, by the style's ordinal.
+    private static ResourceLocation[] eyelidSprites(String suffix) {
+        EyelidStyle[] styles = EyelidStyle.values();
+        ResourceLocation[] sprites = new ResourceLocation[styles.length];
+        for (EyelidStyle style : styles) sprites[style.ordinal()] = WhyCantISleep.id("hud/eyelids/" + style.id() + suffix);
+        return sprites;
     }
 
     // A chest lid raised, or being let down, and since when.
