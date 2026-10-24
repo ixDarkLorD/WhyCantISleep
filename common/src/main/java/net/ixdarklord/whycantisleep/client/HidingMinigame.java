@@ -202,14 +202,20 @@ public final class HidingMinigame {
                 false);
     }
 
+    /** How much of it shows, 0 to 1: fading in as it starts, and out once it has ended. */
+    public static float shown(float partialTick) {
+        float now = tick + partialTick;
+        return active ? Mth.clamp((now - startedAt) / FADE_TICKS, 0.0F, 1.0F)
+                : endedAt == Long.MIN_VALUE ? 0.0F : Mth.clamp((endedAt - now) / FADE_TICKS, 0.0F, 1.0F);
+    }
+
     /** The panel under the crosshair: the mouse at the left; what to do and the hearts on top, the pulse line under. */
     public static void render(GuiGraphics graphics, DeltaTracker delta) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.options.hideGui) return;
         float partial = delta.getGameTimeDeltaPartialTick(true);
         float now = tick + partial;
-        float alpha = active ? Mth.clamp((now - startedAt) / FADE_TICKS, 0.0F, 1.0F)
-                : endedAt == Long.MIN_VALUE ? 0.0F : Mth.clamp((endedAt - now) / FADE_TICKS, 0.0F, 1.0F);
+        float alpha = shown(partial);
         if (alpha <= 0.0F) return;
 
         Font font = minecraft.font;
