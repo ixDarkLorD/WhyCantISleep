@@ -72,6 +72,8 @@ public final class HidingClient {
     // The eyelids' texture, and how many of the opening's middle half-heights it spans top to bottom.
     private static final ResourceLocation EYELIDS = WhyCantISleep.id("hud/eyelids");
     private static final float EYELIDS_SPAN = 2.5F;
+    // The lids' grey rim is tinted towards this red while the heartbeat minigame runs, and left grey otherwise.
+    private static final int EYELIDS_DANGER = 0xFF3A28;
     // The squint's ease from one amount to another, and when it began.
     private static float squintFrom;
     private static float squintTo;
@@ -405,10 +407,11 @@ public final class HidingClient {
 
     /**
      * The eyes narrowed: dark lids close in from above and below, leaving an almond of view, widest in the middle and
-     * pinched at the sides, its edges shading off: one texture, stretched taller or shorter with the squint. The squint
-     * eases in and out, so the lids slide rather than snap, and lives while it is held: a slow sway with the breath, a
-     * tighter squint with monsters about, a blink now and then. Drawn first in the HUD ({@code GuiMixin}), so the
-     * HUD stays over it, and drawn with the HUD hidden too: it is the player's eyes, not part of the HUD.
+     * pinched at the sides, its edges blending off through a dim rim (grey, red in the heartbeat minigame): one
+     * texture, stretched taller or shorter with the squint. The squint eases in and out, so the lids slide rather than
+     * snap, and lives while it is held: a slow sway with the breath, a tighter squint with monsters about, a blink now
+     * and then. Drawn first in the HUD ({@code GuiMixin}), so the HUD stays over it, and drawn with the HUD hidden
+     * too: it is the player's eyes, not part of the HUD.
      */
     public static void renderEyelids(GuiGraphics graphics, DeltaTracker delta) {
         Minecraft minecraft = Minecraft.getInstance();
@@ -421,7 +424,12 @@ public final class HidingClient {
         float open = height / 2.0F * (1.0F - squint);
         int lids = Math.max(2, Math.round(open * EYELIDS_SPAN));
         int top = (height - lids) / 2;
-        HudStyle.sprite(graphics, EYELIDS, 0, top, width, lids);
+        // The rim goes red only with the heartbeat minigame, fading in and out with it.
+        float danger = HidingMinigame.shown(delta.getGameTimeDeltaPartialTick(true));
+        int tint = 0xFF000000 | Math.round(Mth.lerp(danger, 0xFF, EYELIDS_DANGER >> 16)) << 16
+                | Math.round(Mth.lerp(danger, 0xFF, EYELIDS_DANGER >> 8 & 0xFF)) << 8
+                | Math.round(Mth.lerp(danger, 0xFF, EYELIDS_DANGER & 0xFF));
+        HudStyle.sprite(graphics, EYELIDS, 0, top, width, lids, tint);
         if (top > 0) {
             graphics.fill(0, 0, width, top, 0xFF000000);
             graphics.fill(0, top + lids, width, height, 0xFF000000);
