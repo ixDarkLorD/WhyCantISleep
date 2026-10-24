@@ -28,12 +28,14 @@ public final class WCISClientConfig {
             .comment("Leaves faint footprints where the blocking monsters walked, for a while after their highlight is gone.").enabledWhen(HIGHLIGHT_MONSTERS).build();
     static {
         BUILDER.pop();
-        BUILDER.push("hud", "Arrows around the crosshair and the action bar text.");
+        BUILDER.push("hud", "Arrows around the crosshair, the action bar text, and the eyelids while hiding.");
     }
     public static final ConfigValue<Boolean> OFF_SCREEN_ARROWS = BUILDER.bool("offScreenArrows", true)
             .comment("Draws arrows around the crosshair pointing to blocking monsters that are off-screen or behind walls.").enabledWhen(WCISServerConfig.ALLOW_ARROWS).build();
     public static final ConfigValue<ArrowSize> ARROW_SIZE = BUILDER.enumValue("arrowSize", ArrowSize.MEDIUM)
             .comment("How large the arrows are.").enabledWhen(OFF_SCREEN_ARROWS).build();
+    public static final ConfigValue<EyelidStyle> EYELID_STYLE = BUILDER.enumValue("eyelidStyle", EyelidStyle.PIXEL)
+            .comment("How the eyelids look while you hide: smooth, stepped, dithered, or pixel art (stepped and dithered).").build();
     public static final ConfigValue<Boolean> SLEEP_DEBT_MOON = BUILDER.bool("sleepDebtMoon", true)
             .comment("Shows a moon in the corner of the screen that fills up with each day you go without sleep. Needs the mod on the server.").build();
     public static final ConfigValue<Boolean> MORNING_CARD = BUILDER.bool("morningCard", true)
