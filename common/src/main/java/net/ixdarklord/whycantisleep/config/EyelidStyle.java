@@ -7,10 +7,10 @@ import java.util.Locale;
 
 /** How the hiding squint's eyelids are drawn: each has its own textures, {@code hud/eyelids/<name>}. */
 public enum EyelidStyle implements EnumType.Displayable {
-    SMOOTH,
-    STEPPED,
-    DITHERED,
-    PIXEL;
+    SOFT,
+    BANDED,
+    GRAINY,
+    RETRO;
 
     /** The name of its textures. */
     public String id() {
