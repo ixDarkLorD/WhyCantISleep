@@ -4,8 +4,8 @@
 # HidingClient tints red and draws over the lids only while the heartbeat minigame runs. Each texture's height is
 # OPENING_SPAN times the almond's half-height at its middle, so the game stretches it to the squint and fills above and
 # below the lids with black.
-# Styles: smooth (large, a smooth edge), and three pixel-art ones drawn small, so the game's stretch makes chunky
-# pixels: stepped (the edge in a few flat tones), dithered (each pixel clear or black, ordered-dithered) and pixel (the
+# Styles: soft (large, a smooth edge), and three pixel-art ones drawn small, so the game's stretch makes chunky
+# pixels: banded (the edge in a few flat tones), grainy (each pixel clear or black, ordered-dithered) and retro (the
 # default: the flat tones, dithered from one to the next).
 # Run from the project root: python tools/gen_eyelids.py
 import math
@@ -32,20 +32,20 @@ BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]
 # Each style's size and soft edge's width (in half-heights; keep 1 + the pixel styles' SOFT in step with EYELIDS_DARK
 # in HidingClient where it has one).
 STYLES = {
-    'smooth': (512, 256, 0.25),
-    'stepped': (128, 64, 0.3),
-    'dithered': (128, 64, 0.3),
-    'pixel': (128, 64, 0.3),
+    'soft': (512, 256, 0.25),
+    'banded': (128, 64, 0.3),
+    'grainy': (128, 64, 0.3),
+    'retro': (128, 64, 0.3),
 }
 
 
 def lid_alpha(style, alpha, x, y):
     dither = (BAYER[y % 4][x % 4] + 0.5) / 16.0
-    if style == 'stepped':
+    if style == 'banded':
         return math.ceil(alpha * STEPS - 1e-6) / STEPS if alpha > 0.02 else 0.0
-    if style == 'dithered':
+    if style == 'grainy':
         return 1.0 if alpha > dither else 0.0
-    if style == 'pixel':
+    if style == 'retro':
         # The step below this alpha, or the one above where the dither says so.
         step = alpha * STEPS
         return min(STEPS, int(step) + (1 if step - int(step) > dither else 0)) / STEPS
@@ -69,7 +69,7 @@ for style, (width, height, soft) in STYLES.items():
             # A cosine bump, so the glow fades off on both sides; in flat steps for the pixel styles.
             d = min(1.0, abs(v - half - GLOW_AT) / GLOW_REACH)
             g = (0.5 + 0.5 * math.cos(math.pi * d)) * GLOW_ALPHA
-            if style != 'smooth':
+            if style != 'soft':
                 g = math.floor(g * GLOW_STEPS + 0.5) / GLOW_STEPS * GLOW_STRENGTH if g > 0.05 else 0.0
             glow_pixels[x, y] = (255, 255, 255, round(g * 255))
     lids.save(OUT + style + '.png')
