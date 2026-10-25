@@ -1,7 +1,7 @@
 # Changelog
 This file is for listing all the changes to this project
 
-## v1.21.1-1 Beta | Unreleased
+## v1.0.0 Beta | Unreleased
 ### 🛠️ Changes
 - Ported to Minecraft 1.21.1 (Forge, Fabric and NeoForge), with the features of v26.1.2-1. Forge is new.
 - Card icons that are blocks can't fade on 1.21.1: they show until a card has mostly faded out, then go.
