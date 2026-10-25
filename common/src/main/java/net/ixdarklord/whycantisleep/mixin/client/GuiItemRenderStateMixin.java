@@ -1,5 +1,6 @@
 package net.ixdarklord.whycantisleep.mixin.client;
 
+import net.ixdarklord.whycantisleep.client.hud.HudFade;
 import net.ixdarklord.whycantisleep.client.hud.ItemFade;
 import net.minecraft.client.renderer.state.gui.GuiItemRenderState;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,7 +17,7 @@ public abstract class GuiItemRenderStateMixin implements ItemFade.Faded {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void whycantisleep$rememberAlpha(CallbackInfo ci) {
-        this.whycantisleep$alpha = ItemFade.alpha;
+        this.whycantisleep$alpha = ItemFade.alpha * HudFade.factor();
     }
 
     @Override

@@ -18,6 +18,13 @@ import java.util.function.IntFunction;
 public final class Hiding {
     /** Set on clients ({@code HidingClient}): how the player with this network id hides, as last told, or null. */
     public static IntFunction<@Nullable HidingView> onClient = id -> null;
+    /**
+     * The heartbeat minigame's overtime: a player hiding hunted who missed the last beat when the hide time is up must
+     * catch one more, and gets OVERTIME_TICKS more for it (a beat's crossing and the longest gap before it), at most
+     * MAX_OVERTIME times.
+     */
+    public static final int OVERTIME_TICKS = 64;
+    public static final int MAX_OVERTIME = 2;
 
     private Hiding() {
     }

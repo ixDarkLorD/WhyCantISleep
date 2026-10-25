@@ -4,17 +4,14 @@
   "sort": 3,
   "pages": [
     {
-      "type": "text",
       "title": "guide.whycantisleep.guide.entry.sleeping.bedtime.page1.title",
       "text": "guide.whycantisleep.guide.entry.sleeping.bedtime.page1.text"
     },
     {
-      "type": "text",
       "title": "guide.whycantisleep.guide.entry.sleeping.bedtime.page2.title",
       "text": "guide.whycantisleep.guide.entry.sleeping.bedtime.page2.text"
     },
     {
-      "type": "text",
       "title": "guide.whycantisleep.guide.entry.sleeping.bedtime.page3.title",
       "text": "guide.whycantisleep.guide.entry.sleeping.bedtime.page3.text"
     }

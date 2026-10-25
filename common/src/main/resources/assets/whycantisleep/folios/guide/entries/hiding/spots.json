@@ -5,7 +5,7 @@
   "pages": [
     {
       "type": "spotlight",
-      "item": "minecraft:red_bed",
+      "item": "#minecraft:beds",
       "title": "guide.whycantisleep.guide.entry.hiding.spots.page1.title",
       "text": "guide.whycantisleep.guide.entry.hiding.spots.page1.text"
     },
@@ -19,6 +19,7 @@
       "type": "spotlight",
       "item": "minecraft:chest",
       "title": "guide.whycantisleep.guide.entry.hiding.spots.page3.title",
+      "overflow": "auto",
       "text": "guide.whycantisleep.guide.entry.hiding.spots.page3.text"
     },
     {
@@ -28,14 +29,13 @@
       "text": "guide.whycantisleep.guide.entry.hiding.spots.page4.text"
     },
     {
-      "type": "text",
       "title": "guide.whycantisleep.guide.entry.hiding.spots.page5.title",
       "text": "guide.whycantisleep.guide.entry.hiding.spots.page5.text"
     },
     {
       "type": "build",
       "title": "guide.whycantisleep.guide.entry.hiding.spots.page6.title",
-      "builds": [
+      "build": [
         "closet",
         "trapdoor_closet",
         "double_closet"
