@@ -2,7 +2,7 @@ apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/grad
 
 dependencies {
     // CoolCatLib (Fabric). Its common classes are inside this jar.
-    modImplementation "net.ixdarklord.coolcatlib:coolcatlib-fabric:${libs.versions.minecraft.get()}-${coolcatlib_version}"
+    modImplementation "net.ixdarklord.coolcatlib:coolcatlib-fabric:${coolcatlib_version}"
     // Folios: the mod's guide book is a Folios book.
     modImplementation("net.ixdarklord.folios:folios-fabric:${folios_version}") { transitive = false }
 }

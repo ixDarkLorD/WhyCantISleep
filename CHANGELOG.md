@@ -1,7 +1,7 @@
 # Changelog
 This file is for listing all the changes to this project
 
-## v1.20.1-1 Beta | Unreleased
+## v1.0.0 Beta | Unreleased
 ### ✨ New Features
 - Backported to Minecraft 1.20.1 for Forge and Fabric, with every feature of the 26.1.2 version below (built on CoolCatLib 1.20.1-2001.4.0.1 and Folios 1.20.1+2.1).
 
