@@ -6,7 +6,7 @@ license = "${mod_license}"
 [[mods]]
 modId = "${modid}"
 displayName = "${mod_name}"
-version = "${mc_version}-${mod_version}"
+version = "${version}"
 description = "${mod_description}"
 authors = "${mod_author}"
 displayURL = "${mod_page_url}"
@@ -38,6 +38,6 @@ side = "BOTH"
 [[dependencies.${modid}]]
 modId = "folios"
 mandatory = true
-versionRange = "[${folios_version},)"
+versionRange = "[${folios_min_version},)"
 ordering = "NONE"
 side = "BOTH"
