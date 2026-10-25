@@ -6,7 +6,7 @@ plugins {
 }
 
 // Every project's Java, jar, resource and publishing setup.
-apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v4/main.gradle"
+apply from: "${findProperty("shared_scripts_url") ?: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v4"}/main.gradle"
 
 subprojects {
     // Every jar carries the mod's license (MPL-2.0).
