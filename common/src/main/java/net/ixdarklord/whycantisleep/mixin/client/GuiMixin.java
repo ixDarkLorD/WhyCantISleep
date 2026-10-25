@@ -1,6 +1,9 @@
 package net.ixdarklord.whycantisleep.mixin.client;
 
-import net.ixdarklord.whycantisleep.client.HidingClient;
+import net.ixdarklord.whycantisleep.client.Eyelids;
+import net.ixdarklord.whycantisleep.client.HidingMinigame;
+import net.ixdarklord.whycantisleep.client.NightTerrorClient;
+import net.ixdarklord.whycantisleep.client.hud.HudFade;
 import net.ixdarklord.whycantisleep.client.SleepClient;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -13,9 +16,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Sees the game's sleep messages as they are about to be shown, which is all a server without the mod tells the
- * client, and keeps those the sleep HUD shows in its own card off the line above the hotbar. Also draws a hiding
- * player's squint ({@link HidingClient#renderEyelids}) before anything else, under the hotbar and the rest of the HUD,
- * and with the HUD hidden (F1) too.
+ * client, and keeps those the sleep HUD shows in its own card off the line above the hotbar. Also draws the player's
+ * eyelids ({@link Eyelids#render}: hiding, or in bed) before anything else, under the hotbar and the rest of the HUD,
+ * and with the HUD hidden (F1) too. The rest of the HUD is drawn faded ({@link HudFade}) while the heartbeat minigame
+ * runs, the crosshair left out once it is half gone; and the game's fade to dark in bed waits while a night terror
+ * runs.
  */
 @Mixin(Gui.class)
 public abstract class GuiMixin {
@@ -26,6 +31,25 @@ public abstract class GuiMixin {
 
     @Inject(method = "extractRenderState", at = @At("HEAD"))
     private void whycantisleep$squint(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-        HidingClient.renderEyelids(graphics, deltaTracker);
+        Eyelids.render(graphics, deltaTracker);
+        // Then the rest of the HUD, faded while the heartbeat minigame has the screen.
+        HudFade.set(HidingMinigame.hudVisible(deltaTracker));
+        HudFade.begin();
+    }
+
+    @Inject(method = "extractRenderState", at = @At("TAIL"))
+    private void whycantisleep$endFade(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
+        HudFade.end();
+    }
+
+    // The game's fade to dark in bed waits while a night terror runs: the terror is what they see.
+    @Inject(method = "extractSleepOverlay", at = @At("HEAD"), cancellable = true)
+    private void whycantisleep$terrorHoldsTheDark(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
+        if (NightTerrorClient.running()) ci.cancel();
+    }
+
+    @Inject(method = "extractCrosshair", at = @At("HEAD"), cancellable = true)
+    private void whycantisleep$fadeCrosshair(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
+        if (HudFade.factor() < 0.5F) ci.cancel();
     }
 }

@@ -1,10 +1,14 @@
 {
+  "format_version": "3.0",
   "name": "guide.whycantisleep.guide.name",
   "subtitle": "guide.whycantisleep.guide.subtitle",
   "summary": "guide.whycantisleep.guide.summary",
+  "author": "The Sleepless Knight",
   "style": "screen",
   "accent": "#7AA7D9",
-  "cover": "#1B1F2E",
+  "cover": {
+    "color": "#1B1F2E"
+  },
   "icon": "minecraft:red_bed",
   "landing": "guide.whycantisleep.guide.landing",
   "reveal": {

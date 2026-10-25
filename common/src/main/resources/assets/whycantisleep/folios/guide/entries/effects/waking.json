@@ -4,9 +4,16 @@
   "sort": 0,
   "pages": [
     {
-      "type": "text",
       "title": "guide.whycantisleep.guide.entry.effects.waking.page1.title",
       "text": "guide.whycantisleep.guide.entry.effects.waking.page1.text"
+    },
+    {
+      "type": "links",
+      "links": [
+        "effects/good",
+        "effects/bad",
+        "effects/odd"
+      ]
     }
   ]
 }

@@ -78,7 +78,8 @@ public final class WCISServerConfig {
             .comment("Whether a monster that chased a player into a hiding spot comes to search it, looks about, and then finds them or walks off.").enabledWhen(ALLOW_HIDING).build();
     public static final ConfigValue<Integer> SEARCH_CHANCE = BUILDER.intValue("searchChance", 25)
             .range(0, 100).slider().comment("Percent chance a monster that chased a player into a hiding spot, and came to search it, finds them and drags them out. "
-                    + "This is on normal difficulty: half on easy, half as much again on hard, never on peaceful. The noise they make adds to it.")
+                    + "This is on normal difficulty: half on easy, half as much again on hard, never on peaceful. The noise they make adds to it. "
+                    + "While a player plays the heartbeat minigame there is no chance: only failing it gives them away.")
             .enabledWhen(HUNTER_SEARCH).build();
     static {
         BUILDER.pop();

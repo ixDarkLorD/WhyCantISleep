@@ -26,6 +26,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.monster.Monster;
@@ -57,6 +58,11 @@ public final class SleepNights {
     private static final int SHAKEN_NAUSEA_TICKS = 140;
     private static final int SHAKEN_SLOWNESS_TICKS = 100;
     private static final int RESTED_REGENERATION_TICKS = 20 * 30;
+    // A night terror's intensity: as if the night were slept through (a whole night, in ticks), at least TERROR_MILDEST,
+    // and this much worse sleepless.
+    private static final int FULL_NIGHT = 12000;
+    private static final float TERROR_MILDEST = 0.25F;
+    private static final float TERROR_SLEEPLESS = 0.15F;
 
     private static final Map<UUID, Night> NIGHTS = new HashMap<>();
     private static final Map<UUID, SleepTrouble> BEFORE_SLEEP = new HashMap<>();
@@ -119,10 +125,7 @@ public final class SleepNights {
             if (level.getRandom().nextInt(100) < chance) {
                 SleepEvents.NightTerror event = new SleepEvents.NightTerror(player, trouble);
                 SleepEvents.NIGHT_TERROR.invoke(event);
-                if (!event.isCancelled()) {
-                    night.terror = true;
-                    WCISNetwork.sendToPlayer(player, new TerrorPayload(true));
-                }
+                if (!event.isCancelled()) startTerror(player, night, level);
             }
         }
     }
@@ -133,8 +136,35 @@ public final class SleepNights {
      */
     public static void nightmare(ServerPlayer player) {
         Night night = NIGHTS.get(player.getUUID());
-        if (night != null && player.isSleeping()) night.terror = true;
-        WCISNetwork.sendToPlayer(player, new TerrorPayload(true));
+        if (night != null && player.isSleeping()) startTerror(player, night, player.level());
+        else WCISNetwork.sendToPlayer(player, new TerrorPayload(true, 1.0F));
+    }
+
+    /** Whether a player is in the middle of a night terror: the night waits for it before it passes. */
+    public static boolean inTerror(ServerPlayer player) {
+        Night night = NIGHTS.get(player.getUUID());
+        return night != null && player.level().getGameTime() < night.terrorUntil;
+    }
+
+    // A night terror, as bad as the night was going to be.
+    private static void startTerror(ServerPlayer player, Night night, ServerLevel level) {
+        float intensity = terrorIntensity(player, night);
+        night.terror = true;
+        night.terrorUntil = level.getGameTime() + TerrorPayload.ticks(intensity);
+        WCISNetwork.sendToPlayer(player, new TerrorPayload(true, intensity));
+    }
+
+    /**
+     * How bad a night terror is, 0 to 1: the worse the night was going to be (scored as if slept through, from what is
+     * known as they lie down), the worse; worse again sleepless. Never quite mild: a terror is a terror.
+     */
+    private static float terrorIntensity(ServerPlayer player, Night night) {
+        Bedroom room = night.room;
+        SleepContext context = new SleepContext(player, night.bed, WakeReason.MORNING, FULL_NIGHT, room.enclosed(), room.lit(), room.pillowLight(),
+                room.decor().soothing(), room.decor().unsettling(), night.monsters, night.calm, night.creepy, night.loud, night.trouble.level(), false);
+        int score = SleepQuality.of(SleepModifiers.score(context)).score();
+        float sleepless = night.trouble.level() == SleepTrouble.Level.SLEEPLESS ? TERROR_SLEEPLESS : 0.0F;
+        return Mth.clamp(1.0F - score / 100.0F + sleepless, TERROR_MILDEST, 1.0F);
     }
 
     private static int nightmare(CommandSourceStack source, Collection<ServerPlayer> targets) {
@@ -192,7 +222,7 @@ public final class SleepNights {
             player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SHAKEN_SLOWNESS_TICKS, 0, false, false, true));
         }
         if (wellRested) player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, RESTED_REGENERATION_TICKS, 0, false, true, true));
-        if (night.terror) WCISNetwork.sendToPlayer(player, new TerrorPayload(false));
+        if (night.terror) WCISNetwork.sendToPlayer(player, new TerrorPayload(false, 0.0F));
 
         SleepEffect sleepEffect = reason.rested() ? sleepEffect(player, quality) : null;
         SleepEvents.WOKE.invoke(new SleepEvents.Woke(player, reason, quality, slept, night.terror, wellRested, sleepEffect));
@@ -243,6 +273,8 @@ public final class SleepNights {
         private boolean loud;
         private boolean calm;
         private boolean terror;
+        // Until when a night terror runs (game time): the night waits for it.
+        private long terrorUntil = Long.MIN_VALUE;
 
         private Night(BlockPos bed, long since, SleepTrouble trouble, Bedroom room) {
             this.bed = bed;

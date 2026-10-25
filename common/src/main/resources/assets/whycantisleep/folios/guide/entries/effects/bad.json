@@ -4,9 +4,23 @@
   "sort": 2,
   "pages": [
     {
-      "type": "text",
       "title": "guide.whycantisleep.guide.entry.effects.bad.page1.title",
-      "text": "guide.whycantisleep.guide.entry.effects.bad.page1.text"
+      "text": {
+        "translate": "guide.whycantisleep.guide.entry.effects.bad.page1.text"
+      },
+      "overflow": "auto",
+      "observe": {
+        "source": "whycantisleep:sleep_effects",
+        "row": "- {$name}: {$effects}{$quality}",
+        "where": {
+          "field": "kind",
+          "is": "negative"
+        },
+        "sort": "rank",
+        "empty": {
+          "translate": "guide.whycantisleep.guide.entry.effects.bad.page1.list.empty"
+        }
+      }
     }
   ]
 }

@@ -28,12 +28,14 @@ public final class WCISClientConfig {
             .comment("Leaves faint footprints where the blocking monsters walked, for a while after their highlight is gone.").enabledWhen(HIGHLIGHT_MONSTERS).build();
     static {
         BUILDER.pop();
-        BUILDER.push("hud", "Arrows around the crosshair and the action bar text.");
+        BUILDER.push("hud", "Arrows around the crosshair, the action bar text, and the eyelids while hiding.");
     }
     public static final ConfigValue<Boolean> OFF_SCREEN_ARROWS = BUILDER.bool("offScreenArrows", true)
             .comment("Draws arrows around the crosshair pointing to blocking monsters that are off-screen or behind walls.").enabledWhen(WCISServerConfig.ALLOW_ARROWS).build();
     public static final ConfigValue<ArrowSize> ARROW_SIZE = BUILDER.enumValue("arrowSize", ArrowSize.MEDIUM)
             .comment("How large the arrows are.").enabledWhen(OFF_SCREEN_ARROWS).build();
+    public static final ConfigValue<EyelidStyle> EYELID_STYLE = BUILDER.enumValue("eyelidStyle", EyelidStyle.RETRO)
+            .comment("How the eyelids look while you hide: soft, banded, grainy, or retro pixel art (banded and grainy together).").build();
     public static final ConfigValue<Boolean> SLEEP_DEBT_MOON = BUILDER.bool("sleepDebtMoon", true)
             .comment("Shows a moon in the corner of the screen that fills up with each day you go without sleep. Needs the mod on the server.").build();
     public static final ConfigValue<Boolean> MORNING_CARD = BUILDER.bool("morningCard", true)
@@ -42,6 +44,12 @@ public final class WCISClientConfig {
             .comment("Shows a moon button on your player in the inventory, which opens how you have been sleeping. Needs the mod on the server.").build();
     public static final ConfigValue<Boolean> ACTION_BAR_INFO = BUILDER.bool("actionBarInfo", true)
             .comment("Shows how many monsters are nearby and where the closest one is, above the hotbar.").build();
+    static {
+        BUILDER.pop();
+        BUILDER.push("sounds", "How the world sounds while you hide or sleep.");
+    }
+    public static final ConfigValue<Boolean> MUFFLE_SOUNDS = BUILDER.bool("muffleSounds", true)
+            .comment("Muffles and roughens the sounds around you while you hide, as much as your hiding spot shuts them out (through a chest's lid crack, a door's windows, the open sides under a bed), and while you sleep, the deeper the sleep the more.").build();
     static {
         BUILDER.pop();
         BUILDER.push("explanations", "Why a sleep failed, and what to do about it.");
