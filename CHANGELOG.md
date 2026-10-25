@@ -1,7 +1,7 @@
 # Changelog
 This file is for listing all the changes to this project
 
-## v26.2-1 Beta | Unreleased
+## v1.0.0 Beta | Unreleased
 ### 🛠️ Changes
 - Ported to Minecraft 26.2 (Fabric and NeoForge), with every feature of v26.1.2-1, on CoolCatLib 26.2-6 and Folios 26.2+2.0.
 
