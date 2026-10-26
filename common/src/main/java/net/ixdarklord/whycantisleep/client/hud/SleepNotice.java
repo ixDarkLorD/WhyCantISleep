@@ -74,6 +74,8 @@ public record SleepNotice(Kind kind, Component title, @Nullable Component hint, 
         HIDING(HudStyle.SILVER, () -> Items.BED.gray()),
         // Hiding, with monsters about.
         HIDING_DANGER(HudStyle.RED, () -> Items.BED.gray()),
+        // Too soon to hide again: the cooldown counting down.
+        HIDE_COOLDOWN(HudStyle.GOLD, () -> Items.CLOCK),
         // Waking: a good night, a middling one, a bad one; woken early; shaken from a night terror.
         WOKE_GOOD(HudStyle.GREEN, () -> Items.BED.lime()),
         WOKE_FAIR(HudStyle.YELLOW, () -> Items.BED.yellow()),
@@ -97,7 +99,7 @@ public record SleepNotice(Kind kind, Component title, @Nullable Component hint, 
             return this.color;
         }
 
-        /** Whether the card is a hiding player's, the only kind with a timer: how long until they have shaken off what hunts them. */
+        /** Whether the card is a hiding player's: how long until they have shaken off what hunts them. */
         public boolean hiding() {
             return this == HIDING || this == HIDING_DANGER;
         }

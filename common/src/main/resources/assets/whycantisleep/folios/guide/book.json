@@ -3,7 +3,9 @@
   "name": "guide.whycantisleep.guide.name",
   "subtitle": "guide.whycantisleep.guide.subtitle",
   "summary": "guide.whycantisleep.guide.summary",
-  "author": "The Sleepless Knight",
+  "credits": {
+    "authors": "The Sleepless Knight"
+  },
   "style": "screen",
   "accent": "#7AA7D9",
   "cover": {
