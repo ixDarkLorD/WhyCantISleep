@@ -28,17 +28,17 @@ A multiloader mod built on the author's libraries **CoolCatLib: Core** (`coolcat
 
 ## Versions
 
-One folder per Minecraft version, each on its own branch of the same repo (the author's convention, e.g. `../GlazedMenu-26.1.2`, `../GlazedMenu-1.20`). The targets are the loader/version pairs CoolCatLib: Core actually ships:
+One folder per Minecraft version, each on its own branch of the same repo (the author's convention, e.g. `../GlazedMenu-26.1.2`, `../GlazedMenu-1.20`). As of 2026-10-26 all five carry the same features:
 
-| Minecraft | Loaders | Folder / branch | CoolCatLib: Core (Maven Local) | State |
-|---|---|---|---|---|
-| 26.1 – 26.1.2 | Fabric, NeoForge | `../WhyCantISleep-26.1.2`, `main` | `26.1.2-6` (Folios `26.1.2+2.0`) | first version, feature complete |
-| 26.3 | Fabric, NeoForge | this folder, `26.3` | `8.0.0+26.3` (Folios `3.0.0+26.3`, MCP Bridge `1.0.0+26.3`, catalog `26.3-v1`) | ported 2026-10-23, brought up to main `49d3ab4` on 2026-10-26 |
-| 1.21.1 | Forge, Fabric, NeoForge | `../WhyCantISleep-1.21.1` (not created) | `1.21.1-2100.2.0.1` | backport, after 26.1.2 is feature complete |
-| 1.20.1 | Forge, Fabric (no NeoForge) | `../WhyCantISleep-1.20.1` (empty folder) | `1.20.1-2001.2.0.1` | backport |
-| 26.2 | Fabric, NeoForge | `../WhyCantISleep-26.2`, `26.2` | `26.2-6` | being ported |
+| Minecraft | Loaders | Folder / branch | CoolCatLib (Maven Local) | Folios (Maven Local) | State |
+|---|---|---|---|---|---|
+| 26.1 – 26.1.2 | Fabric, NeoForge | `../WhyCantISleep-26.1.2`, `main` | `8.0.0+26.1.2` | `3.0.0+26.1.2` | the first version, where features are made and tested in game first |
+| 26.2 | Fabric, NeoForge | `../WhyCantISleep-26.2`, branch `26.2` | `8.0.0+26.2` | `3.0.0+26.2` | in step with `main` (2026-10-26); builds on both loaders |
+| 26.3 | Fabric, NeoForge | **this folder**, branch `26.3` | `8.0.0+26.3` | `3.0.0+26.3` | in step with `main` (2026-10-26); builds on both loaders |
+| 1.21.1 | Forge, Fabric, NeoForge | `../WhyCantISleep-1.21.1`, branch `1.21.1` | `8.0.0+1.21.1` | `3.0.0+1.21.1` | in step with `main` (2026-10-26); builds on all three loaders, not yet run in game |
+| 1.20.1 | Forge, Fabric (no NeoForge) | `../WhyCantISleep-1.20.1`, branch `1.20.1` | `8.0.0+1.20.1` | `3.0.0+1.20.1` | in step with `main` (2026-10-26); builds on both loaders, run in game on Fabric |
 
-Finish all features on 26.1.2 first, then carry them to each branch. Folios for 26.3 is published to Maven Local from `../Folios-26.3` (`gradlew assemble publishToMavenLocal`); its API is the same as 26.1.2's.
+A feature is made and tested on `main` first, then carried to the other four, each building on its own checkouts of CoolCatLib (`../CoolCatLib-<version>`, `../CoolCatLib-1.21` for 1.21.1) and Folios (`../Folios-<version>`), published to Maven Local with `gradlew assemble publishToMavenLocal`, and MCP Bridge `1.0.0+<version>` in its dev runs. On the remapping branches (1.21.1, 1.20.1), a library republished under the same version is served from Loom's stale copy until it is deleted (`.gradle/loom-cache/remapped_mods/remapped/net/ixdarklord/<coolcatlib|folios>/*/<version>`; a stale CoolCatLib shows as a `NoClassDefFoundError` in the dev run); never use `--refresh-dependencies` there.
 
 **What 26.3 changed (this branch):** read the decompiled 26.3 sources, not 26.1.2's. Entity type constants are on `EntityTypes` (`EntityType` is the class only); bed items are `Items.BED.pick(DyeColor.RED)` (a `ColorCollection`); beds share `AbstractBedBlock` with the new straw bed (`BedBlock` is the colored one, which alone can be hidden under: a straw bed is four pixels high), `startSleepInBed(bedBlock, state, rule, pos)`, and a bed's rule is `block.getBedRule(level, pos)` (`destroyOnUse()` replaced `explodes()`; straw beds have their own rule); `Gui` was split into `Gui` (screens: `minecraft.gui.screen()`) and `Hud` (`minecraft.gui.hud.isHidden()` replaced `options.hideGui`; the overlay message and the HUD's `extractRenderState` are on `Hud`, so the mixin is `HudMixin`); input is SDL, not GLFW (`InputConstants.Type.KEYBOARD`, `InputConstants.KEY_V`); `GameRenderer.mainCamera()`; `PoseStack.rotate(Quaternionfc)` replaced `mulPose` for rotations; `drop(stack, thrown, Prediction)`; `RenderPipeline` moved to `com.mojang.renderpearl.api.pipeline` (the render state mixins name it in their constructor descriptors), and `BlitRenderState`'s full constructor takes a `Matrix3x2fc` pose; shaders are compiled to SPIR-V, so a post shader starts `#version 330` and `#extension GL_ARB_separate_shader_objects : require`, imports with `#include <coolcatlib:screen_effect.glsl>` (not `#moj_import`) and gives its `in` and `out` a `layout(location = 0)` (as CoolCatLib's own 26.3 shaders do; `shaders/post/terror_warp.fsh`).
 
