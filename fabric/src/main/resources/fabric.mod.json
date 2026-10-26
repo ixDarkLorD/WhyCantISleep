@@ -23,6 +23,9 @@
     ],
     "coolcatlib:client": [
       "net.ixdarklord.whycantisleep.WhyCantISleepClient"
+    ],
+    "voicechat": [
+      "net.ixdarklord.whycantisleep.compat.voicechat.WCISVoicechatPlugin"
     ]
   },
   "mixins": [
@@ -42,5 +45,8 @@
     "fabric-api": ">=${project.supported_min_fabric_api_version}",
     "coolcatlib": ">=${coolcatlib_version}",
     "folios": ">=${folios_min_version}"
+  },
+  "suggests": {
+    "voicechat": "*"
   }
 }
