@@ -9,7 +9,8 @@
   "style": "screen",
   "accent": "#7AA7D9",
   "cover": {
-    "color": "#1B1F2E"
+    "color": "#1B1F2E",
+    "icon": "minecraft:red_bed"
   },
   "icon": "minecraft:red_bed",
   "landing": "guide.whycantisleep.guide.landing",
