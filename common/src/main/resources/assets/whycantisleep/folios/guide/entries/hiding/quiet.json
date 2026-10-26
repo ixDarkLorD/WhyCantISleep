@@ -4,13 +4,14 @@
   "sort": 2,
   "pages": [
     {
-      "type": "text",
       "title": "guide.whycantisleep.guide.entry.hiding.quiet.page1.title",
       "text": "guide.whycantisleep.guide.entry.hiding.quiet.page1.text"
     },
     {
-      "type": "text",
+      "type": "entity",
+      "entity": "minecraft:silverfish",
       "title": "guide.whycantisleep.guide.entry.hiding.quiet.page2.title",
+      "zoom": 1.6,
       "text": "guide.whycantisleep.guide.entry.hiding.quiet.page2.text"
     }
   ]

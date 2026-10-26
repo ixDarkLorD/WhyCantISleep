@@ -9,6 +9,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.ixdarklord.coolcatcore.api.utils.ARGB;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
@@ -36,17 +37,32 @@ public final class SleepTooltip {
 
     /** Draws a buff icon for points above nothing, a debuff icon for points below. */
     public static void icon(GuiGraphics graphics, int x, int y, int points) {
-        GuiSprites.blit(graphics, points > 0 ? BUFF : DEBUFF, x, y, ICON_SIZE, ICON_SIZE);
+        icon(graphics, x, y, points, 1.0F);
+    }
+
+    /** Draws a buff or debuff icon this opaque, so it fades with the card it is on. */
+    public static void icon(GuiGraphics graphics, int x, int y, int points, float alpha) {
+        sprite(graphics, points > 0 ? BUFF : DEBUFF, x, y, alpha);
     }
 
     /** Draws the icon of a sleep effect's kind: buff, debuff, or neutral. */
     public static void icon(GuiGraphics graphics, int x, int y, SleepEffect.Kind kind) {
+        icon(graphics, x, y, kind, 1.0F);
+    }
+
+    /** Draws the icon of a sleep effect's kind this opaque, so it fades with the card it is on. */
+    public static void icon(GuiGraphics graphics, int x, int y, SleepEffect.Kind kind, float alpha) {
         ResourceLocation sprite = switch (kind) {
             case POSITIVE -> BUFF;
             case NEGATIVE -> DEBUFF;
             case NEUTRAL -> NEUTRAL;
         };
-        GuiSprites.blit(graphics, sprite, x, y, ICON_SIZE, ICON_SIZE);
+        sprite(graphics, sprite, x, y, alpha);
+    }
+
+    private static void sprite(GuiGraphics graphics, ResourceLocation sprite, int x, int y, float alpha) {
+        if (alpha <= 0.0F) return;
+        GuiSprites.blit(graphics, sprite, x, y, ICON_SIZE, ICON_SIZE, ARGB.white(Math.min(alpha, 1.0F)));
     }
 
     private static void append(ItemStack stack, List<Component> lines) {

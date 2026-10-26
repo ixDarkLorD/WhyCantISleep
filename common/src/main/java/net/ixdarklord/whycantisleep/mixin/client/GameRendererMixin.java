@@ -1,6 +1,9 @@
 package net.ixdarklord.whycantisleep.mixin.client;
 
+import net.ixdarklord.whycantisleep.client.Eyelids;
 import net.ixdarklord.whycantisleep.client.HidingClient;
+import net.ixdarklord.whycantisleep.client.HidingMinigame;
+import net.ixdarklord.whycantisleep.client.hud.HudFade;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
@@ -15,8 +18,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * No hand in view while hiding: under a bed it would reach up through the frame, and in a closet it holds still. The
- * near plane drawn in close under a bed ({@link HidingClient#nearPlane}), and the squint drawn as the GUI starts, before
- * the HUD and whether or not the HUD is hidden ({@link HidingClient#renderEyelids}).
+ * near plane drawn in close under a bed ({@link HidingClient#nearPlane}). The eyelids drawn as the GUI starts, before
+ * the HUD and whether or not the HUD is hidden ({@link Eyelids#render}: hiding, or in bed), and then the HUD drawn faded
+ * while the heartbeat minigame runs ({@link HudFade}): Forge draws its HUD without {@code Gui.render}, so the fade
+ * opens and closes round the game's call to draw the HUD, on both loaders.
  */
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin {
@@ -38,7 +43,20 @@ public abstract class GameRendererMixin {
             args = "ldc=gui"))
     private void whycantisleep$squint(float partialTicks, long nanoTime, boolean renderLevel, CallbackInfo ci) {
         GuiGraphics graphics = new GuiGraphics(this.minecraft, this.minecraft.renderBuffers().bufferSource());
-        HidingClient.renderEyelids(graphics, partialTicks);
+        Eyelids.render(graphics, partialTicks);
         graphics.flush();
+        // Then the rest of the HUD, faded while the heartbeat minigame has the screen.
+        HudFade.set(HidingMinigame.hudVisible(partialTicks));
+    }
+
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;render(Lnet/minecraft/client/gui/GuiGraphics;F)V"))
+    private void whycantisleep$beginFade(float partialTicks, long nanoTime, boolean renderLevel, CallbackInfo ci) {
+        HudFade.begin(new GuiGraphics(this.minecraft, this.minecraft.renderBuffers().bufferSource()));
+    }
+
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;render(Lnet/minecraft/client/gui/GuiGraphics;F)V",
+            shift = At.Shift.AFTER))
+    private void whycantisleep$endFade(float partialTicks, long nanoTime, boolean renderLevel, CallbackInfo ci) {
+        HudFade.end(new GuiGraphics(this.minecraft, this.minecraft.renderBuffers().bufferSource()));
     }
 }

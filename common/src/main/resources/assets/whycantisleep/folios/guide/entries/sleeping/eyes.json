@@ -1,0 +1,15 @@
+{
+  "name": "guide.whycantisleep.guide.entry.sleeping.eyes.name",
+  "icon": "minecraft:light_blue_bed",
+  "sort": 4,
+  "pages": [
+    {
+      "title": "guide.whycantisleep.guide.entry.sleeping.eyes.page1.title",
+      "text": "guide.whycantisleep.guide.entry.sleeping.eyes.page1.text"
+    },
+    {
+      "title": "guide.whycantisleep.guide.entry.sleeping.eyes.page2.title",
+      "text": "guide.whycantisleep.guide.entry.sleeping.eyes.page2.text"
+    }
+  ]
+}

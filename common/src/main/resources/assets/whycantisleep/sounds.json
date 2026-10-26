@@ -8,29 +8,83 @@
   "heartbeat.beat": {
     "subtitle": "subtitles.whycantisleep.heartbeat.beat",
     "sounds": [
-      { "name": "minecraft:entity.warden.heartbeat", "type": "event" }
+      "whycantisleep:heartbeat/beat"
     ]
   },
   "heartbeat.calm": {
     "sounds": [
-      { "name": "minecraft:block.amethyst_block.chime", "type": "event" }
+      "whycantisleep:heartbeat/calm"
     ]
   },
   "heartbeat.click": {
     "sounds": [
-      { "name": "minecraft:ui.button.click", "type": "event" }
+      "whycantisleep:heartbeat/click"
     ]
   },
   "heartbeat.gasp": {
     "subtitle": "subtitles.whycantisleep.heartbeat.gasp",
     "sounds": [
-      { "name": "minecraft:entity.player.hurt_drown", "type": "event" }
+      "whycantisleep:heartbeat/gasp"
     ]
   },
   "heartbeat.heart_lost": {
     "subtitle": "subtitles.whycantisleep.heartbeat.heart_lost",
     "sounds": [
-      { "name": "minecraft:entity.item.break", "type": "event" }
+      "whycantisleep:heartbeat/heart_lost"
+    ]
+  },
+  "heartbeat.ready": {
+    "subtitle": "subtitles.whycantisleep.heartbeat.ready",
+    "sounds": [
+      "whycantisleep:heartbeat/ready"
+    ]
+  },
+  "heartbeat.sting": {
+    "subtitle": "subtitles.whycantisleep.heartbeat.sting",
+    "sounds": [
+      "whycantisleep:heartbeat/sting"
+    ]
+  },
+  "terror.creep": {
+    "subtitle": "subtitles.whycantisleep.terror.creep",
+    "sounds": [
+      "whycantisleep:terror/creep"
+    ]
+  },
+  "terror.drone": {
+    "subtitle": "subtitles.whycantisleep.terror.drone",
+    "sounds": [
+      "whycantisleep:terror/drone"
+    ]
+  },
+  "terror.emerge": {
+    "subtitle": "subtitles.whycantisleep.terror.emerge",
+    "sounds": [
+      "whycantisleep:terror/emerge"
+    ]
+  },
+  "terror.jolt": {
+    "subtitle": "subtitles.whycantisleep.terror.jolt",
+    "sounds": [
+      "whycantisleep:terror/jolt"
+    ]
+  },
+  "terror.stare": {
+    "subtitle": "subtitles.whycantisleep.terror.stare",
+    "sounds": [
+      "whycantisleep:terror/stare"
+    ]
+  },
+  "terror.wake": {
+    "subtitle": "subtitles.whycantisleep.terror.wake",
+    "sounds": [
+      "whycantisleep:terror/wake"
+    ]
+  },
+  "terror.whisper": {
+    "subtitle": "subtitles.whycantisleep.terror.whisper",
+    "sounds": [
+      "whycantisleep:terror/whisper"
     ]
   },
   "notice": {

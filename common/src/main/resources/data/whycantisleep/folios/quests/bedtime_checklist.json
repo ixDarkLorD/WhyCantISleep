@@ -1,0 +1,45 @@
+{
+  "book": "whycantisleep:guide",
+  "objectives": [
+    {
+      "obtained": "#minecraft:beds",
+      "label": "guide.whycantisleep.guide.quest.bedtime_checklist.bed"
+    },
+    {
+      "obtained": "#whycantisleep:soothing",
+      "label": "guide.whycantisleep.guide.quest.bedtime_checklist.soothing"
+    },
+    {
+      "obtained": "minecraft:jukebox",
+      "label": "guide.whycantisleep.guide.quest.bedtime_checklist.jukebox"
+    },
+    {
+      "read": "quality/scoring",
+      "label": "guide.whycantisleep.guide.quest.bedtime_checklist.read"
+    },
+    {
+      "advancement": "minecraft:adventure/sleep_in_bed",
+      "label": "guide.whycantisleep.guide.quest.bedtime_checklist.sleep"
+    },
+    {
+      "flag": "whycantisleep:well_rested",
+      "hidden": true,
+      "label": "guide.whycantisleep.guide.quest.bedtime_checklist.well_rested"
+    }
+  ],
+  "rewards": {
+    "items": [
+      "minecraft:flower_pot"
+    ],
+    "random": [
+      "minecraft:lily_of_the_valley",
+      "minecraft:cornflower",
+      "minecraft:azure_bluet",
+      "minecraft:moss_carpet*2",
+      {
+        "item": "minecraft:azalea",
+        "weight": 1
+      }
+    ]
+  }
+}

@@ -16,13 +16,14 @@ public final class ItemFade {
     /** Draws an item, as {@code renderFakeItem} does, at an opacity from 0 to 1. */
     public static void item(GuiGraphics graphics, ItemStack stack, int x, int y, float opacity) {
         if (opacity <= 0.0F) return;
-        float alpha = Math.min(opacity, 1.0F);
+        // Faded with the HUD too ({@link HudFade}).
+        float alpha = Math.min(opacity, 1.0F) * HudFade.factor();
         RenderSystem.enableBlend();
         RenderSystem.setShaderColor(alpha, alpha, alpha, alpha);
         try {
             graphics.renderFakeItem(stack, x, y);
         } finally {
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            HudFade.restore(graphics);
         }
     }
 }

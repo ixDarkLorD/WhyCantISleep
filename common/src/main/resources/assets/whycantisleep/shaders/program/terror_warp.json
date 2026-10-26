@@ -1,0 +1,12 @@
+{
+    "vertex": "sobel",
+    "fragment": "whycantisleep:terror_warp",
+    "attributes": ["Position"],
+    "samplers": [
+        {"name": "DiffuseSampler"}
+    ],
+    "uniforms": [
+        {"name": "Amount", "type": "float", "count": 1, "values": [1.0]},
+        {"name": "Beat", "type": "float", "count": 1, "values": [0.0]}
+    ]
+}
