@@ -23,7 +23,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * runs, the crosshair with it, and the crosshair fades out while hiding; and the game's fade to dark in bed waits while a night terror
  * runs.
  */
-@Mixin(Gui.class)
+// After other mods' injections at the HUD's tail (CoolCatLib's Forge HUD event among them), so the minigame is drawn last.
+@Mixin(value = Gui.class, priority = 1500)
 public abstract class GuiMixin {
     @Inject(method = "setOverlayMessage", at = @At("HEAD"), cancellable = true)
     private void whycantisleep$onOverlayMessage(Component message, boolean animate, CallbackInfo ci) {
@@ -38,9 +39,10 @@ public abstract class GuiMixin {
         HudFade.begin();
     }
 
+    // The heartbeat minigame, over the whole HUD; it ends the fade the HUD was drawn under.
     @Inject(method = "render", at = @At("TAIL"))
     private void whycantisleep$endFade(GuiGraphics graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-        HudFade.end();
+        HidingMinigame.render(graphics, deltaTracker);
     }
 
     // The game's fade to dark in bed waits while a night terror runs: the terror is what they see.
