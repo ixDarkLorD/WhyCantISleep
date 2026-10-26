@@ -13,6 +13,7 @@ import net.ixdarklord.whycantisleep.api.HidingSpot;
 import net.ixdarklord.whycantisleep.api.HidingSpotType;
 import net.ixdarklord.whycantisleep.api.HidingSpots;
 import net.ixdarklord.whycantisleep.config.WCISServerConfig;
+import net.ixdarklord.whycantisleep.network.HideCooldownPayload;
 import net.ixdarklord.whycantisleep.network.HidingPayload;
 import net.ixdarklord.whycantisleep.network.WCISNetwork;
 import net.minecraft.core.BlockPos;
@@ -100,6 +101,8 @@ public final class HidingServer {
     private static final int OVERTIME_ASK_FROM = 40;
 
     private static final Map<UUID, Hide> HIDING = new HashMap<>();
+    // The server tick each player who came out of a spot may hide again from (the server's hideCooldown).
+    private static final Map<UUID, Integer> COOLDOWN = new HashMap<>();
     // The level each player was last seen in, to tell them of the hiders in a new one.
     private static final Map<UUID, ResourceKey<Level>> LEVELS = new HashMap<>();
 
@@ -137,7 +140,15 @@ public final class HidingServer {
             if (player.level().isClientSide()) return HidingSpots.typeFor(state) != null ? InteractionResult.SUCCESS : InteractionResult.PASS;
             if (!(player instanceof ServerPlayer serverPlayer)) return InteractionResult.PASS;
             HidingSpotType.Lookup lookup = HidingSpots.find(player.level(), pos, state, player);
-            if (lookup.spot() != null) return start(serverPlayer, lookup.spot()) ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
+            if (lookup.spot() != null) {
+                // Too soon after coming out of a spot: they are shown how long is left, and stay out.
+                int left = cooldownLeft(serverPlayer);
+                if (left > 0) {
+                    tellCooldown(serverPlayer, left);
+                    return InteractionResult.CONSUME;
+                }
+                return start(serverPlayer, lookup.spot()) ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
+            }
             if (lookup.refusal() != null) {
                 serverPlayer.sendSystemMessage(lookup.refusal(), true);
                 return InteractionResult.CONSUME;
@@ -168,6 +179,7 @@ public final class HidingServer {
         ServerLifecycleEvents.STOPPED.register(server -> {
             HIDING.clear();
             LEVELS.clear();
+            COOLDOWN.clear();
         });
     }
 
@@ -278,8 +290,31 @@ public final class HidingServer {
             enterSound(level, hide.spot, player, false);
         }
         broadcastOut(level, player, hide.spot.anchor());
+        // However they came out, they may not hide again until the server's cooldown has passed.
+        int cooldown = WCISServerConfig.HIDE_COOLDOWN.get() * 20;
+        if (cooldown > 0) COOLDOWN.put(player.getUUID(), player.server.getTickCount() + cooldown);
         HidingEvents.STOP.invoke(new HidingEvents.HideStop(player, hide.spot, reason, hide.ticks));
         return true;
+    }
+
+    /** How many ticks are left before a player may hide again; 0 when they may now. */
+    public static int cooldownLeft(ServerPlayer player) {
+        Integer until = COOLDOWN.get(player.getUUID());
+        if (until == null) return 0;
+        int left = until - player.server.getTickCount();
+        if (left <= 0) COOLDOWN.remove(player.getUUID());
+        // The cooldown made shorter in the config since counts as the shorter one.
+        return Math.max(0, Math.min(left, WCISServerConfig.HIDE_COOLDOWN.get() * 20));
+    }
+
+    // A card counting the cooldown down, for a player with the mod; else the time left on the action bar.
+    private static void tellCooldown(ServerPlayer player, int left) {
+        if (WCISNetwork.hasMod(player)) {
+            WCISNetwork.sendToPlayer(player, new HideCooldownPayload(left, WCISServerConfig.HIDE_COOLDOWN.get() * 20));
+            return;
+        }
+        player.sendSystemMessage(Component.translatableWithFallback("gui.whycantisleep.hide.cooldown_seconds", "You can hide again in %ss",
+                Mth.ceil(left / 20.0F)), true);
     }
 
     /** The player's client asked to come out (they sneaked). */
