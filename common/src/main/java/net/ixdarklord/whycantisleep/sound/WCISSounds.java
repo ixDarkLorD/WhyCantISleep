@@ -18,9 +18,13 @@ public final class WCISSounds {
     public static final SoundEvent WARNING = sound("warning");
     /** A player in bed nudging one who is awake. */
     public static final SoundEvent NUDGE = sound("nudge");
-    /** The heartbeat minigame (hiding hunted): a beat coming in, and (deeper) one caught. */
+    /** The heartbeat minigame (hiding hunted): its warning slamming in, a deep impact with a dark ring. */
+    public static final SoundEvent HEARTBEAT_STING = sound("heartbeat.sting");
+    /** A heartbeat coming in, the rhythm to catch. */
     public static final SoundEvent HEARTBEAT_BEAT = sound("heartbeat.beat");
-    /** A beat caught in the calm window: a soft shimmer over the deep beat. */
+    /** A beat about to reach the calm window: a bright cue to get ready, with the arrows lighting beside the window. */
+    public static final SoundEvent HEARTBEAT_READY = sound("heartbeat.ready");
+    /** A beat caught in the calm window: a bass thump with a bell ringing over it. */
     public static final SoundEvent HEARTBEAT_CALM = sound("heartbeat.calm");
     /** Any click in the minigame. */
     public static final SoundEvent HEARTBEAT_CLICK = sound("heartbeat.click");
@@ -28,6 +32,21 @@ public final class WCISSounds {
     public static final SoundEvent HEARTBEAT_HEART_LOST = sound("heartbeat.heart_lost");
     /** The third strike: they gasp. */
     public static final SoundEvent HEARTBEAT_GASP = sound("heartbeat.gasp");
+
+    /** A night terror (all synthesized, {@code tools/gen_terror_sounds.py}): the drone under it, swelling. */
+    public static final SoundEvent TERROR_DRONE = sound("terror.drone");
+    /** The demon rising out of the floor. */
+    public static final SoundEvent TERROR_EMERGE = sound("terror.emerge");
+    /** Whispers in the dark. */
+    public static final SoundEvent TERROR_WHISPER = sound("terror.whisper");
+    /** A shadow hand coming up: bones cracking. */
+    public static final SoundEvent TERROR_CREEP = sound("terror.creep");
+    /** Face to face with the demon. */
+    public static final SoundEvent TERROR_STARE = sound("terror.stare");
+    /** The end of the terror: a huge hit and a shriek. */
+    public static final SoundEvent TERROR_JOLT = sound("terror.jolt");
+    /** Waking from a night terror: a gasp with a rising, unresolved chord. */
+    public static final SoundEvent TERROR_WAKE = sound("terror.wake");
 
     private WCISSounds() {
     }

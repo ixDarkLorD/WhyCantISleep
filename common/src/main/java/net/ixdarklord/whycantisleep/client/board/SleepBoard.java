@@ -62,6 +62,8 @@ public final class SleepBoard {
 
     public static void init() {
         ClientTickEvents.END.register(minecraft -> {
+            // Paused, the panel's wash and specks hold still.
+            if (minecraft.isPaused()) return;
             tick++;
             if (!isShown()) shownSince = Long.MIN_VALUE;
             else if (shownSince == Long.MIN_VALUE) shownSince = tick;
@@ -76,6 +78,15 @@ public final class SleepBoard {
     public static void onBoard(SleepBoardPayload payload) {
         board = payload;
         receivedAt = tick;
+    }
+
+    /**
+     * Whether enough players are asleep for the night to pass, as the server's last board said; null when there is no
+     * fresh board to tell (a server without the mod, or alone, where the server sends none).
+     */
+    public static @Nullable Boolean enoughAsleep() {
+        if (board == null || tick - receivedAt > STALE_TICKS) return null;
+        return board.sleeping() >= board.needed();
     }
 
     private static boolean isShown() {
@@ -131,7 +142,7 @@ public final class SleepBoard {
         float alpha = Mth.clamp((tick - shownSince + delta.getGameTimeDeltaPartialTick(true)) / APPEAR_TICKS, 0.0F, 1.0F);
         boolean enough = board.sleeping() >= board.needed();
         // The message cards' frame and wash, the wash the green of the sleep segments.
-        HudStyle.notice(graphics, X, Y, WIDTH, height, alpha);
+        HudStyle.notice(graphics, X, Y, WIDTH, height, 0x4ADE80, alpha);
         HudStyle.wash(graphics, X, Y, WIDTH, Y + height, alpha, 0x4ADE80, alpha, tick + delta.getGameTimeDeltaPartialTick(true), shownSince);
 
         // Header: the title and the count, a divider, and the night's sleepers as segments, filled for those asleep.
