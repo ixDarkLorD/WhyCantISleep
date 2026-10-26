@@ -19,6 +19,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -40,8 +41,9 @@ import java.util.Set;
  * leaves open, glass a little, a solid block hardly at all, a door or trapdoor as much as its texture is see-through
  * (an oak door's top through its windows, an iron door not at all). Tucked in a container (a chest) only the crack
  * under the raised lid, at the front, is open. A sound is then muffled by how open the sides facing it are, the most
- * by those turned straight to it, and roughened by a little distortion; a sound inside the spot (their own breath and heart) not at all. The muffling eases
- * in and out with the eyelids, over {@link #FADE_TICKS}. Through {@link SoundFilters}, which the sound thread asks: it
+ * by those turned straight to it, and roughened by a little distortion; a sound inside the spot (their own heart) not at
+ * all. The muffling eases in and out with the eyelids, over {@link #FADE_TICKS}. Another player's spot is read the same
+ * way for how their voice gets out of it ({@link #heardOutOf}). Through {@link SoundFilters}, which the sound thread asks: it
  * reads only the immutable {@link Enclosure} swapped in here.
  */
 public final class HidingAcoustics {
@@ -69,6 +71,9 @@ public final class HidingAcoustics {
     private static final Map<BlockState, Float> TEXTURE_OPENNESS = new HashMap<>();
 
     private static volatile Enclosure enclosure = Enclosure.NONE;
+    // Other hiding players' spots, read for how their voices get out (HidingVoices): by network id, with when read.
+    private static final Map<Integer, Enclosure> SPOTS = new HashMap<>();
+    private static final Map<Integer, Long> SPOTS_READ = new HashMap<>();
     private static float strength;
     private static long tick;
 
@@ -80,10 +85,40 @@ public final class HidingAcoustics {
         ClientTickEvents.END.register(HidingAcoustics::tick);
     }
 
+    /** How a sound from this place reaches the local player through their own hiding spot now (none when not hiding). */
+    public static SoundFilter heardFrom(Vec3 position) {
+        return enclosure.filter(position);
+    }
+
+    /**
+     * How a hiding player's spot lets a sound of theirs (their voice) out towards a place: by how open its sides that
+     * face it are, as the local player's own spot lets sounds in. Read on the client thread; the spot is read again
+     * every second.
+     */
+    public static SoundFilter heardOutOf(Player hider, Vec3 toward) {
+        if (Hiding.view(hider) == null || !(hider.level() instanceof ClientLevel level)) {
+            SPOTS.remove(hider.getId());
+            return SoundFilter.NONE;
+        }
+        Long read = SPOTS_READ.get(hider.getId());
+        Enclosure spot = SPOTS.get(hider.getId());
+        if (spot == null || read == null || tick - read >= RESCAN_TICKS) {
+            spot = scan(level, hider).withStrength(1.0F);
+            SPOTS.put(hider.getId(), spot);
+            SPOTS_READ.put(hider.getId(), tick);
+        }
+        return spot.filter(toward);
+    }
+
     private static void tick(Minecraft minecraft) {
         // Paused, the muffling holds where it is.
         if (minecraft.isPaused()) return;
         tick++;
+        // Spots of players no longer hiding are read afresh when they hide again.
+        if (minecraft.level == null) {
+            SPOTS.clear();
+            SPOTS_READ.clear();
+        } else SPOTS.keySet().removeIf(id -> !(minecraft.level.getEntity(id) instanceof Player hider) || Hiding.view(hider) == null);
         LocalPlayer player = minecraft.player;
         boolean hiding = player != null && minecraft.level != null && HidingClient.isLocalHiding() && WCISClientConfig.MUFFLE_SOUNDS.get();
         float target = hiding ? 1.0F : 0.0F;
@@ -110,8 +145,8 @@ public final class HidingAcoustics {
         return t * t * (3.0F - 2.0F * t);
     }
 
-    // The spot the player is in: the blocks they are in, and each side of those facing out, with how open it is.
-    private static Enclosure scan(ClientLevel level, LocalPlayer player) {
+    // The spot a player is in: the blocks they are in, and each side of those facing out, with how open it is.
+    private static Enclosure scan(ClientLevel level, Player player) {
         HidingView view = Hiding.view(player);
         if (view == null) return Enclosure.NONE;
         // The blocks from their feet up to their eyes: the body's box would poke out of a chest's front into the open.

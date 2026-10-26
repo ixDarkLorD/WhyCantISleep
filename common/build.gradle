@@ -1,10 +1,21 @@
 apply from: "https://raw.githubusercontent.com/ixDarkLorD/ModResources/main/gradle/v4/common.gradle"
 
+repositories {
+    // Simple Voice Chat's API, for the optional integration (compat/voicechat).
+    maven {
+        url = "https://maven.maxhenkel.de/repository/public"
+        content { includeGroup "de.maxhenkel.voicechat" }
+    }
+}
+
 dependencies {
     // CoolCatLib (common): mod constructors, events, networking, configs, platform checks
     modCompileOnly("net.ixdarklord.coolcatlib:coolcatlib-common:${coolcatlib_version}") { transitive = false }
     // Folios: the guide book, and giving it to new players (compat/GuideBookGift)
     modCompileOnly("net.ixdarklord.folios:folios-common:${folios_version}") { transitive = false }
+    // Simple Voice Chat (optional): a hiding player's voice is muffled by their spot and is noise that gives them away.
+    // Plain Java with no Minecraft classes, so it needs no remapping.
+    compileOnly "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
 }
 
 // The shared main.gradle publishes every subproject's shadowJar. For common it must be a plain jar of this
