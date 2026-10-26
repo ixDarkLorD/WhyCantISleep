@@ -63,12 +63,22 @@ public final class SleepNights {
     private static final int FULL_NIGHT = 12000;
     private static final float TERROR_MILDEST = 0.25F;
     private static final float TERROR_SLEEPLESS = 0.15F;
+    // Harsh terrors (harshTerrors): this much worse for each day awake past the first, at most TERROR_DAYS_MOST more;
+    // hurting from HURT_FROM_DAYS awake, by up to TERROR_HURT_MOST health at full intensity, never below half a heart.
+    private static final int DAY = 24000;
+    private static final float TERROR_PER_DAY = 0.1F;
+    private static final float TERROR_DAYS_MOST = 0.3F;
+    private static final int HURT_FROM_DAYS = 3;
+    private static final float TERROR_HURT_MOST = 10.0F;
 
     private static final Map<UUID, Night> NIGHTS = new HashMap<>();
     private static final Map<UUID, SleepTrouble> BEFORE_SLEEP = new HashMap<>();
     private static final Map<UUID, SleepQuality> LAST = new HashMap<>();
     private static final Map<UUID, Long> HURT_AT = new HashMap<>();
     private static final Set<UUID> MORNING = new HashSet<>();
+    // A harsh terror's hurt, dealt on the player's next tick: hurting them while they are being woken would wake them
+    // again from inside it.
+    private static final Map<UUID, Float> HURT_LATER = new HashMap<>();
     // A player marked for a nightmare the next time they lie down (/whycantisleep nightmare on someone awake): kept as
     // a tag on them, so it lasts through leaving and coming back.
     private static final String NIGHTMARE_MARK = "whycantisleep.nightmare";
@@ -78,7 +88,13 @@ public final class SleepNights {
 
     public static void init() {
         PlayerEvents.END_TICK.register(player -> {
-            if (player instanceof ServerPlayer serverPlayer && player.tickCount % LOOK_TICKS == 0) look(serverPlayer);
+            if (!(player instanceof ServerPlayer serverPlayer)) return;
+            Float hurt = HURT_LATER.remove(player.getUUID());
+            if (hurt != null) {
+                float amount = Math.min(hurt, serverPlayer.getHealth() - 1.0F);
+                if (amount > 0.0F) serverPlayer.hurtServer(serverPlayer.level(), serverPlayer.damageSources().magic(), amount);
+            }
+            if (player.tickCount % LOOK_TICKS == 0) look(serverPlayer);
         });
         // /whycantisleep nightmare [players]: a night terror for operators to hand out: now for one asleep, else the
         // next time they lie down.
@@ -93,6 +109,7 @@ public final class SleepNights {
         });
         PlayerEvents.LEAVE.register(player -> {
             NIGHTS.remove(player.getUUID());
+            HURT_LATER.remove(player.getUUID());
             BEFORE_SLEEP.remove(player.getUUID());
         });
         ReloadListeners.registerServer(WhyCantISleep.id("sleep_effects"), DataSleepEffects.INSTANCE);
@@ -103,6 +120,7 @@ public final class SleepNights {
             LAST.clear();
             HURT_AT.clear();
             MORNING.clear();
+            HURT_LATER.clear();
         });
     }
 
@@ -168,6 +186,7 @@ public final class SleepNights {
     private static void startTerror(ServerPlayer player, Night night, ServerLevel level) {
         float intensity = terrorIntensity(player, night);
         night.terror = true;
+        night.terrorIntensity = intensity;
         night.terrorUntil = level.getGameTime() + TerrorPayload.ticks(intensity);
         WCISNetwork.sendToPlayer(player, new TerrorPayload(true, intensity, true));
     }
@@ -182,7 +201,39 @@ public final class SleepNights {
                 room.decor().soothing(), room.decor().unsettling(), night.monsters, night.calm, night.creepy, night.loud, night.trouble.level(), false);
         int score = SleepQuality.of(SleepModifiers.score(context)).score();
         float sleepless = night.trouble.level() == SleepTrouble.Level.SLEEPLESS ? TERROR_SLEEPLESS : 0.0F;
-        return Mth.clamp(1.0F - score / 100.0F + sleepless, TERROR_MILDEST, 1.0F);
+        float days = harsh() ? Math.min(TERROR_DAYS_MOST, Math.max(0, daysAwake(night) - 1) * TERROR_PER_DAY) : 0.0F;
+        return Mth.clamp(1.0F - score / 100.0F + sleepless + days, TERROR_MILDEST, 1.0F);
+    }
+
+    private static boolean harsh() {
+        return WCISServerConfig.HARSH_TERRORS.get();
+    }
+
+    // Whole days the player had gone without lying down when this night began.
+    private static int daysAwake(Night night) {
+        return night.trouble.ticksSinceRest() / DAY;
+    }
+
+    /**
+     * Waking from a night terror: shaken (nausea, slowness). Harsh terrors (the server's {@code harshTerrors}) leave
+     * worse the more intense they were, and so the longer the player stayed awake: longer nausea, slowness II, weakness,
+     * mining fatigue, a moment of darkness; and from three days awake the terror hurts, never below half a heart.
+     */
+    private static void shaken(ServerPlayer player, Night night) {
+        float intensity = night.terrorIntensity;
+        if (!harsh()) {
+            player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, SHAKEN_NAUSEA_TICKS, 0, false, false, true));
+            player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SHAKEN_SLOWNESS_TICKS, 0, false, false, true));
+            return;
+        }
+        int nausea = Math.round(SHAKEN_NAUSEA_TICKS * (1.0F + 2.0F * intensity));
+        player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, nausea, 0, false, false, true));
+        player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, Math.round(SHAKEN_SLOWNESS_TICKS * (1.0F + 3.0F * intensity)),
+                intensity >= 0.6F ? 1 : 0, false, false, true));
+        if (intensity >= 0.5F) player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, Math.round(1200 * intensity), intensity >= 0.85F ? 1 : 0, false, false, true));
+        if (intensity >= 0.75F) player.addEffect(new MobEffectInstance(MobEffects.MINING_FATIGUE, Math.round(1200 * intensity), 0, false, false, true));
+        if (intensity >= 0.85F) player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 160, 0, false, false, true));
+        if (daysAwake(night) >= HURT_FROM_DAYS) HURT_LATER.put(player.getUUID(), TERROR_HURT_MOST * intensity);
     }
 
     private static int nightmare(CommandSourceStack source, Collection<ServerPlayer> targets) {
@@ -235,10 +286,7 @@ public final class SleepNights {
         boolean wellRested = WCISServerConfig.WELL_RESTED.get()
                 && quality.factors().stream().anyMatch(factor -> factor.id().equals(SleepQuality.ROUTINE) && factor.points() > 0);
 
-        if (night.terror) {
-            player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, SHAKEN_NAUSEA_TICKS, 0, false, false, true));
-            player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SHAKEN_SLOWNESS_TICKS, 0, false, false, true));
-        }
+        if (night.terror) shaken(player, night);
         if (wellRested) player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, RESTED_REGENERATION_TICKS, 0, false, true, true));
         if (night.terror) WCISNetwork.sendToPlayer(player, new TerrorPayload(false, 0.0F, false));
 
@@ -291,6 +339,7 @@ public final class SleepNights {
         private boolean loud;
         private boolean calm;
         private boolean terror;
+        private float terrorIntensity;
         // Until when a night terror runs (game time): the night waits for it.
         private long terrorUntil = Long.MIN_VALUE;
 
