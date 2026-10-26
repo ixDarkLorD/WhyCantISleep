@@ -63,6 +63,9 @@ public final class WCISServerConfig {
             .comment("Whether players may hide in closets: a door, or a double door, with a nook behind it walled in by blocks or trapdoors.").enabledWhen(ALLOW_HIDING).build();
     public static final ConfigValue<Integer> HIDE_TIME = BUILDER.intValue("hideTime", 15)
             .range(3, 120).slider().comment("Seconds a player must stay hidden before the monsters after them give up and vanish.").build();
+    public static final ConfigValue<Integer> HIDE_COOLDOWN = BUILDER.intValue("hideCooldown", 10)
+            .range(0, 300).slider().comment("Seconds a player must wait after coming out of a hiding spot before they may hide again (0 for none). "
+                    + "Trying sooner shows them a card counting it down.").enabledWhen(ALLOW_HIDING).build();
     public static final ConfigValue<Boolean> HIDING_CLEARS_MONSTERS = BUILDER.bool("hidingClearsMonsters", true)
             .comment("Whether, once the hide time is up, the monsters after a hiding player and those about their spot (the ones keeping them from "
                     + "sleeping in that bed) vanish. Only when every other player near is hiding too; else they just lose the player.").enabledWhen(ALLOW_HIDING).build();
