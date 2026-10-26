@@ -1,7 +1,7 @@
 package net.ixdarklord.whycantisleep.client;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.ixdarklord.coolcatcanvas.api.utils.Easing;
-import net.ixdarklord.coolcatcore.api.event.v2.client.ClientGuiEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
 import net.ixdarklord.whycantisleep.client.hud.HudFade;
 import net.ixdarklord.whycantisleep.client.hud.HudStyle;
@@ -16,6 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import org.lwjgl.opengl.GL11;
 
 /**
  * Keeping their heart slow, for a player who ran into a hiding spot with something hunting them. It opens with a
@@ -277,7 +278,8 @@ public final class HidingMinigame {
         ClientTickEvents.END.register(minecraft -> {
             if (!minecraft.isPaused()) tick++;
         });
-        ClientGuiEvents.RENDER_HUD.register(HidingMinigame::render);
+        // Drawn by GuiMixin at the very end of the HUD rather than as a HUD layer: Fabric's HUD callback comes before
+        // some of the game's own layers on 1.21.1, which were drawn over the band.
     }
 
     /** They went in hunted: the warning, then the beats. */
@@ -469,6 +471,10 @@ public final class HidingMinigame {
         HudFade.end();
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.options.hideGui || startedAt == Long.MIN_VALUE) return;
+        // The game's HUD layers are each drawn 200 nearer in depth, and write it even faded away, which would cut their
+        // shapes (the hearts, the hotbar) out of the band: it is drawn last, over a clear depth buffer.
+        graphics.flush();
+        RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
         // On a small GUI scale the band and its pixel art would shrink to a sliver: drawn larger by a whole number, so
         // it is never smaller on screen than at MIN_SCALE and its pixels stay square. Laid out on the screen as that
         // larger scale sees it.
