@@ -96,6 +96,10 @@ public final class WCISServerConfig {
             .comment("Whether restless players can have a night terror when they lie down, and wake up shaken.").build();
     public static final ConfigValue<Integer> TERROR_CHANCE = BUILDER.intValue("terrorChance", 30)
             .range(0, 100).slider().comment("Percent chance of a night terror for a restless player; a sleepless one has twice the chance.").build();
+    public static final ConfigValue<Boolean> HARSH_TERRORS = BUILDER.bool("harshTerrors", true)
+            .comment("Whether night terrors grow worse the longer a player has stayed awake: harsher effects on waking (weakness, "
+                    + "mining fatigue, darkness), and after three days without sleep, the terror hurts (never below half a heart).")
+            .enabledWhen(NIGHT_TERRORS).build();
     public static final ConfigValue<Boolean> SLEEP_EFFECTS = BUILDER.bool("sleepEffects", true)
             .comment("Whether waking in the morning can leave a sleep effect: positive after good nights, negative after bad ones, neutral after any. Data packs add more.").build();
     public static final ConfigValue<Integer> SLEEP_EFFECT_CHANCE = BUILDER.intValue("sleepEffectChance", 50)

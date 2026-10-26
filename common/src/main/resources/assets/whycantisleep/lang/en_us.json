@@ -66,6 +66,7 @@
   "config.whycantisleep.server.highlights.roomClearing": "Room clearing",
   "config.whycantisleep.server.highlights.showToEveryone": "Show to everyone",
   "config.whycantisleep.server.nights": "Nights",
+  "config.whycantisleep.server.nights.harshTerrors": "Harsh night terrors",
   "config.whycantisleep.server.nights.nightTerrors": "Night terrors",
   "config.whycantisleep.server.nights.sharedBedTolerance": "Shared bed tolerance",
   "config.whycantisleep.server.nights.sleepEffectChance": "Sleep effect chance",
