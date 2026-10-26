@@ -61,6 +61,7 @@ This file is for listing all the changes to this project
 - Client and server configs, with client options locked while the server turns their feature off. Hiding under beds or tables and in chests or closets, the heartbeat minigame, monsters searching, monsters vanishing and the sleep status button can each be turned off.
 
 ### 🐛 Bug Fixes
+- The game no longer crashes while starting on NeoForge: the sleep rules (the sleep tags, a shared bed's tolerance) now find the monster check where NeoForge has moved it.
 - Coming into a hiding spot on the move no longer makes the view flicker: you stop where you hide.
 - Holding the attack button no longer breaks your hiding spot (or anything else) from inside it.
 - A silverfish or cave spider already in a hiding spot comes out at its mouth and after you, rather than staying stuck inside the bed or chest.
