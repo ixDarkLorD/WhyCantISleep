@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -24,6 +25,18 @@ public abstract class GuiMixin {
     @Inject(method = "setOverlayMessage", at = @At("HEAD"), cancellable = true)
     private void whycantisleep$onOverlayMessage(Component message, boolean animate, CallbackInfo ci) {
         if (SleepClient.onOverlayMessage(message)) ci.cancel();
+    }
+
+    // The game sets the shader color back to white after its vignette and its effect icons, which would undo the
+    // HUD's fade (the shader color's alpha, HudFade) for all drawn after them: the fade's color is put back.
+    @Inject(method = "renderVignette", at = @At("RETURN"))
+    private void whycantisleep$fadeAfterVignette(GuiGraphics graphics, Entity entity, CallbackInfo ci) {
+        HudFade.restore(graphics);
+    }
+
+    @Inject(method = "renderEffects", at = @At("RETURN"))
+    private void whycantisleep$fadeAfterEffects(GuiGraphics graphics, CallbackInfo ci) {
+        HudFade.restore(graphics);
     }
 
     // The crosshair fades with the HUD in the minigame, and out while hiding (HudFade.crosshair); gone, not drawn.

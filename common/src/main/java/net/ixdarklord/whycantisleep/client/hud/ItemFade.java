@@ -1,13 +1,15 @@
 package net.ixdarklord.whycantisleep.client.hud;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import net.ixdarklord.coolcatcanvas.api.client.gui.FadedItems;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Items drawn faded on the HUD, so a card fading in or out fades its icon with it. On 1.20.1 a GUI item is drawn at
- * once, through the shaders' color, so the opacity is that color for the one item: items drawn translucent (most flat
- * ones) fade, and solid block models only darken.
+ * Items drawn faded on the HUD, so a card fading in or out fades its icon with it, through CoolCatLib's
+ * {@link FadedItems}, which draws even solid items (blocks, beds) see-through. On 1.20.1 the shader color holds the
+ * HUD's fade while the HUD is drawn ({@link HudFade}), and the item's opacity scales it, so the two go together; the
+ * game's own items fade with the HUD the same way (CoolCatLib draws any GUI item see-through while that alpha is
+ * under 1).
  */
 public final class ItemFade {
     private ItemFade() {
@@ -15,15 +17,6 @@ public final class ItemFade {
 
     /** Draws an item, as {@code renderFakeItem} does, at an opacity from 0 to 1. */
     public static void item(GuiGraphics graphics, ItemStack stack, int x, int y, float opacity) {
-        if (opacity <= 0.0F) return;
-        // Faded with the HUD too ({@link HudFade}).
-        float alpha = Math.min(opacity, 1.0F) * HudFade.factor();
-        RenderSystem.enableBlend();
-        RenderSystem.setShaderColor(alpha, alpha, alpha, alpha);
-        try {
-            graphics.renderFakeItem(stack, x, y);
-        } finally {
-            HudFade.restore(graphics);
-        }
+        FadedItems.render(graphics, stack, x, y, opacity);
     }
 }
