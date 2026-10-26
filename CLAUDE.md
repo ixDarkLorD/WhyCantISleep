@@ -28,16 +28,17 @@ A multiloader mod built on the author's libraries **CoolCatLib: Core** (`coolcat
 
 ## Versions
 
-One folder per Minecraft version, each on its own branch of the same repo (the author's convention, e.g. `../GlazedMenu-26.1.2`, `../GlazedMenu-1.20`). The targets are the loader/version pairs CoolCatLib: Core actually ships:
+One folder per Minecraft version, each on its own branch of the same repo (the author's convention, e.g. `../GlazedMenu-26.1.2`, `../GlazedMenu-1.20`). As of 2026-10-26 all five carry the same features:
 
-| Minecraft | Loaders | Folder / branch | CoolCatLib: Core (Maven Local) | State |
-|---|---|---|---|---|
-| 26.1 – 26.1.2 | Fabric, NeoForge | `../WhyCantISleep-26.1.2`, `main` | `26.1.2-4` | in progress (first version) |
-| 1.21.1 | Forge, Fabric, NeoForge | this folder, branch `1.21.1` | `1.21.1-2100.4.0.0` | ported 2026-10-23 (see "1.21.1 port" below), not tested in game |
-| 1.20.1 | Forge, Fabric (no NeoForge) | `../WhyCantISleep-1.20.1` (empty folder) | `1.20.1-2001.2.0.1` | backport |
-| 26.2, 26.3 | Fabric, NeoForge | — | **none: CoolCatLib has no build for them** | blocked until CoolCatLib is ported |
+| Minecraft | Loaders | Folder / branch | CoolCatLib (Maven Local) | Folios (Maven Local) | State |
+|---|---|---|---|---|---|
+| 26.1 – 26.1.2 | Fabric, NeoForge | `../WhyCantISleep-26.1.2`, `main` | `8.0.0+26.1.2` | `3.0.0+26.1.2` | the first version, where features are made and tested in game first |
+| 26.2 | Fabric, NeoForge | `../WhyCantISleep-26.2`, branch `26.2` | `8.0.0+26.2` | `3.0.0+26.2` | in step with `main` (2026-10-26); builds on both loaders |
+| 26.3 | Fabric, NeoForge | `../WhyCantISleep-26.3`, branch `26.3` | `8.0.0+26.3` | `3.0.0+26.3` | in step with `main` (2026-10-26); builds on both loaders |
+| 1.21.1 | Forge, Fabric, NeoForge | **this folder**, branch `1.21.1` | `8.0.0+1.21.1` | `3.0.0+1.21.1` | in step with `main` (2026-10-26); builds on all three loaders, not yet run in game |
+| 1.20.1 | Forge, Fabric (no NeoForge) | `../WhyCantISleep-1.20.1`, branch `1.20.1` | `8.0.0+1.20.1` | `3.0.0+1.20.1` | in step with `main` (2026-10-26); builds on both loaders, run in game on Fabric |
 
-The shared catalogs `26.2-v1` and `26.3-v1` exist (Glazed Menu uses them), but this mod requires Core at runtime, so 26.2+ waits on a CoolCatLib port. Finish all features on 26.1.2 before backporting.
+A feature is made and tested on `main` first, then carried to the other four, each building on its own checkouts of CoolCatLib (`../CoolCatLib-<version>`, `../CoolCatLib-1.21` for 1.21.1) and Folios (`../Folios-<version>`), published to Maven Local with `gradlew assemble publishToMavenLocal`, and MCP Bridge `1.0.0+<version>` in its dev runs. On the remapping branches (1.21.1, 1.20.1), a library republished under the same version is served from Loom's stale copy until it is deleted (`.gradle/loom-cache/remapped_mods/remapped/net/ixdarklord/<coolcatlib|folios>/*/<version>`; a stale CoolCatLib shows as a `NoClassDefFoundError` in the dev run); never use `--refresh-dependencies` there.
 
 ## 1.21.1 port (2026-10-23)
 
@@ -129,7 +130,7 @@ gradlew :neoforge:runServer
 
 There are no tests or linters; verify by building and running the game. Both clients share `run/`. A running game locks `common/build/libs/*-dev.jar`: stop it before rebuilding, and when a server and a client run together start the server first and the client with `-x :common:jar`.
 
-**Testing in the running game**: the `minecraft` MCP tools (MCP Bridge) drive a dev game: `game_start` (`loader`, `task`, `world`), `mc_command`, `mc_logs`, `mc_screenshot`, `mc_summon`, `mc_time`... After checks, `mc_leave_world` then `game_stop`. MCP Bridge exists for 26.1.2 only, so backports are checked by hand.
+**Testing in the running game**: the `minecraft` MCP tools (MCP Bridge) drive a dev game: `game_start` (`loader`, `task`, `world`), `mc_command`, `mc_logs`, `mc_screenshot`, `mc_summon`, `mc_time`... After checks, `mc_leave_world` then `game_stop`. MCP Bridge has a build for every version (`mcp_bridge_version`), so every branch can be tested this way.
 
 ## Module layout
 
