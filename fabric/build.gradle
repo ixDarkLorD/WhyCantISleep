@@ -9,4 +9,6 @@ dependencies {
     // Dev runs only, never published: MCP Bridge lets the game be driven from outside. Not transitive, because it still points
     // at CoolCatLib's old coordinates and would load a second copy of it.
     localRuntime("net.ixdarklord.mcp_bridge:mcp_bridge-fabric:${mcp_bridge_version}") { transitive = false }
+    // Dev runs only: Simple Voice Chat, to try the optional integration (Modrinth's maven comes from the shared scripts).
+    localRuntime("maven.modrinth:simple-voice-chat:fabric-${voicechat_version}") { transitive = false }
 }
