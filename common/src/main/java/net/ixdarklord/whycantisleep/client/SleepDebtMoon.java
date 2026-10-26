@@ -22,7 +22,7 @@ import net.minecraft.util.Mth;
 /**
  * The moon of sleep debt: a moon that fills up, from the bottom, with each day the player goes without lying down,
  * full at three (when phantoms come), with the days beside it. Out of sight until a whole day has gone without sleep.
- * It sits where the client config says ({@code debtMoonPosition}, top centre unless set, nudged by
+ * It sits where the client config says ({@code debtMoonPosition}, top left unless set, nudged by
  * {@code debtMoonOffsetX} / {@code debtMoonOffsetY}), and pops larger for a moment when it shows and each time another
  * day goes by, so it is noticed. It keeps out of the way of the rest of the HUD, whichever mod drew it (a minimap,
  * Jade's tooltip, the boss bars), gliding clear of them. The time since rest is {@link SleepStatus}'s, as the server last sent it.

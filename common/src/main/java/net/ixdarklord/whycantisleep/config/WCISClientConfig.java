@@ -38,7 +38,7 @@ public final class WCISClientConfig {
             .comment("How the eyelids look while you hide: soft, banded, grainy, or retro pixel art (banded and grainy together).").build();
     public static final ConfigValue<Boolean> SLEEP_DEBT_MOON = BUILDER.bool("sleepDebtMoon", true)
             .comment("Shows a moon on the screen that fills up with each day you go without sleep. Needs the mod on the server.").build();
-    public static final ConfigValue<HudCorner> DEBT_MOON_POSITION = BUILDER.enumValue("debtMoonPosition", HudCorner.TOP_CENTER)
+    public static final ConfigValue<HudCorner> DEBT_MOON_POSITION = BUILDER.enumValue("debtMoonPosition", HudCorner.TOP_LEFT)
             .comment("Where on the screen the sleep debt moon sits.").enabledWhen(SLEEP_DEBT_MOON).build();
     public static final ConfigValue<Integer> DEBT_MOON_OFFSET_X = BUILDER.intValue("debtMoonOffsetX", 0)
             .range(-200, 200).slider().comment("Moves the sleep debt moon this many pixels right of its place (left when negative).").enabledWhen(SLEEP_DEBT_MOON).build();
