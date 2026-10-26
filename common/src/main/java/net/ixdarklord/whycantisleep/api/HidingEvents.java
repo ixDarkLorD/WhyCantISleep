@@ -36,8 +36,8 @@ public final class HidingEvents {
     /** A player stayed hidden long enough: the hunters in the list are about to give up and vanish. */
     public static final Event<ShakenOff> SHAKEN_OFF = new Event<>();
     /**
-     * The noise a hiding player makes changed: trying to move, looking about, gasping after holding their breath. From
-     * 0 to 1, as their client reports it, in steps of a tenth; at 1, with monsters near, they are heard and found.
+     * The noise a hiding player makes changed: trying to move, looking about, gasping at the heartbeat minigame's third
+     * miss. From 0 to 1, as their client reports it, in steps of a tenth; at 1, with monsters near, they are heard and found.
      */
     public static final Event<NoiseChanged> NOISE_CHANGED = new Event<>();
 
