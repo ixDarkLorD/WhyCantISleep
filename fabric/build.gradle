@@ -15,4 +15,7 @@ dependencies {
     modImplementation("net.ixdarklord.coolcatlib:coolcatlib-fabric:${coolcatlib_version}") { transitive = false }
     // Folios: the mod's guide book is a Folios book.
     modImplementation("net.ixdarklord.folios:folios-fabric:${folios_version}") { transitive = false }
+    // Dev runs only, never published: MCP Bridge lets the game be driven from outside. Not transitive, so it never
+    // brings a second CoolCatLib. modLocalRuntime, since 1.21.1 is mapped and the jar must be remapped for dev runs.
+    modLocalRuntime("net.ixdarklord.mcp_bridge:mcp_bridge-fabric:${mcp_bridge_version}") { transitive = false }
 }
