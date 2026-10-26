@@ -101,10 +101,10 @@
     header.insertBefore(box, search || null);
   }
 
-  // The picker belongs to the docs (under docs/): the landing page, downloads, changelog and license have no
-  // version-specific content. Instant navigation keeps the header, so a picker left from a docs page is taken away.
+  // The picker belongs to the wiki and the docs: the landing page, downloads, changelog and license have no
+  // version-specific content. Instant navigation keeps the header, so a picker left from one of their pages is taken away.
   function inDocs() {
-    return /\/docs\//.test(window.location.pathname);
+    return /\/(docs|wiki)\//.test(window.location.pathname);
   }
 
   function setup() {

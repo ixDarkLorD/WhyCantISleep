@@ -14,8 +14,8 @@ is read by the server (or by the world, in single player).
 | What you wake up with in the morning | `whycantisleep/sleep_effect/` | [Sleep effects](sleep-effects.md) |
 | New places to hide | `whycantisleep/hiding_spot/` | [Hiding spots](hiding-spots.md) |
 
-How the features themselves play is on the [Why can't I sleep?](../playing/why-cant-i-sleep.md),
-[Hiding](../playing/hiding.md) and [Nights](../playing/nights.md) pages; the server settings that turn them on and off
+How the features themselves play is on the [Why can't I sleep?](../../wiki/sleeping/why-cant-i-sleep.md),
+[Hiding](../../wiki/hiding/index.md) and [Nights](../../wiki/nights/sleep-quality.md) pages; the server settings that turn them on and off
 are on [Configuration](../server/configuration.md). For changes that need code, see
 [For mod developers](../developers/index.md).
 
@@ -111,7 +111,7 @@ Every tag the mod reads is in the `whycantisleep` namespace. The mod's own files
 | --- | --- | --- |
 | `#whycantisleep:blocks_sleep` | Mobs that keep you from sleeping when they are near the bed, as monsters do, even if they aren't monsters. | empty |
 | `#whycantisleep:does_not_block_sleep` | Monsters that never keep you from sleeping. | empty |
-| `#whycantisleep:ignores_hiding` | Mobs that see through [hiding](../playing/hiding.md): they can still target and chase a hiding player, and are never shaken off when the hide time is up. | `minecraft:wither`, `minecraft:ender_dragon`, `minecraft:warden`, `minecraft:elder_guardian` |
+| `#whycantisleep:ignores_hiding` | Mobs that see through [hiding](../../wiki/hiding/index.md): they can still target and chase a hiding player, and are never shaken off when the hide time is up. | `minecraft:wither`, `minecraft:ender_dragon`, `minecraft:warden`, `minecraft:elder_guardian` |
 
 The sleep rules change the game's own check, so they decide whether a sleep really goes ahead, not only what the mod
 highlights. The game looks for monsters within 8 blocks of the bed's head to each side and 5 up and down; a mob in

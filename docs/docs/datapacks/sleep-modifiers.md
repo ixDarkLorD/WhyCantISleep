@@ -2,7 +2,7 @@
 
 Every night you sleep is scored from 0 to 100 as you wake. The score starts at 75, and each **sleep modifier** that has
 a say about the night adds points to it or takes them away; the sum is held to 0 to 100. The morning card lists the
-modifiers that counted, each with its points. How this plays is on [Nights](../playing/nights.md).
+modifiers that counted, each with its points. How this plays is on [Nights](../../wiki/nights/sleep-quality.md).
 
 The mod's own fifteen modifiers are data files, and a data pack can add more, change them, or take them out. Each is a
 file at `data/<namespace>/whycantisleep/sleep_modifier/<name>.json`, the same on every Minecraft version.
@@ -221,5 +221,5 @@ a data pack with the same id as one from code replaces it.
 }
 ```
 
-The [Insomniac's Handbook](../playing/nights.md) lists every modifier from data packs on its What Counts pages, yours
+The [Insomniac's Handbook](../../wiki/nights/sleep-quality.md) lists every modifier from data packs on its What Counts pages, yours
 included, with their points.

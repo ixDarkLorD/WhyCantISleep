@@ -2,7 +2,7 @@
 
 Players hide by sneaking and using a hiding spot with both hands empty: under a bed or a table, inside a double chest,
 in a closet. A data pack can make any other block a hiding spot, such as a modded wardrobe or cupboard, with one file.
-How hiding plays is on [Hiding](../playing/hiding.md).
+How hiding plays is on [Hiding](../../wiki/hiding/index.md).
 
 Each spot is a file at `data/<namespace>/whycantisleep/hiding_spot/<name>.json`, the same on every Minecraft version.
 The mod has no hiding spot files of its own: its four spots are built in.
@@ -108,7 +108,7 @@ A data pack spot is a hiding spot like any other. While a player is in it, monst
 those in [`#whycantisleep:ignores_hiding`](index.md#entity-type-tags)), the hide time runs, and when it is up the
 monsters hunting them are shaken off. Each full block on a side of the spot takes 10% off the hide time, at most three
 (the server's `cover` setting), the hide time is never under one second, and everything else on the
-[Hiding](../playing/hiding.md) page applies: noise, critters, the heartbeat minigame, the cooldown, and muffled sounds.
+[Hiding](../../wiki/hiding/index.md) page applies: noise, critters, the heartbeat minigame, the cooldown, and muffled sounds.
 
 !!! note "Server side only"
     Data pack spots are known to the server only. A player's client doesn't know them, so it predicts nothing when they

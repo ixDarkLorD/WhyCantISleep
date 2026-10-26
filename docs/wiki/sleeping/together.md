@@ -36,7 +36,7 @@ are listed too, dimmed, but don't count either way.
 When more than one fits, the first in this list wins.
 
 The panel is on by default. You can hide it in the client settings, and the server can turn it off for everyone
-([Configuration](../server/configuration.md)).
+([Configuration](../../docs/server/configuration.md)).
 
 ## Nudges
 
@@ -75,11 +75,11 @@ their vote.
 
 !!! tip
     The chat buttons run `/whycantisleep vote yes` and `/whycantisleep vote no`, which you can also type
-    ([Commands](../server/commands.md)).
+    ([Commands](../../docs/server/commands.md)).
 
 ## Shared beds
 
 Sleeping side by side has a bonus: monsters bother you less. If another player is **already asleep** in a bed within 3
 blocks of yours, your bed lets up to **2** monsters by. Only a third monster in range keeps you up, and then all of them
-are [shown to you](why-cant-i-sleep.md#monsters-in-the-way) as usual. The server can change how many are let by (0 to
+are [shown to you](monsters.md) as usual. The server can change how many are let by (0 to
 10).

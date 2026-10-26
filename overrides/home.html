@@ -19,7 +19,7 @@
           you, and wake to find out how well you slept. Stay up too long and something else comes for you instead.
         </p>
         <div class="wh-actions" data-reveal>
-          <a class="wh-btn wh-btn--primary" href="{{ 'docs/playing/getting-started/' | url }}">Get started</a>
+          <a class="wh-btn wh-btn--primary" href="{{ 'wiki/getting-started/' | url }}">Get started</a>
           <a class="wh-btn" href="https://modrinth.com/mod/why-cant-i-sleep">Modrinth</a>
           <a class="wh-btn" href="https://www.curseforge.com/minecraft/mc-mods/why-cant-i-sleep">CurseForge</a>
         </div>
@@ -56,10 +56,10 @@
       </header>
       <div class="wh-grid">
         {% set pillars = [
-          ['👁️', '#ff1e3c', 'Find the culprits', 'The exact monsters that blocked your sleep glow, arrows point to the ones you can\'t see, and every failed sleep says why and what to do.', 'docs/playing/why-cant-i-sleep/'],
-          ['🛏️', '#9b8cc4', 'Hide from them', 'Crawl under a bed or a table, climb into a chest or shut yourself in a closet. Keep still, keep your heart slow, and they give up.', 'docs/playing/hiding/'],
-          ['🌙', '#f2dd9b', 'Every night counts', 'Each night is scored: the room, the light, the music, what\'s by your bed. Wake up rested, with a dream, or shaken by a night terror.', 'docs/playing/nights/'],
-          ['👥', '#4ade80', 'Sleep together', 'On servers, see who is keeping everyone up and why, give them a nudge, or vote to skip the night.', 'docs/playing/together/'],
+          ['👁️', '#ff1e3c', 'Find the culprits', 'The exact monsters that blocked your sleep glow, arrows point to the ones you can\'t see, and every failed sleep says why and what to do.', 'wiki/sleeping/why-cant-i-sleep/'],
+          ['🛏️', '#9b8cc4', 'Hide from them', 'Crawl under a bed or a table, climb into a chest or shut yourself in a closet. Keep still, keep your heart slow, and they give up.', 'wiki/hiding/'],
+          ['🌙', '#f2dd9b', 'Every night counts', 'Each night is scored: the room, the light, the music, what\'s by your bed. Wake up rested, with a dream, or shaken by a night terror.', 'wiki/nights/sleep-quality/'],
+          ['👥', '#4ade80', 'Sleep together', 'On servers, see who is keeping everyone up and why, give them a nudge, or vote to skip the night.', 'wiki/sleeping/together/'],
         ] %}
         {% for icon, colour, title, text, link in pillars %}
           <article class="wh-card" data-reveal style="--i: {{ loop.index0 }}; --c: {{ colour }}">
@@ -156,7 +156,7 @@
             <li><b>Fabric API</b><span>on Fabric</span></li>
             <li><b>Simple Voice Chat</b><span>optional</span></li>
           </ul>
-          <p class="wh-panel__note">Install it on the client and the server. <a href="{{ 'docs/compatibility/' | url }}">Compatibility</a></p>
+          <p class="wh-panel__note">Install it on the client and the server. <a href="{{ 'docs/installation/' | url }}">Installation</a></p>
         </div>
         <div class="wh-panel" data-reveal style="--i: 2">
           <h3>License</h3>
@@ -179,6 +179,7 @@
       <p>Free to download on Modrinth and CurseForge.</p>
       <div class="wh-actions">
         <a class="wh-btn wh-btn--primary" href="{{ 'downloads/' | url }}">Downloads</a>
+        <a class="wh-btn" href="{{ 'wiki/' | url }}">Read the wiki</a>
         <a class="wh-btn" href="{{ 'docs/' | url }}">Read the docs</a>
       </div>
     </div>

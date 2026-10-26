@@ -11,15 +11,31 @@ extra_javascript = ["assets/wcis.js", "assets/mc-version.js"]
 
 nav = [
   { "Home" = "index.md" },
+  { "Wiki" = [
+    "wiki/index.md",
+    { "Getting started" = "wiki/getting-started.md" },
+    { "Sleeping" = [
+      { "Why can't I sleep?" = "wiki/sleeping/why-cant-i-sleep.md" },
+      { "Monsters in the way" = "wiki/sleeping/monsters.md" },
+      { "Sleeping together" = "wiki/sleeping/together.md" },
+    ] },
+    { "Hiding" = [
+      "wiki/hiding/index.md",
+      { "Hiding spots" = "wiki/hiding/spots.md" },
+      { "Noise and searches" = "wiki/hiding/noise.md" },
+      { "The heartbeat minigame" = "wiki/hiding/heartbeat.md" },
+    ] },
+    { "Nights" = [
+      { "Sleep quality" = "wiki/nights/sleep-quality.md" },
+      { "Dreams" = "wiki/nights/dreams.md" },
+      { "Night terrors" = "wiki/nights/night-terrors.md" },
+      { "Sleep debt" = "wiki/nights/sleep-debt.md" },
+    ] },
+    { "Insomniac's Handbook" = "wiki/handbook.md" },
+  ] },
   { "Docs" = [
     "docs/index.md",
-    { "Playing" = [
-      { "Getting started" = "docs/playing/getting-started.md" },
-      { "Why can't I sleep?" = "docs/playing/why-cant-i-sleep.md" },
-      { "Hiding" = "docs/playing/hiding.md" },
-      { "Nights" = "docs/playing/nights.md" },
-      { "Sleeping together" = "docs/playing/together.md" },
-    ] },
+    { "Installation" = "docs/installation.md" },
     { "Server owners" = [
       { "Configuration" = "docs/server/configuration.md" },
       { "Commands" = "docs/server/commands.md" },
@@ -64,6 +80,7 @@ features = [
   "navigation.path",
   "navigation.prune",
   "navigation.sections",
+  "navigation.tabs",
   "navigation.top",
   "navigation.tracking",
   "search.highlight",

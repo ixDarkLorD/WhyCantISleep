@@ -15,5 +15,5 @@ is optional.
 | 1.21.1 | Fabric, NeoForge, Forge |
 | 1.20.1 | Fabric, Forge |
 
-Then follow [Getting started](docs/playing/getting-started.md). Questions and bug reports are welcome on
+Then follow [Getting started](wiki/getting-started.md). Questions and bug reports are welcome on
 [Discord](https://discord.gg/ZapGEPqm2V).

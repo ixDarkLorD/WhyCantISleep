@@ -2,7 +2,7 @@
 
 Waking in the morning, you may wake with a **sleep effect**: a dream that helps (positive), one that hurts (negative),
 or one that is only odd (neutral). Each gives mob effects, and the morning card names it in its rarity's color. How
-this plays is on [Nights](../playing/nights.md).
+this plays is on [Nights](../../wiki/nights/sleep-quality.md).
 
 The mod's own twenty-two sleep effects are data files, and a data pack can add more or change them. Each is a file at
 `data/<namespace>/whycantisleep/sleep_effect/<name>.json`, the same on every Minecraft version.
@@ -170,4 +170,4 @@ turn off `sleepEffects` in the [server configuration](../server/configuration.md
     The format is the same on every version, but use effect ids that exist in your version of the game. All of the
     mod's own effects exist on 1.20.1.
 
-The [Insomniac's Handbook](../playing/nights.md) lists every sleep effect, yours included, with its kind and rarity.
+The [Insomniac's Handbook](../../wiki/nights/sleep-quality.md) lists every sleep effect, yours included, with its kind and rarity.
