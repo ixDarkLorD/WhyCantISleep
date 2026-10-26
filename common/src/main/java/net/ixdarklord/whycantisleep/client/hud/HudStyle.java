@@ -16,18 +16,21 @@ import net.minecraft.util.RandomSource;
  * icon squares are small flat fills.
  */
 public final class HudStyle {
-    /** A night's sleep card and the status popup: charcoal, with a hairline border and softly rounded corners. */
+    /** A night's sleep card and the status popup: dusk smoke, grey with wavy edges ({@code tools/gen_frames.py}). */
     public static final Identifier CARD = WhyCantISleep.id("hud/card");
-    /** The other message cards, the sleep board and the breath minigame: soft as a pillow, a two pixel border with round corners, a lighter line along the top. */
+    /** The other message cards and the sleep board: moonlit, grey with a pale rim ({@code tools/gen_frames.py}). */
     public static final Identifier NOTICE = WhyCantISleep.id("hud/notice");
     /** The wash of a notice's color over its left side, fading to the right; how far across it reaches, how strong, and its specks. */
     public static final Identifier WASH = WhyCantISleep.id("hud/wash");
-    private static final float WASH_SHARE = 0.55F;
+    private static final float WASH_SHARE = 0.8F;
     private static final float WASH_ALPHA = 0.24F;
     private static final int WASH_CLIMB = 6;
-    /** The wash's foot, fading downwards as well, over this many rows. */
+    /** The wash's foot and head, fading downwards and upwards as well, over this many rows each. */
     public static final Identifier WASH_FADE = WhyCantISleep.id("hud/wash_fade");
+    public static final Identifier WASH_FADE_TOP = WhyCantISleep.id("hud/wash_fade_top");
     private static final int WASH_FADE_ROWS = 6;
+    /** How far the wash keeps from the frame's top and bottom, inside its border. */
+    private static final int WASH_INSET = 2;
     /** A notice's timer, frame and all, is this tall: an outline round a bar two high. */
     public static final int TIMER_HEIGHT = 4;
     /** A bar's empty track, and the sleep board's fill. */
@@ -37,6 +40,10 @@ public final class HudStyle {
     public static final int SLOT_SIZE = 20;
     /** How far a panel reaches beyond what it holds: its border, and room to breathe inside it. */
     public static final int PANEL_PADDING = 6;
+    /** Above and below, a little more, so the frames' top and bottom edges (rim, shading, shadow) have room. */
+    public static final int PANEL_PADDING_Y = PANEL_PADDING + 2;
+    /** How far a panel's grey is tinted towards its message's color: a touch, showing most on the bright rim. */
+    private static final float PANEL_TINT = 0.45F;
     public static final int BAR_HEIGHT = 3;
 
     // The chat's colors.
@@ -64,24 +71,28 @@ public final class HudStyle {
         return ARGB.color(Math.round(Mth.clamp(alpha, 0.0F, 1.0F) * 255.0F), rgb);
     }
 
-    /** A panel around a content area, which it pads by {@link #PANEL_PADDING} on every side. */
-    public static void panel(GuiGraphicsExtractor graphics, Identifier sprite, int x, int y, int width, int height, float alpha) {
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x - PANEL_PADDING, y - PANEL_PADDING, width + PANEL_PADDING * 2, height + PANEL_PADDING * 2,
-                ARGB.white(Mth.clamp(alpha, 0.0F, 1.0F)));
+    /**
+     * A panel around a content area, which it pads by {@link #PANEL_PADDING} at the sides, {@link #PANEL_PADDING_Y}
+     * above and below; its grey tinted a little ({@link #PANEL_TINT}) towards a color, its message's (as its wash).
+     */
+    public static void panel(GuiGraphicsExtractor graphics, Identifier sprite, int x, int y, int width, int height, int rgb, float alpha) {
+        int tint = ARGB.srgbLerp(PANEL_TINT, WHITE, rgb);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x - PANEL_PADDING, y - PANEL_PADDING_Y, width + PANEL_PADDING * 2, height + PANEL_PADDING_Y * 2,
+                color(tint, alpha));
     }
 
-    /** The card around a content area. */
-    public static void box(GuiGraphicsExtractor graphics, int x, int y, int width, int height, float alpha) {
-        panel(graphics, CARD, x, y, width, height, alpha);
+    /** The card around a content area, tinted towards a color. */
+    public static void box(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int rgb, float alpha) {
+        panel(graphics, CARD, x, y, width, height, rgb, alpha);
     }
 
-    /** How thick the notice's border is (soft, two pixels) and the card's (a hairline): a wash keeps inside it. */
-    public static final int NOTICE_BORDER = 2;
-    public static final int CARD_BORDER = 1;
+    /** How far in from a notice's and a card's edges a wash keeps, to stay under their rims (the card's top is wavy). */
+    public static final int NOTICE_BORDER = 4;
+    public static final int CARD_BORDER = 5;
 
-    /** The notice frame around a content area. */
-    public static void notice(GuiGraphicsExtractor graphics, int x, int y, int width, int height, float alpha) {
-        panel(graphics, NOTICE, x, y, width, height, alpha);
+    /** The notice frame around a content area, tinted towards a color. */
+    public static void notice(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int rgb, float alpha) {
+        panel(graphics, NOTICE, x, y, width, height, rgb, alpha);
     }
 
     /**
@@ -112,20 +123,20 @@ public final class HudStyle {
         int speckRgb = lively >= 0.5F ? brighten(rgb) : rgb;
         // How far a speck rises (or, dull, sinks) over the wash's length.
         float climb = (lively - 0.5F) * 2.0F * WASH_CLIMB;
-        // Just in from the border, its top left corner rounded off by a pixel to sit in the frame's round corner.
+        // Just in from the border, and a little further from the frame's top (and, as far under the content as over
+        // it, its bottom); it fades in at its top as it fades out at its foot, and in from its left edge too (WASH).
         int left = x - PANEL_PADDING + border;
-        int top = y - PANEL_PADDING + border;
-        // As far under the content as over it, less the pixel it moved up by, so it keeps its height.
+        int top = y - PANEL_PADDING_Y + border + WASH_INSET;
         int bottom = contentBottom + (y - top) - 2;
-        int fadeRows = Math.min(WASH_FADE_ROWS, (bottom - top) / 2);
+        int fadeRows = Math.min(WASH_FADE_ROWS, (bottom - top) / 3);
+        int head = top + fadeRows;
         int body = bottom - fadeRows;
         int full = Math.round((width + PANEL_PADDING) * WASH_SHARE);
         int span = Math.round(full * Mth.clamp(reach, 0.0F, 1.0F));
         if (span <= 0) return;
         int tint = color(rgb, alpha * WASH_ALPHA);
-        // Its top row starts a pixel in, rounding the corner.
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, WASH, left + 1, top, span - 1, 1, tint);
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, WASH, left, top + 1, span, body - top - 1, tint);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, WASH_FADE_TOP, left, top, span, fadeRows, tint);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, WASH, left, head, span, body - head, tint);
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, WASH_FADE, left, body, span, fadeRows, tint);
         RandomSource random = RandomSource.create(seed);
         for (int i = 0; i < specks; i++) {
@@ -138,7 +149,8 @@ public final class HudStyle {
             float along = (age * speed + phase) % full;
             if (along > span) continue;
             int speckY = Mth.clamp(startY - Math.round(climb * along / full), top + 1, bottom - 2);
-            float down = speckY < body ? 1.0F : 1.0F - (speckY - body + 0.5F) / fadeRows;
+            float down = speckY >= body ? 1.0F - (speckY - body + 0.5F) / fadeRows
+                    : speckY < head ? (speckY - top + 0.5F) / fadeRows : 1.0F;
             float fade = (float) Math.pow(1.0F - along / full, 1.6F) * down * glow;
             int speckX = left + Math.round(along);
             int speck = color(speckRgb, alpha * fade * twinkle);

@@ -1,5 +1,6 @@
 package net.ixdarklord.whycantisleep.hiding;
 
+import net.ixdarklord.coolcatcore.api.event.v2.common.BlockEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.InteractionEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.LivingEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.PlayerEvents;
@@ -96,6 +97,10 @@ public final class HidingServer {
     private static final float SEARCH_NOISE = 0.5F;
     // Each wall close around a spot takes this much off the hide time.
     private static final float COVER_PER_WALL = 0.1F;
+    // At the end of a hunted player's hide time, how long their client's word (overtime or done) is waited for, and how
+    // near the end it may ask for overtime.
+    private static final int VERDICT_WAIT = 20;
+    private static final int OVERTIME_ASK_FROM = 40;
 
     private static final Map<UUID, Hide> HIDING = new HashMap<>();
 
@@ -142,6 +147,9 @@ public final class HidingServer {
         });
         // Nor broken: knocking the spot out from round them would give them away.
         InteractionEvents.ATTACK_BLOCK.register((player, hand, pos, face) -> Hiding.isHiding(player) ? EventResult.INTERRUPT : EventResult.PASS);
+        // And the server's last word: whatever reached it (a held click, a creative player's instant break), a hiding
+        // player breaks nothing, least of all the spot they are in.
+        BlockEvents.BREAK.register((level, pos, state, player) -> Hiding.isHiding(player) ? EventResult.INTERRUPT : EventResult.PASS);
         PlayerEvents.END_TICK.register(player -> {
             if (player instanceof ServerPlayer serverPlayer) tick(serverPlayer);
         });
@@ -325,7 +333,30 @@ public final class HidingServer {
         if (hide.search != null && search(level, player, hide)) return;
         // The hide time waits for a search under way to end: what searched gives up only once it has walked off.
         if (hide.search != null && hide.search.phase != Search.Phase.LEAVE && hide.ticks >= hide.hideTicks - 1) return;
+        // Hunted, their client has the last word at the end of the hide time: whether they held (it ends) or missed the
+        // last beat (a beat's overtime). It is waited for a little, never forever.
+        if (hide.hunted && !hide.settled && hide.ticks == hide.hideTicks - 1 && hide.waited++ < VERDICT_WAIT) return;
         if (++hide.ticks == hide.hideTicks) shakeOff(level, player, hide);
+    }
+
+    /**
+     * A hunted player's client at the end of the hide time: a beat's overtime ({@code more}, near the end and at most
+     * {@link Hiding#MAX_OVERTIME} times), or the minigame is over, which ends an overtime at once but never shortens the
+     * hide time itself.
+     */
+    public static void onOvertime(ServerPlayer player, boolean more) {
+        Hide hide = HIDING.get(player.getUUID());
+        // Too late once the hide time is over: what chased them in has given up by then.
+        if (hide == null || !hide.hunted || hide.settled || hide.ticks >= hide.hideTicks) return;
+        if (more) {
+            if (hide.overtime >= Hiding.MAX_OVERTIME || hide.ticks < hide.hideTicks - OVERTIME_ASK_FROM) return;
+            hide.overtime++;
+            hide.hideTicks += Hiding.OVERTIME_TICKS;
+            hide.waited = 0;
+        } else {
+            hide.settled = true;
+            if (hide.overtime > 0) hide.hideTicks = Math.max(hide.baseHideTicks, Math.min(hide.hideTicks, hide.ticks + 1));
+        }
     }
 
     // The first of a spot's places that no other hider, and no monster, is in; or null when they all are.
@@ -387,8 +418,9 @@ public final class HidingServer {
     /**
      * A tick of the search a hunter makes of a hunted player's spot: after a moment it comes to the spot's front, stops
      * and looks about (now and then at the spot itself), and then either finds them, by a chance the difficulty, the
-     * server's search chance and the noise they make decide, and drags them out, or walks away. Returns true when it
-     * found them (they are out).
+     * server's search chance and the noise they make decide, and drags them out, or walks away. A player keeping their
+     * heart slow (the heartbeat minigame) is never found by chance: only failing it gives them away. Returns true when
+     * it found them (they are out).
      */
     private static boolean search(ServerLevel level, ServerPlayer player, Hide hide) {
         Search search = hide.search;
@@ -421,7 +453,9 @@ public final class HidingServer {
                 }
                 mob.getLookControl().setLookAt(search.look.x, search.look.y, search.look.z);
                 if (search.ticks < SEARCH_LOOK_TICKS) return false;
-                if (level.getRandom().nextFloat() < findChance(level, hide)) {
+                // Hunted, they are keeping their heart slow (the client's minigame): only failing it gives them away
+                // (their gasp, onNoise), never the search's chance, however many beats they miss before that.
+                if (!hide.hunted && level.getRandom().nextFloat() < findChance(level, hide)) {
                     hide.search = null;
                     stop(player, HidingEvents.Reason.FOUND);
                     mob.setTarget(player);
@@ -667,7 +701,13 @@ public final class HidingServer {
         private final HidingView view;
         private final ResourceKey<Level> dimension;
         private final Vec3 exit;
-        private final int hideTicks;
+        private final int baseHideTicks;
+        // The hide time, longer by any overtime; the overtime granted; whether the client said the minigame is over;
+        // and how long it has been waited for at the end.
+        private int hideTicks;
+        private int overtime;
+        private boolean settled;
+        private int waited;
         private final Set<UUID> hunters = new HashSet<>();
         private int ticks;
         private float noise;
@@ -680,6 +720,7 @@ public final class HidingServer {
             this.view = HidingView.of(spot);
             this.dimension = dimension;
             this.exit = exit;
+            this.baseHideTicks = hideTicks;
             this.hideTicks = hideTicks;
         }
     }

@@ -32,6 +32,8 @@ public final class Blockers {
 
     public static void init() {
         ClientTickEvents.END.register(minecraft -> {
+            // Paused, the highlights hold: their time doesn't run out behind the pause screen.
+            if (minecraft.isPaused()) return;
             tick++;
             if (!ENDS.isEmpty()) ENDS.int2LongEntrySet().removeIf(entry -> entry.getLongValue() <= tick);
             top = rankTop(minecraft);

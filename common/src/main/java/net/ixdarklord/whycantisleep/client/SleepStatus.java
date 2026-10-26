@@ -166,11 +166,13 @@ public final class SleepStatus {
         // Kept on the screen: to the left of the button if there is no room to its right.
         int width = WIDTH;
         if (x + width + HudStyle.PANEL_PADDING > graphics.guiWidth()) x = x - BUTTON - 8 - width;
-        y = Mth.clamp(y, HudStyle.PANEL_PADDING, graphics.guiHeight() - height - HudStyle.PANEL_PADDING);
-        // A popup over the inventory: backed solid, so the slots and labels under it don't show through the card.
-        int pad = HudStyle.PANEL_PADDING - 1;
-        graphics.fill(x - pad, y - pad, x + width + pad, y + height + pad, 0xFF111317);
-        HudStyle.box(graphics, x, y, width, height, 1.0F);
+        y = Mth.clamp(y, HudStyle.PANEL_PADDING_Y, graphics.guiHeight() - height - HudStyle.PANEL_PADDING_Y);
+        // A popup over the inventory: backed solid inside the frame's edges, in its own dark grey, so the slots and
+        // labels under it don't show through the card and nothing shows past its wavy top and bottom.
+        int padX = HudStyle.PANEL_PADDING - 2;
+        int padY = HudStyle.PANEL_PADDING_Y - 5;
+        graphics.fill(x - padX, y - padY, x + width + padX, y + height + padY, 0xFF141414);
+        HudStyle.box(graphics, x, y, width, height, color, 1.0F);
         int rowY = y;
         for (Row row : rows) {
             row.draw.draw(graphics, font, x, rowY, width);

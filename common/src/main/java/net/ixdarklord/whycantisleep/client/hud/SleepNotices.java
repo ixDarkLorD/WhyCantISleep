@@ -68,24 +68,19 @@ public final class SleepNotices {
     private static long tick;
     private static long shownAt;
     private static int duration;
-    // The top of the card's frame where it settles, from the last frame drawn; what sits over the card keeps above it.
-    private static int top = Integer.MAX_VALUE;
 
     private SleepNotices() {
     }
 
     public static void init() {
         ClientTickEvents.END.register(minecraft -> {
+            // Paused, a card holds: its wash and specks still, its time not running out behind the pause screen.
+            if (minecraft.isPaused()) return;
             tick++;
             if (notice != null && tick - shownAt > duration) notice = null;
         });
         ClientPlayerEvents.LEAVE.register(player -> notice = null);
         ClientGuiEvents.RENDER_HUD.register(SleepNotices::render);
-    }
-
-    /** The top edge of the card's frame on screen, or {@link Integer#MAX_VALUE} while no card is shown. */
-    public static int top() {
-        return top;
     }
 
     public static void show(SleepNotice notice) {
@@ -126,7 +121,6 @@ public final class SleepNotices {
     private static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
         SleepNotice shown = notice;
         Minecraft minecraft = Minecraft.getInstance();
-        top = Integer.MAX_VALUE;
         if (shown == null || minecraft.gui.hud.isHidden()) return;
         float age = tick - shownAt + delta.getGameTimeDeltaPartialTick(true);
         float left = duration - age;
@@ -153,10 +147,9 @@ public final class SleepNotices {
         float rise = 1.0F - Easing.CUBIC_OUT.apply(Mth.clamp(age / NOTICE_IN_TICKS, 0.0F, 1.0F));
         int x = (graphics.guiWidth() - width) / 2;
         int y = graphics.guiHeight() - BOTTOM_OFFSET - height + Math.round(NOTICE_RISE * rise);
-        top = graphics.guiHeight() - BOTTOM_OFFSET - height - HudStyle.PANEL_PADDING;
         int rgb = shown.kind().color();
 
-        HudStyle.notice(graphics, x, y, width, height, alpha);
+        HudStyle.notice(graphics, x, y, width, height, rgb, alpha);
         // The wash over the left side, sweeping in as the card comes in; for danger it throbs.
         float washAlpha = shown.kind().danger() ? alpha * (0.65F + 0.35F * Mth.sin(age * 0.3F)) : alpha;
         HudStyle.wash(graphics, x, y, width, y + contentHeight, 1.0F - rise, rgb, washAlpha, age, shownAt * 31L + shown.kind().ordinal());
@@ -211,8 +204,7 @@ public final class SleepNotices {
         float rise = 1.0F - Easing.CUBIC_OUT.apply(Mth.clamp(age / (APPEAR_TICKS * 2.0F), 0.0F, 1.0F));
         int x = (graphics.guiWidth() - width) / 2;
         int y = graphics.guiHeight() - BOTTOM_OFFSET - height + Math.round(QUALITY_RISE * rise);
-        top = graphics.guiHeight() - BOTTOM_OFFSET - height - HudStyle.PANEL_PADDING;
-        HudStyle.box(graphics, x, y, width, height, alpha);
+        HudStyle.box(graphics, x, y, width, height, rgb, alpha);
         float fill = Easing.QUAD_OUT.apply(Mth.clamp(age / QUALITY_FILL_TICKS, 0.0F, 1.0F));
         // The wash over the head, sweeping in as the meter fills, its specks as lively as the night was good.
         HudStyle.wash(graphics, x, y, width, y + SLOT_SIZE + 5 + QUALITY_PIP_HEIGHT, fill, rgb, alpha, age, shownAt * 31L, quality.score() / 100.0F,
@@ -259,7 +251,7 @@ public final class SleepNotices {
                 int wash = Math.round(width * Math.abs(detail.points()) / (float) biggest * in);
                 if (wash > 0) graphics.fill(x, cursor, x + wash, cursor + QUALITY_ROW - 2, HudStyle.color(pointsColor, rowAlpha * 0.08F));
                 graphics.fill(x, cursor, x + 1, cursor + QUALITY_ROW - 2, HudStyle.color(pointsColor, rowAlpha * 0.7F));
-                SleepTooltip.icon(graphics, x + 4 + slide, cursor + 1, detail.points());
+                SleepTooltip.icon(graphics, x + 4 + slide, cursor + 1, detail.points(), rowAlpha);
                 int shownPoints = Math.round(Math.abs(detail.points()) * in);
                 Component points = Component.literal((detail.points() > 0 ? "+" : "\u2212") + shownPoints);
                 int pointsX = x + width - 2 - font.width(points);
@@ -285,7 +277,7 @@ public final class SleepNotices {
             int tagX = x + width - font.width(rarity) - 4;
             graphics.fill(tagX, cursor, x + width, cursor + QUALITY_ROW - 2, HudStyle.color(rarityColor, rowAlpha * 0.16F));
             graphics.text(font, rarity, tagX + 2, cursor + 2, HudStyle.color(rarityColor, rowAlpha), false);
-            SleepTooltip.icon(graphics, x + slide, cursor + 1, dream.kind());
+            SleepTooltip.icon(graphics, x + slide, cursor + 1, dream.kind(), rowAlpha);
             int nameX = x + SleepTooltip.ICON_SIZE + 4 + slide;
             graphics.text(font, font.split(dream.name(), tagX - nameX - 4).getFirst(), nameX, cursor + 2, HudStyle.color(rarityColor, rowAlpha), false);
             sheen(graphics, x, cursor, width, QUALITY_ROW - 2, age - rowStart(row), dream.rarity().ordinal() >= SleepEffect.Rarity.EPIC.ordinal(), rowAlpha);
