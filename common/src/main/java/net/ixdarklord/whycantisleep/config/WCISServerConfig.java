@@ -75,6 +75,9 @@ public final class WCISServerConfig {
             .range(0, 100).slider().comment("Percent chance a silverfish or cave spider is already in a hiding spot, and chases the player out.").build();
     public static final ConfigValue<Boolean> NOISE_GIVES_AWAY = BUILDER.bool("noiseGivesAway", true)
             .comment("Whether a hiding player who makes too much noise with monsters near is found, and pulled out.").build();
+    public static final ConfigValue<Boolean> VOICE_GIVES_AWAY = BUILDER.bool("voiceGivesAway", true)
+            .comment("With Simple Voice Chat: whether speaking while hiding is noise, as loud as the voice (whispering hardly counts), "
+                    + "so talking with monsters near gives a hiding player away.").enabledWhen(NOISE_GIVES_AWAY).build();
     public static final ConfigValue<Boolean> HEARTBEAT_MINIGAME = BUILDER.bool("heartbeatMinigame", true)
             .comment("Whether a player who hides with monsters chasing them must keep their heart slow: clicking on the beat, three misses and they gasp.").enabledWhen(ALLOW_HIDING).build();
     public static final ConfigValue<Boolean> HUNTER_SEARCH = BUILDER.bool("hunterSearch", true)

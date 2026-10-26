@@ -268,6 +268,8 @@ public final class HidingClient {
         float made = (trying ? NOISE_PER_KEY : 0.0F) + Math.min(NOISE_MAX_LOOK, swing * NOISE_PER_DEGREE);
         // While the heartbeat minigame runs it is their heart that gives them away, not their moves.
         if (HidingMinigame.running()) made = 0.0F;
+        // Their voice is noise whatever they do (Simple Voice Chat, HidingVoices).
+        made += HidingVoices.takeNoise();
         noise = Mth.clamp(noise + made - NOISE_FALL, 0.0F, 1.0F);
         // The server hears of it in tenths, when that changes.
         float rounded = Math.round(noise * 10.0F) / 10.0F;
