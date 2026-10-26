@@ -62,6 +62,8 @@ public final class SleepBoard {
 
     public static void init() {
         ClientTickEvents.END.register(minecraft -> {
+            // Paused, the panel's wash and specks hold still.
+            if (minecraft.isPaused()) return;
             tick++;
             if (!isShown()) shownSince = Long.MIN_VALUE;
             else if (shownSince == Long.MIN_VALUE) shownSince = tick;

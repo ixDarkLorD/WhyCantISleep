@@ -15,6 +15,8 @@ public final class HudFade {
     // How much of the HUD shows, 0 to 1, set each frame before it is drawn; whether it is being drawn now.
     private static float visible = 1.0F;
     private static boolean drawing;
+    // How much of the crosshair shows while it is drawn (1 otherwise).
+    private static float crosshair = 1.0F;
 
     private HudFade() {
     }
@@ -26,6 +28,19 @@ public final class HudFade {
      */
     public static void init() {
         ClientGuiEvents.RENDER_HUD.register((graphics, delta) -> begin());
+    }
+
+    /**
+     * How much of the crosshair shows while it is drawn now (1 when it isn't). It is drawn inverted over the world, so an
+     * alpha does nothing to it; {@code BlitRenderStateMixin} darkens its color instead, which takes the inversion down as
+     * smoothly.
+     */
+    public static float crosshair() {
+        return crosshair;
+    }
+
+    public static void crosshair(float amount) {
+        crosshair = Math.clamp(amount, 0.0F, 1.0F);
     }
 
     /** How much of the HUD shows this frame, 0 to 1. */

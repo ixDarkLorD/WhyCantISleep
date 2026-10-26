@@ -82,6 +82,8 @@ public final class HidingAcoustics {
     }
 
     private static void tick(Minecraft minecraft) {
+        // Paused, the muffling holds where it is.
+        if (minecraft.isPaused()) return;
         tick++;
         LocalPlayer player = minecraft.player;
         boolean hiding = player != null && minecraft.level != null && HidingClient.isLocalHiding() && WCISClientConfig.MUFFLE_SOUNDS.get();

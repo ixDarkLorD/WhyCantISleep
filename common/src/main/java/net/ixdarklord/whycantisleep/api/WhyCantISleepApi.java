@@ -35,11 +35,19 @@ public final class WhyCantISleepApi {
     }
 
     /**
-     * Gives a player a night terror now (as {@code /whycantisleep nightmare} does). Asleep, they wake shaken and the night
+     * Gives a player a night terror now. Asleep, they wake shaken and the night
      * is scored for it; awake, they only see it. Server side.
      */
     public static void nightmare(ServerPlayer player) {
         SleepNights.nightmare(player);
+    }
+
+    /**
+     * Marks a player for a night terror the next time they lie down (as {@code /whycantisleep nightmare} does), whether
+     * or not they sleep badly; they wake shaken and the night is scored for it. One already asleep has it now.
+     */
+    public static void markNightmare(ServerPlayer player) {
+        SleepNights.markNightmare(player);
     }
 
     /** How badly a player is sleeping. Server side. */

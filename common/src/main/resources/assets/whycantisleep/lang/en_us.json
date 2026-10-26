@@ -1,7 +1,7 @@
 {
   "commands.whycantisleep.nightmare.asleep": "Gave %s a nightmare; they will wake up shaken",
-  "commands.whycantisleep.nightmare.awake": "Showed %s a nightmare",
-  "commands.whycantisleep.nightmare.many": "Gave %s players a nightmare",
+  "commands.whycantisleep.nightmare.awake": "%s will have a nightmare the next time they sleep",
+  "commands.whycantisleep.nightmare.many": "Gave %s players a nightmare, for the next time they sleep",
   "config.whycantisleep.arrow_size.large": "Large",
   "config.whycantisleep.arrow_size.medium": "Medium",
   "config.whycantisleep.arrow_size.small": "Small",
