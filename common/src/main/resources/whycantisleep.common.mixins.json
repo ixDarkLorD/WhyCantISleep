@@ -16,7 +16,9 @@
     "client.CameraMixin",
     "client.ChatScreenMixin",
     "client.ChestBlockEntityMixin",
+    "client.ChestRendererMixin",
     "client.EntityMixin",
+    "client.FogRendererMixin",
     "client.GameRendererAccessor",
     "client.GameRendererMixin",
     "client.GuiMixin",
@@ -25,7 +27,8 @@
     "client.LocalPlayerMixin",
     "client.MinecraftMixin",
     "client.MultiPlayerGameModeMixin",
-    "client.PlayerRendererMixin"
+    "client.PlayerRendererMixin",
+    "client.PlayerSleepTimerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -86,10 +86,9 @@ public final class BlockerArrows {
             graphics.pose().scale(scale, scale, 1.0F);
             RenderSystem.enableBlend();
             int tint = ARGB.color(Math.round(alpha * 255.0F), arrow.color);
-            graphics.setColor(ARGB.redFloat(tint), ARGB.greenFloat(tint), ARGB.blueFloat(tint), ARGB.alphaFloat(tint));
+            graphics.setColor(ARGB.redFloat(tint), ARGB.greenFloat(tint), ARGB.blueFloat(tint), ARGB.alphaFloat(tint) * HudFade.factor());
             graphics.blit(ARROWS, -FRAME_SIZE / 2, -FRAME_SIZE / 2, arrow.hollow ? FRAME_SIZE : 0.0F, 0.0F, FRAME_SIZE, FRAME_SIZE, SHEET_WIDTH, FRAME_SIZE);
-            graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.disableBlend();
+            HudFade.restore(graphics);
             graphics.pose().popPose();
         }
         float pulse = (age % PULSE_TICKS) / PULSE_TICKS;

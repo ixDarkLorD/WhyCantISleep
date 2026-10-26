@@ -1,0 +1,21 @@
+{
+    "targets": [
+        "swap"
+    ],
+    "passes": [
+        {
+            "name": "whycantisleep:terror_warp",
+            "intarget": "minecraft:main",
+            "outtarget": "swap",
+            "uniforms": [
+                {"name": "Amount", "values": [1.0]},
+                {"name": "Beat", "values": [0.0]}
+            ]
+        },
+        {
+            "name": "coolcatcanvas:blit",
+            "intarget": "swap",
+            "outtarget": "minecraft:main"
+        }
+    ]
+}

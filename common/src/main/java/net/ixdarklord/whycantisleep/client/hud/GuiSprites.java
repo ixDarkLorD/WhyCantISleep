@@ -54,14 +54,14 @@ public final class GuiSprites {
         Sprite info = SPRITES.computeIfAbsent(sprite, GuiSprites::read);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        graphics.setColor(ARGB.redFloat(color), ARGB.greenFloat(color), ARGB.blueFloat(color), ARGB.alphaFloat(color));
+        // Faded with the HUD, as the fade's shader color is replaced for this sprite.
+        graphics.setColor(ARGB.redFloat(color), ARGB.greenFloat(color), ARGB.blueFloat(color), ARGB.alphaFloat(color) * HudFade.factor());
         if (info.border <= 0) {
             graphics.blit(info.texture, x, y, width, height, info.u, info.v, info.width, info.height, info.textureWidth, info.textureHeight);
         } else {
             nineSlice(graphics, info, x, y, width, height);
         }
-        graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.disableBlend();
+        HudFade.restore(graphics);
     }
 
     // The corners as they are, the edges stretched along, the middle stretched both ways.

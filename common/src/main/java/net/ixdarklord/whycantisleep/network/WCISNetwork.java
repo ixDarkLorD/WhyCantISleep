@@ -35,6 +35,9 @@ public final class WCISNetwork {
         Network.registerServerbound(NoisePayload.class, (payload, context) -> context.queue(() -> {
             if (context.getPlayer() instanceof ServerPlayer player) HidingServer.onNoise(player, payload.noise());
         }));
+        Network.registerServerbound(OvertimePayload.class, (payload, context) -> context.queue(() -> {
+            if (context.getPlayer() instanceof ServerPlayer player) HidingServer.onOvertime(player, payload.more());
+        }));
         Network.registerServerbound(VotePayload.class, (payload, context) -> context.queue(() -> {
             if (context.getPlayer() instanceof ServerPlayer player && payload.skip()) SleepVotes.onVote(player);
         }));
