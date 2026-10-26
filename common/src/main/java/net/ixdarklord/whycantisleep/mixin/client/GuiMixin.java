@@ -1,6 +1,7 @@
 package net.ixdarklord.whycantisleep.mixin.client;
 
 import net.ixdarklord.whycantisleep.client.Eyelids;
+import net.ixdarklord.whycantisleep.client.HidingClient;
 import net.ixdarklord.whycantisleep.client.HidingMinigame;
 import net.ixdarklord.whycantisleep.client.NightTerrorClient;
 import net.ixdarklord.whycantisleep.client.hud.HudFade;
@@ -19,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * client, and keeps those the sleep HUD shows in its own card off the line above the hotbar. Also draws the player's
  * eyelids ({@link Eyelids#render}: hiding, or in bed) before anything else, under the hotbar and the rest of the HUD,
  * and with the HUD hidden (F1) too. The rest of the HUD is drawn faded ({@link HudFade}) while the heartbeat minigame
- * runs, the crosshair left out once it is half gone; and the game's fade to dark in bed waits while a night terror
+ * runs, the crosshair with it, and the crosshair fades out while hiding; and the game's fade to dark in bed waits while a night terror
  * runs.
  */
 @Mixin(Gui.class)
@@ -48,8 +49,19 @@ public abstract class GuiMixin {
         if (NightTerrorClient.running()) ci.cancel();
     }
 
+    // The crosshair fades with the HUD in the minigame, and out while hiding (HudFade.crosshair); gone, not drawn.
     @Inject(method = "extractCrosshair", at = @At("HEAD"), cancellable = true)
     private void whycantisleep$fadeCrosshair(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-        if (HudFade.factor() < 0.5F) ci.cancel();
+        float shown = Math.min(HudFade.factor(), HidingClient.crosshair(deltaTracker.getGameTimeDeltaPartialTick(true)));
+        if (shown <= 0.01F) {
+            ci.cancel();
+            return;
+        }
+        HudFade.crosshair(shown);
+    }
+
+    @Inject(method = "extractCrosshair", at = @At("RETURN"))
+    private void whycantisleep$crosshairDone(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
+        HudFade.crosshair(1.0F);
     }
 }

@@ -74,6 +74,8 @@ public final class SleepNotices {
 
     public static void init() {
         ClientTickEvents.END.register(minecraft -> {
+            // Paused, a card holds: its wash and specks still, its time not running out behind the pause screen.
+            if (minecraft.isPaused()) return;
             tick++;
             if (notice != null && tick - shownAt > duration) notice = null;
         });
@@ -249,7 +251,7 @@ public final class SleepNotices {
                 int wash = Math.round(width * Math.abs(detail.points()) / (float) biggest * in);
                 if (wash > 0) graphics.fill(x, cursor, x + wash, cursor + QUALITY_ROW - 2, HudStyle.color(pointsColor, rowAlpha * 0.08F));
                 graphics.fill(x, cursor, x + 1, cursor + QUALITY_ROW - 2, HudStyle.color(pointsColor, rowAlpha * 0.7F));
-                SleepTooltip.icon(graphics, x + 4 + slide, cursor + 1, detail.points());
+                SleepTooltip.icon(graphics, x + 4 + slide, cursor + 1, detail.points(), rowAlpha);
                 int shownPoints = Math.round(Math.abs(detail.points()) * in);
                 Component points = Component.literal((detail.points() > 0 ? "+" : "\u2212") + shownPoints);
                 int pointsX = x + width - 2 - font.width(points);
@@ -275,7 +277,7 @@ public final class SleepNotices {
             int tagX = x + width - font.width(rarity) - 4;
             graphics.fill(tagX, cursor, x + width, cursor + QUALITY_ROW - 2, HudStyle.color(rarityColor, rowAlpha * 0.16F));
             graphics.text(font, rarity, tagX + 2, cursor + 2, HudStyle.color(rarityColor, rowAlpha), false);
-            SleepTooltip.icon(graphics, x + slide, cursor + 1, dream.kind());
+            SleepTooltip.icon(graphics, x + slide, cursor + 1, dream.kind(), rowAlpha);
             int nameX = x + SleepTooltip.ICON_SIZE + 4 + slide;
             graphics.text(font, font.split(dream.name(), tagX - nameX - 4).getFirst(), nameX, cursor + 2, HudStyle.color(rarityColor, rowAlpha), false);
             sheen(graphics, x, cursor, width, QUALITY_ROW - 2, age - rowStart(row), dream.rarity().ordinal() >= SleepEffect.Rarity.EPIC.ordinal(), rowAlpha);

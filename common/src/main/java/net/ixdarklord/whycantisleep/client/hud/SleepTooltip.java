@@ -12,6 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.objects.AtlasSprite;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
@@ -42,17 +43,32 @@ public final class SleepTooltip {
 
     /** Draws a buff icon for points above nothing, a debuff icon for points below. */
     public static void icon(GuiGraphicsExtractor graphics, int x, int y, int points) {
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, points > 0 ? BUFF : DEBUFF, x, y, ICON_SIZE, ICON_SIZE);
+        icon(graphics, x, y, points, 1.0F);
+    }
+
+    /** Draws a buff or debuff icon this opaque, so it fades with the card it is on. */
+    public static void icon(GuiGraphicsExtractor graphics, int x, int y, int points, float alpha) {
+        sprite(graphics, points > 0 ? BUFF : DEBUFF, x, y, alpha);
     }
 
     /** Draws the icon of a sleep effect's kind: buff, debuff, or neutral. */
     public static void icon(GuiGraphicsExtractor graphics, int x, int y, SleepEffect.Kind kind) {
+        icon(graphics, x, y, kind, 1.0F);
+    }
+
+    /** Draws the icon of a sleep effect's kind this opaque, so it fades with the card it is on. */
+    public static void icon(GuiGraphicsExtractor graphics, int x, int y, SleepEffect.Kind kind, float alpha) {
         Identifier sprite = switch (kind) {
             case POSITIVE -> BUFF;
             case NEGATIVE -> DEBUFF;
             case NEUTRAL -> NEUTRAL;
         };
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, y, ICON_SIZE, ICON_SIZE);
+        sprite(graphics, sprite, x, y, alpha);
+    }
+
+    private static void sprite(GuiGraphicsExtractor graphics, Identifier sprite, int x, int y, float alpha) {
+        if (alpha <= 0.0F) return;
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, y, ICON_SIZE, ICON_SIZE, ARGB.white(Math.min(alpha, 1.0F)));
     }
 
     private static void append(ItemStack stack, List<Component> lines) {

@@ -72,6 +72,10 @@ public final class HidingClient {
     private static boolean sneakReleased;
     private static boolean sneakWasDown;
     private static long tick;
+    // How much of the crosshair shows (it fades out over CROSSHAIR_TICKS while hiding): now, and a tick ago.
+    private static final float CROSSHAIR_TICKS = 10.0F;
+    private static float crosshair = 1.0F;
+    private static float crosshairO = 1.0F;
     private static long hidAt;
     // The noise the local player makes while hidden, 0 to 1: trying to walk or jump, or swinging the view about,
     // raises it; keeping still lets it fall. With monsters near, past RESTLESS_FROM the card says to hold still, and it
@@ -135,6 +139,11 @@ public final class HidingClient {
     /** Whether the local player is hiding. */
     public static boolean isLocalHiding() {
         return localView() != null;
+    }
+
+    /** How much of the crosshair shows, 0 to 1: it fades out while the local player hides. */
+    public static float crosshair(float partialTicks) {
+        return Mth.lerp(partialTicks, crosshairO, crosshair);
     }
 
     /** How the local player hides, or null when they don't. */
@@ -313,7 +322,13 @@ public final class HidingClient {
     }
 
     private static void tick(Minecraft minecraft) {
+        // Paused, hiding stands still with the world: the hide time, the card, the noise and the heartbeat all wait (the
+        // client ticks on behind the pause screen; in singleplayer the server waits too).
+        if (minecraft.isPaused()) return;
         tick++;
+        // The crosshair fades out while hiding, and back in coming out.
+        crosshairO = crosshair;
+        crosshair = Mth.approach(crosshair, isLocalHiding() ? 0.0F : 1.0F, 1.0F / CROSSHAIR_TICKS);
         LIDS.values().removeIf(lid -> !lid.raising && tick - lid.since > LID_TICKS);
         if (minecraft.level != null && !HIDING.isEmpty()) {
             boolean check = tick % DANGER_CHECK_TICKS == 0;

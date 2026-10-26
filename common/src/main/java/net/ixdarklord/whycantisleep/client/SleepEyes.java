@@ -60,6 +60,8 @@ public final class SleepEyes {
     }
 
     private static void tick(Minecraft minecraft) {
+        // Paused, the eyes in bed wait with the world.
+        if (minecraft.isPaused()) return;
         LocalPlayer player = minecraft.player;
         boolean sleeping = player != null && player.isSleeping() && !HidingClient.isLocalHiding();
         // A night terror has the eyes while it runs; once it is over they are shut, and sleep goes on from there.

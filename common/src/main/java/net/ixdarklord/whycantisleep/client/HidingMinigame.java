@@ -273,7 +273,11 @@ public final class HidingMinigame {
     }
 
     public static void init() {
-        ClientTickEvents.END.register(minecraft -> tick++);
+        // Its clock stops while the game is paused (the client ticks on behind the pause screen), so beats don't cross
+        // the line, or slip past the window, unseen.
+        ClientTickEvents.END.register(minecraft -> {
+            if (!minecraft.isPaused()) tick++;
+        });
         ClientGuiEvents.RENDER_HUD.register(HidingMinigame::render);
     }
 
@@ -355,6 +359,8 @@ public final class HidingMinigame {
      * gasp, for their noise to go to its loudest.
      */
     public static boolean tick(Minecraft minecraft, boolean danger) {
+        // Paused, nothing moves on: no beats, no strikes, the veins where they are.
+        if (minecraft.isPaused()) return false;
         boolean pressed = clicked;
         clicked = false;
         // The veins come in a level a strike, and fall back as a streak calms them; gasped, they take the screen.

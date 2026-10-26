@@ -191,6 +191,9 @@ public final class Eyelids {
     }
 
     private static void tick(Minecraft minecraft) {
+        // Paused, the lids hold where they are: no sway, no blinks, the eased keyframes waiting (the client ticks on
+        // behind the pause screen).
+        if (minecraft.isPaused()) return;
         tick++;
         tensionO = tension;
         tension = Mth.approach(tension, tense ? TENSION : 0.0F, TENSION_RATE);

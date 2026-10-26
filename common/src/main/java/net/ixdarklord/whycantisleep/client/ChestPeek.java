@@ -35,9 +35,9 @@ public final class ChestPeek {
     private static final float SPOT_FORWARD = 0.3F;
     // The band's foot: just over the chest's rim, where its lid shuts (10/16), in the spot's own space.
     private static final float RIM = 0.625F + 0.01F - SPOT_UP;
-    // The head's middle, behind the spot: its hat layer's face just inside the chest's front (inset 1/16 from the
-    // block's edge).
-    private static final float BACK = -0.16F;
+    // The head's middle, behind the spot: its hat layer's face a pixel back from the chest's front (inset 1/16 from
+    // the block's edge), in the shadow under the lid.
+    private static final float BACK = -0.22F;
     // The chest's lid, in the model's pixels from the chest's base and back: hinged 9 up and 1 in, 14 deep. Its front
     // wall is 1 in from the block's front, and the band keeps a little inside that.
     private static final float HINGE_Y = 9.0F;

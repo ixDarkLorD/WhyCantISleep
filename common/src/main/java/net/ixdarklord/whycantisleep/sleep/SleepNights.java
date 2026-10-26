@@ -69,6 +69,9 @@ public final class SleepNights {
     private static final Map<UUID, SleepQuality> LAST = new HashMap<>();
     private static final Map<UUID, Long> HURT_AT = new HashMap<>();
     private static final Set<UUID> MORNING = new HashSet<>();
+    // A player marked for a nightmare the next time they lie down (/whycantisleep nightmare on someone awake): kept as
+    // a tag on them, so it lasts through leaving and coming back.
+    private static final String NIGHTMARE_MARK = "whycantisleep.nightmare";
 
     private SleepNights() {
     }
@@ -77,7 +80,8 @@ public final class SleepNights {
         PlayerEvents.END_TICK.register(player -> {
             if (player instanceof ServerPlayer serverPlayer && player.tickCount % LOOK_TICKS == 0) look(serverPlayer);
         });
-        // /whycantisleep nightmare [players]: a night terror on demand, for operators.
+        // /whycantisleep nightmare [players]: a night terror for operators to hand out: now for one asleep, else the
+        // next time they lie down.
         CommandEvents.REGISTER.register((dispatcher, context, selection) -> dispatcher.register(Commands.literal("whycantisleep")
                 .then(Commands.literal("nightmare").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                         .executes(command -> nightmare(command.getSource(), List.of(command.getSource().getPlayerOrException())))
@@ -120,14 +124,28 @@ public final class SleepNights {
         Night night = new Night(bed.immutable(), level.getGameTime(), trouble, Bedroom.of(level, bed));
         NIGHTS.put(player.getUUID(), night);
         night.observe(level);
-        if (WCISServerConfig.NIGHT_TERRORS.get() && trouble.level().atLeast(SleepTrouble.Level.RESTLESS)) {
+        // Marked for one, they have it this time, whatever the chance; else restless or worse, at the server's chance.
+        boolean marked = player.entityTags().contains(NIGHTMARE_MARK);
+        if (marked) player.removeTag(NIGHTMARE_MARK);
+        boolean rolled = false;
+        if (!marked && WCISServerConfig.NIGHT_TERRORS.get() && trouble.level().atLeast(SleepTrouble.Level.RESTLESS)) {
             int chance = WCISServerConfig.TERROR_CHANCE.get() * (trouble.level() == SleepTrouble.Level.SLEEPLESS ? 2 : 1);
-            if (level.getRandom().nextInt(100) < chance) {
-                SleepEvents.NightTerror event = new SleepEvents.NightTerror(player, trouble);
-                SleepEvents.NIGHT_TERROR.invoke(event);
-                if (!event.isCancelled()) startTerror(player, night, level);
-            }
+            rolled = level.getRandom().nextInt(100) < chance;
         }
+        if (marked || rolled) {
+            SleepEvents.NightTerror event = new SleepEvents.NightTerror(player, trouble);
+            SleepEvents.NIGHT_TERROR.invoke(event);
+            if (!event.isCancelled()) startTerror(player, night, level);
+        }
+    }
+
+    /**
+     * Marks a player for a night terror the next time they lie down, whether or not they sleep badly; one already
+     * asleep has it now instead.
+     */
+    public static void markNightmare(ServerPlayer player) {
+        if (player.isSleeping() && NIGHTS.containsKey(player.getUUID())) nightmare(player);
+        else player.addTag(NIGHTMARE_MARK);
     }
 
     /**
@@ -137,7 +155,7 @@ public final class SleepNights {
     public static void nightmare(ServerPlayer player) {
         Night night = NIGHTS.get(player.getUUID());
         if (night != null && player.isSleeping()) startTerror(player, night, player.level());
-        else WCISNetwork.sendToPlayer(player, new TerrorPayload(true, 1.0F));
+        else WCISNetwork.sendToPlayer(player, new TerrorPayload(true, 1.0F, false));
     }
 
     /** Whether a player is in the middle of a night terror: the night waits for it before it passes. */
@@ -151,7 +169,7 @@ public final class SleepNights {
         float intensity = terrorIntensity(player, night);
         night.terror = true;
         night.terrorUntil = level.getGameTime() + TerrorPayload.ticks(intensity);
-        WCISNetwork.sendToPlayer(player, new TerrorPayload(true, intensity));
+        WCISNetwork.sendToPlayer(player, new TerrorPayload(true, intensity, true));
     }
 
     /**
@@ -168,7 +186,7 @@ public final class SleepNights {
     }
 
     private static int nightmare(CommandSourceStack source, Collection<ServerPlayer> targets) {
-        for (ServerPlayer target : targets) nightmare(target);
+        for (ServerPlayer target : targets) markNightmare(target);
         if (targets.size() == 1) {
             ServerPlayer target = targets.iterator().next();
             source.sendSuccess(() -> Component.translatable(target.isSleeping() ? "commands.whycantisleep.nightmare.asleep" : "commands.whycantisleep.nightmare.awake",
@@ -222,7 +240,7 @@ public final class SleepNights {
             player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SHAKEN_SLOWNESS_TICKS, 0, false, false, true));
         }
         if (wellRested) player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, RESTED_REGENERATION_TICKS, 0, false, true, true));
-        if (night.terror) WCISNetwork.sendToPlayer(player, new TerrorPayload(false, 0.0F));
+        if (night.terror) WCISNetwork.sendToPlayer(player, new TerrorPayload(false, 0.0F, false));
 
         SleepEffect sleepEffect = reason.rested() ? sleepEffect(player, quality) : null;
         SleepEvents.WOKE.invoke(new SleepEvents.Woke(player, reason, quality, slept, night.terror, wellRested, sleepEffect));
