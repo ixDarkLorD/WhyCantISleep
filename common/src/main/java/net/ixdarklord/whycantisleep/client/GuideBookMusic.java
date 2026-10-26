@@ -19,8 +19,9 @@ import java.util.List;
  * The guide book's live list of the music that counts at bedtime ({@code whycantisleep:bedtime_music}, a Folios
  * source): each music disc in one of the mood tags ({@link Bedroom#CALM}, {@link Bedroom#CREEPY}, {@link Bedroom#LOUD};
  * 1.20.1 has no jukebox songs, so they are item tags of discs), with {@code name} (the disc's description, "C418 -
- * cat") and {@code mood} ({@code calm}, {@code creepy} or {@code loud}; a disc in two tags is a row for each). Worked out
- * from the tags each time the page is laid out, so a data pack's tags show in the book.
+ * cat"), {@code mood} ({@code calm}, {@code creepy} or {@code loud}; a disc in two tags is a row for each) and
+ * {@code disc} (the disc itself as an item slot, {@code {slot:...}}). Worked out from the tags each time the page is
+ * laid out, so a data pack's tags show in the book.
  */
 public final class GuideBookMusic {
     public static final ResourceLocation SOURCE = WhyCantISleep.id("bedtime_music");
@@ -46,7 +47,8 @@ public final class GuideBookMusic {
             // The description's translation key, which the page translates; a disc with a plain description, as written.
             Component description = record.getDisplayName();
             String name = description.getContents() instanceof TranslatableContents translatable ? translatable.getKey() : description.getString();
-            rows.add(FoliosSources.row(BuiltInRegistries.ITEM.getKey(disc.value()) + "#" + mood).field("name", name).field("mood", mood).build());
+            ResourceLocation id = BuiltInRegistries.ITEM.getKey(disc.value());
+            rows.add(FoliosSources.row(id + "#" + mood).field("name", name).field("mood", mood).field("disc", "{slot:" + id + "} ").build());
         }
     }
 }

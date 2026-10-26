@@ -17,8 +17,8 @@
           },
           "observe": {
             "source": "whycantisleep:bedtime_music",
-            "row": "{$name}",
-            "separator": ", ",
+            "row": "{$disc}{$name}",
+            "separator": "\n",
             "where": {
               "field": "mood",
               "is": "calm"
@@ -35,8 +35,8 @@
           },
           "observe": {
             "source": "whycantisleep:bedtime_music",
-            "row": "{$name}",
-            "separator": ", ",
+            "row": "{$disc}{$name}",
+            "separator": "\n",
             "where": {
               "field": "mood",
               "is": "creepy"
@@ -53,8 +53,8 @@
           },
           "observe": {
             "source": "whycantisleep:bedtime_music",
-            "row": "{$name}",
-            "separator": ", ",
+            "row": "{$disc}{$name}",
+            "separator": "\n",
             "where": {
               "field": "mood",
               "is": "loud"

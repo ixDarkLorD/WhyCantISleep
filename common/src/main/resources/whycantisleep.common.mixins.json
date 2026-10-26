@@ -28,7 +28,8 @@
     "client.MinecraftMixin",
     "client.MultiPlayerGameModeMixin",
     "client.PlayerRendererMixin",
-    "client.PlayerSleepTimerMixin"
+    "client.PlayerSleepTimerMixin",
+    "client.RenderSystemMixin"
   ],
   "injectors": {
     "defaultRequire": 1

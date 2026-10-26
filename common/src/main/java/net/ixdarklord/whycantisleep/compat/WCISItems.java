@@ -1,5 +1,6 @@
 package net.ixdarklord.whycantisleep.compat;
 
+import net.ixdarklord.coolcatcore.api.registry.CreativeTabs;
 import net.ixdarklord.coolcatcore.api.registry.DeferredRegister;
 import net.ixdarklord.coolcatcore.api.registry.RegistryEntry;
 import net.ixdarklord.folios.api.FoliosBookItem;
@@ -10,12 +11,13 @@ import net.ixdarklord.folios.api.FoliosBooks;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 
 /**
- * The mod's one item: its guide book, a Folios {@link FoliosBookItem} that always opens {@link GuideBookGift#BOOK},
+ * The mod's one item, in a creative tab of its own ({@link #TAB}): its guide book, a Folios {@link FoliosBookItem} that always opens {@link GuideBookGift#BOOK},
  * named "Insomniac's Handbook". Its stacks carry the book in their NBT too ({@code folios_book}, {@link GuideBookGift#stack}),
  * which Folios draws the cover from; on 1.20.1 a recipe's result can't carry NBT, so a crafted one is given it as it is
  * made, and any stack without it as it sits in an inventory.
@@ -26,11 +28,24 @@ public final class WCISItems {
     public static final RegistryEntry<FoliosBookItem> GUIDE_BOOK = ITEMS.register("guide_book",
             () -> new Handbook(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
 
+    private static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(WhyCantISleep.MOD_ID, Registries.CREATIVE_MODE_TAB);
+
+    /**
+     * The mod's creative tab, holding the guide book as it is given (its book named, so its cover is drawn), which is
+     * also where JEI and the like find it.
+     */
+    public static final RegistryEntry<CreativeModeTab> TAB = TABS.register("main", () -> CreativeTabs.builder()
+            .title(Component.translatable("itemGroup.whycantisleep"))
+            .icon(GuideBookGift::stack)
+            .displayItems((parameters, output) -> output.accept(GuideBookGift.stack()))
+            .build());
+
     private WCISItems() {
     }
 
     public static void register() {
         ITEMS.register();
+        TABS.register();
     }
 
     /**
