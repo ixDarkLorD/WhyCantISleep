@@ -218,7 +218,7 @@ html:not([data-mc]) .mc-only { display: none; }
   animation: wh-blink 5s infinite; animation-delay: var(--d);
 }
 @keyframes wh-blink { 0%, 44%, 50%, 100% { transform: scaleY(1); } 47% { transform: scaleY(0.1); } }
-@keyframes wh-lurk { 0%, 100% { opacity: calc(0.45 + 0.4 * var(--s)); } 60% { opacity: calc(0.15 + 0.3 * var(--s)); } } }
+@keyframes wh-lurk { 0%, 100% { opacity: calc(0.45 + 0.4 * var(--s)); } 60% { opacity: calc(0.15 + 0.3 * var(--s)); } }
 
 /* ----- Sections ----- */
 .wh-section { padding: 4.5rem 0; position: relative; }
