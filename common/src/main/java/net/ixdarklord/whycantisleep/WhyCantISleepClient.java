@@ -5,6 +5,7 @@ import net.ixdarklord.whycantisleep.client.Eyelids;
 import net.ixdarklord.whycantisleep.client.HidingAcoustics;
 import net.ixdarklord.whycantisleep.client.HideCooldown;
 import net.ixdarklord.whycantisleep.client.HidingClient;
+import net.ixdarklord.whycantisleep.client.HidingVoices;
 import net.ixdarklord.whycantisleep.client.SleepEyes;
 import net.ixdarklord.whycantisleep.client.HidingMinigame;
 import net.ixdarklord.whycantisleep.client.NightTerrorClient;
@@ -33,6 +34,7 @@ public final class WhyCantISleepClient implements ClientModConstructor {
         HidingClient.init();
         HideCooldown.init();
         HidingAcoustics.init();
+        HidingVoices.init();
         Eyelids.init();
         SleepEyes.init();
         SleepClient.init();
