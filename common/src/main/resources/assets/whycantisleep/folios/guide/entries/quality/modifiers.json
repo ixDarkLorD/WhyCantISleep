@@ -4,19 +4,42 @@
   "sort": 1,
   "pages": [
     {
-      "type": "text",
       "title": "guide.whycantisleep.guide.entry.quality.modifiers.page1.title",
-      "text": "guide.whycantisleep.guide.entry.quality.modifiers.page1.text"
+      "text": {
+        "translate": "guide.whycantisleep.guide.entry.quality.modifiers.page1.text"
+      },
+      "overflow": "auto",
+      "observe": {
+        "source": "whycantisleep:sleep_modifiers",
+        "row": "- {$icon}{$points} **{$label}**{$hint}",
+        "where": {
+          "field": "value",
+          "above": 0
+        },
+        "sort": "-value",
+        "empty": {
+          "translate": "guide.whycantisleep.guide.entry.quality.modifiers.page1.list.empty"
+        }
+      }
     },
     {
-      "type": "text",
       "title": "guide.whycantisleep.guide.entry.quality.modifiers.page2.title",
-      "text": "guide.whycantisleep.guide.entry.quality.modifiers.page2.text"
-    },
-    {
-      "type": "text",
-      "title": "guide.whycantisleep.guide.entry.quality.modifiers.page3.title",
-      "text": "guide.whycantisleep.guide.entry.quality.modifiers.page3.text"
+      "text": {
+        "translate": "guide.whycantisleep.guide.entry.quality.modifiers.page2.text"
+      },
+      "overflow": "auto",
+      "observe": {
+        "source": "whycantisleep:sleep_modifiers",
+        "row": "- {$icon}{$points} **{$label}**{$hint}",
+        "where": {
+          "field": "value",
+          "below": 0
+        },
+        "sort": "value",
+        "empty": {
+          "translate": "guide.whycantisleep.guide.entry.quality.modifiers.page2.list.empty"
+        }
+      }
     }
   ]
 }

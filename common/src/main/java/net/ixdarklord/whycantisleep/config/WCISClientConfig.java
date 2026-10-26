@@ -46,6 +46,12 @@ public final class WCISClientConfig {
             .comment("Shows how many monsters are nearby and where the closest one is, above the hotbar.").build();
     static {
         BUILDER.pop();
+        BUILDER.push("sounds", "How the world sounds while you hide or sleep.");
+    }
+    public static final ConfigValue<Boolean> MUFFLE_SOUNDS = BUILDER.bool("muffleSounds", true)
+            .comment("Muffles and roughens the sounds around you while you hide, as much as your hiding spot shuts them out (through a chest's lid crack, a door's windows, the open sides under a bed), and while you sleep, the deeper the sleep the more.").build();
+    static {
+        BUILDER.pop();
         BUILDER.push("explanations", "Why a sleep failed, and what to do about it.");
     }
     public static final ConfigValue<Boolean> SLEEP_EXPLANATIONS = BUILDER.bool("sleepExplanations", true)

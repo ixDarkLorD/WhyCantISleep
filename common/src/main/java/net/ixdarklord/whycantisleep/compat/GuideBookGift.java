@@ -1,7 +1,7 @@
 package net.ixdarklord.whycantisleep.compat;
 
 import net.ixdarklord.coolcatcore.api.event.v2.common.PlayerEvents;
-import net.ixdarklord.folios.api.GuideBooks;
+import net.ixdarklord.folios.api.FoliosBooks;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.whycantisleep.config.WCISServerConfig;
 import net.minecraft.resources.Identifier;
@@ -33,7 +33,7 @@ public final class GuideBookGift {
 
     /** A copy of the guide: the mod's item, naming its book for the cover Folios draws. */
     public static ItemStack stack() {
-        return GuideBooks.createStack(WCISItems.GUIDE_BOOK.get(), BOOK);
+        return FoliosBooks.createStack(WCISItems.GUIDE_BOOK.get(), BOOK);
     }
 
     /** Puts a copy of the guide in a player's inventory, or at their feet when it is full. */

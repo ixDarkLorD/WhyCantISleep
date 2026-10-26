@@ -16,20 +16,26 @@
     "client.AbstractRecipeBookScreenMixin",
     "client.AvatarRenderStateMixin",
     "client.AvatarRendererMixin",
+    "client.BlitRenderStateMixin",
     "client.ChestBlockEntityMixin",
+    "client.ChestRendererMixin",
+    "client.ColoredRectangleRenderStateMixin",
     "client.CameraMixin",
     "client.ChatScreenMixin",
     "client.EntityMixin",
+    "client.FogRendererMixin",
     "client.GameRendererMixin",
     "client.GuiItemRenderStateMixin",
     "client.HudMixin",
     "client.GuiRendererMixin",
+    "client.GuiTextRenderStateMixin",
     "client.HumanoidModelMixin",
     "client.InventoryScreenMixin",
     "client.LivingEntityRendererMixin",
     "client.LocalPlayerMixin",
     "client.MinecraftMixin",
-    "client.MultiPlayerGameModeMixin"
+    "client.MultiPlayerGameModeMixin",
+    "client.TiledBlitRenderStateMixin"
   ],
   "injectors": {
     "defaultRequire": 1
