@@ -141,8 +141,8 @@ public final class SleepNotices {
         int textHeight = (title.size() + hint.size()) * LINE_HEIGHT - 2 + (hint.isEmpty() ? 0 : HINT_GAP);
         int width = SLOT_SIZE + SLOT_GAP + textWidth;
         int contentHeight = Math.max(SLOT_SIZE, textHeight);
-        // Only a hiding card has a timer, and only while it has something to count (not all quiet).
-        boolean timed = shown.kind().hiding() && shown.progress() != null;
+        // Only a card with something to count has a timer: a hiding card (not all quiet), the hiding cooldown.
+        boolean timed = shown.progress() != null;
         int height = contentHeight + (timed ? NOTICE_FOOT_ROOM : 0);
         float rise = 1.0F - Easing.CUBIC_OUT.apply(Mth.clamp(age / NOTICE_IN_TICKS, 0.0F, 1.0F));
         int x = (graphics.guiWidth() - width) / 2;

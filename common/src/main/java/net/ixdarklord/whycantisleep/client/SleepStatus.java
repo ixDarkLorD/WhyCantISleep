@@ -1,5 +1,7 @@
 package net.ixdarklord.whycantisleep.client;
 
+import net.ixdarklord.coolcatcanvas.api.client.gui.placement.GuiAreas;
+import net.ixdarklord.coolcatcanvas.api.client.gui.placement.GuiPlacement;
 import net.ixdarklord.whycantisleep.client.hud.GuiSprites;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientPlayerEvents;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
@@ -30,9 +32,11 @@ import java.util.Locale;
 /**
  * The player's sleep, as they last heard of it, and the button in the inventory's player preview that shows it: a
  * small moon in the preview's corner, its dot the color of their sleep trouble; clicked, a popup beside it tells how
- * badly they are sleeping (the level, how long they have been up, refused sleeps in a row) and how their last night
- * went (its score as a meter of pips, what mattered most, whether they woke shaken or well rested, or what woke them).
- * The server sends the trouble ({@link TroublePayload}, every 5 s) and each waking ({@link WokePayload}).
+ * badly they are sleeping (the level, how long they have been up with the sleep debt moon as a meter, refused sleeps
+ * in a row) and how their last night went (its score as a meter of pips, what mattered most, whether they woke
+ * shaken or well rested, or what woke them).
+ * The server sends the trouble ({@link TroublePayload}, every 5 s) and each waking ({@link WokePayload}). The button
+ * keeps out of the way of anything another mod puts in that corner ({@link #place}).
  */
 public final class SleepStatus {
     // The button: a dark tile with a sleeping moon face, lighter under the pointer and lighter still while open
@@ -61,6 +65,7 @@ public final class SleepStatus {
     private static final int DETAILS = 3;
     private static final int POINTS_WIDTH = 30;
     private static final int PIP_HEIGHT = 5;
+    private static final int MOON = 9;
     private static final int GAP = 6;
 
     private static int ticksSinceRest;
@@ -99,13 +104,25 @@ public final class SleepStatus {
         open = false;
     }
 
-    // The button's corner: the top right of the inventory's player preview (26 to 75 across, 8 to 78 down).
-    private static int buttonX(int left) {
-        return left + 75 - BUTTON - 1;
-    }
+    // The inventory's player preview, from the panel's corner: 26 to 75 across, 8 to 78 down.
+    private static final int PREVIEW_X = 26;
+    private static final int PREVIEW_Y = 8;
+    private static final int PREVIEW_WIDTH = 49;
+    private static final int PREVIEW_HEIGHT = 70;
 
-    private static int buttonY(int top) {
-        return top + 8 + 1;
+    /**
+     * Where the button goes: the top right corner of the inventory's player preview, unless something of another mod's
+     * is there (a button, a slot, whatever the screen draws over the preview; CoolCatLib's {@link GuiPlacement}), when
+     * it moves left or down the preview to the nearest clear place.
+     */
+    private static GuiPlacement.Position place(int left, int top) {
+        return GuiPlacement.screen()
+                .size(BUTTON, BUTTON)
+                .at(left + PREVIEW_X + PREVIEW_WIDTH - BUTTON - 1, top + PREVIEW_Y + 1)
+                .gap(1)
+                .within(left + PREVIEW_X, top + PREVIEW_Y, PREVIEW_WIDTH, PREVIEW_HEIGHT)
+                .directions(GuiPlacement.Direction.LEFT, GuiPlacement.Direction.DOWN)
+                .find();
     }
 
     /**
@@ -114,7 +131,7 @@ public final class SleepStatus {
      */
     public static boolean click(int left, int top, double mouseX, double mouseY, int button) {
         if (!WCISClientConfig.STATUS_BUTTON.get()) return false;
-        if (button == 0 && over(left, top, mouseX, mouseY)) {
+        if (button == 0 && overButton(left, top, mouseX, mouseY)) {
             open = !open;
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F, 0.6F));
             return true;
@@ -123,18 +140,28 @@ public final class SleepStatus {
         return false;
     }
 
-    private static boolean over(int left, int top, double mouseX, double mouseY) {
-        int x = buttonX(left);
-        int y = buttonY(top);
+    private static boolean overButton(int left, int top, double mouseX, double mouseY) {
+        GuiPlacement.Position at = place(left, top);
+        return over(at.x(), at.y(), mouseX, mouseY);
+    }
+
+    private static boolean over(int x, int y, double mouseX, double mouseY) {
         return mouseX >= x && mouseX < x + BUTTON && mouseY >= y && mouseY < y + BUTTON;
     }
 
-    /** Draws the button, and the popup when open ({@code InventoryScreenMixin}, after the screen). */
+    /**
+     * Draws the button, and the popup when open ({@code InventoryScreenMixin}, after the screen); unrecorded by
+     * CoolCatLib's {@link GuiAreas}, so the button isn't in its own way.
+     */
     public static void render(GuiGraphics graphics, Font font, int left, int top, int mouseX, int mouseY) {
         if (!WCISClientConfig.STATUS_BUTTON.get()) return;
-        int x = buttonX(left);
-        int y = buttonY(top);
-        boolean hover = over(left, top, mouseX, mouseY);
+        GuiAreas.unrecorded(() -> render(graphics, font, place(left, top), mouseX, mouseY));
+    }
+
+    private static void render(GuiGraphics graphics, Font font, GuiPlacement.Position at, int mouseX, int mouseY) {
+        int x = at.x();
+        int y = at.y();
+        boolean hover = over(x, y, mouseX, mouseY);
         SleepTrouble.Level level = new SleepTrouble(failedAttempts, ticksSinceRest).level();
         int color = color(level);
         // The moon's face follows how you are sleeping: sad when sleepless or after an awful night, tired when restless
@@ -154,8 +181,14 @@ public final class SleepStatus {
         graphics.fill(x + 1, y + last, x + last, y + BUTTON, rim);
         graphics.fill(x, y + 1, x + 1, y + last, rim);
         graphics.fill(x + last, y + 1, x + BUTTON, y + last, rim);
-        if (open) popup(graphics, font, x + BUTTON + 4, y, level, color);
-        else if (hover) graphics.renderTooltip(font, Component.translatable("gui.whycantisleep.status.button"), mouseX, mouseY);
+        if (open) {
+            // Over the slots: their items and empty-slot icons (the shield's) are drawn 100 nearer and write depth, so
+            // the popup is drawn nearer still, as the game draws its tooltips.
+            graphics.pose().pushPose();
+            graphics.pose().translate(0.0F, 0.0F, 400.0F);
+            popup(graphics, font, x + BUTTON + 4, y, level, color);
+            graphics.pose().popPose();
+        } else if (hover) graphics.renderTooltip(font, Component.translatable("gui.whycantisleep.status.button"), mouseX, mouseY);
     }
 
     private static void popup(GuiGraphics graphics, Font font, int x, int y, SleepTrouble.Level level, int color) {
@@ -195,6 +228,12 @@ public final class SleepStatus {
                 Component.translatable("gui.whycantisleep.status.level." + levelName + ".hint"), x, y, HudStyle.color(HudStyle.GRAY, 1.0F), false)));
         rows.add(divider());
         rows.add(pair(Component.translatable("gui.whycantisleep.status.awake_for"), awakeFor(), HudStyle.WHITE));
+        // The sleep debt moon, as on the HUD, and a meter running to the three days when phantoms come.
+        float debt = SleepDebtMoon.fill(ticksSinceRest);
+        rows.add(new Row(MOON + 2, (graphics, font, x, y, width) -> {
+            SleepDebtMoon.drawMoon(graphics, x, y, MOON, debt);
+            HudStyle.pips(graphics, x + MOON + 4, y + (MOON - PIP_HEIGHT) / 2, width - MOON - 4, PIP_HEIGHT, debt, color, 1.0F);
+        }));
         if (failedAttempts > 0) {
             rows.add(pair(Component.translatable("gui.whycantisleep.status.refused"), Component.literal(String.valueOf(failedAttempts)), HudStyle.WHITE));
         }

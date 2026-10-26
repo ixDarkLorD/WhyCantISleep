@@ -5,6 +5,7 @@ import net.ixdarklord.coolcatcore.api.core.ClientModConstructor;
 import net.ixdarklord.folios.internal.client.FoliosBookItemModel;
 import net.ixdarklord.whycantisleep.client.Eyelids;
 import net.ixdarklord.whycantisleep.client.HidingAcoustics;
+import net.ixdarklord.whycantisleep.client.HideCooldown;
 import net.ixdarklord.whycantisleep.client.HidingClient;
 import net.ixdarklord.whycantisleep.client.SleepEyes;
 import net.ixdarklord.whycantisleep.client.HidingMinigame;
@@ -33,6 +34,7 @@ public final class WhyCantISleepClient implements ClientModConstructor {
         // First of the HUD layers, so the mod's own fade with the game's while the heartbeat minigame runs.
         HudFade.init();
         HidingClient.init();
+        HideCooldown.init();
         HidingAcoustics.init();
         Eyelids.init();
         SleepEyes.init();
