@@ -1,6 +1,6 @@
 package net.ixdarklord.whycantisleep.client.hud;
 
-import net.ixdarklord.coolcatcanvas.api.client.gui.FadedItems;
+import net.ixdarklord.coolcatcanvas.api.client.gui.ItemOpacityRenderer;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientGuiEvents;
 
 /**
@@ -54,13 +54,13 @@ public final class HudFade {
         if (drawing) return;
         drawing = true;
         // The game's items (the hotbar's and all) fade with the HUD through CoolCatLib (ItemFade).
-        FadedItems.pushItemOpacity(visible);
+        ItemOpacityRenderer.pushItemOpacity(visible);
     }
 
     public static void end() {
         if (!drawing) return;
         drawing = false;
-        FadedItems.popItemOpacity();
+        ItemOpacityRenderer.popItemOpacity();
     }
 
     /** What the opacity of anything drawn now is scaled by: the HUD's, while the HUD is drawn, and 1 otherwise. */
