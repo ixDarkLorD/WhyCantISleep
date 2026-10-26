@@ -1,0 +1,124 @@
+[project]
+site_url = "https://ixdarklord.github.io/WhyCantISleep/"
+site_name = "Why Can't I Sleep?"
+site_description = "Find out what's keeping you awake at night, hide from what's hunting you, and make every night count."
+site_author = "ixDarkLorD"
+repo_url = "https://github.com/ixDarkLorD/WhyCantISleep"
+repo_name = "ixDarkLorD/WhyCantISleep"
+copyright = "Copyright &copy; 2026 ixDarkLorD &middot; <a href=\"/WhyCantISleep/license/\">Mozilla Public License 2.0</a>"
+extra_css = ["assets/wcis.css"]
+extra_javascript = ["assets/wcis.js", "assets/mc-version.js"]
+
+nav = [
+  { "Home" = "index.md" },
+  { "Docs" = [
+    "docs/index.md",
+    { "Playing" = [
+      { "Getting started" = "docs/playing/getting-started.md" },
+      { "Why can't I sleep?" = "docs/playing/why-cant-i-sleep.md" },
+      { "Hiding" = "docs/playing/hiding.md" },
+      { "Nights" = "docs/playing/nights.md" },
+      { "Sleeping together" = "docs/playing/together.md" },
+    ] },
+    { "Server owners" = [
+      { "Configuration" = "docs/server/configuration.md" },
+      { "Commands" = "docs/server/commands.md" },
+    ] },
+    { "Data packs" = [
+      { "Overview and tags" = "docs/datapacks/index.md" },
+      { "Sleep modifiers" = "docs/datapacks/sleep-modifiers.md" },
+      { "Sleep effects" = "docs/datapacks/sleep-effects.md" },
+      { "Hiding spots" = "docs/datapacks/hiding-spots.md" },
+    ] },
+    { "Compatibility" = "docs/compatibility.md" },
+    { "For mod developers" = [
+      { "Overview and setup" = "docs/developers/index.md" },
+      { "Events" = "docs/developers/events.md" },
+      { "Hiding spots in code" = "docs/developers/hiding-spots.md" },
+      { "Data generation" = "docs/developers/datagen.md" },
+    ] },
+  ] },
+  { "Downloads" = "downloads.md" },
+  { "Changelog" = "changelog.md" },
+  { "License" = "license.md" },
+]
+
+[project.theme]
+custom_dir = "overrides"
+favicon = "assets/favicon.png"
+logo = "assets/logo.png"
+language = "en"
+features = [
+  "announce.dismiss",
+  "content.code.annotate",
+  "content.code.copy",
+  "content.code.select",
+  "content.footnote.tooltips",
+  "content.tabs.link",
+  "content.tooltips",
+  "navigation.footer",
+  "navigation.indexes",
+  "navigation.instant",
+  "navigation.instant.prefetch",
+  "navigation.instant.progress",
+  "navigation.path",
+  "navigation.prune",
+  "navigation.sections",
+  "navigation.top",
+  "navigation.tracking",
+  "search.highlight",
+  "toc.follow",
+]
+
+[project.theme.font]
+text = "Inter"
+code = "JetBrains Mono"
+
+# Night first: the dark scheme is the site's own look, the light one a moonlit page for those who prefer it.
+[[project.theme.palette]]
+media = "(prefers-color-scheme)"
+toggle.icon = "lucide/sun-moon"
+toggle.name = "Switch to light mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+primary = "custom"
+accent = "custom"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+primary = "custom"
+accent = "custom"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to system preference"
+
+[project.markdown_extensions]
+abbr = {}
+admonition = {}
+attr_list = {}
+def_list = {}
+footnotes = {}
+md_in_html = {}
+toc.permalink = true
+pymdownx.betterem = {}
+pymdownx.caret = {}
+pymdownx.details = {}
+pymdownx.emoji.emoji_generator = "zensical.extensions.emoji.to_svg"
+pymdownx.emoji.emoji_index = "zensical.extensions.emoji.twemoji"
+pymdownx.highlight.anchor_linenums = true
+pymdownx.highlight.line_spans = "__span"
+pymdownx.highlight.pygments_lang_class = true
+pymdownx.inlinehilite = {}
+pymdownx.keys = {}
+pymdownx.magiclink = {}
+pymdownx.mark = {}
+pymdownx.smartsymbols = {}
+pymdownx.superfences = {}
+pymdownx.tabbed.alternate_style = true
+pymdownx.tabbed.combine_header_slug = true
+pymdownx.tasklist.custom_checkbox = true
+pymdownx.tilde = {}

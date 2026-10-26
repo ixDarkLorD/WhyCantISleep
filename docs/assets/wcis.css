@@ -1,0 +1,341 @@
+/* Why Can't I Sleep? website: a night-time look taken from the banner. Colours are tokens, dark first (the site's
+   own look), light as a moonlit page. The landing page (home.html) has its own sections, prefixed wh-. */
+
+:root {
+  --w-night: #0f0b17;
+  --w-night-2: #161021;
+  --w-panel: #1b1428;
+  --w-panel-2: #231a33;
+  --w-line: rgba(207, 198, 220, 0.12);
+  --w-bone: #ece6da;
+  --w-lavender: #cfc6dc;
+  --w-purple: #9b8cc4;
+  --w-violet: #6b4fc0;
+  --w-red: #ff1e3c;
+  --w-cyan: #00e6d2;
+  --w-moon: #f2dd9b;
+  --w-green: #4ade80;
+  --w-muted: rgba(207, 198, 220, 0.66);
+  --w-pixel: "Silkscreen", "JetBrains Mono", monospace;
+  --w-creep: "Creepster", "Inter", sans-serif;
+}
+
+/* ----- Theme colours for the docs ----- */
+[data-md-color-scheme="slate"] {
+  --md-hue: 265;
+  --md-default-bg-color: var(--w-night);
+  --md-default-fg-color: rgba(236, 230, 218, 0.92);
+  --md-default-fg-color--light: rgba(236, 230, 218, 0.7);
+  --md-default-fg-color--lighter: rgba(236, 230, 218, 0.42);
+  --md-default-fg-color--lightest: rgba(236, 230, 218, 0.14);
+  --md-primary-fg-color: #1a1326;
+  --md-primary-fg-color--light: #2a1f3d;
+  --md-primary-fg-color--dark: #0f0b17;
+  --md-primary-bg-color: var(--w-bone);
+  --md-primary-bg-color--light: rgba(236, 230, 218, 0.7);
+  --md-accent-fg-color: #b9a8ec;
+  --md-accent-fg-color--transparent: rgba(155, 140, 196, 0.14);
+  --md-typeset-a-color: #b9a8ec;
+  --md-code-bg-color: #1a1426;
+  --md-code-fg-color: #e2dcef;
+  --md-footer-bg-color: #0b0812;
+  --md-footer-bg-color--dark: #08060d;
+  --md-typeset-table-color: rgba(207, 198, 220, 0.12);
+}
+
+[data-md-color-scheme="default"] {
+  --md-default-bg-color: #f7f4fb;
+  --md-default-fg-color: #241c33;
+  --md-default-fg-color--light: rgba(36, 28, 51, 0.72);
+  --md-default-fg-color--lighter: rgba(36, 28, 51, 0.45);
+  --md-default-fg-color--lightest: rgba(36, 28, 51, 0.12);
+  --md-primary-fg-color: #1a1326;
+  --md-primary-fg-color--light: #2a1f3d;
+  --md-primary-fg-color--dark: #0f0b17;
+  --md-primary-bg-color: var(--w-bone);
+  --md-primary-bg-color--light: rgba(236, 230, 218, 0.7);
+  --md-accent-fg-color: #6b4fc0;
+  --md-accent-fg-color--transparent: rgba(107, 79, 192, 0.1);
+  --md-typeset-a-color: #5a3fb0;
+  --md-code-bg-color: #efeaf6;
+  --md-footer-bg-color: #1a1326;
+}
+
+/* The header: night sky, with a faint line of stars along its foot. */
+.md-header {
+  background: linear-gradient(180deg, #1a1326, #140f1f);
+  box-shadow: 0 1px 0 rgba(155, 140, 196, 0.18), 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+.md-header__title { font-weight: 700; letter-spacing: 0.01em; }
+.md-header__button.md-logo img { border-radius: 6px; }
+.md-tabs { background: #140f1f; }
+
+/* Headings: the page title in the bone of the banner's title. */
+.md-typeset h1 { font-weight: 800; letter-spacing: -0.01em; color: var(--md-default-fg-color); }
+[data-md-color-scheme="slate"] .md-typeset h1 { color: var(--w-bone); }
+.md-typeset h2 { font-weight: 700; }
+.md-typeset h2::after {
+  content: ""; display: block; height: 2px; width: 2.2rem; margin-top: 0.35rem; border-radius: 2px;
+  background: linear-gradient(90deg, var(--w-red), var(--w-purple));
+  opacity: 0.8;
+}
+
+/* Tables: rounded, with a soft header. */
+.md-typeset table:not([class]) { border-radius: 10px; overflow: hidden; border: 1px solid var(--md-typeset-table-color); font-size: 0.72rem; }
+.md-typeset table:not([class]) th { background: var(--md-accent-fg-color--transparent); font-weight: 700; }
+
+/* Admonitions in the site's colours. */
+.md-typeset .admonition, .md-typeset details { border-radius: 10px; border-width: 1px; }
+
+/* Buttons. */
+.md-typeset .md-button { border-radius: 999px; font-weight: 700; }
+.md-typeset .md-button--primary { background: var(--w-violet); border-color: var(--w-violet); color: #fff; }
+.md-typeset .md-button--primary:hover { background: #7d62d4; border-color: #7d62d4; }
+
+/* Keys. */
+.md-typeset kbd { font-family: var(--w-pixel); font-size: 0.7em; }
+
+/* ----- The Minecraft version picker (mc-version.js) ----- */
+.mc-picker { display: flex; align-items: center; gap: 0.4rem; margin: 0 0.6rem 0 auto; font-size: 0.7rem; color: rgba(236, 230, 218, 0.75); white-space: nowrap; }
+.mc-picker__name { font-weight: 600; letter-spacing: 0.02em; }
+.mc-picker select {
+  appearance: none; -webkit-appearance: none; font: inherit; font-weight: 600; color: var(--w-bone); cursor: pointer;
+  padding: 0.25rem 1.5rem 0.25rem 0.6rem; border-radius: 8px; border: 0;
+  background: rgba(230, 235, 242, 0.06) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23f2dd9b' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 0.5rem center;
+  box-shadow: inset 0 0 0 1px rgba(230, 235, 242, 0.12); transition: background-color 0.2s;
+}
+.mc-picker select:hover { background-color: rgba(230, 235, 242, 0.1); }
+.mc-picker select:focus-visible { outline: 2px solid var(--w-moon); outline-offset: 1px; }
+.mc-picker option { color: #17121f; background: #f6eedb; }
+@media screen and (max-width: 59.984em) {
+  .mc-picker__name { display: none; }
+  .mc-picker { margin-right: 0; }
+  .mc-picker select { padding: 0.2rem 1.1rem 0.2rem 0.4rem; background-position: right 0.35rem center; font-size: 0.65rem; max-width: 6.2rem; text-overflow: ellipsis; }
+}
+.md-typeset tr.mc-row td { background: color-mix(in srgb, var(--w-purple) 16%, transparent); font-weight: 600; }
+html:not([data-mc]) .mc-only { display: none; }
+
+/* =====================================================================================================================
+   The landing page
+   ===================================================================================================================== */
+.wh { --wh-max: 72rem; color: var(--w-lavender); }
+.md-main:has(.wh) { background: var(--w-night); }
+.md-content:has(.wh) .md-content__inner { margin: 0; padding: 0; max-width: none; }
+.md-main__inner:has(.wh) { margin: 0; max-width: none; }
+.md-content:has(.wh) .md-content__inner::before { display: none; }
+.wh *, .wh *::before, .wh *::after { box-sizing: border-box; }
+.wh h1, .wh h2, .wh h3, .wh p { margin: 0; }
+.wh h2::after { display: none; }
+.wh a { color: inherit; }
+
+.wh-eyebrow { font-family: var(--w-pixel); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--w-purple); }
+.wh-wrap { width: 100%; max-width: var(--wh-max); margin: 0 auto; padding: 0 1rem; }
+
+/* ----- Hero ----- */
+.wh-hero {
+  position: relative; overflow: hidden; isolation: isolate;
+  padding: 5.5rem 0 4.5rem;
+  background:
+    radial-gradient(60rem 30rem at 72% 30%, rgba(107, 79, 192, 0.28), transparent 60%),
+    radial-gradient(40rem 22rem at 10% 90%, rgba(255, 30, 60, 0.08), transparent 70%),
+    linear-gradient(180deg, #120d1c 0%, var(--w-night) 70%);
+}
+.wh-stars { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+.wh-hero::after {   /* the banner's own brick wall along the foot, fading into the night below */
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 11rem; z-index: -1;
+  background:
+    linear-gradient(180deg, transparent 55%, var(--w-night) 100%),
+    url("bricks.png") repeat-x center bottom / auto 100%;
+  opacity: 0.85;
+}
+.wh-hero__inner { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 2.5rem; align-items: center; }
+.wh-title {
+  position: relative; font-family: var(--w-creep); font-weight: 400; color: var(--w-bone);
+  font-size: clamp(2.6rem, 6.4vw, 4.6rem); line-height: 1.02; letter-spacing: 0.04em; margin: 0.6rem 0 1.1rem;
+  text-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+}
+.wh-title span { display: block; }
+.wh-glitch { position: relative; display: inline-block; }
+.wh-glitch::before, .wh-glitch::after {
+  content: attr(data-text); position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen;
+}
+.wh-glitch::before { color: var(--w-red); opacity: 0.7; transform: translate(-3px, 0); animation: wh-jitter 6s infinite steps(1); }
+.wh-glitch::after { color: var(--w-cyan); opacity: 0.4; transform: translate(3px, 1px); animation: wh-jitter 6s infinite steps(1) reverse; }
+@keyframes wh-jitter {
+  0%, 92%, 100% { clip-path: inset(0 0 0 0); }
+  93% { clip-path: inset(10% 0 60% 0); transform: translate(-6px, 0); }
+  95% { clip-path: inset(55% 0 20% 0); transform: translate(5px, 1px); }
+  97% { clip-path: inset(30% 0 40% 0); transform: translate(-2px, -1px); }
+}
+.wh-lead { font-size: 1.02rem; line-height: 1.65; max-width: 34rem; color: rgba(236, 230, 218, 0.82); }
+.wh-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.6rem; }
+.wh-btn {
+  display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.7rem 1.15rem; border-radius: 999px;
+  font-weight: 700; font-size: 0.8rem; text-decoration: none; color: var(--w-bone) !important;
+  background: rgba(155, 140, 196, 0.1); box-shadow: inset 0 0 0 1px rgba(155, 140, 196, 0.3);
+  transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+.wh-btn:hover { transform: translateY(-2px); background: rgba(155, 140, 196, 0.18); }
+.wh-btn--primary { background: linear-gradient(135deg, #7b5fd6, #5a3fb0); box-shadow: 0 8px 24px rgba(91, 63, 176, 0.45); }
+.wh-btn--primary:hover { background: linear-gradient(135deg, #8b70e0, #6a4ec0); }
+.wh-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; list-style: none; padding: 0; margin: 1.4rem 0 0; }
+.wh-chips li { font-family: var(--w-pixel); font-size: 0.6rem; letter-spacing: 0.06em; padding: 0.3rem 0.6rem; border-radius: 6px; background: rgba(255, 255, 255, 0.04); box-shadow: inset 0 0 0 1px var(--w-line); color: var(--w-lavender); margin: 0; }
+
+/* The bed, floating in the dark, watched from beneath. */
+.wh-stage { position: relative; display: grid; place-items: center; min-height: 22rem; }
+.wh-moon {
+  position: absolute; top: 0.4rem; right: 8%; width: 4.4rem; height: 4.4rem; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff6d2, var(--w-moon) 55%, #c8a957);
+  box-shadow: 0 0 40px rgba(242, 221, 155, 0.45), 0 0 120px rgba(242, 221, 155, 0.18);
+}
+.wh-moon::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 70% 40%, transparent 55%, rgba(15, 11, 23, 0.85) 56%); }
+.wh-tile {
+  position: relative; width: min(18rem, 70vw); aspect-ratio: 1; border-radius: 22%;
+  background: url("logo.png") center / cover no-repeat;
+  box-shadow: 0 0 0 4px #6f5aa8, 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 80px rgba(107, 79, 192, 0.35);
+  animation: wh-float 7s ease-in-out infinite;
+}
+.wh-tile::after {   /* the scanlines of the logo, alive */
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.18) 0 1px, transparent 1px 3px); mix-blend-mode: multiply;
+}
+@keyframes wh-float { 0%, 100% { transform: translateY(0) rotate(-1.5deg); } 50% { transform: translateY(-10px) rotate(1deg); } }
+.wh-zz { position: absolute; top: 12%; left: 18%; font-family: var(--w-pixel); font-weight: 700; color: var(--w-red); text-shadow: 2px 0 var(--w-cyan); pointer-events: none; }
+.wh-zz i { position: absolute; font-style: normal; opacity: 0; animation: wh-z 3.6s infinite; }
+.wh-zz i:nth-child(2) { animation-delay: 1.2s; }
+.wh-zz i:nth-child(3) { animation-delay: 2.4s; }
+@keyframes wh-z { 0% { transform: translate(0, 0) scale(0.7); opacity: 0; } 20% { opacity: 1; } 100% { transform: translate(-1.8rem, -3.2rem) scale(1.3); opacity: 0; } }
+/* Eyes in the dark along the brick wall: pairs of red pixels, each its own size, glowing and blinking now and then. */
+.wh-lurkers { position: absolute; left: 0; right: 0; bottom: 0; height: 11rem; z-index: -1; pointer-events: none; }
+.wh-lurkers span {
+  position: absolute; left: var(--x); bottom: var(--y); width: calc(26px * var(--s)); height: calc(8px * var(--s));
+  display: flex; justify-content: space-between; opacity: calc(0.45 + 0.4 * var(--s));
+  animation: wh-lurk 9s ease-in-out infinite; animation-delay: var(--d);
+}
+.wh-lurkers span::before, .wh-lurkers span::after {
+  content: ""; width: calc(8px * var(--s)); height: calc(8px * var(--s)); background: var(--w-red);
+  box-shadow: 0 0 calc(10px * var(--s)) var(--w-red), 0 0 calc(22px * var(--s)) rgba(255, 30, 60, 0.55);
+  animation: wh-blink 5s infinite; animation-delay: var(--d);
+}
+@keyframes wh-blink { 0%, 44%, 50%, 100% { transform: scaleY(1); } 47% { transform: scaleY(0.1); } }
+@keyframes wh-lurk { 0%, 100% { opacity: calc(0.45 + 0.4 * var(--s)); } 60% { opacity: calc(0.15 + 0.3 * var(--s)); } } }
+
+/* ----- Sections ----- */
+.wh-section { padding: 4.5rem 0; position: relative; }
+.wh-section + .wh-section { border-top: 1px solid var(--w-line); }
+.wh-head { text-align: center; max-width: 42rem; margin: 0 auto 2.6rem; }
+.wh-head h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 800; color: var(--w-bone); margin: 0.5rem 0 0.7rem; letter-spacing: -0.01em; }
+.wh-head p { color: var(--w-muted); line-height: 1.6; }
+
+/* The four pillars. */
+.wh-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+.wh-card {
+  position: relative; padding: 1.4rem 1.2rem 1.3rem; border-radius: 14px; overflow: hidden;
+  background: linear-gradient(180deg, var(--w-panel), var(--w-night-2));
+  box-shadow: inset 0 0 0 1px var(--w-line), 0 10px 30px rgba(0, 0, 0, 0.25);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.wh-card:hover { transform: translateY(-4px); box-shadow: inset 0 0 0 1px rgba(155, 140, 196, 0.35), 0 16px 40px rgba(0, 0, 0, 0.35); }
+.wh-card::before { content: ""; position: absolute; left: 0; top: 0; right: 0; height: 3px; background: var(--c, var(--w-purple)); opacity: 0.85; }
+.wh-card__icon { display: inline-grid; place-items: center; width: 2.4rem; height: 2.4rem; border-radius: 10px; font-size: 1.25rem; background: color-mix(in srgb, var(--c, var(--w-purple)) 18%, transparent); margin-bottom: 0.9rem; }
+.wh-card h3 { color: var(--w-bone); font-size: 0.98rem; font-weight: 800; margin-bottom: 0.45rem; }
+.wh-card p { font-size: 0.78rem; line-height: 1.6; color: var(--w-muted); }
+.wh-card a.wh-more { display: inline-block; margin-top: 0.8rem; font-size: 0.72rem; font-weight: 700; color: var(--w-purple); text-decoration: none; }
+.wh-card a.wh-more:hover { color: var(--w-bone); }
+
+/* The card demo: the mod's sleep cards, as the HUD draws them. */
+.wh-demo { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: center; }
+.wh-demo__text h2 { font-size: clamp(1.4rem, 2.8vw, 1.9rem); color: var(--w-bone); font-weight: 800; margin: 0.5rem 0 0.8rem; }
+.wh-demo__text p { line-height: 1.65; color: var(--w-muted); }
+.wh-demo__text ul { margin: 1rem 0 0; padding: 0; list-style: none; }
+.wh-demo__text li { position: relative; padding-left: 1.2rem; margin: 0.45rem 0; font-size: 0.82rem; color: var(--w-lavender); }
+.wh-demo__text li::before { content: ""; position: absolute; left: 0; top: 0.5em; width: 6px; height: 6px; background: var(--w-red); box-shadow: 0 0 8px var(--w-red); }
+/* The gameplay video, with a chip for each of its three parts. */
+.wh-screen {
+  position: relative; margin: 0; border-radius: 14px; overflow: hidden; background: #0c0913;
+  box-shadow: inset 0 0 0 1px var(--w-line), 0 20px 50px rgba(0, 0, 0, 0.4);
+}
+.wh-screen video { display: block; width: 100%; height: auto; aspect-ratio: 960 / 812; }
+.wh-chapters {
+  position: absolute; left: 0; right: 0; top: 0; display: flex; flex-wrap: wrap; gap: 0.35rem; padding: 0.6rem;
+  background: linear-gradient(180deg, rgba(8, 6, 14, 0.75), transparent);
+}
+.wh-chapters button {
+  font-family: var(--w-pixel); font-size: 0.62rem; color: var(--w-lavender); cursor: pointer;
+  padding: 0.3rem 0.55rem; border: 0; border-radius: 4px; background: rgba(17, 19, 23, 0.8);
+  box-shadow: inset 0 0 0 1px #2e3138; transition: color 0.2s, box-shadow 0.2s;
+}
+.wh-chapters button:hover, .wh-chapters button:focus-visible { color: var(--w-bone); }
+.md-typeset .wh .wh-screen { display: block; width: 100%; max-width: none; margin: 0; }
+.md-typeset .wh .wh-chapters { margin: 0; max-width: none; font-style: normal; text-align: left; }
+.wh-chapters button.is-on { color: var(--w-bone); box-shadow: inset 0 0 0 1px var(--w-red), 0 0 10px rgba(255, 30, 60, 0.35); }
+
+/* The hiding spots. */
+.wh-spots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+.wh-spot { padding: 1.2rem; border-radius: 14px; background: rgba(255, 255, 255, 0.025); box-shadow: inset 0 0 0 1px var(--w-line); }
+.wh-spot b { display: block; font-family: var(--w-pixel); font-size: 0.72rem; letter-spacing: 0.06em; color: var(--w-bone); margin-bottom: 0.4rem; }
+.wh-spot p { font-size: 0.76rem; line-height: 1.55; color: var(--w-muted); }
+.wh-spot .wh-meter { display: flex; gap: 3px; margin-top: 0.8rem; }
+.wh-spot .wh-meter i { flex: 1; height: 5px; border-radius: 2px; background: #2a2236; }
+.wh-spot .wh-meter i.on { background: var(--w-purple); box-shadow: 0 0 6px rgba(155, 140, 196, 0.6); }
+.wh-spot small { display: block; margin-top: 0.35rem; font-family: var(--w-pixel); font-size: 0.55rem; color: rgba(207, 198, 220, 0.5); letter-spacing: 0.05em; }
+
+/* At a glance. */
+.wh-glance { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.wh-panel { padding: 1.4rem; border-radius: 14px; background: linear-gradient(180deg, var(--w-panel), var(--w-night-2)); box-shadow: inset 0 0 0 1px var(--w-line); }
+.wh-panel h3 { font-family: var(--w-pixel); font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--w-purple); margin-bottom: 0.9rem; }
+.wh-rows { list-style: none; margin: 0; padding: 0; }
+.wh-rows li { display: flex; justify-content: space-between; gap: 1rem; padding: 0.55rem 0; border-bottom: 1px dashed var(--w-line); font-size: 0.8rem; margin: 0; }
+.wh-rows li:last-child { border-bottom: 0; }
+.wh-rows b { color: var(--w-bone); }
+.wh-rows span { color: var(--w-muted); text-align: right; }
+.wh-panel__note { margin-top: 0.9rem !important; font-size: 0.74rem; color: var(--w-muted); line-height: 1.55; }
+.wh-panel__note a { color: var(--w-purple) !important; }
+
+/* The closing call. */
+.wh-call { text-align: center; padding: 5rem 0 5.5rem; background: radial-gradient(40rem 18rem at 50% 100%, rgba(107, 79, 192, 0.25), transparent 70%); }
+.wh-call h2 { font-family: var(--w-creep); font-weight: 400; font-size: clamp(2rem, 4.6vw, 3.2rem); color: var(--w-bone); letter-spacing: 0.04em; margin: 0.4rem 0 0.8rem; }
+.wh-call p { color: var(--w-muted); }
+.wh-call .wh-actions { justify-content: center; }
+
+/* Revealed as they come into view (wcis.js), unless motion is unwanted. */
+[data-reveal] { opacity: 0; transform: translateY(14px); transition: opacity 0.7s ease, transform 0.7s ease; transition-delay: calc(var(--i, 0) * 70ms); }
+[data-reveal].is-in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1; transform: none; transition: none; }
+  .wh-tile, .wh-zz i, .wh-lurkers span, .wh-lurkers span::before, .wh-lurkers span::after, .wh-glitch::before, .wh-glitch::after { animation: none; }
+}
+
+/* Narrow screens. */
+@media screen and (max-width: 60em) {
+  .wh-hero { padding: 3.5rem 0 3rem; }
+  .wh-hero__inner, .wh-demo { grid-template-columns: 1fr; }
+  .wh-stage { min-height: 16rem; order: -1; }
+  .wh-grid, .wh-spots { grid-template-columns: repeat(2, 1fr); }
+  .wh-glance { grid-template-columns: 1fr; }
+}
+@media screen and (max-width: 30em) {
+  .wh-grid, .wh-spots { grid-template-columns: 1fr; }
+  .wh-section { padding: 3.2rem 0; }
+}
+
+/* The docs' article styles (.md-typeset headings, lists, links) win over the landing page's own classes by
+   specificity; these restate the landing page's where they meet. */
+.md-typeset .wh h1.wh-title { font-family: var(--w-creep); font-weight: 400; font-size: clamp(2.6rem, 6.4vw, 4.6rem); line-height: 1.02; letter-spacing: 0.04em; margin: 0.6rem 0 1.1rem; color: var(--w-bone); }
+.md-typeset .wh h2 { margin: 0.5rem 0 0.7rem; }
+.md-typeset .wh h3 { margin: 0 0 0.45rem; }
+.md-typeset .wh-head h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 800; color: var(--w-bone); line-height: 1.25; }
+.md-typeset .wh-demo__text h2 { font-size: clamp(1.4rem, 2.8vw, 1.9rem); color: var(--w-bone); font-weight: 800; line-height: 1.25; }
+.md-typeset .wh-call h2 { font-family: var(--w-creep); font-weight: 400; font-size: clamp(2rem, 4.6vw, 3.2rem); color: var(--w-bone); letter-spacing: 0.04em; }
+.md-typeset .wh p { margin: 0; }
+.md-typeset .wh ul { margin: 0; padding: 0; list-style: none; }
+.md-typeset .wh ul li { margin-left: 0; }
+.md-typeset .wh .wh-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1.4rem; }
+.md-typeset .wh .wh-chips li { margin: 0; }
+.md-typeset .wh .wh-demo__text ul { margin-top: 1rem; }
+.md-typeset .wh .wh-demo__text li { margin: 0.45rem 0; }
+.md-typeset .wh a, .md-typeset .wh a:hover { text-decoration: none; }
+.md-typeset .wh .wh-btn { color: var(--w-bone); }
+.md-typeset .wh .wh-panel__note { margin-top: 0.9rem; }
+.md-typeset .wh .wh-head p, .md-typeset .wh .wh-demo__text p, .md-typeset .wh .wh-call p { color: var(--w-muted); }
+.md-typeset .wh .wh-lead { font-size: 1.02rem; line-height: 1.65; color: rgba(236, 230, 218, 0.82); }

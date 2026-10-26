@@ -1,0 +1,188 @@
+{% extends "main.html" %}
+
+{#- The landing page: its own sections in place of the article, the site's header and footer kept. -#}
+{% block content %}
+<div class="wh">
+
+  <!-- Hero -->
+  <section class="wh-hero">
+    <canvas class="wh-stars" aria-hidden="true"></canvas>
+    <div class="wh-wrap wh-hero__inner">
+      <div class="wh-hero__text">
+        <p class="wh-eyebrow" data-reveal>A Minecraft mod about the night</p>
+        <h1 class="wh-title" data-reveal>
+          <span class="wh-glitch" data-text="Why Can't">Why Can't</span>
+          <span class="wh-glitch" data-text="I Sleep?">I Sleep?</span>
+        </h1>
+        <p class="wh-lead" data-reveal>
+          Your bed says no, and now you know why. See the monsters keeping you up, crawl under the bed when they come for
+          you, and wake to find out how well you slept. Stay up too long and something else comes for you instead.
+        </p>
+        <div class="wh-actions" data-reveal>
+          <a class="wh-btn wh-btn--primary" href="{{ 'docs/playing/getting-started/' | url }}">Get started</a>
+          <a class="wh-btn" href="https://modrinth.com/mod/why-cant-i-sleep">Modrinth</a>
+          <a class="wh-btn" href="https://www.curseforge.com/minecraft/mc-mods/why-cant-i-sleep">CurseForge</a>
+        </div>
+        <ul class="wh-chips" data-reveal>
+          <li>Fabric</li><li>NeoForge</li><li>Forge</li><li>1.20.1 – 26.3</li>
+        </ul>
+      </div>
+      <div class="wh-stage" aria-hidden="true" data-reveal>
+        <div class="wh-moon"></div>
+        <div class="wh-tile"></div>
+        <div class="wh-zz"><i>z</i><i>z</i><i>z</i></div>
+      </div>
+    </div>
+    <!-- Eyes watching from the dark along the brick wall: each pair its own place, size and blink. -->
+    <div class="wh-lurkers" aria-hidden="true">
+      {% set lurkers = [
+        [4, 46, 1.0, 0.0], [13, 18, 0.6, 2.1], [22, 62, 0.75, 3.4], [31, 30, 1.25, 1.2], [42, 12, 0.55, 4.3],
+        [51, 52, 0.9, 0.6], [60, 24, 0.65, 2.8], [69, 58, 1.1, 1.8], [78, 16, 0.7, 3.9], [87, 40, 0.85, 0.9],
+        [95, 20, 0.6, 2.5]
+      ] %}
+      {% for x, y, size, delay in lurkers %}
+        <span style="--x: {{ x }}%; --y: {{ y }}%; --s: {{ size }}; --d: {{ delay }}s"></span>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- The four pillars -->
+  <section class="wh-section">
+    <div class="wh-wrap">
+      <header class="wh-head" data-reveal>
+        <p class="wh-eyebrow">Every night, explained</p>
+        <h2>From "you may not rest now" to a good night's sleep</h2>
+        <p>Four parts that work together, every one of them can be turned off, and the server has the last word.</p>
+      </header>
+      <div class="wh-grid">
+        {% set pillars = [
+          ['👁️', '#ff1e3c', 'Find the culprits', 'The exact monsters that blocked your sleep glow, arrows point to the ones you can\'t see, and every failed sleep says why and what to do.', 'docs/playing/why-cant-i-sleep/'],
+          ['🛏️', '#9b8cc4', 'Hide from them', 'Crawl under a bed or a table, climb into a chest or shut yourself in a closet. Keep still, keep your heart slow, and they give up.', 'docs/playing/hiding/'],
+          ['🌙', '#f2dd9b', 'Every night counts', 'Each night is scored: the room, the light, the music, what\'s by your bed. Wake up rested, with a dream, or shaken by a night terror.', 'docs/playing/nights/'],
+          ['👥', '#4ade80', 'Sleep together', 'On servers, see who is keeping everyone up and why, give them a nudge, or vote to skip the night.', 'docs/playing/together/'],
+        ] %}
+        {% for icon, colour, title, text, link in pillars %}
+          <article class="wh-card" data-reveal style="--i: {{ loop.index0 }}; --c: {{ colour }}">
+            <span class="wh-card__icon">{{ icon }}</span>
+            <h3>{{ title }}</h3>
+            <p>{{ text }}</p>
+            <a class="wh-more" href="{{ link | url }}">Read more →</a>
+          </article>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- The sleep HUD -->
+  <section class="wh-section">
+    <div class="wh-wrap wh-demo">
+      <div class="wh-demo__text" data-reveal>
+        <p class="wh-eyebrow">No more guessing</p>
+        <h2>A card for every reason</h2>
+        <p>The game's one vague line is gone. In its place a card says what went wrong, and how to put it right, while the
+          monsters that blocked you glow and arrows lead you to them.</p>
+        <ul>
+          <li>Monsters nearby, the wrong time, too far, an obstructed or occupied bed</li>
+          <li>A warning before a bed that explodes in the Nether or the End</li>
+          <li>"The room is safe" once you've dealt with every one of them</li>
+          <li>A sleep debt moon that fills up for each day you stay awake</li>
+        </ul>
+      </div>
+      <!-- Recorded in game: a refused sleep, hiding under the bed, then a night slept through. -->
+      <figure class="wh-screen" data-reveal data-demo>
+        <video autoplay muted loop playsinline preload="metadata" poster="{{ 'assets/demo-poster.jpg' | url }}"
+               aria-label="Gameplay: monsters block a sleep and glow, the player hides under the bed until they vanish, then sleeps till morning">
+          <source src="{{ 'assets/demo.webm' | url }}" type="video/webm">
+          <source src="{{ 'assets/demo.mp4' | url }}" type="video/mp4">
+        </video>
+        <figcaption class="wh-chapters">
+          <button type="button" data-at="0">Why can't I sleep?</button>
+          <button type="button" data-at="4.75">Hide</button>
+          <button type="button" data-at="14.1">Morning</button>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- The hiding spots -->
+  <section class="wh-section">
+    <div class="wh-wrap">
+      <header class="wh-head" data-reveal>
+        <p class="wh-eyebrow">Sneak and use, with empty hands</p>
+        <h2>Four places to hide</h2>
+        <p>Nothing can see you while you hide, bosses aside. The world comes to you muffled through your hiding place, and
+          so does your voice to others, with Simple Voice Chat.</p>
+      </header>
+      <div class="wh-spots">
+        {% set spots = [
+          ['Under a bed', 'Lie flat on the floor beneath the frame. It needs a floor under both halves.', 1],
+          ['Under a table', 'Two top slabs or upside-down stairs side by side, with carpet over both.', 2],
+          ['In a double chest', 'Curl up inside and peek out through the crack under the lid. A single chest is too small.', 4],
+          ['In a closet', 'A door with a nook behind it, walled in, roofed and floored. It shuts behind you.', 3],
+        ] %}
+        {% for name, text, shut in spots %}
+          <div class="wh-spot" data-reveal style="--i: {{ loop.index0 }}">
+            <b>{{ name }}</b>
+            <p>{{ text }}</p>
+            <div class="wh-meter">{% for n in range(5) %}<i class="{{ 'on' if n < shut else '' }}"></i>{% endfor %}</div>
+            <small>How much it shuts out</small>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- At a glance -->
+  <section class="wh-section">
+    <div class="wh-wrap">
+      <header class="wh-head" data-reveal>
+        <p class="wh-eyebrow">At a glance</p>
+        <h2>Where it runs, and what it needs</h2>
+      </header>
+      <div class="wh-glance">
+        <div class="wh-panel" data-reveal style="--i: 0">
+          <h3>Versions</h3>
+          <ul class="wh-rows">
+            <li><b>26.1 – 26.3</b><span>Fabric · NeoForge</span></li>
+            <li><b>1.21.1</b><span>Fabric · NeoForge · Forge</span></li>
+            <li><b>1.20.1</b><span>Fabric · Forge</span></li>
+          </ul>
+        </div>
+        <div class="wh-panel" data-reveal style="--i: 1">
+          <h3>Needs</h3>
+          <ul class="wh-rows">
+            <li><b>CoolCatLib</b><span>required</span></li>
+            <li><b>Folios</b><span>required, for the guide book</span></li>
+            <li><b>Fabric API</b><span>on Fabric</span></li>
+            <li><b>Simple Voice Chat</b><span>optional</span></li>
+          </ul>
+          <p class="wh-panel__note">Install it on the client and the server. <a href="{{ 'docs/compatibility/' | url }}">Compatibility</a></p>
+        </div>
+        <div class="wh-panel" data-reveal style="--i: 2">
+          <h3>License</h3>
+          <ul class="wh-rows">
+            <li><b>MPL-2.0</b><span>open source</span></li>
+            <li><b>Modpacks</b><span>welcome</span></li>
+            <li><b>Your own mods</b><span>use its API and data packs</span></li>
+          </ul>
+          <p class="wh-panel__note"><a href="{{ 'license/' | url }}">Read the license</a> · <a href="{{ 'docs/developers/' | url }}">For mod developers</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Closing call -->
+  <section class="wh-call">
+    <div class="wh-wrap" data-reveal>
+      <p class="wh-eyebrow">Sweet dreams</p>
+      <h2>Go to bed. If you can.</h2>
+      <p>Free to download on Modrinth and CurseForge.</p>
+      <div class="wh-actions">
+        <a class="wh-btn wh-btn--primary" href="{{ 'downloads/' | url }}">Downloads</a>
+        <a class="wh-btn" href="{{ 'docs/' | url }}">Read the docs</a>
+      </div>
+    </div>
+  </section>
+
+</div>
+{% endblock %}
