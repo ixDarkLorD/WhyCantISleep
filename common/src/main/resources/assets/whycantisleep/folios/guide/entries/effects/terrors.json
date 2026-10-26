@@ -1,0 +1,20 @@
+{
+  "name": "guide.whycantisleep.guide.entry.effects.terrors.name",
+  "icon": "minecraft:wither_rose",
+  "sort": 4,
+  "pages": [
+    {
+      "title": "guide.whycantisleep.guide.entry.effects.terrors.page1.title",
+      "text": "guide.whycantisleep.guide.entry.effects.terrors.page1.text"
+    },
+    {
+      "title": "guide.whycantisleep.guide.entry.effects.terrors.page2.title",
+      "text": "guide.whycantisleep.guide.entry.effects.terrors.page2.text"
+    },
+    {
+      "title": "guide.whycantisleep.guide.entry.effects.terrors.page3.title",
+      "anchor": "center",
+      "text": "guide.whycantisleep.guide.entry.effects.terrors.page3.text"
+    }
+  ]
+}

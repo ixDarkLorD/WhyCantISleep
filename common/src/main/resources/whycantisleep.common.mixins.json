@@ -14,9 +14,11 @@
   "client": [
     "client.AbstractContainerScreenAccessor",
     "client.ChestBlockEntityMixin",
+    "client.ChestRendererMixin",
     "client.CameraMixin",
     "client.ChatScreenMixin",
     "client.EntityMixin",
+    "client.FogRendererMixin",
     "client.GameRendererAccessor",
     "client.GameRendererMixin",
     "client.GuiMixin",
@@ -26,7 +28,8 @@
     "client.LocalPlayerMixin",
     "client.MinecraftMixin",
     "client.MultiPlayerGameModeMixin",
-    "client.PlayerRendererMixin"
+    "client.PlayerRendererMixin",
+    "client.RenderSystemMixin"
   ],
   "injectors": {
     "defaultRequire": 1

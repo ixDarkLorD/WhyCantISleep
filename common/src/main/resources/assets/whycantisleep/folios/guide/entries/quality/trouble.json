@@ -4,13 +4,14 @@
   "sort": 4,
   "pages": [
     {
-      "type": "text",
       "title": "guide.whycantisleep.guide.entry.quality.trouble.page1.title",
       "text": "guide.whycantisleep.guide.entry.quality.trouble.page1.text"
     },
     {
-      "type": "text",
+      "type": "entity",
+      "entity": "minecraft:phantom",
       "title": "guide.whycantisleep.guide.entry.quality.trouble.page2.title",
+      "zoom": 0.8,
       "text": "guide.whycantisleep.guide.entry.quality.trouble.page2.text"
     },
     {

@@ -28,6 +28,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +61,17 @@ public final class DataSleepModifiers extends SimpleJsonResourceReloadListener {
     /** The ids data packs turned off, the mod's own or another mod's. */
     public static Set<ResourceLocation> disabled() {
         return disabled;
+    }
+
+    /** What a data pack modifier is worth, for the guide book to show: null for one registered in code. */
+    public static @Nullable Worth worth(SleepModifier modifier) {
+        if (!(modifier instanceof DataModifier data)) return null;
+        Definition definition = data.definition();
+        return new Worth(definition.points(), definition.per().isPresent() ? definition.each() : 0, definition.most().orElse(null));
+    }
+
+    /** A modifier's points: fixed, and so many for each thing counted ({@code each}, 0 for none), held to {@code most}. */
+    public record Worth(int points, int each, @Nullable Integer most) {
     }
 
     @Override
