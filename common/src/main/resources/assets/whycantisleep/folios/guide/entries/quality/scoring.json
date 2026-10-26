@@ -4,14 +4,26 @@
   "sort": 0,
   "pages": [
     {
-      "type": "text",
       "title": "guide.whycantisleep.guide.entry.quality.scoring.page1.title",
       "text": "guide.whycantisleep.guide.entry.quality.scoring.page1.text"
     },
     {
-      "type": "text",
       "title": "guide.whycantisleep.guide.entry.quality.scoring.page2.title",
       "text": "guide.whycantisleep.guide.entry.quality.scoring.page2.text"
+    },
+    {
+      "type": "quest",
+      "quest": "whycantisleep:bedtime_checklist",
+      "title": "guide.whycantisleep.guide.entry.quality.scoring.page3.title",
+      "text": "guide.whycantisleep.guide.entry.quality.scoring.page3.text"
+    },
+    {
+      "type": "links",
+      "links": [
+        "quality/modifiers",
+        "quality/bedside",
+        "quality/music"
+      ]
     }
   ]
 }

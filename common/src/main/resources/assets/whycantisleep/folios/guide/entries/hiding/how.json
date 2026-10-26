@@ -4,19 +4,42 @@
   "sort": 0,
   "pages": [
     {
-      "type": "text",
       "title": "guide.whycantisleep.guide.entry.hiding.how.page1.title",
       "text": "guide.whycantisleep.guide.entry.hiding.how.page1.text"
     },
     {
-      "type": "text",
       "title": "guide.whycantisleep.guide.entry.hiding.how.page2.title",
-      "text": "guide.whycantisleep.guide.entry.hiding.how.page2.text"
+      "text": {
+        "translate": "guide.whycantisleep.guide.entry.hiding.how.page2.text"
+      },
+      "overflow": "auto",
+      "observe": {
+        "source": "folios:entities",
+        "of": "#whycantisleep:ignores_hiding",
+        "row": "- {entity:{$id}}"
+      }
     },
     {
-      "type": "text",
       "title": "guide.whycantisleep.guide.entry.hiding.how.page3.title",
       "text": "guide.whycantisleep.guide.entry.hiding.how.page3.text"
+    },
+    {
+      "title": "guide.whycantisleep.guide.entry.hiding.how.page4.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.how.page4.text"
+    },
+    {
+      "type": "quest",
+      "quest": "whycantisleep:hide_and_seek",
+      "title": "guide.whycantisleep.guide.entry.hiding.how.page5.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.how.page5.text"
+    },
+    {
+      "type": "links",
+      "links": [
+        "hiding/spots",
+        "hiding/quiet",
+        "hiding/heartbeat"
+      ]
     }
   ]
 }

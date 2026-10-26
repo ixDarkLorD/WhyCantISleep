@@ -10,34 +10,28 @@ import net.ixdarklord.coolcatcore.api.client.registry.KeyMappingRegistry;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientPlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
 import net.ixdarklord.coolcatcore.api.network.Network;
-import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.whycantisleep.api.HidingPosture;
 import net.ixdarklord.whycantisleep.client.hud.Explanations;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotice;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotices;
-import net.ixdarklord.whycantisleep.config.EyelidStyle;
-import net.ixdarklord.whycantisleep.config.WCISClientConfig;
 import net.ixdarklord.whycantisleep.hiding.Hiding;
 import net.ixdarklord.whycantisleep.hiding.HidingView;
 import net.ixdarklord.whycantisleep.network.HidingPayload;
 import net.ixdarklord.whycantisleep.network.LeaveHidingPayload;
 import net.ixdarklord.whycantisleep.network.NoisePayload;
-import net.minecraft.client.DeltaTracker;
+import net.ixdarklord.whycantisleep.network.OvertimePayload;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -63,53 +57,30 @@ public final class HidingClient {
     private static final IntSet TREMBLING = new IntOpenHashSet();
     // How long the eyes take to narrow to the spot's squint going in, and to open coming out.
     private static final float SQUINT_TICKS = 14.0F;
-    // A chest's lid with someone in it: raised this far (of fully open: the game eases it, so about 12 degrees), over
-    // LID_TICKS, and let down again as they climb out.
-    private static final float LID_AJAR = 0.045F;
+    // A chest's lid with someone in it: raised this far (of fully open: the game eases it, so about 21 degrees, room
+    // for the eyes and the face under them), over LID_TICKS, and let down again as they climb out.
+    static final float LID_AJAR = 0.085F;
     private static final float LID_TICKS = 8.0F;
     // How far the view turns peering out of a chest: either side of its front, up, and down.
     private static final float PEEK_YAW = 50.0F;
     private static final float PEEK_UP = 25.0F;
     private static final float PEEK_DOWN = 35.0F;
     private static final Map<BlockPos, Lid> LIDS = new HashMap<>();
-    // The eyelids' textures, one pair per style (the lids, and the glow along their edge), and how many of the
-    // opening's middle half-heights they span top to bottom.
-    private static final Identifier[] EYELIDS = eyelidSprites("");
-    private static final Identifier[] EYELIDS_GLOW = eyelidSprites("_glow");
-    private static final float EYELIDS_SPAN = 2.5F;
-    // How much wider the opening is than the screen once the lids are fully open: enough that the almond's pinched
-    // corners (PINCH in tools/gen_eyelids.py) are past the screen's edges.
-    private static final float EYELIDS_CLEAR = 1.6F;
-    // The glow along the lids' edge is drawn in this red over them, only while the heartbeat minigame runs.
-    private static final int EYELIDS_DANGER = 0xFF3A28;
-    // The squint's ease from one amount to another, and when it began.
-    private static float squintFrom;
-    private static float squintTo;
-    private static long squintAt;
-    // The squint lives a little while it is held: it sways slowly with the breath, narrows further with monsters about
-    // (eased in and out, TENSION_RATE a tick), and now and then blinks shut for BLINK_TICKS, every BLINK_MIN to
-    // BLINK_MAX ticks.
-    private static final float SWAY = 0.025F;
-    private static final float SWAY_SPEED = 0.07F;
-    private static final float TENSION = 0.08F;
-    private static final float TENSION_RATE = 0.01F;
-    private static final float BLINK_TICKS = 6.0F;
-    private static final int BLINK_MIN = 70;
-    private static final int BLINK_MAX = 200;
-    private static float tension;
-    private static float tensionO;
-    private static long blinkAt;
-    private static long nextBlink = BLINK_MAX;
     // Where each player crouched in a chest went in, for their eyes to rise into its gap as the lid lifts.
     private static final Int2ObjectMap<BlockPos> TUCKED_AT = new Int2ObjectOpenHashMap<>();
     // Sneaking took them in, so the key must be let go before pressing it again counts as coming out.
     private static boolean sneakReleased;
     private static boolean sneakWasDown;
     private static long tick;
+    // How much of the crosshair shows (it fades out over CROSSHAIR_TICKS while hiding): now, and a tick ago.
+    private static final float CROSSHAIR_TICKS = 10.0F;
+    private static float crosshair = 1.0F;
+    private static float crosshairO = 1.0F;
     private static long hidAt;
     // The noise the local player makes while hidden, 0 to 1: trying to walk or jump, or swinging the view about,
     // raises it; keeping still lets it fall. With monsters near, past RESTLESS_FROM the card says to hold still, and it
     // stays saying so until the noise is down to CALM_BELOW. At 1, with a monster near, the server has them found.
+    // While the heartbeat minigame runs, their moves make none: it is their heart that can give them away then.
     private static final float NOISE_PER_KEY = 0.05F;
     private static final float NOISE_PER_DEGREE = 0.0025F;
     private static final float NOISE_MAX_LOOK = 0.06F;
@@ -161,8 +132,6 @@ public final class HidingClient {
             TREMBLING.clear();
             LIDS.clear();
             TUCKED_AT.clear();
-            squintFrom = 0.0F;
-            squintTo = 0.0F;
         });
         HidingAmbience.init();
     }
@@ -172,10 +141,21 @@ public final class HidingClient {
         return localView() != null;
     }
 
+    /** How much of the crosshair shows, 0 to 1: it fades out while the local player hides. */
+    public static float crosshair(float partialTicks) {
+        return Mth.lerp(partialTicks, crosshairO, crosshair);
+    }
+
     /** How the local player hides, or null when they don't. */
     public static @Nullable HidingView localView() {
         Minecraft minecraft = Minecraft.getInstance();
         return minecraft.player == null ? null : HIDING.get(minecraft.player.getId());
+    }
+
+    /** The chest the local player is crouched in, or null when they aren't in one. */
+    public static @Nullable BlockPos localChest() {
+        Minecraft minecraft = Minecraft.getInstance();
+        return minecraft.player == null ? null : TUCKED_AT.get(minecraft.player.getId());
     }
 
     /**
@@ -227,26 +207,6 @@ public final class HidingClient {
         return at == null ? 0.0F : lidAjar(at, partialTicks) / LID_AJAR;
     }
 
-    /** How far the local player's eyes are closed, 0 open to 1 shut, easing to their spot's squint and back. */
-    public static float squint(float partialTicks) {
-        float progress = Mth.clamp((tick - squintAt + partialTicks) / SQUINT_TICKS, 0.0F, 1.0F);
-        return Mth.lerp(Easing.SINE_IN_OUT.apply(progress), squintFrom, squintTo);
-    }
-
-    // The squint as drawn: the eased squint, with its sway, tension and blinks while it is held.
-    private static float livingSquint(float partialTicks) {
-        float squint = squint(partialTicks);
-        if (squintTo <= 0.0F) return squint;
-        // How much of the held squint is in: the life in it eases in and out with it.
-        float held = Mth.clamp(squint / squintTo, 0.0F, 1.0F);
-        float time = tick + partialTicks;
-        float lively = SWAY * Mth.sin(time * SWAY_SPEED) + Mth.lerp(partialTicks, tensionO, tension);
-        float blink = Mth.clamp((time - blinkAt) / BLINK_TICKS, 0.0F, 1.0F);
-        float shut = blink < 1.0F ? Mth.sin(blink * Mth.PI) : 0.0F;
-        float living = Mth.clamp(squint + lively * held, 0.0F, 1.0F);
-        return Mth.lerp(shut * held, living, 1.0F);
-    }
-
     public static void on(HidingPayload payload) {
         HidingView before = HIDING.get(payload.player());
         if (payload.hiding()) {
@@ -267,11 +227,13 @@ public final class HidingClient {
         }
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null || payload.player() != minecraft.player.getId()) return;
-        // Coming out, the lids slide open from where they are, sway and blink included, so they don't jump first.
-        squintFrom = payload.hiding() ? squint(0.0F) : livingSquint(0.0F);
-        squintTo = payload.hiding() ? payload.squint() : 0.0F;
-        squintAt = tick;
+        // The eyes narrow to the spot's squint going in, and open coming out, from wherever the lids are.
+        if (payload.hiding()) Eyelids.ease(payload.squint(), SQUINT_TICKS, Eyelids.Mood.ALERT);
+        else Eyelids.ease(0.0F, SQUINT_TICKS, Eyelids.Mood.STILL);
         if (payload.hiding()) {
+            // Whatever speed they came in with stops here: the server holds them still, and so must the client.
+            minecraft.player.setDeltaMovement(Vec3.ZERO);
+            minecraft.player.setSprinting(false);
             sneakReleased = false;
             hidAt = tick;
             icon = payload.icon();
@@ -289,7 +251,7 @@ public final class HidingClient {
             if (payload.hunted()) HidingMinigame.begin();
         } else {
             holding = false;
-            HidingMinigame.end();
+            HidingMinigame.end(false);
             SleepNotices.clear(SleepNotice.Kind.HIDING);
             SleepNotices.clear(SleepNotice.Kind.HIDING_DANGER);
         }
@@ -338,6 +300,8 @@ public final class HidingClient {
             breath = Math.min(1.0F, breath + BREATH_REFILL);
             made = (trying ? NOISE_PER_KEY : 0.0F) + Math.min(NOISE_MAX_LOOK, swing * NOISE_PER_DEGREE);
         }
+        // While the heartbeat minigame runs it is their heart that gives them away, not their moves.
+        if (HidingMinigame.running()) made = 0.0F;
         noise = Mth.clamp(noise + made - NOISE_FALL, 0.0F, 1.0F);
         // The server hears of it in tenths, when that changes.
         float rounded = Math.round(noise * 10.0F) / 10.0F;
@@ -358,7 +322,13 @@ public final class HidingClient {
     }
 
     private static void tick(Minecraft minecraft) {
+        // Paused, hiding stands still with the world: the hide time, the card, the noise and the heartbeat all wait (the
+        // client ticks on behind the pause screen; in singleplayer the server waits too).
+        if (minecraft.isPaused()) return;
         tick++;
+        // The crosshair fades out while hiding, and back in coming out.
+        crosshairO = crosshair;
+        crosshair = Mth.approach(crosshair, isLocalHiding() ? 0.0F : 1.0F, 1.0F / CROSSHAIR_TICKS);
         LIDS.values().removeIf(lid -> !lid.raising && tick - lid.since > LID_TICKS);
         if (minecraft.level != null && !HIDING.isEmpty()) {
             boolean check = tick % DANGER_CHECK_TICKS == 0;
@@ -372,22 +342,22 @@ public final class HidingClient {
                 else TREMBLING.remove(player.getId());
             }
         }
-        tensionO = tension;
-        if (!isLocalHiding()) {
-            tension = Math.max(0.0F, tension - TENSION_RATE);
-            return;
-        }
-        tension = Mth.approach(tension, minecraft.player != null && TREMBLING.contains(minecraft.player.getId()) ? TENSION : 0.0F, TENSION_RATE);
-        if (tick >= nextBlink) {
-            blinkAt = tick;
-            nextBlink = tick + BLINK_MIN + minecraft.level.getRandom().nextInt(BLINK_MAX - BLINK_MIN);
-        }
+        // The eyes squint tighter with monsters about.
+        Eyelids.tense(isLocalHiding() && minecraft.player != null && TREMBLING.contains(minecraft.player.getId()));
+        if (!isLocalHiding()) return;
         // The card follows what is out there, and what the player is doing about it, without starting over.
         listen(minecraft);
         boolean danger = TREMBLING.contains(minecraft.player.getId());
-        // Hunted in, they keep their breath steady until the hide time is up; at the third strike they gasp.
-        if (hideProgress() >= 1.0) HidingMinigame.end();
-        if (HidingMinigame.tick(minecraft, noise, danger)) {
+        // Hunted in, they keep their heart slow until the hide time is up, and a beat longer if they missed the last
+        // (overtime, at most Hiding.MAX_OVERTIME beats, each its own time); a beat caught in overtime ends it at once.
+        // The server hears which. At the third strike they gasp.
+        if (HidingMinigame.running() && (hideProgress() >= 1.0 || HidingMinigame.settled())) {
+            boolean more = !HidingMinigame.settled() && HidingMinigame.overtime(danger);
+            if (more) hideTicks += Hiding.OVERTIME_TICKS;
+            else HidingMinigame.end(true);
+            Network.sendToServer(new OvertimePayload(more));
+        }
+        if (HidingMinigame.tick(minecraft, danger)) {
             noise = 1.0F;
             sentNoise = 1.0F;
             Network.sendToServer(new NoisePayload(1.0F));
@@ -412,50 +382,6 @@ public final class HidingClient {
             Network.sendToServer(new LeaveHidingPayload(true));
         }
         sneakWasDown = down;
-    }
-
-    /**
-     * The eyes narrowed: dark lids close in from above and below, leaving an almond of view, widest in the middle and
-     * pinched at the sides, its edges shading off (and glowing red in the heartbeat minigame): one texture, stretched
-     * taller or shorter with the squint. The squint eases in and out, so the lids slide rather than snap, and lives
-     * while it is held: a slow sway with the breath, a tighter squint with monsters about, a blink now and then. Drawn
-     * first in the HUD ({@code GuiMixin}), so the HUD stays over it, and drawn with the HUD hidden too: it is the
-     * player's eyes, not part of the HUD.
-     */
-    public static void renderEyelids(GuiGraphicsExtractor graphics, DeltaTracker delta) {
-        Minecraft minecraft = Minecraft.getInstance();
-        if (!minecraft.options.getCameraType().isFirstPerson()) return;
-        float squint = livingSquint(delta.getGameTimeDeltaPartialTick(true));
-        if (squint <= 0.001F) return;
-        int width = graphics.guiWidth();
-        int height = graphics.guiHeight();
-        // One stretched texture holds the almond and its soft edge (tools/gen_eyelids.py); above and below it, black.
-        // Sliding in or out, the opening also widens until the pinched corners and the soft edge are off the screen,
-        // so the lids leave it smoothly rather than vanish with their corners still showing.
-        float peak = Math.max(squintFrom, squintTo);
-        float in = peak > 0.0F ? Mth.clamp(squint(delta.getGameTimeDeltaPartialTick(true)) / peak, 0.0F, 1.0F) : 0.0F;
-        float open = height / 2.0F * (1.0F - squint) * Mth.lerp(in, EYELIDS_CLEAR, 1.0F);
-        int lids = Math.max(2, Math.round(open * EYELIDS_SPAN));
-        int top = (height - lids) / 2;
-        int style = WCISClientConfig.EYELID_STYLE.get().ordinal();
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, EYELIDS[style], 0, top, width, lids);
-        // The edge glows red only with the heartbeat minigame, fading in and out with it.
-        float danger = HidingMinigame.shown(delta.getGameTimeDeltaPartialTick(true));
-        if (danger > 0.0F) {
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, EYELIDS_GLOW[style], 0, top, width, lids, ARGB.color(danger, EYELIDS_DANGER));
-        }
-        if (top > 0) {
-            graphics.fill(0, 0, width, top, 0xFF000000);
-            graphics.fill(0, top + lids, width, height, 0xFF000000);
-        }
-    }
-
-    // Each style's sprite of the eyelids' textures with this suffix, by the style's ordinal.
-    private static Identifier[] eyelidSprites(String suffix) {
-        EyelidStyle[] styles = EyelidStyle.values();
-        Identifier[] sprites = new Identifier[styles.length];
-        for (EyelidStyle style : styles) sprites[style.ordinal()] = WhyCantISleep.id("hud/eyelids/" + style.id() + suffix);
-        return sprites;
     }
 
     // A chest lid raised, or being let down, and since when.

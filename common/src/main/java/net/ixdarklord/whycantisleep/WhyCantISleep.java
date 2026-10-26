@@ -3,6 +3,8 @@ package net.ixdarklord.whycantisleep;
 import net.ixdarklord.coolcatcore.api.core.ModConstructor;
 import net.ixdarklord.coolcatcore.api.platform.Platform;
 import net.ixdarklord.whycantisleep.compat.GuideBookGift;
+import net.ixdarklord.whycantisleep.compat.GuideBookQuests;
+import net.ixdarklord.whycantisleep.compat.GuideBookSources;
 import net.ixdarklord.whycantisleep.compat.WCISItems;
 import net.ixdarklord.whycantisleep.config.WCISConfigs;
 import net.ixdarklord.whycantisleep.hiding.HidingServer;
@@ -41,6 +43,8 @@ public final class WhyCantISleep implements ModConstructor {
         SleepVotes.init();
         HidingServer.init();
         GuideBookGift.init();
+        GuideBookSources.init();
+        GuideBookQuests.init();
     }
 
     public static Identifier id(String path) {

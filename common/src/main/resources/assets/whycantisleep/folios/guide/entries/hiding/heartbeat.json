@@ -4,9 +4,27 @@
   "sort": 3,
   "pages": [
     {
-      "type": "text",
       "title": "guide.whycantisleep.guide.entry.hiding.heartbeat.page1.title",
       "text": "guide.whycantisleep.guide.entry.hiding.heartbeat.page1.text"
+    },
+    {
+      "title": "guide.whycantisleep.guide.entry.hiding.heartbeat.page2.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.heartbeat.page2.text"
+    },
+    {
+      "title": "guide.whycantisleep.guide.entry.hiding.heartbeat.page3.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.heartbeat.page3.text"
+    },
+    {
+      "title": "guide.whycantisleep.guide.entry.hiding.heartbeat.page4.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.heartbeat.page4.text"
+    },
+    {
+      "type": "links",
+      "links": [
+        "hiding/quiet",
+        "hiding/search"
+      ]
     }
   ]
 }
