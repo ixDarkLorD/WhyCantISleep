@@ -1,12 +1,10 @@
 package net.ixdarklord.whycantisleep.client;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.ixdarklord.coolcatcanvas.api.utils.Easing;
-import net.ixdarklord.coolcatcore.api.client.registry.KeyMappingRegistry;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientPlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
 import net.ixdarklord.coolcatcore.api.network.Network;
@@ -20,12 +18,9 @@ import net.ixdarklord.whycantisleep.network.HidingPayload;
 import net.ixdarklord.whycantisleep.network.LeaveHidingPayload;
 import net.ixdarklord.whycantisleep.network.NoisePayload;
 import net.ixdarklord.whycantisleep.network.OvertimePayload;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Monster;
@@ -33,7 +28,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,13 +35,10 @@ import java.util.Map;
 /**
  * The client's side of hiding: who is hiding and how (the server says, for every player in the level, so they are
  * drawn in their spots) and who of them trembles with monsters about; and for the local player the view from the
- * spot, eyes narrowed to a squint, a card saying whether anything is out there, holding their breath (steadily,
- * if they ran in hunted: {@link HidingMinigame}), and sneaking to come out. A chest someone hides in has its lid raised a crack.
+ * spot, eyes narrowed to a squint, a card saying whether anything is out there, the heartbeat to keep slow if they ran
+ * in hunted ({@link HidingMinigame}), and sneaking to come out. A chest someone hides in has its lid raised a crack.
  */
 public final class HidingClient {
-    /** Held while hiding, the player holds their breath: they make no noise, until they run out and gasp. */
-    public static final KeyMapping HOLD_BREATH = new KeyMapping("key.whycantisleep.hold_breath", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V,
-            "key.categories.gameplay");
     // A card that stays up for as long as the player hides; it is taken down when they come out.
     private static final int CARD_TICKS = 20 * 60 * 60;
     // How near a monster must be for a hiding player to tremble, and for their card to warn; and how often to look.
@@ -87,12 +78,6 @@ public final class HidingClient {
     private static final float NOISE_FALL = 0.02F;
     private static final float RESTLESS_FROM = 0.12F;
     private static final float CALM_BELOW = 0.04F;
-    // Holding their breath: it lasts BREATH_TICKS, comes back three times as slowly, and can't be held again until it
-    // is back to BREATH_AGAIN. Running out is a gasp, as loud as GASP_NOISE.
-    private static final int BREATH_TICKS = 20 * 8;
-    private static final float BREATH_REFILL = 1.0F / (BREATH_TICKS * 3.0F);
-    private static final float BREATH_AGAIN = 0.3F;
-    private static final float GASP_NOISE = 0.6F;
     // The local player's card while hiding: what it shows, where it says they are, and which card it is.
     private static ItemStack icon = ItemStack.EMPTY;
     private static Component where = Component.empty();
@@ -102,9 +87,6 @@ public final class HidingClient {
     private static float sentNoise;
     private static float lastYaw;
     private static float lastPitch;
-    private static float breath = 1.0F;
-    private static boolean holding;
-    private static boolean winded;
 
     private HidingClient() {
     }
@@ -112,15 +94,13 @@ public final class HidingClient {
     private enum Card {
         QUIET,
         DANGER,
-        RESTLESS,
-        BREATH
+        RESTLESS
     }
 
     public static void init() {
-        KeyMappingRegistry.register(HOLD_BREATH);
         Hiding.onClient = HIDING::get;
         ClientTickEvents.END.register(HidingClient::tick);
-        // Hidden, a left click is the breath minigame's, never an attack: taken before the game handles its keys.
+        // Hidden, a left click is the heartbeat minigame's, never an attack: taken before the game handles its keys.
         ClientTickEvents.START.register(minecraft -> {
             if (!isLocalHiding()) return;
             boolean clicked = false;
@@ -182,11 +162,6 @@ public final class HidingClient {
         return TREMBLING.contains(playerId);
     }
 
-    /** Whether the local player is holding their breath. */
-    public static boolean isHoldingBreath() {
-        return holding;
-    }
-
     /**
      * How far the lid of the chest at a position is raised by someone hiding in it, as the game counts a lid's
      * openness (0 shut, 1 open); 0 for any other. Read by the chest's own openness ({@code ChestBlockEntityMixin}).
@@ -241,16 +216,12 @@ public final class HidingClient {
             hideTicks = Math.max(1, payload.hideTicks());
             noise = 0.0F;
             sentNoise = 0.0F;
-            breath = 1.0F;
-            holding = false;
-            winded = false;
             lastYaw = minecraft.player.getYRot();
             lastPitch = minecraft.player.getXRot();
             card = dangerNear(minecraft.player) ? Card.DANGER : Card.QUIET;
             SleepNotices.show(card(card), CARD_TICKS);
             if (payload.hunted()) HidingMinigame.begin();
         } else {
-            holding = false;
             HidingMinigame.end(false);
             SleepNotices.clear(SleepNotice.Kind.HIDING);
             SleepNotices.clear(SleepNotice.Kind.HIDING_DANGER);
@@ -258,21 +229,19 @@ public final class HidingClient {
     }
 
     // The hiding card: all quiet; a warning that something is out there; moving about while it is, a call to hold
-    // still; or holding their breath. It shows what they hide in. All quiet, it has no timer; with something out there,
-    // its timer runs down the time left to hold out until it gives up; on the call to hold still, it is the noise being
-    // made, and while holding their breath, the breath left.
+    // still. It shows what they hide in. All quiet, it has no timer; with something out there, its timer runs down the
+    // time left to hold out until it gives up; and on the call to hold still, it is the noise being made.
     private static SleepNotice card(Card shown) {
         SleepNotice notice = switch (shown) {
             case QUIET -> Explanations.notice(SleepNotice.Kind.HIDING, "hiding", where);
             case DANGER -> Explanations.notice(SleepNotice.Kind.HIDING_DANGER, "hiding_danger").withProgress(() -> 1.0 - hideProgress());
             case RESTLESS -> Explanations.notice(SleepNotice.Kind.HIDING_DANGER, "hiding_restless").withProgress(() -> noise);
-            case BREATH -> Explanations.notice(SleepNotice.Kind.HIDING, "hiding_breath").withProgress(() -> breath);
         };
         return icon.isEmpty() ? notice : notice.withIcon(icon);
     }
 
     // The noise made this tick: a walking or jumping key held (their moves are blocked, but the try is heard), and how
-    // far the view swung; none of it while they hold their breath, which they do until they let go or run out.
+    // far the view swung.
     private static void listen(Minecraft minecraft) {
         var options = minecraft.options;
         boolean trying = options.keyUp.isDown() || options.keyDown.isDown() || options.keyLeft.isDown() || options.keyRight.isDown() || options.keyJump.isDown();
@@ -282,24 +251,7 @@ public final class HidingClient {
         lastYaw = yaw;
         lastPitch = pitch;
 
-        if (winded && breath >= BREATH_AGAIN) winded = false;
-        holding = HOLD_BREATH.isDown() && !winded;
-        float made = 0.0F;
-        if (holding) {
-            breath -= 1.0F / BREATH_TICKS;
-            if (breath <= 0.0F) {
-                // Out of breath: a gasp, heard all round.
-                breath = 0.0F;
-                holding = false;
-                winded = true;
-                made = GASP_NOISE;
-                minecraft.level.playLocalSound(minecraft.player.getX(), minecraft.player.getEyeY(), minecraft.player.getZ(), SoundEvents.PLAYER_HURT_DROWN,
-                        SoundSource.PLAYERS, 0.8F, 0.8F, false);
-            }
-        } else {
-            breath = Math.min(1.0F, breath + BREATH_REFILL);
-            made = (trying ? NOISE_PER_KEY : 0.0F) + Math.min(NOISE_MAX_LOOK, swing * NOISE_PER_DEGREE);
-        }
+        float made = (trying ? NOISE_PER_KEY : 0.0F) + Math.min(NOISE_MAX_LOOK, swing * NOISE_PER_DEGREE);
         // While the heartbeat minigame runs it is their heart that gives them away, not their moves.
         if (HidingMinigame.running()) made = 0.0F;
         noise = Mth.clamp(noise + made - NOISE_FALL, 0.0F, 1.0F);
@@ -362,8 +314,7 @@ public final class HidingClient {
             sentNoise = 1.0F;
             Network.sendToServer(new NoisePayload(1.0F));
         }
-        Card next = holding ? Card.BREATH
-                : !danger ? Card.QUIET
+        Card next = !danger ? Card.QUIET
                 : card == Card.RESTLESS ? (noise > CALM_BELOW ? Card.RESTLESS : Card.DANGER)
                 : (noise > RESTLESS_FROM ? Card.RESTLESS : Card.DANGER);
         SleepNotice.Kind shown = SleepNotices.shownKind();
