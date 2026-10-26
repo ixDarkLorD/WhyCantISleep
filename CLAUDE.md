@@ -28,15 +28,17 @@ A multiloader mod built on the author's libraries **CoolCatLib: Core** (`coolcat
 
 ## Versions
 
-One folder per Minecraft version, each on its own branch of the same repo (the author's convention, e.g. `../GlazedMenu-26.1.2`, `../GlazedMenu-1.20`). The targets are the loader/version pairs CoolCatLib: Core actually ships:
+One folder per Minecraft version, each on its own branch of the same repo (the author's convention, e.g. `../GlazedMenu-26.1.2`, `../GlazedMenu-1.20`). As of 2026-10-26 all five carry the same features:
 
 | Minecraft | Loaders | Folder / branch | CoolCatLib (Maven Local) | Folios (Maven Local) | State |
 |---|---|---|---|---|---|
-| 26.2 | Fabric, NeoForge | **this folder**, `../WhyCantISleep-26.2`, branch `26.2` | `8.0.0+26.2` | `3.0.0+26.2` (from `../Folios-26.2`) | ported 2026-10-23; in step with `main` at 49d3ab4 since 2026-10-26 |
-| 26.1 – 26.1.2 | Fabric, NeoForge | `../WhyCantISleep-26.1.2`, `main` | `26.1.2-6` | `26.1.2+2.0` | feature complete (first version) |
-| 1.21.1 | Forge, Fabric, NeoForge | `../WhyCantISleep-1.21.1`, branch `1.21.1` | `1.21.1-2100.2.0.1` | | backport (its own session) |
-| 1.20.1 | Forge, Fabric (no NeoForge) | `../WhyCantISleep-1.20.1`, branch `1.20.1` | `1.20.1-2001.2.0.1` | | backport (its own session) |
-| 26.3 | Fabric, NeoForge | `../WhyCantISleep-26.3`, branch `26.3` | `26.3-6` | `26.3+2.0` | port (its own session) |
+| 26.1 – 26.1.2 | Fabric, NeoForge | `../WhyCantISleep-26.1.2`, `main` | `8.0.0+26.1.2` | `3.0.0+26.1.2` | the first version, where features are made and tested in game first |
+| 26.2 | Fabric, NeoForge | **this folder**, branch `26.2` | `8.0.0+26.2` | `3.0.0+26.2` | in step with `main` (2026-10-26); builds on both loaders |
+| 26.3 | Fabric, NeoForge | `../WhyCantISleep-26.3`, branch `26.3` | `8.0.0+26.3` | `3.0.0+26.3` | in step with `main` (2026-10-26); builds on both loaders |
+| 1.21.1 | Forge, Fabric, NeoForge | `../WhyCantISleep-1.21.1`, branch `1.21.1` | `8.0.0+1.21.1` | `3.0.0+1.21.1` | in step with `main` (2026-10-26); builds on all three loaders, not yet run in game |
+| 1.20.1 | Forge, Fabric (no NeoForge) | `../WhyCantISleep-1.20.1`, branch `1.20.1` | `8.0.0+1.20.1` | `3.0.0+1.20.1` | in step with `main` (2026-10-26); builds on both loaders, run in game on Fabric |
+
+A feature is made and tested on `main` first, then carried to the other four, each building on its own checkouts of CoolCatLib (`../CoolCatLib-<version>`, `../CoolCatLib-1.21` for 1.21.1) and Folios (`../Folios-<version>`), published to Maven Local with `gradlew assemble publishToMavenLocal`, and MCP Bridge `1.0.0+<version>` in its dev runs. On the remapping branches (1.21.1, 1.20.1), a library republished under the same version is served from Loom's stale copy until it is deleted (`.gradle/loom-cache/remapped_mods/remapped/net/ixdarklord/<coolcatlib|folios>/*/<version>`; a stale CoolCatLib shows as a `NoClassDefFoundError` in the dev run); never use `--refresh-dependencies` there.
 
 This branch builds on the shared catalog `26.2-v1` (NeoForge 26.2.0.84+, Fabric API 0.159.0+), CoolCatLib `8.0.0+26.2` (with the sound filters) and Folios `3.0.0+26.2` (publish it from `../Folios-26.2` with `gradlew assemble publishToMavenLocal`; its API is the 26.1.2 one), and MCP Bridge `1.0.0+26.2`. Vanilla changes met in the port, for the next one: entity types are constants of `EntityTypes` (not `EntityType`); dyed items and blocks are `ColorCollection`s (`Items.BED.red()`, not `Items.RED_BED`; the ids are unchanged); the HUD is `Gui.hud` (`net.minecraft.client.gui.Hud`: `setOverlayMessage`, `extractRenderState(GuiGraphicsExtractor, DeltaTracker)` and `isHidden()`, which replaces `options.hideGui`), so `GuiMixin` targets `Hud`; the open screen is `minecraft.gui.screen()`; `GameRenderer.getMainCamera()` is `mainCamera()`; the HUD fade mixins follow two render-state changes: `BlitRenderState`'s full constructor takes a `Matrix3x2fc` pose, and `GuiTextRenderState`'s fields are private.
 
@@ -65,7 +67,7 @@ gradlew :neoforge:runServer
 
 There are no tests or linters; verify by building and running the game. Both clients share `run/`. A running game locks `common/build/libs/*-dev.jar`: stop it before rebuilding, and when a server and a client run together start the server first and the client with `-x :common:jar`.
 
-**Testing in the running game**: the `minecraft` MCP tools (MCP Bridge) drive a dev game: `game_start` (`loader`, `task`, `world`), `mc_command`, `mc_logs`, `mc_screenshot`, `mc_summon`, `mc_time`... After checks, `mc_leave_world` then `game_stop`. MCP Bridge exists for 26.1.2 only, so backports are checked by hand.
+**Testing in the running game**: the `minecraft` MCP tools (MCP Bridge) drive a dev game: `game_start` (`loader`, `task`, `world`), `mc_command`, `mc_logs`, `mc_screenshot`, `mc_summon`, `mc_time`... After checks, `mc_leave_world` then `game_stop`. MCP Bridge has a build for every version (`mcp_bridge_version`), so every branch can be tested this way.
 
 ## Module layout
 
