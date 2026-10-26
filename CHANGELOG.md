@@ -68,6 +68,7 @@ This file is for listing all the changes to this project
 - Breaking a hiding spot brings whoever hides there out at once.
 
 ### 🛠️ Changes
+- **Harsh night terrors** (`harshTerrors` in the server config, on by default): the longer you stay awake, the worse a night terror gets, each day past the first making it more intense. Waking from one leaves you worse off the more intense it was: longer nausea and slowness, then weakness, mining fatigue and a moment of darkness; after three days without sleep, it hurts too (never below half a heart).
 - The **sleep status button** in the inventory moves out of the way of other mods' buttons in that corner.
 - The **sleep debt moon** pops larger when it appears and as each day passes. Its place can be set in the client config (`debtMoonPosition`: a corner or the top center, and `debtMoonOffsetX` / `debtMoonOffsetY` to nudge it). It keeps out of the way of the rest of the HUD, whichever mod drew it (a minimap, Jade's tooltip, the boss bars), gliding clear of them.
 - The message cards and the bedtime panel are pixel art now, with a pale lit rim, and the sleep quality card has smoky edges; each is tinted a touch with its message's color.
