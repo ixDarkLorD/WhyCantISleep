@@ -8,6 +8,9 @@ dependencies {
     // Dev runs only, never published: MCP Bridge lets the game be driven from outside. Not transitive, so it never
     // brings a second CoolCatLib. modLocalRuntime, since 1.20.1 is mapped and the jar must be remapped for dev runs.
     modLocalRuntime("net.ixdarklord.mcp_bridge:mcp_bridge-forge:${mcp_bridge_version}") { transitive = false }
+    // Dev runs only: Simple Voice Chat, to try the optional integration (Modrinth's maven comes from the shared scripts).
+    // modLocalRuntime, so it is remapped like MCP Bridge.
+    modLocalRuntime("maven.modrinth:simple-voice-chat:forge-${voicechat_version}") { transitive = false }
 }
 
 // A dev run straight into a singleplayer world of run/saves when asked (-Ptest_world="<world folder>"), to test without
