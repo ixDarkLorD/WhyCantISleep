@@ -1,8 +1,8 @@
 # Changelog
 
-Every change to Why Can't I Sleep?, newest first. The first release is still on its way: everything below is in it.
+Every change to Why Can't I Sleep?, newest first. 0.1.0 is the first release, a beta: everything below is in it.
 
-## 1.0.0 Beta · unreleased
+## 0.1.0 Beta · Oct 26, 2026
 ### ✨ New Features
 - Project set up for Fabric and NeoForge (Minecraft 26.1 to 26.1.2), built on CoolCatLib: Core and CoolCatLib: Canvas.
 - **Monster highlights**: when monsters keep you from sleeping, exactly the ones that blocked it (the game's own check range) glow for a few seconds, colored by the kind of threat or in one color. Only you see it; a server can also show it to players without the mod through the game's glowing effect.

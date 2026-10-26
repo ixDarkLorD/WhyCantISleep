@@ -40,7 +40,7 @@ The Insomniac's Handbook has its own creative tab, so recipe viewers such as JEI
 
 ## Config screens
 
-With [Glazed Menu](https://modrinth.com/mod/glazed-menu) installed, both config files can be edited in game from the
+With [Glazed Menu](https://modrinth.com/mod/glazedmenu) installed, both config files can be edited in game from the
 **Mods** menu (Mod Menu on Fabric). Without it, edit the files in the `config` folder.
 
 ## Other sleep mods

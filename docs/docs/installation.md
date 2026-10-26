@@ -32,7 +32,7 @@ turns off is greyed out in the players' settings. See [Configuration](server/con
 | Mod | What it adds |
 | --- | --- |
 | [Simple Voice Chat](https://modrinth.com/plugin/simple-voice-chat) | Your voice counts as noise while you hide, and others hear you muffled through your hiding place ([Noise and searches](../wiki/hiding/noise.md#voice-chat)). |
-| [Glazed Menu](https://modrinth.com/mod/glazed-menu) | Edit both config files in game, from the Mods menu. |
+| [Glazed Menu](https://modrinth.com/mod/glazedmenu) | Edit both config files in game, from the Mods menu. |
 
 More on how it works with other mods in [Compatibility](compatibility.md).
 

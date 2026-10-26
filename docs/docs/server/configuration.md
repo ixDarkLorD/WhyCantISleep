@@ -4,7 +4,7 @@ Why Can't I Sleep? has two config files. **Client** settings change what *you* s
 what everyone on a server gets. The server's settings are sent to every player when they join and whenever they
 change, and a feature the server turns off stays off for everyone: its client settings show greyed out.
 
-With [Glazed Menu](https://modrinth.com/mod/glazed-menu) installed, both are edited in game from the **Mods** menu
+With [Glazed Menu](https://modrinth.com/mod/glazedmenu) installed, both are edited in game from the **Mods** menu
 (Mod Menu on Fabric). Otherwise, edit the files in the game's `config` folder; they reload when saved.
 
 | File | Holds |
