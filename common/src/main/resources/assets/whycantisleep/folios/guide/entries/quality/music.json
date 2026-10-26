@@ -4,10 +4,68 @@
   "sort": 3,
   "pages": [
     {
-      "type": "spotlight",
-      "item": "minecraft:jukebox",
-      "title": "guide.whycantisleep.guide.entry.quality.music.page1.title",
-      "text": "guide.whycantisleep.guide.entry.quality.music.page1.text"
+      "elements": [
+        {
+          "type": "spotlight",
+          "item": "minecraft:jukebox",
+          "title": "guide.whycantisleep.guide.entry.quality.music.page1.element1.title",
+          "text": "guide.whycantisleep.guide.entry.quality.music.page1.element1.text"
+        },
+        {
+          "text": {
+            "translate": "guide.whycantisleep.guide.entry.quality.music.page1.element2.text"
+          },
+          "observe": {
+            "source": "whycantisleep:bedtime_music",
+            "row": "{$name}",
+            "separator": ", ",
+            "where": {
+              "field": "mood",
+              "is": "calm"
+            },
+            "sort": "name",
+            "empty": {
+              "translate": "guide.whycantisleep.guide.entry.quality.music.page1.element2.list.empty"
+            }
+          }
+        },
+        {
+          "text": {
+            "translate": "guide.whycantisleep.guide.entry.quality.music.page1.element3.text"
+          },
+          "observe": {
+            "source": "whycantisleep:bedtime_music",
+            "row": "{$name}",
+            "separator": ", ",
+            "where": {
+              "field": "mood",
+              "is": "creepy"
+            },
+            "sort": "name",
+            "empty": {
+              "translate": "guide.whycantisleep.guide.entry.quality.music.page1.element3.list.empty"
+            }
+          }
+        },
+        {
+          "text": {
+            "translate": "guide.whycantisleep.guide.entry.quality.music.page1.element4.text"
+          },
+          "observe": {
+            "source": "whycantisleep:bedtime_music",
+            "row": "{$name}",
+            "separator": ", ",
+            "where": {
+              "field": "mood",
+              "is": "loud"
+            },
+            "sort": "name",
+            "empty": {
+              "translate": "guide.whycantisleep.guide.entry.quality.music.page1.element4.list.empty"
+            }
+          }
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,23 @@
+{
+  "book": "whycantisleep:guide",
+  "in_order": true,
+  "objectives": [
+    {
+      "read": "hiding/how",
+      "label": "guide.whycantisleep.guide.quest.hide_and_seek.read_how"
+    },
+    {
+      "read": "hiding/spots",
+      "label": "guide.whycantisleep.guide.quest.hide_and_seek.read_spots"
+    },
+    {
+      "flag": "whycantisleep:shook_off",
+      "label": "guide.whycantisleep.guide.quest.hide_and_seek.shook_off"
+    }
+  ],
+  "rewards": {
+    "items": [
+      "minecraft:oak_door"
+    ]
+  }
+}

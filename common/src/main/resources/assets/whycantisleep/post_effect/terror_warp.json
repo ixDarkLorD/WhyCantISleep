@@ -1,0 +1,36 @@
+{
+    "targets": {
+        "swap": {}
+    },
+    "passes": [
+        {
+            "vertex_shader": "coolcatcanvas:post/screenquad",
+            "fragment_shader": "whycantisleep:post/terror_warp",
+            "inputs": [
+                {
+                    "sampler_name": "In",
+                    "target": "minecraft:main",
+                    "bilinear": true
+                }
+            ],
+            "output": "swap",
+            "uniforms": {
+                "TerrorWarpConfig": [
+                    { "name": "Amount", "type": "float", "value": 1.0 },
+                    { "name": "Beat", "type": "float", "value": 0.0 }
+                ]
+            }
+        },
+        {
+            "vertex_shader": "coolcatcanvas:post/screenquad",
+            "fragment_shader": "coolcatcanvas:post/blit",
+            "inputs": [
+                {
+                    "sampler_name": "In",
+                    "target": "swap"
+                }
+            ],
+            "output": "minecraft:main"
+        }
+    ]
+}
