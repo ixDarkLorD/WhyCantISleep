@@ -2,7 +2,6 @@ package net.ixdarklord.whycantisleep.client.hud;
 
 import net.ixdarklord.whycantisleep.network.WokePayload;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -67,18 +66,20 @@ public record SleepNotice(Kind kind, Component title, @Nullable Component hint, 
         WRONG_TIME(HudStyle.YELLOW, () -> Items.CLOCK),
         TOO_FAR(HudStyle.YELLOW, () -> Items.SPYGLASS),
         OBSTRUCTED(HudStyle.YELLOW, () -> Items.COBBLESTONE),
-        OCCUPIED(HudStyle.YELLOW, () -> Items.BED.pick(DyeColor.RED)),
+        OCCUPIED(HudStyle.YELLOW, () -> Items.BED.red()),
         PLAYERS_AWAKE(HudStyle.AQUA, () -> Items.PLAYER_HEAD),
         NOT_POSSIBLE(HudStyle.WHITE, () -> Items.BARRIER),
         DANGER(HudStyle.RED, () -> Items.TNT),
         NUDGE(HudStyle.GREEN, () -> Items.BELL),
-        HIDING(HudStyle.SILVER, () -> Items.BED.pick(DyeColor.GRAY)),
+        HIDING(HudStyle.SILVER, () -> Items.BED.gray()),
         // Hiding, with monsters about.
-        HIDING_DANGER(HudStyle.RED, () -> Items.BED.pick(DyeColor.GRAY)),
+        HIDING_DANGER(HudStyle.RED, () -> Items.BED.gray()),
+        // Too soon to hide again: the cooldown counting down.
+        HIDE_COOLDOWN(HudStyle.GOLD, () -> Items.CLOCK),
         // Waking: a good night, a middling one, a bad one; woken early; shaken from a night terror.
-        WOKE_GOOD(HudStyle.GREEN, () -> Items.BED.pick(DyeColor.LIME)),
-        WOKE_FAIR(HudStyle.YELLOW, () -> Items.BED.pick(DyeColor.YELLOW)),
-        WOKE_POOR(HudStyle.RED, () -> Items.BED.pick(DyeColor.RED)),
+        WOKE_GOOD(HudStyle.GREEN, () -> Items.BED.lime()),
+        WOKE_FAIR(HudStyle.YELLOW, () -> Items.BED.yellow()),
+        WOKE_POOR(HudStyle.RED, () -> Items.BED.red()),
         WOKE_EARLY(HudStyle.GOLD, () -> Items.CLOCK),
         SHAKEN(HudStyle.LIGHT_PURPLE, () -> Items.ENDER_EYE),
         // The monsters that blocked a sleep, all dealt with.
@@ -98,7 +99,7 @@ public record SleepNotice(Kind kind, Component title, @Nullable Component hint, 
             return this.color;
         }
 
-        /** Whether the card is a hiding player's, the only kind with a timer: how long until they have shaken off what hunts them. */
+        /** Whether the card is a hiding player's: how long until they have shaken off what hunts them. */
         public boolean hiding() {
             return this == HIDING || this == HIDING_DANGER;
         }

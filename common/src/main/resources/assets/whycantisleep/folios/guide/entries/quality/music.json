@@ -6,8 +6,6 @@
     {
       "elements": [
         {
-          "type": "spotlight",
-          "item": "minecraft:jukebox",
           "title": "guide.whycantisleep.guide.entry.quality.music.page1.element1.title",
           "text": "guide.whycantisleep.guide.entry.quality.music.page1.element1.text"
         },
@@ -27,6 +25,10 @@
             "empty": {
               "translate": "guide.whycantisleep.guide.entry.quality.music.page1.element2.list.empty"
             }
+          },
+          "overflow": {
+            "mode": "scroll",
+            "height": "fill"
           }
         },
         {
@@ -45,6 +47,10 @@
             "empty": {
               "translate": "guide.whycantisleep.guide.entry.quality.music.page1.element3.list.empty"
             }
+          },
+          "overflow": {
+            "mode": "scroll",
+            "height": "48%"
           }
         },
         {
@@ -63,6 +69,10 @@
             "empty": {
               "translate": "guide.whycantisleep.guide.entry.quality.music.page1.element4.list.empty"
             }
+          },
+          "overflow": {
+            "mode": "scroll",
+            "height": "48%"
           }
         }
       ]
