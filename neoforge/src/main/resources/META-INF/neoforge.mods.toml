@@ -43,3 +43,11 @@ type = "required"
 versionRange = "[${folios_min_version},)"
 ordering = "NONE"
 side = "BOTH"
+
+# Simple Voice Chat, optional: a hiding player's voice is muffled by their spot, and is noise that gives them away.
+[[dependencies.${modid}]]
+modId = "voicechat"
+type = "optional"
+versionRange = "*"
+ordering = "NONE"
+side = "BOTH"
