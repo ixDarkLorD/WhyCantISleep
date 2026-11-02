@@ -16,6 +16,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
@@ -131,6 +132,6 @@ public final class BedCheckClient {
     }
 
     private static @Nullable String key(Component label) {
-        return label.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents contents ? contents.getKey() : null;
+        return label.getContents() instanceof TranslatableContents contents ? contents.getKey() : null;
     }
 }
