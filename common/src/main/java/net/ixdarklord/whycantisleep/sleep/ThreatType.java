@@ -2,7 +2,6 @@ package net.ixdarklord.whycantisleep.sleep;
 
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 
 /**

@@ -11,6 +11,7 @@ import net.minecraft.stats.Stats;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -59,7 +60,9 @@ public final class SleepTroubles {
     private static void check(ServerPlayer player) {
         SleepTrouble trouble = get(player);
         // The client's moon of sleep debt follows the time since rest.
-        WCISNetwork.sendToPlayer(player, new TroublePayload(trouble.ticksSinceRest(), trouble.failedAttempts()));
+        ServerPlayer.RespawnConfig respawn = player.getRespawnConfig();
+        WCISNetwork.sendToPlayer(player, new TroublePayload(trouble.ticksSinceRest(), trouble.failedAttempts(),
+                Optional.ofNullable(respawn).map(config -> config.respawnData().globalPos())));
         SleepTrouble.Level now = trouble.level();
         SleepTrouble.Level before = LEVEL.put(player.getUUID(), now);
         if (before != null && before != now) SleepEvents.TROUBLE_CHANGED.invoke(new SleepEvents.TroubleChanged(player, before, now, trouble));

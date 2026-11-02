@@ -1,8 +1,8 @@
 package net.ixdarklord.whycantisleep.client;
 
-import net.ixdarklord.coolcatcanvas.api.utils.Easing;
 import net.ixdarklord.coolcatcanvas.api.client.gui.placement.GuiAreas;
 import net.ixdarklord.coolcatcanvas.api.client.gui.placement.GuiPlacement;
+import net.ixdarklord.coolcatcanvas.api.utils.Easing;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientGuiEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
 import net.ixdarklord.whycantisleep.WhyCantISleep;

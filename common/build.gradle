@@ -6,6 +6,11 @@ repositories {
         url = "https://maven.maxhenkel.de/repository/public"
         content { includeGroup "de.maxhenkel.voicechat" }
     }
+    // WTHIT's API, for the optional tooltip lines (compat/wthit).
+    maven {
+        url = "https://maven4.bai.lol"
+        content { includeGroup "mcp.mobius.waila" }
+    }
 }
 
 dependencies {
@@ -15,6 +20,10 @@ dependencies {
     compileOnly "net.ixdarklord.folios:folios-common:${folios_version}"
     // Simple Voice Chat (optional): a hiding player's voice is muffled by their spot and is noise that gives them away
     compileOnly "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
+    // Jade and WTHIT (optional): a bed's last night and the respawn point, and what soothes or unsettles a sleeper, in their tooltips.
+    // Jade has no API jar of its own; its Fabric jar holds the API (unobfuscated, so common compiles against it).
+    compileOnly("maven.modrinth:jade:${jade_fabric_version}") { transitive = false }
+    compileOnly("mcp.mobius.waila:wthit-api:${wthit_api_version}") { transitive = false }
 }
 
 // The shared main.gradle publishes every subproject's shadowJar. For common it must be a plain jar of this
