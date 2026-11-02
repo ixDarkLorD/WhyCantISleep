@@ -13,6 +13,7 @@ import net.ixdarklord.whycantisleep.client.HidingVoices;
 import net.ixdarklord.whycantisleep.client.SleepEyes;
 import net.ixdarklord.whycantisleep.client.HidingMinigame;
 import net.ixdarklord.whycantisleep.client.NightTerrorClient;
+import net.ixdarklord.whycantisleep.client.GuideBookDecor;
 import net.ixdarklord.whycantisleep.client.GuideBookMusic;
 import net.ixdarklord.whycantisleep.client.SleepDebtMoon;
 import net.ixdarklord.whycantisleep.client.SleepStatus;
@@ -59,6 +60,7 @@ public final class WhyCantISleepClient implements ClientModConstructor {
         SleepTooltip.init();
         NightTerrorClient.init();
         GuideBookMusic.init();
+        GuideBookDecor.init();
         // Last, so the minigame draws over everything else on the HUD.
         HidingMinigame.init();
     }

@@ -13,10 +13,10 @@ import java.util.Optional;
 /**
  * Server to client: the player woke up. Why, how well they slept (0 to 100) and what made it so, and whether they
  * woke shaken from a night terror or well rested, the sleep effect they woke with, if any, and the things by the bed
- * they found out about ({@link net.ixdarklord.whycantisleep.sleep.DecorDiscovery}).
+ * they came to know (slept with a Dreamcatcher) or only noticed ({@link net.ixdarklord.whycantisleep.sleep.DecorDiscovery}).
  */
 public record WokePayload(WakeReason reason, int score, List<Line> lines, boolean shaken, boolean wellRested, Optional<Dream> dream,
-                          List<Item> discovered)
+                          List<Item> discovered, List<Item> noticed)
         implements CustomPacketPayload {
     public static final Type<WokePayload> TYPE = new Type<>(WhyCantISleep.id("woke"));
 

@@ -6,22 +6,17 @@ import net.ixdarklord.coolcatcore.api.event.v2.common.PlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.ServerLifecycleEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.core.EventResult;
 import net.ixdarklord.whycantisleep.api.SleepQuality;
-import net.ixdarklord.whycantisleep.compat.WCISItems;
 import net.ixdarklord.whycantisleep.config.WCISServerConfig;
 import net.ixdarklord.whycantisleep.network.BedCheckPayload;
 import net.ixdarklord.whycantisleep.network.BedCheckRequestPayload;
-import net.ixdarklord.whycantisleep.network.StudiedPayload;
 import net.ixdarklord.whycantisleep.network.WCISNetwork;
 import net.ixdarklord.whycantisleep.network.WokePayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -76,8 +71,6 @@ public final class BedCheck {
             if (hand != InteractionHand.MAIN_HAND || !WCISServerConfig.BED_CHECK.get() || !BedTools.checksByClick(player)) {
                 return InteractionResult.PASS;
             }
-            // With a Dreamcatcher, something unknown held in the other hand is studied instead.
-            if (study(serverPlayer)) return InteractionResult.SUCCESS;
             check(serverPlayer, hit.getBlockPos());
             return InteractionResult.SUCCESS;
         });
@@ -97,18 +90,6 @@ public final class BedCheck {
     /** The client asks how a night in this bed would go. */
     public static void onRequest(ServerPlayer player, BedCheckRequestPayload payload) {
         check(player, payload.bed());
-    }
-
-    // A Dreamcatcher in the main hand and, in the off hand, something whose effect by a bed the player doesn't know yet:
-    // they find out, and are told.
-    private static boolean study(ServerPlayer player) {
-        if (!player.getMainHandItem().is(WCISItems.DREAMCATCHER.get())) return false;
-        ItemStack held = player.getOffhandItem();
-        if (DecorDiscovery.knows(player, held)) return false;
-        if (DecorDiscovery.discover(player, List.of(held.getItem())).isEmpty()) return false;
-        player.level().playSound(null, player.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8F, 1.2F);
-        WCISNetwork.sendToPlayer(player, new StudiedPayload(held.getItem()));
-        return true;
     }
 
     // Answers a player reading the bed at this spot, at most once a second.

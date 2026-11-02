@@ -42,6 +42,11 @@ public final class BedTools {
         return isTool(main) || main.isEmpty() && isTool(player.getOffhandItem());
     }
 
+    /** Whether a Dreamcatcher is in either hand: slept with, it teaches what the things by the bed do ({@link DecorDiscovery}). */
+    public static boolean holdsDreamcatcher(Player player) {
+        return holding(player, WCISItems.DREAMCATCHER.get());
+    }
+
     private static boolean isTool(ItemStack stack) {
         return stack.is(WCISItems.DREAMCATCHER.get()) || stack.is(WCISItems.BEDSIDE_LANTERN.get());
     }
