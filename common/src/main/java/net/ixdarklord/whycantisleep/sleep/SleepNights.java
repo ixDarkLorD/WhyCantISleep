@@ -129,6 +129,29 @@ public final class SleepNights {
         return LAST.get(player.getUUID());
     }
 
+    /**
+     * How a night in this bed would go, slept through from now, as it looks before lying down: the room, the monsters
+     * about and the music playing now, and the player's sleep trouble as it stands. The bed check's forecast; nothing
+     * has been slept, so {@link SleepEvents#SCORE_QUALITY} listeners have no say in it.
+     */
+    public static SleepQuality forecast(ServerPlayer player, BlockPos head, Bedroom room) {
+        ServerLevel level = player.level();
+        int monsters = level.getEntitiesOfClass(Monster.class, new AABB(head).inflate(PROWL_RANGE), Monster::isAlive).size();
+        Bedroom.Music music = Bedroom.music(level, head);
+        SleepContext context = new SleepContext(player, head, WakeReason.MORNING, FULL_NIGHT, room.enclosed(), room.lit(), room.pillowLight(),
+                room.decor().soothing(), room.decor().unsettling(), monsters, music == Bedroom.Music.CALM, music == Bedroom.Music.CREEPY,
+                music == Bedroom.Music.LOUD, SleepTroubles.get(player).level(), false);
+        return SleepQuality.of(SleepModifiers.score(context));
+    }
+
+    /** The chance of a night terror on lying down, in percent, for the trouble a player is in now (0 when none could come). */
+    public static int terrorChance(ServerPlayer player) {
+        SleepTrouble.Level trouble = SleepTroubles.get(player).level();
+        if (player.entityTags().contains(NIGHTMARE_MARK)) return 100;
+        if (!WCISServerConfig.NIGHT_TERRORS.get() || !trouble.atLeast(SleepTrouble.Level.RESTLESS)) return 0;
+        return Math.min(100, WCISServerConfig.TERROR_CHANCE.get() * (trouble == SleepTrouble.Level.SLEEPLESS ? 2 : 1));
+    }
+
     /** Before a try to sleep: the trouble as it stands, before lying down wipes the time since rest. */
     public static void beforeSleep(ServerPlayer player) {
         BEFORE_SLEEP.put(player.getUUID(), SleepTroubles.get(player));
