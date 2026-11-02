@@ -77,7 +77,9 @@ public final class SleepTooltip {
         boolean soothing = points > 0;
         int most = soothing ? SleepDecor.SOOTHING_MOST : SleepDecor.UNSETTLING_MOST;
         ChatFormatting color = soothing ? ChatFormatting.GREEN : ChatFormatting.RED;
-        lines.add(Component.empty());
+        // A blank line sets the section apart from the lines above it, but not from the name alone, where it would only
+        // leave a gap.
+        if (lines.size() > 1) lines.add(Component.empty());
         lines.add(sprite(soothing ? BUFF : DEBUFF, soothing ? "+" : "-").append(" ")
                 .append(Component.translatable(soothing ? "gui.whycantisleep.tooltip.soothing" : "gui.whycantisleep.tooltip.unsettling").withStyle(color))
                 .append(Component.literal("  ").append(Component.translatable("gui.whycantisleep.tooltip.points", signed(points))).withStyle(ChatFormatting.WHITE)));
