@@ -1,6 +1,6 @@
 """Draws the mod's two bedside tools as 16x16 item textures (Pillow), each centered in its square:
 the Dreamcatcher (a leather-wrapped wooden hoop on a loop, a diamond web round a violet bead, and three
-feathers on strings) and the Bedside Lantern (a tall iron lantern with a ring handle, an amethyst set in its cap, and violet
+feathers on strings) and the Bedside Lantern (an iron lantern, round-bellied and footed, with a ring handle, an amethyst set in its cap, and violet
 glass round a candle's flame). Violet is the bed check's color, the dark spots' too. Light falls from the upper left.
 
 Run from the repository root: python tools/gen_items.py
@@ -34,24 +34,25 @@ DREAMCATCHER_COLORS = {
     "h": (150, 150, 164, 255),   # feather, shadow
 }
 
-# The lantern, pixel by pixel: tall and narrow, its outline symmetric about the middle, so it sits centered.
+# The lantern, pixel by pixel: a ring handle, a brimmed cap, a narrow neck, a rounded belly of glass, a waist and a
+# flared foot, its outline symmetric about the middle, so it sits centered.
 LANTERN = [
+    "................",
     "......OOOO......",
     ".....O....O.....",
     ".....O....O.....",
-    "....OOOOOOOO....",
-    "....OiIVvIIO....",
-    "....OPPPPPPO....",
-    "....OkpvvppO....",
-    "....OkvVVvpO....",
-    "....OVVyyVvO....",
-    "....OvyWWyvO....",
-    "....OvVyyVpO....",
-    "....OpvccvpO....",
-    "....OpvccppO....",
-    "....OPPPPPPO....",
-    "....OiIIIIIO....",
     ".....OOOOOO.....",
+    "....OiIVvIIO....",
+    ".....OPPPPO.....",
+    "....OkpvvppO....",
+    "...OkvVyyVvpO...",
+    "...OVVyWWyVvO...",
+    "...OvVyWWyVpO...",
+    "...OvvVccVvpO...",
+    "....OpvccvpO....",
+    ".....OPPPPO.....",
+    "....OiIIIIIO....",
+    "...OOOOOOOOOO...",
 ]
 LANTERN_COLORS = {
     "O": (28, 28, 36, 255),      # outline
@@ -115,20 +116,17 @@ def dreamcatcher():
     # The loop it hangs by.
     put(7, 0, "t")
     put(8, 0, "t")
-    # Three feathers on strings, each two pixels wide: lit on its left, in shadow on its right, tipped violet. One on
-    # each side falls from the hoop's lower edge; the middle one hangs under the hoop.
+    # Three feathers on strings, each two pixels wide: lit on its left, in shadow on its right, tipped violet. They
+    # hang at different levels: the two at the sides short and high, from the hoop's lower edge, the middle one long
+    # and low, under the hoop.
     for inner, outer in ((3, 2), (12, 13)):
         lit, dark = min(inner, outer), max(inner, outer)
         put(inner, 10, "t")
         put(inner, 11, "f")
         put(lit, 12, "f")
-        put(dark, 12, "g")
-        put(lit, 13, "f")
-        put(dark, 13, "h")
-        put(lit, 14, "g")
-        put(dark, 14, "h")
-        put(lit, 15, "v")
-        put(dark, 15, "p")
+        put(dark, 12, "h")
+        put(lit, 13, "v")
+        put(dark, 13, "p")
     put(7, 13, "f")
     put(8, 13, "g")
     put(7, 14, "f")
