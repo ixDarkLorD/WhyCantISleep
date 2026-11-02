@@ -2,26 +2,26 @@ package net.ixdarklord.whycantisleep.client;
 
 import net.ixdarklord.coolcatcanvas.api.client.gui.placement.GuiAreas;
 import net.ixdarklord.coolcatcanvas.api.client.gui.placement.GuiPlacement;
-import net.ixdarklord.whycantisleep.client.hud.GuiSprites;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientPlayerEvents;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.whycantisleep.api.SleepTrouble;
 import net.ixdarklord.whycantisleep.api.WakeReason;
+import net.ixdarklord.whycantisleep.client.hud.GuiSprites;
 import net.ixdarklord.whycantisleep.client.hud.HudStyle;
-import net.ixdarklord.whycantisleep.config.WCISClientConfig;
 import net.ixdarklord.whycantisleep.client.hud.SleepTooltip;
+import net.ixdarklord.whycantisleep.config.WCISClientConfig;
 import net.ixdarklord.whycantisleep.network.TroublePayload;
 import net.ixdarklord.whycantisleep.network.WokePayload;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
-import net.ixdarklord.coolcatcore.api.utils.ARGB;
 import net.minecraft.util.Mth;
-import net.minecraft.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -67,11 +67,20 @@ public final class SleepStatus {
     private static final int PIP_HEIGHT = 5;
     private static final int MOON = 9;
     private static final int GAP = 6;
+    // The beds listed, and the arrows pointing their way: ahead, then clockwise round in eighths.
+    private static final int BEDS = 3;
+    private static final String[] ARROWS = {"↑", "↗", "→", "↘", "↓", "↙", "←", "↖"};
 
     private static int ticksSinceRest;
     private static int failedAttempts;
     private static @Nullable WokePayload lastNight;
     private static boolean open;
+    // Whether the server has said anything yet: one with the mod sends the trouble every few seconds.
+    private static boolean heard;
+    // The bed rows drawn in the popup this frame, to be clicked (forgotten), and where the pointer was.
+    private static final List<BedHit> BED_HITS = new ArrayList<>();
+    private static int popupMouseX;
+    private static int popupMouseY;
 
     private SleepStatus() {
     }
@@ -82,12 +91,20 @@ public final class SleepStatus {
             failedAttempts = 0;
             lastNight = null;
             open = false;
+            heard = false;
         });
     }
 
     public static void onTrouble(TroublePayload payload) {
         ticksSinceRest = payload.ticksSinceRest();
         failedAttempts = payload.failedAttempts();
+        heard = true;
+        BedBookmarks.onRespawn(payload.respawn().orElse(null));
+    }
+
+    /** Whether the server has the mod: it has told this client about its sleep. Asking it anything before is no use. */
+    public static boolean serverHasMod() {
+        return heard;
     }
 
     public static void onWoke(WokePayload payload) {
@@ -131,6 +148,15 @@ public final class SleepStatus {
      */
     public static boolean click(int left, int top, double mouseX, double mouseY, int button) {
         if (!WCISClientConfig.STATUS_BUTTON.get()) return false;
+        if (open && button == 0) {
+            for (BedHit hit : BED_HITS) {
+                if (mouseX >= hit.x && mouseX < hit.x + hit.width && mouseY >= hit.y && mouseY < hit.y + LINE) {
+                    BedBookmarks.forget(hit.pos);
+                    Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0F, 0.8F));
+                    return true;
+                }
+            }
+        }
         if (button == 0 && overButton(left, top, mouseX, mouseY)) {
             open = !open;
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F, 0.6F));
@@ -181,6 +207,9 @@ public final class SleepStatus {
         graphics.fill(x + 1, y + last, x + last, y + BUTTON, rim);
         graphics.fill(x, y + 1, x + 1, y + last, rim);
         graphics.fill(x + last, y + 1, x + BUTTON, y + last, rim);
+        BED_HITS.clear();
+        popupMouseX = mouseX;
+        popupMouseY = mouseY;
         if (open) {
             // Over the slots: their items and empty-slot icons (the shield's) are drawn 100 nearer and write depth, so
             // the popup is drawn nearer still, as the game draws its tooltips.
@@ -246,6 +275,7 @@ public final class SleepStatus {
         if (night == null) {
             rows.add(pair(Component.translatable("gui.whycantisleep.status.last_night"), Component.translatable("gui.whycantisleep.status.none"),
                     HudStyle.MUTED));
+            beds(rows);
             return rows;
         }
         int nightColor = night.score() >= 65 ? HudStyle.GREEN : night.score() >= 45 ? HudStyle.YELLOW : HudStyle.RED;
@@ -285,7 +315,65 @@ public final class SleepStatus {
         if (note != null) {
             rows.add(new Row(LINE + 2, (graphics, font, x, y, width) -> HudStyle.text(graphics, font, note, x, y + 2, HudStyle.color(HudStyle.MUTED, 1.0F), false)));
         }
+        beds(rows);
         return rows;
+    }
+
+    // The beds slept in lately or named (BedBookmarks), under a divider: its name, which way it is and how far, or that it
+    // is in another dimension; a star on the respawn point; the nights slept in it, and its last full night's score at
+    // the right. Under the pointer a row is lit, its score a cross: clicked, the bed is forgotten.
+    private static void beds(List<Row> rows) {
+        List<BedBookmarks.Bed> beds = BedBookmarks.list();
+        Minecraft minecraft = Minecraft.getInstance();
+        if (beds.isEmpty() || minecraft.player == null || minecraft.level == null) return;
+        rows.add(new Row(GAP - 2, (graphics, font, x, y, width) -> {
+        }));
+        rows.add(divider());
+        rows.add(new Row(LINE, (graphics, font, x, y, width) ->
+                HudStyle.text(graphics, font, Component.translatable("gui.whycantisleep.status.beds"), x, y, HudStyle.color(HudStyle.MUTED, 1.0F), false)));
+        for (BedBookmarks.Bed bed : beds.subList(0, Math.min(BEDS, beds.size()))) {
+            rows.add(new Row(LINE, (graphics, font, x, y, width) -> {
+                GlobalPos pos = bed.pos();
+                int left = x;
+                if (BedBookmarks.isRespawn(pos)) {
+                    HudStyle.text(graphics, font, "★", left, y, HudStyle.color(HudStyle.GOLD, 1.0F), false);
+                    left += font.width("★") + 3;
+                }
+                Component where = where(minecraft, pos);
+                Component nights = Component.translatable(bed.nights() == 1 ? "gui.whycantisleep.status.beds.night" : "gui.whycantisleep.status.beds.nights",
+                        bed.nights());
+                boolean hovered = popupMouseX >= x && popupMouseX < x + width && popupMouseY >= y && popupMouseY < y + LINE;
+                BED_HITS.add(new BedHit(pos, x, y, width));
+                if (hovered) graphics.fill(x - 2, y - 1, x + width + 2, y + LINE - 1, HudStyle.color(HudStyle.WHITE, 0.06F));
+                Component score = Component.literal(hovered ? "✕" : bed.nights() > 0 ? String.valueOf(bed.score()) : "—");
+                int scoreX = x + width - font.width(score);
+                int bedColor = hovered ? HudStyle.RED : bed.nights() <= 0 ? HudStyle.MUTED : bed.score() >= 65 ? HudStyle.GREEN : bed.score() >= 45 ? HudStyle.YELLOW : HudStyle.RED;
+                HudStyle.text(graphics, font, score, scoreX, y, HudStyle.color(bedColor, 1.0F), false);
+                if (bed.name() != null && !bed.name().isEmpty()) {
+                    Component name = Component.literal(bed.name());
+                    HudStyle.text(graphics, font, font.split(name, (scoreX - left) / 2).get(0), left, y, HudStyle.color(HudStyle.WHITE, 1.0F), false);
+                    left += Math.min(font.width(name), (scoreX - left) / 2) + 4;
+                }
+                HudStyle.text(graphics, font, font.split(where, scoreX - left - 6).get(0), left, y, HudStyle.color(HudStyle.SILVER, 1.0F), false);
+                int nightsX = left + font.width(where) + 4;
+                if (bed.nights() > 0 && nightsX + font.width(nights) < scoreX - 4) {
+                    HudStyle.text(graphics, font, nights, nightsX, y, HudStyle.color(HudStyle.FAINT, 1.0F), false);
+                }
+            }));
+        }
+    }
+
+    // Which way a bed is from the player and how far, as an arrow turned to where they face; or the other dimension.
+    private static Component where(Minecraft minecraft, GlobalPos pos) {
+        if (!pos.dimension().equals(minecraft.level.dimension())) return Component.translatable("gui.whycantisleep.status.beds.elsewhere");
+        double dx = pos.pos().getX() + 0.5 - minecraft.player.getX();
+        double dz = pos.pos().getZ() + 0.5 - minecraft.player.getZ();
+        int distance = (int) Math.round(Math.sqrt(dx * dx + dz * dz));
+        if (distance < 2) return Component.translatable("gui.whycantisleep.status.beds.here");
+        // The bed's bearing against the way the player faces, in eighths of a turn: 0 ahead, then clockwise.
+        double bearing = Math.toDegrees(Math.atan2(-dx, dz)) - minecraft.player.getYRot();
+        int eighth = Math.floorMod((int) Math.round(bearing / 45.0), 8);
+        return Component.translatable("gui.whycantisleep.status.beds.away", ARROWS[eighth], distance);
     }
 
     // How the last night ended, when there is more to say than its score.
@@ -326,6 +414,9 @@ public final class SleepStatus {
     }
 
     private record Row(int height, Draw draw) {
+    }
+
+    private record BedHit(GlobalPos pos, int x, int y, int width) {
     }
 
     @FunctionalInterface

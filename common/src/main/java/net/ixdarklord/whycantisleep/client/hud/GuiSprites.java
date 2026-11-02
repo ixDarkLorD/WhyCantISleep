@@ -8,6 +8,7 @@ import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.GsonHelper;
 
@@ -126,7 +127,7 @@ public final class GuiSprites {
     }
 
     // The {@code gui} section of a sprite's mcmeta, as the later versions read it: only its scaling is used here.
-    private static final class ScalingSection implements net.minecraft.server.packs.metadata.MetadataSectionSerializer<JsonObject> {
+    private static final class ScalingSection implements MetadataSectionSerializer<JsonObject> {
         private static final ScalingSection INSTANCE = new ScalingSection();
 
         @Override

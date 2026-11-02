@@ -1,7 +1,7 @@
 package net.ixdarklord.whycantisleep.network;
 
-import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.coolcatcore.api.network.CustomPacketPayload;
+import net.ixdarklord.whycantisleep.WhyCantISleep;
 
 /**
  * Server to client: a player tried to hide too soon after coming out of a spot. {@code ticksLeft} until they may hide

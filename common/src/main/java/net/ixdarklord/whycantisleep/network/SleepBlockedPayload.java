@@ -1,8 +1,8 @@
 package net.ixdarklord.whycantisleep.network;
 
+import net.ixdarklord.coolcatcore.api.network.CustomPacketPayload;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.minecraft.core.BlockPos;
-import net.ixdarklord.coolcatcore.api.network.CustomPacketPayload;
 
 import java.util.List;
 

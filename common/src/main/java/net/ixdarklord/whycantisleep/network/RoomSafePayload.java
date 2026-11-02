@@ -1,7 +1,7 @@
 package net.ixdarklord.whycantisleep.network;
 
-import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.coolcatcore.api.network.CustomPacketPayload;
+import net.ixdarklord.whycantisleep.WhyCantISleep;
 
 /** Server to client: the player cleared the room of the monsters that blocked their sleep, and is lying down if so. */
 public record RoomSafePayload(boolean lyingDown) implements CustomPacketPayload {

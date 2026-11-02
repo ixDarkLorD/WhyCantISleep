@@ -42,13 +42,18 @@ public record SleepNotice(Kind kind, Component title, @Nullable Component hint, 
     }
 
     /**
-     * How well a night was slept, for its card.
+     * How well a night was slept, or would be, for its card.
      *
-     * @param score   0 to 100
-     * @param details what made it so, the biggest first
-     * @param dream   the sleep effect woken with, or null
+     * @param score    0 to 100
+     * @param details  what made it so, the biggest first
+     * @param dream    the sleep effect woken with, or null
+     * @param forecast whether it is a night still to come (the bed check's), not one just slept
+     * @param label    the quiet line under the title, or null for the usual one
      */
-    public record Quality(int score, List<Detail> details, @Nullable WokePayload.Dream dream) {
+    public record Quality(int score, List<Detail> details, @Nullable WokePayload.Dream dream, boolean forecast, @Nullable Component label) {
+        public Quality(int score, List<Detail> details, @Nullable WokePayload.Dream dream) {
+            this(score, details, dream, false, null);
+        }
     }
 
     /** One thing that made a night better or worse, and by how much. */
@@ -83,7 +88,11 @@ public record SleepNotice(Kind kind, Component title, @Nullable Component hint, 
         WOKE_EARLY(HudStyle.GOLD, () -> Items.CLOCK),
         SHAKEN(HudStyle.LIGHT_PURPLE, () -> Items.ENDER_EYE),
         // The monsters that blocked a sleep, all dealt with.
-        ROOM_SAFE(HudStyle.GREEN, () -> Items.IRON_SWORD);
+        ROOM_SAFE(HudStyle.GREEN, () -> Items.IRON_SWORD),
+        // How a night in a bed would go, before lying down (the card shows the very bed).
+        BED_CHECK(HudStyle.AQUA, () -> Items.RED_BED),
+        // Night falling on a player who hasn't slept in a day or more.
+        REMINDER(HudStyle.GOLD, () -> Items.CLOCK);
 
         private final int color;
         private final Supplier<Item> item;

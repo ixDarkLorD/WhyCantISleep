@@ -6,11 +6,14 @@ import net.ixdarklord.whycantisleep.api.SleepEvents;
 import net.ixdarklord.whycantisleep.api.SleepTrouble;
 import net.ixdarklord.whycantisleep.network.TroublePayload;
 import net.ixdarklord.whycantisleep.network.WCISNetwork;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -59,7 +62,9 @@ public final class SleepTroubles {
     private static void check(ServerPlayer player) {
         SleepTrouble trouble = get(player);
         // The client's moon of sleep debt follows the time since rest.
-        WCISNetwork.sendToPlayer(player, new TroublePayload(trouble.ticksSinceRest(), trouble.failedAttempts()));
+        BlockPos respawn = player.getRespawnPosition();
+        WCISNetwork.sendToPlayer(player, new TroublePayload(trouble.ticksSinceRest(), trouble.failedAttempts(),
+                respawn == null ? Optional.empty() : Optional.of(GlobalPos.of(player.getRespawnDimension(), respawn))));
         SleepTrouble.Level now = trouble.level();
         SleepTrouble.Level before = LEVEL.put(player.getUUID(), now);
         if (before != null && before != now) SleepEvents.TROUBLE_CHANGED.invoke(new SleepEvents.TroubleChanged(player, before, now, trouble));

@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.Int2LongMap;
 import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientPlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
+import net.ixdarklord.whycantisleep.client.hud.BlockerCompass;
 import net.ixdarklord.whycantisleep.config.WCISServerConfig;
 import net.ixdarklord.whycantisleep.sleep.ThreatType;
 import net.minecraft.client.Minecraft;
@@ -50,6 +51,7 @@ public final class Blockers {
         start = tick;
         end = tick + WCISServerConfig.HIGHLIGHT_DURATION.get() * 20L;
         for (Entity blocker : blockers) ENDS.put(blocker.getId(), end);
+        BlockerCompass.track(blockers);
     }
 
     /** Client ticks since the monsters were pointed out, for the HUD's animations. */
