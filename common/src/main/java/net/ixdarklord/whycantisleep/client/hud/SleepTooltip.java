@@ -16,9 +16,9 @@ import java.util.List;
 /**
  * The buff, debuff and neutral icons (on the morning card, in the sleep status, in tooltips), and the part of an
  * item's tooltip that says it changes sleep quality when placed by a bed ({@link SleepDecor}). That part closes the
- * tooltip (CoolCatLib's {@link ItemTooltipEvents#APPEND}, after every other mod's lines): the buff or debuff icon,
- * "Soothing" or "Unsettling" and the points each one is worth, how far they go together, and a meter of as many pips
- * as count, the first lit: one of them is one pip. The icon and the pips are set in the text as glyphs of a font of the
+ * tooltip (CoolCatLib's {@link ItemTooltipEvents#APPEND}, after every other mod's lines): "Soothing" or "Unsettling" by
+ * the buff or debuff icon, and under it what one is worth by a bed, and a meter of as many pips as count, the first lit
+ * (one of them is one pip), with how far they go together. The icon and the pips are set in the text as glyphs of a font of the
  * mod's own ({@code font/icons.json}, the same pictures as the sprites): 1.21.1's text can't hold sprites.
  */
 public final class SleepTooltip {
@@ -34,6 +34,10 @@ public final class SleepTooltip {
     private static final String PIP_SOOTHING = String.valueOf((char) 0xE003);
     private static final String PIP_UNSETTLING = String.valueOf((char) 0xE004);
     private static final String PIP_EMPTY = String.valueOf((char) 0xE005);
+    // A space of 2 after the icon (10 wide in text) puts the heading's word 12 in, where the lines under it start after
+    // three spaces of 4.
+    private static final String GAP_GLYPH = String.valueOf((char) 0xE006);
+    private static final String INDENT = "   ";
 
     private SleepTooltip() {
     }
@@ -81,16 +85,18 @@ public final class SleepTooltip {
         // A blank line sets the section apart from the lines above it, but not from the name alone, where it would only
         // leave a gap.
         if (lines.size() > 1) lines.add(Component.empty());
-        // The icon beside the text, not holding it: what is appended to a component takes on its font.
-        lines.add(Component.empty().append(glyph(soothing ? BUFF_GLYPH : DEBUFF_GLYPH)).append(" ")
-                .append(Component.translatable(soothing ? "gui.whycantisleep.tooltip.soothing" : "gui.whycantisleep.tooltip.unsettling").withStyle(color))
-                .append(Component.literal("  ").append(Component.translatable("gui.whycantisleep.tooltip.points", signed(points))).withStyle(ChatFormatting.WHITE)));
-        lines.add(Component.translatable(soothing ? "gui.whycantisleep.tooltip.soothing.hint" : "gui.whycantisleep.tooltip.unsettling.hint", signed(most))
-                .withStyle(ChatFormatting.GRAY));
-        // As many pips as count before the most is reached, the first lit: one of them is one pip.
-        MutableComponent meter = Component.empty();
+        // The kind by its icon, as a heading; under it, in line with its word, what one is worth by a bed, then the
+        // meter: as many pips as count before the most is reached, the first lit (one of them is one pip), and that most.
+        // The icon sits beside the words, not holding them: what is appended to a component takes on its font.
+        lines.add(Component.empty().append(glyph((soothing ? BUFF_GLYPH : DEBUFF_GLYPH) + GAP_GLYPH))
+                .append(Component.translatable(soothing ? "gui.whycantisleep.tooltip.soothing" : "gui.whycantisleep.tooltip.unsettling").withStyle(color)));
+        lines.add(Component.literal(INDENT).append(Component.translatable("gui.whycantisleep.tooltip.worth",
+                Component.literal(signed(points)).withStyle(color)).withStyle(ChatFormatting.GRAY)));
+        MutableComponent meter = Component.literal(INDENT);
         int pips = Math.max(1, Math.abs(most / points));
         for (int i = 0; i < pips; i++) meter.append(glyph(i == 0 ? (soothing ? PIP_SOOTHING : PIP_UNSETTLING) : PIP_EMPTY));
+        meter.append(Component.literal(" ").append(Component.translatable(soothing ? "gui.whycantisleep.tooltip.soothing.most" : "gui.whycantisleep.tooltip.unsettling.most",
+                signed(most))).withStyle(ChatFormatting.DARK_GRAY));
         lines.add(meter);
     }
 
