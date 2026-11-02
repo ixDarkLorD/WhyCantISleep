@@ -1,7 +1,10 @@
 package net.ixdarklord.whycantisleep.network;
 
 import net.ixdarklord.coolcatcore.api.network.Network;
+import net.ixdarklord.whycantisleep.client.BedCheckClient;
 import net.ixdarklord.whycantisleep.client.HideCooldown;
+import net.ixdarklord.whycantisleep.client.SleepRemindersClient;
+import net.ixdarklord.whycantisleep.sleep.BedCheck;
 import net.ixdarklord.whycantisleep.client.HidingClient;
 import net.ixdarklord.whycantisleep.client.NightTerrorClient;
 import net.ixdarklord.whycantisleep.client.SleepMornings;
@@ -31,6 +34,11 @@ public final class WCISNetwork {
         Network.registerClientbound(TroublePayload.class, (payload, context) -> context.queue(() -> SleepStatus.onTrouble(payload)));
         Network.registerClientbound(RoomSafePayload.class, (payload, context) -> context.queue(() -> SleepClient.onRoomSafe(payload)));
         Network.registerClientbound(HideCooldownPayload.class, (payload, context) -> context.queue(() -> HideCooldown.on(payload)));
+        Network.registerClientbound(BedCheckPayload.class, (payload, context) -> context.queue(() -> BedCheckClient.onCheck(payload)));
+        Network.registerClientbound(ReminderPayload.class, (payload, context) -> context.queue(() -> SleepRemindersClient.on(payload)));
+        Network.registerServerbound(BedCheckRequestPayload.class, (payload, context) -> context.queue(() -> {
+            if (context.getPlayer() instanceof ServerPlayer player) BedCheck.onRequest(player, payload);
+        }));
         Network.registerServerbound(LeaveHidingPayload.class, (payload, context) -> context.queue(() -> {
             if (context.getPlayer() instanceof ServerPlayer player) HidingServer.onLeaveRequest(player);
         }));

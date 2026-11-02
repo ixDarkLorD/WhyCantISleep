@@ -30,6 +30,7 @@ public final class SleepMornings {
 
     public static void onWoke(WokePayload payload) {
         SleepStatus.onWoke(payload);
+        BedBookmarks.onWoke(payload);
         if (!WCISConfigs.isEnabled(WCISClientConfig.MORNING_CARD)) return;
         SleepNotice notice = notice(payload);
         if (notice != null) SleepNotices.show(notice, CARD_TICKS);
@@ -63,7 +64,8 @@ public final class SleepMornings {
         return new SleepNotice.Quality(payload.score(), details, payload.dream().orElse(null));
     }
 
-    private static String word(int score) {
+    /** The word for a night's score, for the {@code gui.whycantisleep.woke.word.*} keys: great, good, fair, poor, awful. */
+    static String word(int score) {
         if (score >= GREAT) return "great";
         if (score >= GOOD) return "good";
         if (score >= FAIR) return "fair";

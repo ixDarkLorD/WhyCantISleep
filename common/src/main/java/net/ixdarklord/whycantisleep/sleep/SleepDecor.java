@@ -54,8 +54,8 @@ public final class SleepDecor {
         return new Count(soothing, unsettling);
     }
 
-    // The item a placed block stands for: a potted plant's own, else the block's.
-    private static ItemStack item(BlockState state) {
+    /** The item a placed block stands for: a potted plant's own, else the block's. */
+    public static ItemStack item(BlockState state) {
         if (state.getBlock() instanceof FlowerPotBlock pot) return new ItemStack(pot.getPotted().asItem());
         return new ItemStack(state.getBlock().asItem());
     }

@@ -1,6 +1,9 @@
 package net.ixdarklord.whycantisleep;
 
 import net.ixdarklord.coolcatcore.api.core.ClientModConstructor;
+import net.ixdarklord.whycantisleep.client.BedBookmarks;
+import net.ixdarklord.whycantisleep.client.BedCheckClient;
+import net.ixdarklord.whycantisleep.client.DarkSpots;
 import net.ixdarklord.whycantisleep.client.Eyelids;
 import net.ixdarklord.whycantisleep.client.HidingAcoustics;
 import net.ixdarklord.whycantisleep.client.HideCooldown;
@@ -18,6 +21,7 @@ import net.ixdarklord.whycantisleep.client.highlight.BlockerTrails;
 import net.ixdarklord.whycantisleep.client.board.SleepBoard;
 import net.ixdarklord.whycantisleep.client.fx.SleepEffects;
 import net.ixdarklord.whycantisleep.client.hud.BlockerArrows;
+import net.ixdarklord.whycantisleep.client.hud.BlockerCompass;
 import net.ixdarklord.whycantisleep.client.hud.HudFade;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotices;
 import net.ixdarklord.whycantisleep.client.hud.SleepTooltip;
@@ -41,11 +45,15 @@ public final class WhyCantISleepClient implements ClientModConstructor {
         Blockers.init();
         BlockerTrails.init();
         BlockerArrows.init();
+        BlockerCompass.init();
         SleepNotices.init();
         SleepBoard.init();
         SleepEffects.init();
         SleepDebtMoon.init();
         SleepStatus.init();
+        BedBookmarks.init();
+        BedCheckClient.init();
+        DarkSpots.init();
         SleepTooltip.init();
         NightTerrorClient.init();
         GuideBookMusic.init();

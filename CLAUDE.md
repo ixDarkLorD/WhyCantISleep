@@ -191,6 +191,11 @@ Client (`WCISClientConfig`, `config/whycantisleep-client.toml`):
 | Sleep debt moon offsets (`debtMoonOffsetX`, `debtMoonOffsetY`) | 0, 0 (-200–200 px) (**new, not on the mod page yet**) | Sleep debt moon |
 | Morning card | on (**new, not on the mod page yet**) | Sleep quality |
 | Sleep status button (`statusButton`) | on (**new, not on the mod page yet**) | |
+| Last blocker compass (`blockerCompass`) | on (**0.2.0, not on the mod page yet**) | Allow arrows |
+| Bed check (`bedCheck`) | on (**0.2.0, not on the mod page yet**) | Bed check (server) |
+| Mark dark spots (`darkSpots`) | on (**0.2.0, not on the mod page yet**) | Bed check |
+| Sleep reminders (`sleepReminders`) | on (**0.2.0, not on the mod page yet**) | Sleep reminders (server) |
+| Bed bookmarks (`bedBookmarks`) | on (**0.2.0, not on the mod page yet**) | Sleep status button |
 
 Server (`WCISServerConfig`, `config/whycantisleep-server.toml`, synced):
 
@@ -226,6 +231,8 @@ Server (`WCISServerConfig`, `config/whycantisleep-server.toml`, synced):
 | Terror chance | 30% (0–100) (**new, not on the mod page yet**) |
 | Harsh night terrors (`harshTerrors`) | on: a terror grows with the days awake, and wakes worse; from 3 days awake it hurts, never below half a heart (**new, not on the mod page yet**) |
 | Well rested | on (**new, not on the mod page yet**) |
+| Bed check (`bedCheck`) | on (**0.2.0, not on the mod page yet**) |
+| Sleep reminders (`sleepReminders`) | on (**0.2.0, not on the mod page yet**) |
 | Sleep effects | on (**new, not on the mod page yet**) |
 | Sleep effect chance | 50% (0–100) (**new, not on the mod page yet**) |
 | Shared bed tolerance | 2 (0–10) (**new, not on the mod page yet**) |
@@ -243,6 +250,16 @@ Moved to Behind Closed Eyes with the split (a mod page change: the author update
 5. Advancements (the whispers and the "monster under the bed" scare moved to Behind Closed Eyes): "Monsters in the Closet" (blocked by monsters 10 times), "Insomniac" (50 failed sleeps), "Night Shift" (kill a blocker within 5 seconds).
 
 After each feature: build every loader, test in game when possible, add a `CHANGELOG.md` line, commit. Finish with a README (features, config options, supported versions, license).
+
+## 0.2.0: knowing your room (2026-11-02, the author's pick of the update plan)
+
+- **Bed check** (`sleep/BedCheck`, `client/BedCheckClient`): sneak held (`isShiftKeyDown`, as hiding reads it) and looking at a bed for 15 ticks sends `BedCheckRequestPayload`, again every 5 s while still looking; only once the server is known to have the mod (`SleepStatus.serverHasMod`, the first `TroublePayload`). The server checks reach (6), a bed, and one request a second per player, looks the room over (`Bedroom.of(level, head, darkSpots)`) and scores it as a full night from now (`SleepNights.forecast`, no `SCORE_QUALITY` listeners) and sends `BedCheckPayload`: score, factors, dark spots, closed or not, the terror chance (`SleepNights.terrorChance`). The card is the morning card's layout (`SleepNotice.Quality.forecast`: "If you sleep here", "What matters"), kind `BED_CHECK`, the bed's own item; the hint is the terror chance, else the dark spots, else an open room.
+- **Dark spots** (`client/DarkSpots`): unlit air on a sturdy floor in a closed room, nearest the bed first, at most `Bedroom.DARK_SPOTS_MOST` (48), marked with violet dust for 10 s, skipped once lit.
+- **Last blocker compass** (`client/hud/BlockerCompass`): `Blockers.set` hands it the blockers; once the highlights end it points to the nearest still alive (an arrow, `BlockerArrows.drawArrow` / `aim`, only when out of plain sight) with "Zombie · 4 m · 1 more" under the crosshair, until `clearingTime` runs out. Needs `roomClearing` on.
+- **Sleep reminders** (`sleep/SleepReminders`, `client/SleepRemindersClient`, `ReminderPayload`): dusk (the dimension's own clock, `getDefaultClockTime`, crossing 12542) for a player a day or more awake; and, with two or more players, some in bed short of the night's needs for 10 s, each player up is told once a night. The second is untested with two players.
+- **Bed bookmarks** (`client/BedBookmarks`): kept by the client in `config/whycantisleep/beds.json`, per world (`local:<folder>` or `server:<address>`), at most 8, a bed by its head: last full night's score (morning or a terror), nights, when. `TroublePayload` now carries the respawn point (`Optional<GlobalPos>`). The status popup lists 3 under "Beds".
+- **Jade and WTHIT** (`compat/LookedAtLines`, `compat/jade/WCISJadePlugin` (Fabric `jade` entrypoint, `@WailaPlugin`), `compat/wthit/WCISWthitPlugin` (`waila_plugins.json`)), client side only, the only classes that touch their APIs: compiled against Jade's Fabric jar from Modrinth's maven (`jade_fabric_version`; it has no API jar) and `mcp.mobius.waila:wthit-api` from maven4.bai.lol (`wthit_api_version`); Jade is in both dev runs.
+- **Room size fix**: `Bedroom` counted every block looked at (walls too) against `ROOM_LIMIT`, so most bedrooms weren't closed; it counts the room's air now.
 
 ## Code conventions (from the author's other mods)
 

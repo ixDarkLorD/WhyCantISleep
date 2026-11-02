@@ -50,6 +50,20 @@ public final class WCISClientConfig {
             .comment("Shows a moon button on your player in the inventory, which opens how you have been sleeping. Needs the mod on the server.").build();
     public static final ConfigValue<Boolean> ACTION_BAR_INFO = BUILDER.bool("actionBarInfo", true)
             .comment("Shows how many monsters are nearby and where the closest one is, above the hotbar.").build();
+    public static final ConfigValue<Boolean> BLOCKER_COMPASS = BUILDER.bool("blockerCompass", true)
+            .comment("Once the highlights fade, keeps pointing to the nearest monster that blocked your sleep, until the time to clear the room runs out.")
+            .enabledWhen(WCISServerConfig.ALLOW_ARROWS).build();
+    public static final ConfigValue<Boolean> BED_CHECK = BUILDER.bool("bedCheck", true)
+            .comment("Crouch by a bed and look at it to see how a night in it would go, before you lie down. Needs the mod on the server.")
+            .enabledWhen(WCISServerConfig.BED_CHECK).build();
+    public static final ConfigValue<Boolean> DARK_SPOTS = BUILDER.bool("darkSpots", true)
+            .comment("With the bed check, marks the places in the room a monster could spawn, so you know where to put a light.").enabledWhen(BED_CHECK).build();
+    public static final ConfigValue<Boolean> SLEEP_REMINDERS = BUILDER.bool("sleepReminders", true)
+            .comment("Reminds you at dusk when you have gone a day or more without sleep, and tells you when the others have gone to bed. Needs the mod on the server.")
+            .enabledWhen(WCISServerConfig.SLEEP_REMINDERS).build();
+    public static final ConfigValue<Boolean> BED_BOOKMARKS = BUILDER.bool("bedBookmarks", true)
+            .comment("Remembers the beds you sleep in, and lists them in the sleep status popup with how you last slept in each and which is your respawn point.")
+            .enabledWhen(STATUS_BUTTON).build();
     static {
         BUILDER.pop();
         BUILDER.push("sounds", "How the world sounds while you hide or sleep.");

@@ -1,6 +1,18 @@
 # Changelog
 This file is for listing all the changes to this project
 
+## v0.2.0 Beta | Unreleased
+### ✨ New Features
+- **Bed check**: crouch by a bed and look at it for a moment, and a card says how a night in it would go before you lie down: the score it would have, what matters most to it, and whether a night terror is waiting. Keep looking and it updates as you change the room. Server option `bedCheck`, client option of the same name.
+- **Dark spots**: with the bed check, the places in a closed room a monster could spawn are marked on the floor with violet specks for a while, so you know where to put a light. A spot goes unmarked once it's lit. Client option `darkSpots`.
+- **Last blocker compass**: once the highlights of a refused sleep fade, an arrow keeps pointing to the nearest monster that blocked it, with its name, how far it is and how many are left, until the time to clear the room runs out. Client option `blockerCompass`.
+- **Sleep reminders**: at dusk, a player who has gone a day or more without sleep is reminded; on a server, once some players are in bed and have waited a while, those still up are told, once a night. Server and client option `sleepReminders`.
+- **Bed bookmarks**: the beds you sleep in are remembered for each world (on your own computer), and the sleep status popup lists the latest: which way and how far each is, the nights slept in it, its last full night's score, and a star on your respawn point. Client option `bedBookmarks`.
+- **Jade and WTHIT**: looking at a bed shows your last night in it, whether it's your respawn point and how to hide under it; looking at something that soothes or unsettles a sleeper shows by how much. Both are optional.
+
+### 🐛 Bug Fixes
+- A room counted as closed only when its walls were part of the 600-block limit, so most real bedrooms were "Out in the Open": the limit now counts the room's own air.
+
 ## v0.1.0 Beta | Oct 26, 2026
 ### ✨ New Features
 - Project set up for Fabric and NeoForge (Minecraft 26.1 to 26.1.2), built on CoolCatLib: Core and CoolCatLib: Canvas.

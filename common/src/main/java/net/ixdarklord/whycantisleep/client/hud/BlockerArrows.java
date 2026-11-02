@@ -77,17 +77,7 @@ public final class BlockerArrows {
 
         float centerX = graphics.guiWidth() / 2.0F;
         float centerY = graphics.guiHeight() / 2.0F;
-        for (Arrow arrow : arrows) {
-            float scale = size * arrow.scale;
-            graphics.pose().pushMatrix();
-            graphics.pose().translate(centerX, centerY);
-            graphics.pose().rotate(arrow.angle);
-            graphics.pose().translate(radius, 0.0F);
-            graphics.pose().scale(scale, scale);
-            graphics.blit(RenderPipelines.GUI_TEXTURED, ARROWS, -FRAME_SIZE / 2, -FRAME_SIZE / 2, arrow.hollow ? FRAME_SIZE : 0.0F, 0.0F,
-                    FRAME_SIZE, FRAME_SIZE, SHEET_WIDTH, FRAME_SIZE, ARGB.color(Math.round(alpha * 255.0F), arrow.color));
-            graphics.pose().popMatrix();
-        }
+        for (Arrow arrow : arrows) drawArrow(graphics, centerX, centerY, arrow.angle, radius, size * arrow.scale, arrow.hollow, arrow.color, alpha);
         float pulse = (age % PULSE_TICKS) / PULSE_TICKS;
         for (Ring ring : rings) {
             float scale = size * ring.scale;
@@ -98,6 +88,43 @@ public final class BlockerArrows {
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, RING, Math.round(ring.x) - out, Math.round(ring.y) - out, out * 2, out * 2,
                     ARGB.color(Math.round(alpha * 200.0F * (1.0F - pulse)), ring.color));
         }
+    }
+
+    /** One arrow, {@code radius} out from a point at an angle on the screen (0 to the right, down positive), pointing outward. */
+    static void drawArrow(GuiGraphicsExtractor graphics, float centerX, float centerY, float angle, float radius, float scale, boolean hollow, int color,
+                          float alpha) {
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(centerX, centerY);
+        graphics.pose().rotate(angle);
+        graphics.pose().translate(radius, 0.0F);
+        graphics.pose().scale(scale, scale);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, ARROWS, -FRAME_SIZE / 2, -FRAME_SIZE / 2, hollow ? FRAME_SIZE : 0.0F, 0.0F,
+                FRAME_SIZE, FRAME_SIZE, SHEET_WIDTH, FRAME_SIZE, ARGB.color(Math.round(alpha * 255.0F), color));
+        graphics.pose().popMatrix();
+    }
+
+    /**
+     * Where a point in the world is from the camera, on the screen: the angle an arrow pointing to it takes, and whether
+     * it is in the view at all.
+     */
+    static Aim aim(Minecraft minecraft, GuiGraphicsExtractor graphics, Vec3 target) {
+        Camera camera = minecraft.gameRenderer.getMainCamera();
+        Vec3 to = target.subtract(camera.position());
+        Vector3fc forward = camera.forwardVector();
+        Vector3fc up = camera.upVector();
+        Vector3fc left = camera.leftVector();
+        double tanV = Math.tan(Math.toRadians(camera.getFov()) / 2.0);
+        double tanH = tanV * graphics.guiWidth() / graphics.guiHeight();
+        double ahead = to.x * forward.x() + to.y * forward.y() + to.z * forward.z();
+        double right = -(to.x * left.x() + to.y * left.y() + to.z * left.z());
+        double above = to.x * up.x() + to.y * up.y() + to.z * up.z();
+        boolean inView = ahead > 0.0 && Math.abs(right) <= ahead * tanH && Math.abs(above) <= ahead * tanV;
+        float angle = Math.abs(right) < 1.0E-4 && Math.abs(above) < 1.0E-4 ? Mth.HALF_PI : (float) Math.atan2(-above, right);
+        return new Aim(angle, inView, to.length());
+    }
+
+    /** Which way a point is on the screen, whether it is in the view, and how far it is. */
+    record Aim(float angle, boolean inView, double distance) {
     }
 
     // An arrow for each blocker the player can't see outside the view, with the angle on the screen that points to it;
