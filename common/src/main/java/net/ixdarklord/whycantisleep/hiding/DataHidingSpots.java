@@ -10,6 +10,7 @@ import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.whycantisleep.api.HidingPosture;
 import net.ixdarklord.whycantisleep.api.HidingSpot;
 import net.ixdarklord.whycantisleep.api.HidingSpotType;
+import net.ixdarklord.whycantisleep.api.HidingSpots;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -39,7 +40,7 @@ import java.util.TreeMap;
 
 /**
  * The hiding spots data packs describe, at {@code data/<namespace>/whycantisleep/hiding_spot/<name>.json} (the format is
- * in {@link net.ixdarklord.whycantisleep.api.HidingSpots}). Loaded on the server with its data; a client never has them,
+ * in {@link HidingSpots}). Loaded on the server with its data; a client never has them,
  * and lets the server decide what a sneak-use of such a block does.
  */
 public final class DataHidingSpots extends SimpleJsonResourceReloadListener {

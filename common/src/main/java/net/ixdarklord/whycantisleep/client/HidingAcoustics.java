@@ -1,10 +1,10 @@
 package net.ixdarklord.whycantisleep.client;
 
-import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
-import net.ixdarklord.whycantisleep.api.HidingPosture;
 import net.ixdarklord.coolcatcanvas.api.client.sound.SoundFilter;
 import net.ixdarklord.coolcatcanvas.api.client.sound.SoundFilterProvider;
 import net.ixdarklord.coolcatcanvas.api.client.sound.SoundFilters;
+import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
+import net.ixdarklord.whycantisleep.api.HidingPosture;
 import net.ixdarklord.whycantisleep.config.WCISClientConfig;
 import net.ixdarklord.whycantisleep.hiding.Hiding;
 import net.ixdarklord.whycantisleep.hiding.HidingView;
@@ -12,8 +12,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.renderer.texture.SpriteContents;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;

@@ -21,4 +21,6 @@ dependencies {
     // Dev runs only: Simple Voice Chat, to try the optional integration (Modrinth's maven comes from the shared scripts),
     // remapped like MCP Bridge.
     modLocalRuntime("maven.modrinth:simple-voice-chat:fabric-${voicechat_version}") { transitive = false }
+    // Dev runs only: Jade, to see the optional tooltip lines.
+    modLocalRuntime("maven.modrinth:jade:${jade_fabric_version}") { transitive = false }
 }

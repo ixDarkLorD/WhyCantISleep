@@ -9,6 +9,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.whycantisleep.api.SleepContext;
 import net.ixdarklord.whycantisleep.api.SleepModifier;
+import net.ixdarklord.whycantisleep.api.SleepModifiers;
 import net.ixdarklord.whycantisleep.api.SleepTrouble;
 import net.ixdarklord.whycantisleep.api.WakeReason;
 import net.minecraft.core.BlockPos;
@@ -16,8 +17,8 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -41,7 +42,7 @@ import java.util.TreeSet;
 
 /**
  * The sleep quality modifiers data packs describe, at {@code data/<namespace>/whycantisleep/sleep_modifier/<name>.json}
- * (the format is in {@link net.ixdarklord.whycantisleep.api.SleepModifiers}), the mod's own among them. A file with the
+ * (the format is in {@link SleepModifiers}), the mod's own among them. A file with the
  * id of a modifier takes its place; one with {@code "disabled": true} takes it out. Loaded on the server with its data.
  */
 public final class DataSleepModifiers extends SimpleJsonResourceReloadListener {
