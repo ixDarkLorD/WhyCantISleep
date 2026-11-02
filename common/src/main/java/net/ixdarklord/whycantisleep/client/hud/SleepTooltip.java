@@ -3,9 +3,13 @@ package net.ixdarklord.whycantisleep.client.hud;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ItemTooltipEvents;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.whycantisleep.api.SleepEffect;
+import net.ixdarklord.whycantisleep.client.SleepStatus;
+import net.ixdarklord.whycantisleep.sleep.DecorDiscovery;
 import net.ixdarklord.whycantisleep.sleep.SleepDecor;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.data.AtlasIds;
 import net.minecraft.network.chat.Component;
@@ -73,9 +77,26 @@ public final class SleepTooltip {
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, y, ICON_SIZE, ICON_SIZE, ARGB.white(Math.min(alpha, 1.0F)));
     }
 
+    /**
+     * Whether the player knows what an item does by a bed ({@link DecorDiscovery}). Without a world, or on a server
+     * without the mod (which keeps no record of it), everything is known.
+     */
+    public static boolean known(ItemStack stack) {
+        LocalPlayer player = Minecraft.getInstance().player;
+        return player == null || !SleepStatus.serverHasMod() || DecorDiscovery.knows(player, stack);
+    }
+
     private static void append(ItemStack stack, List<Component> lines) {
         int points = SleepDecor.points(stack);
         if (points == 0) return;
+        if (!known(stack)) {
+            // Not found out yet: that it is something, and how to find out what.
+            if (lines.size() > 1) lines.add(Component.empty());
+            lines.add(Component.empty().append(sprite(NEUTRAL, "?")).append(" ")
+                    .append(Component.translatable("gui.whycantisleep.tooltip.unknown").withStyle(ChatFormatting.GRAY)));
+            lines.add(Component.literal(INDENT).append(Component.translatable("gui.whycantisleep.tooltip.unknown.hint").withStyle(ChatFormatting.DARK_GRAY)));
+            return;
+        }
         boolean soothing = points > 0;
         int most = soothing ? SleepDecor.SOOTHING_MOST : SleepDecor.UNSETTLING_MOST;
         ChatFormatting color = soothing ? ChatFormatting.GREEN : ChatFormatting.RED;

@@ -36,6 +36,7 @@ public final class WCISNetwork {
         Network.registerClientbound(HideCooldownPayload.class, (payload, context) -> context.queue(() -> HideCooldown.on(payload)));
         Network.registerClientbound(BedCheckPayload.class, (payload, context) -> context.queue(() -> BedCheckClient.onCheck(payload)));
         Network.registerClientbound(ReminderPayload.class, (payload, context) -> context.queue(() -> SleepRemindersClient.on(payload)));
+        Network.registerClientbound(StudiedPayload.class, (payload, context) -> context.queue(() -> BedCheckClient.onStudied(payload)));
         Network.registerServerbound(BedCheckRequestPayload.class, (payload, context) -> context.queue(() -> {
             if (context.getPlayer() instanceof ServerPlayer player) BedCheck.onRequest(player, payload);
         }));

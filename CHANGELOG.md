@@ -3,8 +3,9 @@ This file is for listing all the changes to this project
 
 ## v0.2.0 Beta | Unreleased
 ### ✨ New Features
-- **Bed check**: hold a **Dreamcatcher**, crouch by a bed and look at it for a moment, and a card says how a night in it would go before you lie down: the score it would have, what matters most to it, how it compares with the last night you slept there, and whether a night terror is waiting. A Dreamcatcher hung in an item frame near the bed works for anyone who looks. The card follows the room live: place a candle, break a pot or open the door and it changes within a moment. Server options `bedCheck` and `bedCheckNeedsTools` (off, no tools are needed), client option `bedCheck`.
-- **Dark spots**: hold a **Bedside Lantern** while you look at a bed, and the places in its room a monster could spawn are marked on the floor with violet specks for a while, so you know where to put a light. A spot goes unmarked once it's lit. Client option `darkSpots`.
+- **Bed check**: hold a **Dreamcatcher**, sneak and use a bed, and a card says at once how a night in it would go before you lie down: the score it would have, what matters most to it, how it compares with the last night you slept there, and whether a night terror is waiting. The card follows the room live: place a candle, break a pot or open the door and it changes within a moment. Server options `bedCheck` and `bedCheckNeedsTools` (off, no tools are needed), client option `bedCheck`.
+- **Dark spots**: sneak and use a bed with a **Bedside Lantern** in hand, and the places in its room a monster could spawn are marked for a while with soft violet tiles of light on the floor, breathing slowly, a mote now and then drifting up from them, so you know where to put a light. A spot goes unmarked once it's lit. Client option `darkSpots`.
+- **Discovering what things by the bed do**: a soothing or unsettling item's tooltip says only "Unknown effect on sleep" until you find out what it does, by sleeping a night through with it near the bed (the morning card says what you learned about), or by holding it in your off hand while you check a bed with a Dreamcatcher. Remembered for each player. Server option `discoverDecor` (on); in creative, everything is known.
 - **New items**: the **Dreamcatcher** (sticks, string and feathers) and the **Bedside Lantern** (a lantern and an amethyst shard), in the mod's creative tab, with a page in the Insomniac's Handbook (Things by the Bed).
 - **Last blocker compass**: once the highlights of a refused sleep fade, an arrow keeps pointing to the nearest monster that blocked it, with its name, how far it is and how many are left, until the time to clear the room runs out. A soft ping quickens as you close in, and dealing with the last of them chimes and says "All of them dealt with". Client options `blockerCompass` and `compassPing`.
 - **Sleep reminders**: at dusk, a player who has gone a day or more without sleep is reminded; on a server, once some players are in bed and have waited a while, those still up are told, once a night. Server options `sleepReminders`, `reminderDays` (1) and `reminderWait` (10 s), client option `sleepReminders`.
@@ -12,6 +13,8 @@ This file is for listing all the changes to this project
 - **Jade and WTHIT**: looking at a bed shows its name, your last night in it, whether it's your respawn point and how to hide under it; looking at something that soothes or unsettles a sleeper shows by how much. Both are optional.
 
 ### 🛠️ Changes
+- The trails highlighted monsters leave are footprints now: a clawed print for each step, left and right, turned the way it went and glowing faintly in its highlight color, pressed in as it's made and fading over 15 seconds.
+- The last blocker compass's label sits in the HUD's own frame, tinted the monster's color, with a dot of that color before its name.
 - The sleep section of a soothing or unsettling item's tooltip is laid out anew: "Soothing" or "Unsettling" by its icon as a heading, and under it, in line with that word, what one is worth near a bed and the meter with how far they go together.
 
 ### 🐛 Bug Fixes

@@ -1,12 +1,14 @@
 package net.ixdarklord.whycantisleep.compat;
 
 import net.ixdarklord.whycantisleep.client.BedBookmarks;
+import net.ixdarklord.whycantisleep.client.hud.SleepTooltip;
 import net.ixdarklord.whycantisleep.config.WCISServerConfig;
 import net.ixdarklord.whycantisleep.sleep.SleepDecor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -44,7 +46,10 @@ public final class LookedAtLines {
             }
             return lines;
         }
-        int points = SleepDecor.points(SleepDecor.item(state));
+        ItemStack item = SleepDecor.item(state);
+        // Only once the player has found out what it does.
+        if (!SleepTooltip.known(item)) return lines;
+        int points = SleepDecor.points(item);
         if (points > 0) lines.add(Component.translatable("gui.whycantisleep.looked_at.soothing", points).withStyle(ChatFormatting.GREEN));
         else if (points < 0) lines.add(Component.translatable("gui.whycantisleep.looked_at.unsettling", -points).withStyle(ChatFormatting.RED));
         return lines;

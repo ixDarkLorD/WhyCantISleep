@@ -3,28 +3,23 @@ package net.ixdarklord.whycantisleep.sleep;
 import net.ixdarklord.whycantisleep.compat.WCISItems;
 import net.ixdarklord.whycantisleep.config.WCISServerConfig;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
+import net.minecraft.world.item.ItemStack;
 
 /**
- * What a player may read of a bed with the bed check, on either side: how a night in it would go with a Dreamcatcher
- * (in either hand, or in an item frame near the bed), the dark spots of its room with a Bedside Lantern (in either
- * hand). With the server's {@code bedCheckNeedsTools} off, both need nothing.
+ * What a player may read of a bed with the bed check, on either side: how a night in it would go with a Dreamcatcher,
+ * the dark spots of its room with a Bedside Lantern, each in either hand. With the server's {@code bedCheckNeedsTools} off, both need nothing. A bed is checked by sneaking and using it
+ * with either tool in hand ({@link #checksByClick}).
  */
 public final class BedTools {
-    // How near the bed a Dreamcatcher hung in an item frame counts: the room round it.
-    private static final double FRAME_RANGE = 6.0;
-
     private BedTools() {
     }
 
     /** Whether the player may read how a night in this bed (its head) would go. */
     public static boolean canForecast(Player player, BlockPos head) {
         if (!WCISServerConfig.BED_CHECK_NEEDS_TOOLS.get()) return true;
-        return holding(player, WCISItems.DREAMCATCHER.get()) || hungNear(player.level(), head);
+        return holding(player, WCISItems.DREAMCATCHER.get());
     }
 
     /** Whether the player may see where in a bed's room a monster could spawn. */
@@ -37,13 +32,21 @@ public final class BedTools {
         return canSeeDarkSpots(player) || canForecast(player, head);
     }
 
-    private static boolean holding(Player player, Item item) {
-        return player.getMainHandItem().is(item) || player.getOffhandItem().is(item);
+    /**
+     * Whether using a bed now checks it: sneaking, with a Dreamcatcher or a Bedside Lantern in the main hand, or in the off
+     * hand with the main hand empty (what the main hand holds is what a use goes by). The only way a bed is checked.
+     */
+    public static boolean checksByClick(Player player) {
+        if (!player.isSecondaryUseActive()) return false;
+        ItemStack main = player.getMainHandItem();
+        return isTool(main) || main.isEmpty() && isTool(player.getOffhandItem());
     }
 
-    // A Dreamcatcher in an item frame near the bed: it watches over the bed for whoever looks at it.
-    private static boolean hungNear(Level level, BlockPos head) {
-        return !level.getEntitiesOfClass(ItemFrame.class, new AABB(head).inflate(FRAME_RANGE),
-                frame -> frame.getItem().is(WCISItems.DREAMCATCHER.get())).isEmpty();
+    private static boolean isTool(ItemStack stack) {
+        return stack.is(WCISItems.DREAMCATCHER.get()) || stack.is(WCISItems.BEDSIDE_LANTERN.get());
+    }
+
+    private static boolean holding(Player player, Item item) {
+        return player.getMainHandItem().is(item) || player.getOffhandItem().is(item);
     }
 }

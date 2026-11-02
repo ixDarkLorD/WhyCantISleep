@@ -6,16 +6,22 @@ import net.ixdarklord.coolcatcore.api.event.v2.common.PlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.ServerLifecycleEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.core.EventResult;
 import net.ixdarklord.whycantisleep.api.SleepQuality;
+import net.ixdarklord.whycantisleep.compat.WCISItems;
 import net.ixdarklord.whycantisleep.config.WCISServerConfig;
 import net.ixdarklord.whycantisleep.network.BedCheckPayload;
 import net.ixdarklord.whycantisleep.network.BedCheckRequestPayload;
+import net.ixdarklord.whycantisleep.network.StudiedPayload;
 import net.ixdarklord.whycantisleep.network.WCISNetwork;
 import net.ixdarklord.whycantisleep.network.WokePayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -29,18 +35,18 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * The bed check: a player crouched by a bed, looking at it, is told how a night in it would go before they lie down
- * ({@link SleepNights#forecast}): the score it would have, what makes it so, and the chance of a night terror, with a
- * Dreamcatcher; where in a closed room a monster could spawn, with a Bedside Lantern ({@link BedTools}). The client asks;
- * the server looks the room over and answers. While a player is reading a bed, a change round it (a block placed or
- * broken, a door or a light used) answers again a moment later, so the card follows the room as it is changed.
+ * The bed check: a player sneaking and using a bed with a tool in hand ({@link BedTools#checksByClick}) is told how a
+ * night in it would go before they lie down ({@link SleepNights#forecast}): the score it would have, what makes it so,
+ * and the chance of a night terror, with a Dreamcatcher; where in a closed room a monster could spawn, with a Bedside
+ * Lantern. The server looks the room over and answers. While a player is reading a bed, a change round it (a block
+ * placed or broken, a door or a light used) answers again a moment later, so the card follows the room as it is changed.
  */
 public final class BedCheck {
     // How near the bed the player must be (as for using it, with room to spare), and how often one player may ask:
     // looking a room over is a flood fill of up to a few hundred blocks.
     private static final double REACH = 6.0;
     private static final int COOLDOWN_TICKS = 20;
-    // A bed read is followed this long after the last ask (the client asks every 5 s while looking), and a change
+    // A bed read is followed this long after the last ask, and a change
     // this near it is looked at again after a few ticks, once the light has settled, at most this often.
     private static final int WATCH_TICKS = 20 * 6;
     private static final double CHANGE_RANGE = 14.0;
@@ -60,11 +66,20 @@ public final class BedCheck {
         });
         BlockEvents.PLACED.register((level, pos, state, placer) -> changed(level, pos));
         InteractionEvents.USE_BLOCK.register((player, hand, hit) -> {
-            // Using the bed itself changes nothing of the room (it is a try to sleep, or to hide).
-            if (!player.level().isClientSide() && !(player.level().getBlockState(hit.getBlockPos()).getBlock() instanceof BedBlock)) {
+            if (player.level().isClientSide() || !(player instanceof ServerPlayer serverPlayer)) return InteractionResult.PASS;
+            // Using the bed itself changes nothing of the room: it is a try to sleep or to hide, or, sneaking with a tool in
+            // hand, a check of it (answered on the client too, so it predicts nothing else).
+            if (!(player.level().getBlockState(hit.getBlockPos()).getBlock() instanceof BedBlock)) {
                 changed(player.level(), hit.getBlockPos());
+                return InteractionResult.PASS;
             }
-            return InteractionResult.PASS;
+            if (hand != InteractionHand.MAIN_HAND || !WCISServerConfig.BED_CHECK.get() || !BedTools.checksByClick(player)) {
+                return InteractionResult.PASS;
+            }
+            // With a Dreamcatcher, something unknown held in the other hand is studied instead.
+            if (study(serverPlayer)) return InteractionResult.SUCCESS;
+            check(serverPlayer, hit.getBlockPos());
+            return InteractionResult.SUCCESS;
         });
         PlayerEvents.END_TICK.register(player -> {
             if (player instanceof ServerPlayer serverPlayer) tick(serverPlayer);
@@ -81,12 +96,28 @@ public final class BedCheck {
 
     /** The client asks how a night in this bed would go. */
     public static void onRequest(ServerPlayer player, BedCheckRequestPayload payload) {
+        check(player, payload.bed());
+    }
+
+    // A Dreamcatcher in the main hand and, in the off hand, something whose effect by a bed the player doesn't know yet:
+    // they find out, and are told.
+    private static boolean study(ServerPlayer player) {
+        if (!player.getMainHandItem().is(WCISItems.DREAMCATCHER.get())) return false;
+        ItemStack held = player.getOffhandItem();
+        if (DecorDiscovery.knows(player, held)) return false;
+        if (DecorDiscovery.discover(player, List.of(held.getItem())).isEmpty()) return false;
+        player.level().playSound(null, player.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8F, 1.2F);
+        WCISNetwork.sendToPlayer(player, new StudiedPayload(held.getItem()));
+        return true;
+    }
+
+    // Answers a player reading the bed at this spot, at most once a second.
+    private static void check(ServerPlayer player, BlockPos pos) {
         if (!WCISServerConfig.BED_CHECK.get() || player.isSleeping() || player.isSpectator()) return;
         ServerLevel level = player.level();
         long now = level.getGameTime();
         Long last = LAST.get(player.getUUID());
         if (last != null && now - last < COOLDOWN_TICKS) return;
-        BlockPos pos = payload.bed();
         if (!level.isLoaded(pos) || player.getEyePosition().distanceTo(Vec3.atCenterOf(pos)) > REACH) return;
         BlockState state = level.getBlockState(pos);
         if (!(state.getBlock() instanceof BedBlock)) return;

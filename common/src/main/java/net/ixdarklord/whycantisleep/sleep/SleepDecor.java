@@ -10,6 +10,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 /**
  * Things by a bed that change how well it is slept in: soothing ones (flowers, amethyst, candles) help, unsettling ones
  * (skulls, cobwebs, sculk) keep a sleeper up. Each placed within {@link #RANGE} blocks of the bed counts, up to a most;
@@ -52,6 +55,18 @@ public final class SleepDecor {
             else if (points < 0) unsettling++;
         }
         return new Count(soothing, unsettling);
+    }
+
+    /** The soothing and unsettling items placed round a bed, each once, nearest the bed's corner first. */
+    public static Set<Item> items(Level level, BlockPos bed) {
+        Set<Item> items = new LinkedHashSet<>();
+        for (BlockPos pos : BlockPos.betweenClosed(bed.offset(-RANGE, -VERTICAL_RANGE, -RANGE), bed.offset(RANGE, VERTICAL_RANGE, RANGE))) {
+            BlockState state = level.getBlockState(pos);
+            if (state.isAir()) continue;
+            ItemStack item = item(state);
+            if (points(item) != 0) items.add(item.getItem());
+        }
+        return items;
     }
 
     /** The item a placed block stands for: a potted plant's own, else the block's. */
