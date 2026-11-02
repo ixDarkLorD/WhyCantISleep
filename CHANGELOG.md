@@ -11,6 +11,9 @@ This file is for listing all the changes to this project
 - **Bed bookmarks**: the beds you sleep in are remembered for each world (on your own computer), and the sleep status popup lists the latest: its name, which way and how far it is, the nights slept in it, its last full night's score, and a star on your respawn point. Name a bed by using a named name tag on it; click a bed in the list to forget it. Client option `bedBookmarks`.
 - **Jade and WTHIT**: looking at a bed shows its name, your last night in it, whether it's your respawn point and how to hide under it; looking at something that soothes or unsettles a sleeper shows by how much. Both are optional.
 
+### 🛠️ Changes
+- The sleep section of a soothing or unsettling item's tooltip is laid out anew: "Soothing" or "Unsettling" by its icon as a heading, and under it, in line with that word, what one is worth near a bed and the meter with how far they go together.
+
 ### 🐛 Bug Fixes
 - The sleep section of a soothing or unsettling item's tooltip no longer leaves a blank line under the item's name when nothing else is above it, and it sits above the advanced tooltip lines (the item's id, its component count).
 - A room counted as closed only when its walls were part of the 600-block limit, so most real bedrooms were "Out in the Open": the limit now counts the room's own air.
