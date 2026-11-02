@@ -1,6 +1,7 @@
-"""Draws the mod's two bedside tools as 16x16 item textures (Pillow):
-the Dreamcatcher (a wooden hoop with a string web, a violet bead and three feathers) and the Bedside Lantern (a small
-iron lantern of violet glass round a candle flame). Violet is the bed check's color, the dark spots' too.
+"""Draws the mod's two bedside tools as 16x16 item textures (Pillow), each centered in its square:
+the Dreamcatcher (a leather-wrapped wooden hoop on a loop, a web of string round a violet bead, and three feathers on
+beaded strings) and the Bedside Lantern (an iron lantern with a ring handle, an amethyst set in its cap, and violet
+glass round a candle's flame). Violet is the bed check's color, the dark spots' too. Light falls from the upper left.
 
 Run from the repository root: python tools/gen_items.py
 """
@@ -11,103 +12,130 @@ from PIL import Image
 
 OUT = Path("common/src/main/resources/assets/whycantisleep/textures/item")
 
-WOOD_DARK = (92, 58, 30, 255)
-WOOD = (140, 96, 52, 255)
-WOOD_LIGHT = (176, 128, 74, 255)
-STRING = (222, 214, 196, 255)
-STRING_DIM = (170, 162, 148, 255)
-VIOLET = (138, 107, 255, 255)
-VIOLET_LIGHT = (190, 172, 255, 255)
-VIOLET_DARK = (88, 64, 180, 255)
-FEATHER = (236, 236, 232, 255)
-FEATHER_SHADE = (190, 190, 186, 255)
-IRON_DARK = (44, 44, 52, 255)
-IRON = (74, 74, 86, 255)
-IRON_LIGHT = (112, 112, 126, 255)
-FLAME = (255, 214, 120, 255)
-FLAME_CORE = (255, 246, 210, 255)
+# The dreamcatcher's hoop: centered between pixels (7.5, 6.5), so it sits evenly, its wood band between these radii,
+# outlined outside them.
+HOOP_X, HOOP_Y = 7.5, 6.5
+HOOP_IN, HOOP_OUT, HOOP_EDGE = 3.6, 4.85, 5.6
+
+DREAMCATCHER_COLORS = {
+    "O": (58, 34, 18, 255),      # outline
+    "D": (98, 62, 32, 255),      # wood, in shadow
+    "W": (140, 94, 50, 255),     # wood
+    "L": (186, 134, 78, 255),    # wood, lit
+    "R": (116, 52, 40, 255),     # leather wrap
+    "r": (152, 74, 56, 255),     # leather wrap, lit
+    "s": (232, 224, 206, 255),   # string
+    "t": (170, 160, 142, 255),   # string, dim
+    "V": (200, 184, 255, 255),   # violet, lit
+    "v": (138, 107, 255, 255),   # violet
+    "p": (84, 58, 168, 255),     # violet, deep
+    "f": (244, 244, 240, 255),   # feather
+    "g": (206, 206, 210, 255),   # feather, soft
+    "h": (150, 150, 164, 255),   # feather, shadow
+}
+
+# The lantern, pixel by pixel: rows 1 to 14, its outline symmetric about the middle, so it sits centered.
+LANTERN = [
+    "................",
+    "......OOOO......",
+    ".....O....O.....",
+    ".....O....O.....",
+    "....OOOOOOOO....",
+    "...OiiIVvIIIO...",
+    "...OPPPPPPPPO...",
+    "...OkpvvvvppO...",
+    "...OkvVyyVvpO...",
+    "...OVVyWWyVvO...",
+    "...OvvVccVvpO...",
+    "...OpvvccvppO...",
+    "...OPPPPPPPPO...",
+    "...OiiIIIIIIO...",
+    "....OOOOOOOO....",
+    "................",
+]
+LANTERN_COLORS = {
+    "O": (28, 28, 36, 255),      # outline
+    "P": (54, 54, 68, 255),      # iron, dark
+    "I": (90, 90, 106, 255),     # iron
+    "i": (138, 138, 156, 255),   # iron, lit
+    "p": (72, 48, 152, 255),     # glass, deep
+    "v": (124, 92, 240, 255),    # glass
+    "V": (172, 150, 255, 255),   # glass, lit
+    "k": (226, 216, 255, 255),   # glint
+    "y": (255, 196, 84, 255),    # flame
+    "W": (255, 246, 206, 255),   # flame's heart
+    "c": (234, 222, 192, 255),   # candle
+}
+
+
+def from_rows(rows, colors):
+    image = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    px = image.load()
+    for y, row in enumerate(rows):
+        for x, key in enumerate(row):
+            if key != ".":
+                px[x, y] = colors[key]
+    return image
 
 
 def dreamcatcher():
-    image = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    px = image.load()
-    cx, cy, r = 7.5, 6.0, 5.2
-    # The web first, so the hoop draws over its ends: a small ring round the bead, and four threads from it to the hoop,
-    # the rest of the hoop left open.
+    grid = [["."] * 16 for _ in range(16)]
+
+    def put(x, y, key):
+        if 0 <= x < 16 and 0 <= y < 16:
+            grid[y][x] = key
+
+    # The web: a ring round the bead, and the four diagonals from the bead out to the hoop.
     for y in range(16):
         for x in range(16):
-            if 2.0 <= math.hypot(x - cx, y - cy) <= 2.7:
-                px[x, y] = STRING_DIM
-    for angle in (45, 135, 225, 315):
-        a = math.radians(angle)
-        for step in range(5):
-            t = 2.6 + step * (r - 3.2) / 4
-            x, y = round(cx + math.cos(a) * t), round(cy + math.sin(a) * t)
-            px[x, y] = STRING
-    # The hoop: a ring of wood, lit on its upper left.
+            if 2.0 <= math.hypot(x - HOOP_X, y - HOOP_Y) <= 2.6:
+                put(x, y, "t")
+    for step in (1, 2, 3):
+        for x, y in ((7 - step, 6 - step), (8 + step, 6 - step), (7 - step, 7 + step), (8 + step, 7 + step)):
+            put(x, y, "s")
+    # The hoop: wood, lit to the upper left and shaded to the lower right, wrapped in leather at its four sides, outlined.
     for y in range(16):
         for x in range(16):
-            d = math.hypot(x - cx, y - cy)
-            if r - 0.7 <= d <= r + 0.6:
-                lit = (x - cx) + (y - cy) < -1.5
-                shade = (x - cx) + (y - cy) > 2.5
-                px[x, y] = WOOD_LIGHT if lit else WOOD_DARK if shade else WOOD
-    # The bead in the web's middle.
-    px[7, 6] = VIOLET_LIGHT
-    px[8, 6] = VIOLET
-    px[7, 7] = VIOLET
-    px[8, 7] = VIOLET_DARK
+            dx, dy = x - HOOP_X, y - HOOP_Y
+            d = math.hypot(dx, dy)
+            if HOOP_IN <= d <= HOOP_OUT:
+                light = -(dx + dy) / max(d, 1e-6)
+                wrap = abs(dx) < 1 or abs(dy) < 1
+                if wrap:
+                    put(x, y, "r" if light > 0 else "R")
+                else:
+                    put(x, y, "L" if light > 0.5 else "D" if light < -0.5 else "W")
+            elif HOOP_OUT < d <= HOOP_EDGE:
+                put(x, y, "O")
+    # The bead, in the web's middle.
+    put(7, 6, "V")
+    put(8, 6, "v")
+    put(7, 7, "v")
+    put(8, 7, "p")
     # The loop it hangs by.
-    px[7, 0] = STRING_DIM
-    # Three feathers on strings from the hoop's foot, the middle one longest, each tipped violet.
-    for fx, top, length in ((4, 10, 4), (7, 12, 3), (11, 10, 4)):
-        for y in range(top, top + 1):
-            px[fx, y] = STRING
-        for i in range(length):
-            y = top + 1 + i
-            if y > 15:
-                break
-            px[fx, y] = FEATHER if i < length - 1 else VIOLET
-            if fx + 1 < 16 and i < length - 1:
-                px[fx + 1, y] = FEATHER_SHADE
-    return image
+    put(7, 0, "t")
+    put(8, 0, "t")
+    # Three feathers, each on a beaded string and tipped violet: one on each side, falling from the hoop, and one in
+    # the middle under it.
+    for fx, out in ((3, -1), (12, 1)):
+        put(fx, 10, "t")
+        put(fx, 11, "v")
+        for y in (12, 13, 14):
+            put(fx, y, "f")
+            put(fx - out, y, "h" if y > 12 else ".")
+        put(fx + out, 13, "g")
+        put(fx, 15, "v")
+    put(7, 13, "V")
+    put(8, 13, "v")
+    put(7, 14, "f")
+    put(8, 14, "g")
+    put(7, 15, "v")
+    put(8, 15, "p")
+    return from_rows(["".join(row) for row in grid], DREAMCATCHER_COLORS)
 
 
 def lantern():
-    image = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    px = image.load()
-    # The handle.
-    for x in range(6, 10):
-        px[x, 0] = IRON_DARK
-    px[6, 1] = IRON_DARK
-    px[9, 1] = IRON_DARK
-    # The cap.
-    for x in range(5, 11):
-        px[x, 2] = IRON_LIGHT if x < 8 else IRON
-    for x in range(4, 12):
-        px[x, 3] = IRON
-    # The glass: violet, lighter towards the flame, framed by iron posts.
-    for y in range(4, 12):
-        for x in range(4, 12):
-            if x in (4, 11):
-                px[x, y] = IRON_DARK
-                continue
-            d = math.hypot(x - 7.5, y - 8.0)
-            px[x, y] = VIOLET_LIGHT if d < 1.8 else VIOLET if d < 3.2 else VIOLET_DARK
-    # The candle's flame.
-    px[7, 7] = FLAME
-    px[8, 7] = FLAME
-    px[7, 8] = FLAME_CORE
-    px[8, 8] = FLAME_CORE
-    px[7, 9] = FLAME
-    px[7, 10] = STRING
-    px[8, 10] = STRING_DIM
-    # The base.
-    for x in range(4, 12):
-        px[x, 12] = IRON
-    for x in range(5, 11):
-        px[x, 13] = IRON_DARK
-    return image
+    return from_rows(LANTERN, LANTERN_COLORS)
 
 
 if __name__ == "__main__":
