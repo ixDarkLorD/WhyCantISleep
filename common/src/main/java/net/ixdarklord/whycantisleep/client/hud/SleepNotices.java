@@ -1,9 +1,9 @@
 package net.ixdarklord.whycantisleep.client.hud;
 
+import net.ixdarklord.coolcatcanvas.api.utils.Easing;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientGuiEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientPlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
-import net.ixdarklord.coolcatcanvas.api.utils.Easing;
 import net.ixdarklord.whycantisleep.api.SleepEffect;
 import net.ixdarklord.whycantisleep.client.fx.SleepEffects;
 import net.ixdarklord.whycantisleep.network.WokePayload;
