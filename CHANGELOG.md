@@ -1,7 +1,7 @@
 # Changelog
 This file is for listing all the changes to this project
 
-## v0.2.0 Beta | Unreleased
+## v0.2.0 Beta | Nov 2, 2026
 ### ✨ New Features
 - **Bed check**: hold a **Dreamcatcher**, sneak and use a bed, and a card says at once how a night in it would go before you lie down: the score it would have, what matters most to it, how it compares with the last night you slept there, and whether a night terror is waiting. The card follows the room live: place a candle, break a pot or open the door and it changes within a moment. Server options `bedCheck` and `bedCheckNeedsTools` (off, either tool shows both the forecast and the dark spots), client option `bedCheck`.
 - **Dark spots**: sneak and use a bed with a **Bedside Lantern** in hand, and the places in its room a monster could spawn are marked for a while with soft violet tiles of light on the floor, breathing slowly, a mote now and then drifting up from them, so you know where to put a light. A spot goes unmarked once it's lit. Client option `darkSpots`.
