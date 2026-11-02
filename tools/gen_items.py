@@ -1,10 +1,10 @@
 """Draws the mod's two bedside tools as 16x16 item textures (Pillow), each centered in its square:
-the Dreamcatcher (a leather-wrapped wooden hoop on a loop, a diamond web round a violet bead, and three
-feathers on strings) and the Bedside Lantern (an iron lantern, round-bellied and footed, with a ring handle, an amethyst set in its cap, and violet
-glass round a candle's flame). Violet is the bed check's color, the dark spots' too. Light falls from the upper left.
+the Dreamcatcher (a slim wooden hoop on a loop, a diamond web round a violet bead, and three feathers) and the Bedside Lantern (an iron lantern, round-bellied and footed, with a ring handle, an amethyst set in its cap, and violet
+glass round a candle's flame, flickering: an animated strip). Violet is the bed check's color, the dark spots' too. Light falls from the upper left.
 
 Run from the repository root: python tools/gen_items.py
 """
+import json
 import math
 from pathlib import Path
 
@@ -12,11 +12,29 @@ from PIL import Image
 
 OUT = Path("common/src/main/resources/assets/whycantisleep/textures/item")
 
-# The dreamcatcher's hoop: centered between pixels (7.5, 6.5), so it sits evenly, its wood band between these radii,
-# outlined outside them.
-HOOP_X, HOOP_Y = 7.5, 6.5
-HOOP_IN, HOOP_OUT, HOOP_EDGE = 3.6, 4.85, 5.6
-
+# The dreamcatcher, pixel by pixel, symmetric about the middle: a hoop one pixel thick (lit to the upper left, shaded to
+# the lower right) hung by a loop, a web of a wide diamond of string tied to the hoop by eight threads and a small ring of
+# thread round a violet bead, and three
+# slim feathers at different levels, lit on their left and tipped violet: the two at the sides short and high, the
+# middle one long and low.
+DREAMCATCHER = [
+    ".......tt.......",
+    "......LLWW......",
+    "....LL.tt.WW....",
+    "...Lt..ss..tW...",
+    "...L.ts..st.W...",
+    "..L..s.tt.s..W..",
+    "..Wts.tVvt.stD..",
+    "..Wts.tvpt.stD..",
+    "..W..s.tt.s..D..",
+    "...W.ts..st.D...",
+    "...Wt..ss..tD...",
+    "...tWW.tt.DDt...",
+    "...f..WWDD..f...",
+    "..fg...fg...fg..",
+    "...v...fh...v...",
+    ".......vp.......",
+]
 DREAMCATCHER_COLORS = {
     "O": (58, 34, 18, 255),      # outline
     "D": (98, 62, 32, 255),      # wood, in shadow
@@ -34,13 +52,13 @@ DREAMCATCHER_COLORS = {
     "h": (150, 150, 164, 255),   # feather, shadow
 }
 
-# The lantern, pixel by pixel: a ring handle, a brimmed cap, a narrow neck, a rounded belly of glass, a waist and a
+# The lantern, pixel by pixel: a rounded wire handle (lit on its left) riveted to the cap, a brimmed cap, a narrow neck, a rounded belly of glass, a waist and a
 # flared foot, its outline symmetric about the middle, so it sits centered.
 LANTERN = [
-    "................",
-    "......OOOO......",
-    ".....O....O.....",
-    ".....O....O.....",
+    "......nnNN......",
+    ".....n....N.....",
+    ".....n....N.....",
+    ".....OO..OO.....",
     ".....OOOOOO.....",
     "....OiIVvIIO....",
     ".....OPPPPO.....",
@@ -66,6 +84,9 @@ LANTERN_COLORS = {
     "y": (255, 196, 84, 255),    # flame
     "W": (255, 246, 206, 255),   # flame's heart
     "c": (234, 222, 192, 255),   # candle
+    # The handle: blackened iron with a violet sheen, dark enough to stand out on a light slot and violet enough on a dark one.
+    "n": (112, 92, 176, 255),    # handle, lit
+    "N": (54, 40, 102, 255),     # handle, in shadow
 }
 
 
@@ -80,68 +101,35 @@ def from_rows(rows, colors):
 
 
 def dreamcatcher():
-    grid = [["."] * 16 for _ in range(16)]
+    return from_rows(DREAMCATCHER, DREAMCATCHER_COLORS)
 
-    def put(x, y, key):
-        if 0 <= x < 16 and 0 <= y < 16:
-            grid[y][x] = key
 
-    # The web: a diamond round the bead, tied to the hoop at its four points by short threads.
-    for y in range(16):
-        for x in range(16):
-            dx, dy = abs(x - HOOP_X), abs(y - HOOP_Y)
-            if dx + dy == 3:
-                put(x, y, "s")
-            elif dx + dy == 4 and (dx < 1 or dy < 1):
-                put(x, y, "t")
-    # The hoop: wood, lit to the upper left and shaded to the lower right, wrapped in leather at its four sides, outlined.
-    for y in range(16):
-        for x in range(16):
-            dx, dy = x - HOOP_X, y - HOOP_Y
-            d = math.hypot(dx, dy)
-            if HOOP_IN <= d <= HOOP_OUT:
-                light = -(dx + dy) / max(d, 1e-6)
-                wrap = abs(dx) < 1 or abs(dy) < 1
-                if wrap:
-                    put(x, y, "r" if light > 0 else "R")
-                else:
-                    put(x, y, "L" if light > 0.5 else "D" if light < -0.5 else "W")
-            elif HOOP_OUT < d <= HOOP_EDGE:
-                put(x, y, "O")
-    # The bead, in the web's middle.
-    put(7, 6, "V")
-    put(8, 6, "v")
-    put(7, 7, "v")
-    put(8, 7, "p")
-    # The loop it hangs by.
-    put(7, 0, "t")
-    put(8, 0, "t")
-    # Three feathers on strings, each two pixels wide: lit on its left, in shadow on its right, tipped violet. They
-    # hang at different levels: the two at the sides short and high, from the hoop's lower edge, the middle one long
-    # and low, under the hoop.
-    for inner, outer in ((3, 2), (12, 13)):
-        lit, dark = min(inner, outer), max(inner, outer)
-        put(inner, 10, "t")
-        put(inner, 11, "f")
-        put(lit, 12, "f")
-        put(dark, 12, "h")
-        put(lit, 13, "v")
-        put(dark, 13, "p")
-    put(7, 13, "f")
-    put(8, 13, "g")
-    put(7, 14, "f")
-    put(8, 14, "h")
-    put(7, 15, "v")
-    put(8, 15, "p")
-    return from_rows(["".join(row) for row in grid], DREAMCATCHER_COLORS)
+# The flame's flicker, as rows of the glass (rows 7 to 10 of LANTERN) that change from frame to frame: still, leaning
+# left, stretched tall, low and dim, leaning right. FLICKER is the order they play in, each FRAME_TICKS long.
+FLAMES = [
+    {},
+    {8: "...OkvyyVVvpO...", 9: "...OVyWWyVVvO..."},
+    {7: "....OkpvyppO....", 8: "...OkvVyWVvpO...", 9: "...OVVyWWyVvO..."},
+    {8: "...OkvVVVVvpO...", 9: "...OVVVyyVVvO..."},
+    {8: "...OkvVVyyvpO...", 9: "...OVVVyWWyvO..."},
+]
+FLICKER = [0, 1, 0, 2, 2, 0, 3, 0, 4, 0]
+FRAME_TICKS = 3
 
 
 def lantern():
-    return from_rows(LANTERN, LANTERN_COLORS)
+    """The lantern as an animated strip: its frames one under another, for the .mcmeta beside it to play."""
+    strip = Image.new("RGBA", (16, 16 * len(FLAMES)), (0, 0, 0, 0))
+    for index, changes in enumerate(FLAMES):
+        rows = [changes.get(y, row) for y, row in enumerate(LANTERN)]
+        strip.paste(from_rows(rows, LANTERN_COLORS), (0, 16 * index))
+    return strip
 
 
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
     dreamcatcher().save(OUT / "dreamcatcher.png")
     lantern().save(OUT / "bedside_lantern.png")
+    animation = {"animation": {"frametime": FRAME_TICKS, "frames": FLICKER}}
+    (OUT / "bedside_lantern.png.mcmeta").write_text(json.dumps(animation, indent=2) + chr(10))
     print("wrote", OUT / "dreamcatcher.png", OUT / "bedside_lantern.png")
