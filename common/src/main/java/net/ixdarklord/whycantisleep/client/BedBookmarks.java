@@ -70,8 +70,11 @@ public final class BedBookmarks {
         });
     }
 
-    /** One bed: where it is, its last full night's score, and how many nights were slept in it. */
-    public record Bed(String dimension, int x, int y, int z, int score, int nights, long last) {
+    /**
+     * One bed: where it is, its last full night's score, how many nights were slept in it (0 for one only named), when
+     * it was last slept in or named, and the name a name tag gave it (null for none).
+     */
+    public record Bed(String dimension, int x, int y, int z, int score, int nights, long last, @Nullable String name) {
         public GlobalPos pos() {
             return GlobalPos.of(ResourceKey.create(Registries.DIMENSION, Identifier.parse(this.dimension)), new BlockPos(this.x, this.y, this.z));
         }
@@ -87,9 +90,27 @@ public final class BedBookmarks {
         Bed before = find(beds, bed);
         beds.remove(before);
         beds.addFirst(new Bed(bed.dimension().identifier().toString(), bed.pos().getX(), bed.pos().getY(), bed.pos().getZ(), payload.score(),
-                before == null ? 1 : before.nights() + 1, System.currentTimeMillis()));
+                before == null ? 1 : before.nights() + 1, System.currentTimeMillis(), before == null ? null : before.name()));
         while (beds.size() > MOST) beds.removeLast();
         save();
+    }
+
+    /** Names a bed (its head), kept even before a night is slept in it. */
+    public static void name(GlobalPos bed, String name) {
+        List<Bed> beds = beds(true);
+        if (beds == null) return;
+        Bed before = find(beds, bed);
+        beds.remove(before);
+        beds.addFirst(new Bed(bed.dimension().identifier().toString(), bed.pos().getX(), bed.pos().getY(), bed.pos().getZ(),
+                before == null ? 0 : before.score(), before == null ? 0 : before.nights(), System.currentTimeMillis(), name));
+        while (beds.size() > MOST) beds.removeLast();
+        save();
+    }
+
+    /** Forgets a bed (its head). */
+    public static void forget(GlobalPos bed) {
+        List<Bed> beds = beds(false);
+        if (beds != null && beds.remove(find(beds, bed))) save();
     }
 
     /** Where the player respawns, as the server last said (null when not set). */

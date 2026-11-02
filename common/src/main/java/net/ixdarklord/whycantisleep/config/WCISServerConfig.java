@@ -112,9 +112,16 @@ public final class WCISServerConfig {
     public static final ConfigValue<Boolean> BED_CHECK = BUILDER.bool("bedCheck", true)
             .comment("Whether a player crouched by a bed and looking at it is told how a night in it would go, before lying down, "
                     + "and shown where in its room a monster could spawn.").enabledWhen(SLEEP_QUALITY).build();
+    public static final ConfigValue<Boolean> BED_CHECK_NEEDS_TOOLS = BUILDER.bool("bedCheckNeedsTools", true)
+            .comment("Whether the bed check needs its tools: a Dreamcatcher (held, or in an item frame near the bed) to tell how a night "
+                    + "would go, and a Bedside Lantern (held) to mark the dark spots. Off, everyone sees both.").enabledWhen(BED_CHECK).build();
     public static final ConfigValue<Boolean> SLEEP_REMINDERS = BUILDER.bool("sleepReminders", true)
             .comment("Whether players are reminded at dusk when they have gone a day or more without sleep, and told when the other "
                     + "players have gone to bed without them.").build();
+    public static final ConfigValue<Integer> REMINDER_DAYS = BUILDER.intValue("reminderDays", 1)
+            .range(1, 10).comment("Days a player must have gone without sleep to be reminded at dusk.").enabledWhen(SLEEP_REMINDERS).build();
+    public static final ConfigValue<Integer> REMINDER_WAIT = BUILDER.intValue("reminderWait", 10)
+            .range(5, 120).comment("Seconds the players in bed wait before those still up are told.").enabledWhen(SLEEP_REMINDERS).build();
     static {
         BUILDER.pop();
         BUILDER.push("advancements", "The mod's advancements.");

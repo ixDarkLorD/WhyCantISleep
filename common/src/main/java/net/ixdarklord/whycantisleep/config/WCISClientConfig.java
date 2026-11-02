@@ -53,6 +53,9 @@ public final class WCISClientConfig {
     public static final ConfigValue<Boolean> BLOCKER_COMPASS = BUILDER.bool("blockerCompass", true)
             .comment("Once the highlights fade, keeps pointing to the nearest monster that blocked your sleep, until the time to clear the room runs out.")
             .enabledWhen(WCISServerConfig.ALLOW_ARROWS).build();
+    public static final ConfigValue<Boolean> COMPASS_PING = BUILDER.bool("compassPing", true)
+            .comment("With the last blocker compass, a soft ping that quickens as you close in, and a chime once they're all dealt with.")
+            .enabledWhen(BLOCKER_COMPASS).build();
     public static final ConfigValue<Boolean> BED_CHECK = BUILDER.bool("bedCheck", true)
             .comment("Crouch by a bed and look at it to see how a night in it would go, before you lie down. Needs the mod on the server.")
             .enabledWhen(WCISServerConfig.BED_CHECK).build();

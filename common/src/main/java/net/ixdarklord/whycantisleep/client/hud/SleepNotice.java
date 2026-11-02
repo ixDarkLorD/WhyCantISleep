@@ -48,10 +48,11 @@ public record SleepNotice(Kind kind, Component title, @Nullable Component hint, 
      * @param details what made it so, the biggest first
      * @param dream    the sleep effect woken with, or null
      * @param forecast whether it is a night still to come (the bed check's), not one just slept
+     * @param label    the quiet line under the title, or null for the usual one
      */
-    public record Quality(int score, List<Detail> details, @Nullable WokePayload.Dream dream, boolean forecast) {
+    public record Quality(int score, List<Detail> details, @Nullable WokePayload.Dream dream, boolean forecast, @Nullable Component label) {
         public Quality(int score, List<Detail> details, @Nullable WokePayload.Dream dream) {
-            this(score, details, dream, false);
+            this(score, details, dream, false, null);
         }
     }
 

@@ -17,8 +17,8 @@ import java.util.List;
 
 /**
  * The lines the mod adds to what Jade and WTHIT show of the block looked at, on the client: for a bed, how the last
- * full night in it went (from {@link BedBookmarks}), whether it is the player's respawn point, and that it hides a
- * player; for a block that soothes or unsettles a sleeper near it, by how much.
+ * full night in it went and the name the player gave it (from {@link BedBookmarks}), whether it is the player's respawn
+ * point, and that it hides a player; for a block that soothes or unsettles a sleeper near it, by how much.
  */
 public final class LookedAtLines {
     private LookedAtLines() {
@@ -30,7 +30,10 @@ public final class LookedAtLines {
             BlockPos head = state.getValue(BedBlock.PART) == BedPart.HEAD ? pos : pos.relative(state.getValue(BedBlock.FACING));
             GlobalPos bed = GlobalPos.of(level.dimension(), head.immutable());
             BedBookmarks.Bed kept = BedBookmarks.get(bed);
-            if (kept != null) {
+            if (kept != null && kept.name() != null && !kept.name().isEmpty()) {
+                lines.add(Component.literal("“" + kept.name() + "”").withStyle(ChatFormatting.WHITE));
+            }
+            if (kept != null && kept.nights() > 0) {
                 ChatFormatting color = kept.score() >= 65 ? ChatFormatting.GREEN : kept.score() >= 45 ? ChatFormatting.YELLOW : ChatFormatting.RED;
                 lines.add(Component.translatable("gui.whycantisleep.looked_at.bed.last", Component.literal(String.valueOf(kept.score())).withStyle(color))
                         .withStyle(ChatFormatting.GRAY));

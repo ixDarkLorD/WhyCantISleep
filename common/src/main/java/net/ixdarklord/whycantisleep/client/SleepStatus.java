@@ -78,6 +78,10 @@ public final class SleepStatus {
     private static boolean open;
     // Whether the server has said anything yet: one with the mod sends the trouble every few seconds.
     private static boolean heard;
+    // The bed rows drawn in the popup this frame, to be clicked (forgotten), and where the pointer was.
+    private static final List<BedHit> BED_HITS = new ArrayList<>();
+    private static int popupMouseX;
+    private static int popupMouseY;
 
     private SleepStatus() {
     }
@@ -145,6 +149,15 @@ public final class SleepStatus {
      */
     public static boolean click(int left, int top, double mouseX, double mouseY, int button) {
         if (!WCISClientConfig.STATUS_BUTTON.get()) return false;
+        if (open && button == 0) {
+            for (BedHit hit : BED_HITS) {
+                if (mouseX >= hit.x && mouseX < hit.x + hit.width && mouseY >= hit.y && mouseY < hit.y + LINE) {
+                    BedBookmarks.forget(hit.pos);
+                    Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0F, 0.8F));
+                    return true;
+                }
+            }
+        }
         if (button == 0 && overButton(left, top, mouseX, mouseY)) {
             open = !open;
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F, 0.6F));
@@ -195,6 +208,9 @@ public final class SleepStatus {
         graphics.fill(x + 1, y + last, x + last, y + BUTTON, rim);
         graphics.fill(x, y + 1, x + 1, y + last, rim);
         graphics.fill(x + last, y + 1, x + BUTTON, y + last, rim);
+        BED_HITS.clear();
+        popupMouseX = mouseX;
+        popupMouseY = mouseY;
         if (open) popup(graphics, font, x + BUTTON + 4, y, level, color);
         else if (hover) graphics.setTooltipForNextFrame(font, Component.translatable("gui.whycantisleep.status.button"), mouseX, mouseY);
     }
@@ -298,8 +314,9 @@ public final class SleepStatus {
         return rows;
     }
 
-    // The beds slept in lately (BedBookmarks), under a divider: which way each is and how far, or that it is in another
-    // dimension; a star on the respawn point; the nights slept in it, and its last full night's score at the right.
+    // The beds slept in lately or named (BedBookmarks), under a divider: its name, which way it is and how far, or that it
+    // is in another dimension; a star on the respawn point; the nights slept in it, and its last full night's score at
+    // the right. Under the pointer a row is lit, its score a cross: clicked, the bed is forgotten.
     private static void beds(List<Row> rows) {
         List<BedBookmarks.Bed> beds = BedBookmarks.list();
         Minecraft minecraft = Minecraft.getInstance();
@@ -320,13 +337,21 @@ public final class SleepStatus {
                 Component where = where(minecraft, pos);
                 Component nights = Component.translatable(bed.nights() == 1 ? "gui.whycantisleep.status.beds.night" : "gui.whycantisleep.status.beds.nights",
                         bed.nights());
-                Component score = Component.literal(String.valueOf(bed.score()));
+                boolean hovered = popupMouseX >= x && popupMouseX < x + width && popupMouseY >= y && popupMouseY < y + LINE;
+                BED_HITS.add(new BedHit(pos, x, y, width));
+                if (hovered) graphics.fill(x - 2, y - 1, x + width + 2, y + LINE - 1, HudStyle.color(HudStyle.WHITE, 0.06F));
+                Component score = Component.literal(hovered ? "✕" : bed.nights() > 0 ? String.valueOf(bed.score()) : "—");
                 int scoreX = x + width - font.width(score);
-                int bedColor = bed.score() >= 65 ? HudStyle.GREEN : bed.score() >= 45 ? HudStyle.YELLOW : HudStyle.RED;
+                int bedColor = hovered ? HudStyle.RED : bed.nights() <= 0 ? HudStyle.MUTED : bed.score() >= 65 ? HudStyle.GREEN : bed.score() >= 45 ? HudStyle.YELLOW : HudStyle.RED;
                 graphics.text(font, score, scoreX, y, HudStyle.color(bedColor, 1.0F), false);
+                if (bed.name() != null && !bed.name().isEmpty()) {
+                    Component name = Component.literal(bed.name());
+                    graphics.text(font, font.split(name, (scoreX - left) / 2).getFirst(), left, y, HudStyle.color(HudStyle.WHITE, 1.0F), false);
+                    left += Math.min(font.width(name), (scoreX - left) / 2) + 4;
+                }
                 graphics.text(font, font.split(where, scoreX - left - 6).getFirst(), left, y, HudStyle.color(HudStyle.SILVER, 1.0F), false);
                 int nightsX = left + font.width(where) + 4;
-                if (nightsX + font.width(nights) < scoreX - 4) graphics.text(font, nights, nightsX, y, HudStyle.color(HudStyle.FAINT, 1.0F), false);
+                if (bed.nights() > 0 && nightsX + font.width(nights) < scoreX - 4) graphics.text(font, nights, nightsX, y, HudStyle.color(HudStyle.FAINT, 1.0F), false);
             }));
         }
     }
@@ -382,6 +407,9 @@ public final class SleepStatus {
     }
 
     private record Row(int height, Draw draw) {
+    }
+
+    private record BedHit(GlobalPos pos, int x, int y, int width) {
     }
 
     @FunctionalInterface

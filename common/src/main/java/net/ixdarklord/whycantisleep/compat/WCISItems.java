@@ -14,7 +14,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 
 /**
- * The mod's one item, in a creative tab of its own ({@link #TAB}): its guide book, a Folios {@link FoliosBookItem} that always opens {@link GuideBookGift#BOOK},
+ * The mod's items, in a creative tab of its own ({@link #TAB}): the bed check's two tools ({@link #DREAMCATCHER},
+ * {@link #BEDSIDE_LANTERN}) and its guide book, a Folios {@link FoliosBookItem} that always opens {@link GuideBookGift#BOOK},
  * named "Insomniac's Handbook". Its stacks are given with the book in their {@code folios:guide_book} component too
  * ({@link GuideBookGift#stack}), which Folios draws the cover from.
  */
@@ -25,6 +26,17 @@ public final class WCISItems {
             () -> new Handbook(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)
                     .setId(ResourceKey.create(Registries.ITEM, WhyCantISleep.id("guide_book")))));
 
+    /**
+     * The bed check's tools. A Dreamcatcher, held or hung in an item frame near the bed, tells how a night in a bed would
+     * go; a Bedside Lantern, held, marks where in its room a monster could spawn ({@code sleep/BedCheck}).
+     */
+    public static final RegistryEntry<Item> DREAMCATCHER = ITEMS.register("dreamcatcher",
+            () -> new Item(new Item.Properties().stacksTo(16).rarity(Rarity.UNCOMMON)
+                    .setId(ResourceKey.create(Registries.ITEM, WhyCantISleep.id("dreamcatcher")))));
+    public static final RegistryEntry<Item> BEDSIDE_LANTERN = ITEMS.register("bedside_lantern",
+            () -> new Item(new Item.Properties().stacksTo(1)
+                    .setId(ResourceKey.create(Registries.ITEM, WhyCantISleep.id("bedside_lantern")))));
+
     private static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(WhyCantISleep.MOD_ID, Registries.CREATIVE_MODE_TAB);
 
     /**
@@ -34,7 +46,11 @@ public final class WCISItems {
     public static final RegistryEntry<CreativeModeTab> TAB = TABS.register("main", () -> CreativeTabs.builder()
             .title(Component.translatable("itemGroup.whycantisleep"))
             .icon(GuideBookGift::stack)
-            .displayItems((parameters, output) -> output.accept(GuideBookGift.stack()))
+            .displayItems((parameters, output) -> {
+                output.accept(GuideBookGift.stack());
+                output.accept(new ItemStack(DREAMCATCHER.get()));
+                output.accept(new ItemStack(BEDSIDE_LANTERN.get()));
+            })
             .build());
 
     private WCISItems() {

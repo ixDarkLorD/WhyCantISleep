@@ -18,8 +18,8 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Reminders to sleep. At dusk, a player who has gone a whole day or more without lying down is reminded, with the
- * days. At night, once some of the players are in bed and have waited a while for the rest, each player still up is
+ * Reminders to sleep. At dusk, a player who has gone the server's {@code reminderDays} or more without lying down is
+ * reminded, with the days. At night, once some of the players are in bed and have waited {@code reminderWait} seconds for the rest, each player still up is
  * told, once a night: an automatic nudge, on top of the Bedtime panel's own.
  */
 public final class SleepReminders {
@@ -27,8 +27,6 @@ public final class SleepReminders {
     private static final int DAY = 24000;
     // The time of day beds can first be slept in, on a clear night: dusk.
     private static final int DUSK = 12542;
-    // How long the players in bed wait before those still up are told.
-    private static final int WAIT_TICKS = 20 * 10;
 
     private static final Map<ResourceKey<Level>, Long> LAST_TIME = new HashMap<>();
     // Since when (game time) some of a level's players have been in bed, short of the night's needs.
@@ -62,7 +60,7 @@ public final class SleepReminders {
         for (ServerPlayer player : level.players()) {
             if (player.isSleeping() || player.isSpectator()) continue;
             int days = SleepTroubles.get(player).ticksSinceRest() / DAY;
-            if (days >= 1) WCISNetwork.sendToPlayer(player, new ReminderPayload(ReminderPayload.Kind.DUSK, days, 0, 0));
+            if (days >= WCISServerConfig.REMINDER_DAYS.get()) WCISNetwork.sendToPlayer(player, new ReminderPayload(ReminderPayload.Kind.DUSK, days, 0, 0));
         }
     }
 
@@ -82,7 +80,7 @@ public final class SleepReminders {
         }
         long now = level.getGameTime();
         long since = WAITING_SINCE.computeIfAbsent(level.dimension(), key -> now);
-        if (now - since < WAIT_TICKS) return;
+        if (now - since < WCISServerConfig.REMINDER_WAIT.get() * 20L) return;
         long night = level.getDefaultClockTime() / DAY;
         for (ServerPlayer player : level.players()) {
             if (player.isSleeping() || player.isSpectator()) continue;

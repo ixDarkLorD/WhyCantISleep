@@ -14,6 +14,8 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -24,7 +26,9 @@ import java.util.Collection;
 /**
  * The last blocker compass: once the highlights of a refused sleep fade, a single arrow round the crosshair keeps
  * pointing to the nearest of those monsters still about, with its name and how far it is under the crosshair (and how
- * many are left), until the time to clear the room runs out, the room is safe, or they are all dealt with.
+ * many are left), until the time to clear the room runs out, the room is safe, or they are all dealt with. A soft ping
+ * goes with it, quicker and higher the closer the nearest is; dealing with the last of them chimes, and says so for a
+ * moment (client option {@code compassPing}).
  */
 public final class BlockerCompass {
     // Smaller and nearer the crosshair than the highlights' arrows; the label under the crosshair, clear of the arrow's
@@ -34,10 +38,17 @@ public final class BlockerCompass {
     private static final int LABEL_BELOW = 33;
     private static final float FADE_IN_TICKS = 8.0F;
     private static final float FADE_OUT_TICKS = 20.0F;
+    // The ping: every this many ticks per block away, never quicker or slower than these; the all-clear's line stays this long.
+    private static final float PING_TICKS_PER_BLOCK = 1.5F;
+    private static final int PING_FASTEST = 5;
+    private static final int PING_SLOWEST = 30;
+    private static final int CLEAR_TICKS = 40;
 
     private static final IntList TRACKED = new IntArrayList();
     private static long tick;
     private static long until;
+    private static int pingIn;
+    private static long clearedAt = Long.MIN_VALUE / 2;
 
     private BlockerCompass() {
     }
@@ -55,6 +66,19 @@ public final class BlockerCompass {
                 Entity entity = minecraft.level.getEntity(id);
                 return entity == null || !entity.isAlive();
             });
+            if (TRACKED.isEmpty()) {
+                // The last of them dealt with in time.
+                clearedAt = tick;
+                if (pinging()) minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_CHIME.value(), 1.5F, 0.6F));
+                return;
+            }
+            if (!Blockers.isEmpty() || !pinging() || --pingIn > 0) return;
+            Entity nearest = nearest(minecraft);
+            if (nearest == null) return;
+            float distance = nearest.distanceTo(minecraft.player);
+            pingIn = Mth.clamp(Math.round(distance * PING_TICKS_PER_BLOCK), PING_FASTEST, PING_SLOWEST);
+            float pitch = Mth.lerp(1.0F - Mth.clamp(distance / 20.0F, 0.0F, 1.0F), 0.8F, 1.6F);
+            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_HAT.value(), pitch, 0.35F));
         });
         ClientPlayerEvents.LEAVE.register(player -> TRACKED.clear());
         ClientGuiEvents.RENDER_HUD.register(BlockerCompass::render);
@@ -63,13 +87,23 @@ public final class BlockerCompass {
     /** The monsters of a refused sleep, followed for as long as the player has to clear the room. None stops it. */
     public static void track(Collection<? extends Entity> blockers) {
         TRACKED.clear();
+        pingIn = 0;
+        clearedAt = Long.MIN_VALUE / 2;
         if (blockers.isEmpty() || !WCISServerConfig.ROOM_CLEARING.get()) return;
         for (Entity blocker : blockers) TRACKED.add(blocker.getId());
         until = tick + WCISServerConfig.CLEARING_TIME.get() * 20L;
     }
 
+    private static boolean pinging() {
+        return WCISConfigs.isEnabled(WCISClientConfig.BLOCKER_COMPASS) && WCISConfigs.isEnabled(WCISClientConfig.COMPASS_PING);
+    }
+
     private static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
         Minecraft minecraft = Minecraft.getInstance();
+        if (TRACKED.isEmpty() && tick - clearedAt < CLEAR_TICKS && !minecraft.options.hideGui && WCISConfigs.isEnabled(WCISClientConfig.BLOCKER_COMPASS)) {
+            allClear(graphics, minecraft.font, (tick - clearedAt + delta.getGameTimeDeltaPartialTick(true)) / CLEAR_TICKS);
+            return;
+        }
         // While the highlights show, their own arrows point the way.
         if (TRACKED.isEmpty() || !Blockers.isEmpty() || minecraft.player == null || minecraft.level == null || minecraft.options.hideGui) return;
         if (!WCISConfigs.isEnabled(WCISClientConfig.BLOCKER_COMPASS)) return;
@@ -97,6 +131,16 @@ public final class BlockerCompass {
         int y = Math.round(centerY) + LABEL_BELOW;
         graphics.fill(x - 3, y - 2, x + font.width(label) + 3, y + 9, HudStyle.color(0x111317, alpha * 0.6F));
         graphics.text(font, label, x, y, HudStyle.color(color, alpha), false);
+    }
+
+    // "All dealt with", in green under the crosshair, fading out.
+    private static void allClear(GuiGraphicsExtractor graphics, Font font, float age) {
+        float alpha = Mth.clamp((1.0F - age) * 3.0F, 0.0F, 1.0F);
+        Component label = Component.translatable("gui.whycantisleep.compass.clear");
+        int x = Math.round(graphics.guiWidth() / 2.0F - font.width(label) / 2.0F);
+        int y = graphics.guiHeight() / 2 + LABEL_BELOW;
+        graphics.fill(x - 3, y - 2, x + font.width(label) + 3, y + 9, HudStyle.color(0x111317, alpha * 0.6F));
+        graphics.text(font, label, x, y, HudStyle.color(HudStyle.GREEN, alpha), false);
     }
 
     private static @Nullable Entity nearest(Minecraft minecraft) {
