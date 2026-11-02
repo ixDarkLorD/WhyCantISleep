@@ -49,3 +49,12 @@ mandatory = false
 versionRange = "*"
 ordering = "NONE"
 side = "BOTH"
+
+# WTHIT, optional: lines on a bed (how the last night in it went, the respawn point) and on soothing and unsettling
+# blocks, in the tooltip of the block looked at. (Jade has no Forge build for 1.21.1.)
+[[dependencies.${modid}]]
+modId = "wthit"
+mandatory = false
+versionRange = "*"
+ordering = "NONE"
+side = "CLIENT"

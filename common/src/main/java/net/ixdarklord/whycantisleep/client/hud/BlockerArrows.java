@@ -1,18 +1,18 @@
 package net.ixdarklord.whycantisleep.client.hud;
 
+import com.mojang.math.Axis;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientGuiEvents;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.whycantisleep.client.Blockers;
 import net.ixdarklord.whycantisleep.client.highlight.Highlights;
 import net.ixdarklord.whycantisleep.config.WCISClientConfig;
 import net.ixdarklord.whycantisleep.config.WCISConfigs;
+import net.ixdarklord.whycantisleep.mixin.client.GameRendererAccessor;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
-import com.mojang.math.Axis;
-import net.ixdarklord.whycantisleep.mixin.client.GameRendererAccessor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
@@ -77,17 +77,7 @@ public final class BlockerArrows {
 
         float centerX = graphics.guiWidth() / 2.0F;
         float centerY = graphics.guiHeight() / 2.0F;
-        for (Arrow arrow : arrows) {
-            float scale = size * arrow.scale;
-            graphics.pose().pushPose();
-            graphics.pose().translate(centerX, centerY, 0.0F);
-            graphics.pose().mulPose(Axis.ZP.rotation(arrow.angle));
-            graphics.pose().translate(radius, 0.0F, 0.0F);
-            graphics.pose().scale(scale, scale, 1.0F);
-            HudStyle.blit(graphics, ARROWS, -FRAME_SIZE / 2, -FRAME_SIZE / 2, arrow.hollow ? FRAME_SIZE : 0.0F, 0.0F,
-                    FRAME_SIZE, FRAME_SIZE, SHEET_WIDTH, FRAME_SIZE, HudStyle.color(arrow.color, alpha));
-            graphics.pose().popPose();
-        }
+        for (Arrow arrow : arrows) drawArrow(graphics, centerX, centerY, arrow.angle, radius, size * arrow.scale, arrow.hollow, arrow.color, alpha);
         float pulse = (age % PULSE_TICKS) / PULSE_TICKS;
         for (Ring ring : rings) {
             float scale = size * ring.scale;
@@ -98,6 +88,43 @@ public final class BlockerArrows {
             HudStyle.sprite(graphics, RING, Math.round(ring.x) - out, Math.round(ring.y) - out, out * 2, out * 2,
                     HudStyle.color(ring.color, alpha * 200.0F / 255.0F * (1.0F - pulse)));
         }
+    }
+
+    /** One arrow, {@code radius} out from a point at an angle on the screen (0 to the right, down positive), pointing outward. */
+    static void drawArrow(GuiGraphics graphics, float centerX, float centerY, float angle, float radius, float scale, boolean hollow, int color,
+                          float alpha) {
+        graphics.pose().pushPose();
+        graphics.pose().translate(centerX, centerY, 0.0F);
+        graphics.pose().mulPose(Axis.ZP.rotation(angle));
+        graphics.pose().translate(radius, 0.0F, 0.0F);
+        graphics.pose().scale(scale, scale, 1.0F);
+        HudStyle.blit(graphics, ARROWS, -FRAME_SIZE / 2, -FRAME_SIZE / 2, hollow ? FRAME_SIZE : 0.0F, 0.0F,
+                FRAME_SIZE, FRAME_SIZE, SHEET_WIDTH, FRAME_SIZE, HudStyle.color(color, alpha));
+        graphics.pose().popPose();
+    }
+
+    /**
+     * Where a point in the world is from the camera, on the screen: the angle an arrow pointing to it takes, and whether
+     * it is in the view at all.
+     */
+    static Aim aim(Minecraft minecraft, GuiGraphics graphics, Vec3 target, float partialTick) {
+        Camera camera = minecraft.gameRenderer.getMainCamera();
+        Vec3 to = target.subtract(camera.getPosition());
+        Vector3fc forward = camera.getLookVector();
+        Vector3fc up = camera.getUpVector();
+        Vector3fc left = camera.getLeftVector();
+        double tanV = Math.tan(Math.toRadians(((GameRendererAccessor) minecraft.gameRenderer).whycantisleep$getFov(camera, partialTick, true)) / 2.0);
+        double tanH = tanV * graphics.guiWidth() / graphics.guiHeight();
+        double ahead = to.x * forward.x() + to.y * forward.y() + to.z * forward.z();
+        double right = -(to.x * left.x() + to.y * left.y() + to.z * left.z());
+        double above = to.x * up.x() + to.y * up.y() + to.z * up.z();
+        boolean inView = ahead > 0.0 && Math.abs(right) <= ahead * tanH && Math.abs(above) <= ahead * tanV;
+        float angle = Math.abs(right) < 1.0E-4 && Math.abs(above) < 1.0E-4 ? Mth.HALF_PI : (float) Math.atan2(-above, right);
+        return new Aim(angle, inView, to.length());
+    }
+
+    /** Which way a point is on the screen, whether it is in the view, and how far it is. */
+    record Aim(float angle, boolean inView, double distance) {
     }
 
     // An arrow for each blocker the player can't see outside the view, with the angle on the screen that points to it;

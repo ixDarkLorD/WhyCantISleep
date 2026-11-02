@@ -4,8 +4,8 @@ import net.ixdarklord.whycantisleep.client.Blockers;
 import net.ixdarklord.whycantisleep.config.WCISClientConfig;
 import net.ixdarklord.whycantisleep.config.WCISConfigs;
 import net.ixdarklord.whycantisleep.sleep.ThreatType;
-import net.minecraft.util.Mth;
 import net.minecraft.util.FastColor.ARGB32;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 /**
