@@ -1,12 +1,12 @@
 package net.ixdarklord.whycantisleep.client.hud;
 
+import net.ixdarklord.coolcatcore.api.utils.ARGB;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.resources.ResourceLocation;
-import net.ixdarklord.coolcatcore.api.utils.ARGB;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 

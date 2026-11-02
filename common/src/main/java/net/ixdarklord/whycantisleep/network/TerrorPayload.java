@@ -1,7 +1,7 @@
 package net.ixdarklord.whycantisleep.network;
 
-import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.coolcatcore.api.network.CustomPacketPayload;
+import net.ixdarklord.whycantisleep.WhyCantISleep;
 
 /**
  * Server to client: the player has a night terror as they fall asleep (start), or woke from one; how bad it is, 0 to

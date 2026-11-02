@@ -49,3 +49,19 @@ mandatory = false
 versionRange = "*"
 ordering = "NONE"
 side = "BOTH"
+
+# Jade or WTHIT, optional: lines on a bed (how the last night in it went, the respawn point) and on soothing and
+# unsettling blocks, in the tooltip of the block looked at.
+[[dependencies.${modid}]]
+modId = "jade"
+mandatory = false
+versionRange = "*"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.${modid}]]
+modId = "wthit"
+mandatory = false
+versionRange = "*"
+ordering = "NONE"
+side = "CLIENT"

@@ -1,7 +1,7 @@
 package net.ixdarklord.whycantisleep.network;
 
-import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.coolcatcore.api.network.CustomPacketPayload;
+import net.ixdarklord.whycantisleep.WhyCantISleep;
 
 /**
  * Client to server: the hiding player sneaked, to come out from under the bed. The flag is always true; it is there

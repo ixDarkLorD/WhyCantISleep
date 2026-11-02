@@ -1,5 +1,6 @@
 package net.ixdarklord.whycantisleep.client.board;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientGuiEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientPlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
@@ -12,11 +13,9 @@ import net.ixdarklord.whycantisleep.config.WCISServerConfig;
 import net.ixdarklord.whycantisleep.network.NudgePayload;
 import net.ixdarklord.whycantisleep.network.SleepBoardPayload;
 import net.ixdarklord.whycantisleep.network.VotePayload;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;

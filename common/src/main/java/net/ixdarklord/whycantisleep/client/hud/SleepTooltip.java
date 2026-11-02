@@ -1,15 +1,19 @@
 package net.ixdarklord.whycantisleep.client.hud;
 
 import net.ixdarklord.coolcatcore.api.event.v2.client.ItemTooltipEvents;
+import net.ixdarklord.coolcatcore.api.utils.ARGB;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.whycantisleep.api.SleepEffect;
+import net.ixdarklord.whycantisleep.client.SleepStatus;
+import net.ixdarklord.whycantisleep.sleep.DecorDiscovery;
 import net.ixdarklord.whycantisleep.sleep.SleepDecor;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.ixdarklord.coolcatcore.api.utils.ARGB;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
@@ -32,6 +36,7 @@ public final class SleepTooltip {
     private static final ResourceLocation ICONS = WhyCantISleep.id("icons");
     private static final String BUFF_GLYPH = String.valueOf((char) 0xE000);
     private static final String DEBUFF_GLYPH = String.valueOf((char) 0xE001);
+    private static final String NEUTRAL_GLYPH = String.valueOf((char) 0xE002);
     private static final String PIP_SOOTHING = String.valueOf((char) 0xE003);
     private static final String PIP_UNSETTLING = String.valueOf((char) 0xE004);
     private static final String PIP_EMPTY = String.valueOf((char) 0xE005);
@@ -77,9 +82,33 @@ public final class SleepTooltip {
         GuiSprites.blit(graphics, sprite, x, y, ICON_SIZE, ICON_SIZE, ARGB.white(Math.min(alpha, 1.0F)));
     }
 
+    /**
+     * Whether the player knows what an item does by a bed ({@link DecorDiscovery}). Without a world, or on a server
+     * without the mod (which keeps no record of it), everything is known.
+     */
+    public static boolean known(ItemStack stack) {
+        LocalPlayer player = Minecraft.getInstance().player;
+        return player == null || !SleepStatus.serverHasMod() || DecorDiscovery.knows(player, stack);
+    }
+
+    /** Whether the player has at least slept near an item, so knows it does something to sleep. */
+    public static boolean noticed(ItemStack stack) {
+        LocalPlayer player = Minecraft.getInstance().player;
+        return player == null || !SleepStatus.serverHasMod() || DecorDiscovery.noticed(player, stack);
+    }
+
     private static void append(ItemStack stack, List<Component> lines) {
         int points = SleepDecor.points(stack);
         if (points == 0) return;
+        if (!known(stack)) {
+            // Never slept near: nothing. Slept near: that it is something, and how to find out what.
+            if (!noticed(stack)) return;
+            if (lines.size() > 1) lines.add(Component.empty());
+            lines.add(Component.empty().append(glyph(NEUTRAL_GLYPH + GAP_GLYPH))
+                    .append(Component.translatable("gui.whycantisleep.tooltip.unknown").withStyle(ChatFormatting.GRAY)));
+            lines.add(Component.literal(INDENT).append(Component.translatable("gui.whycantisleep.tooltip.unknown.hint").withStyle(ChatFormatting.DARK_GRAY)));
+            return;
+        }
         boolean soothing = points > 0;
         int most = soothing ? SleepDecor.SOOTHING_MOST : SleepDecor.UNSETTLING_MOST;
         ChatFormatting color = soothing ? ChatFormatting.GREEN : ChatFormatting.RED;

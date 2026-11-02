@@ -5,18 +5,17 @@ import net.ixdarklord.coolcatcanvas.api.client.gui.placement.GuiPlacement;
 import net.ixdarklord.coolcatcanvas.api.utils.Easing;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientGuiEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
+import net.ixdarklord.coolcatcore.api.utils.ARGB;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.whycantisleep.client.hud.GuiSprites;
 import net.ixdarklord.whycantisleep.client.hud.HudStyle;
 import net.ixdarklord.whycantisleep.config.HudCorner;
 import net.ixdarklord.whycantisleep.config.WCISClientConfig;
 import net.ixdarklord.whycantisleep.config.WCISConfigs;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.ixdarklord.coolcatcore.api.utils.ARGB;
 import net.minecraft.util.Mth;
 
 /**

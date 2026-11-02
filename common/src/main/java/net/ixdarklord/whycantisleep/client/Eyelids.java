@@ -3,15 +3,14 @@ package net.ixdarklord.whycantisleep.client;
 import net.ixdarklord.coolcatcanvas.api.utils.Easing;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientPlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
-import net.ixdarklord.whycantisleep.client.hud.GuiSprites;
+import net.ixdarklord.coolcatcore.api.utils.ARGB;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
+import net.ixdarklord.whycantisleep.client.hud.GuiSprites;
 import net.ixdarklord.whycantisleep.config.EyelidStyle;
 import net.ixdarklord.whycantisleep.config.WCISClientConfig;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
-import net.ixdarklord.coolcatcore.api.utils.ARGB;
 import net.minecraft.util.Mth;
 
 /**

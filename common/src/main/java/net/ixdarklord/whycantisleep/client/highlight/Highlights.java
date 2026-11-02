@@ -1,10 +1,10 @@
 package net.ixdarklord.whycantisleep.client.highlight;
 
+import net.ixdarklord.coolcatcore.api.utils.ARGB;
 import net.ixdarklord.whycantisleep.client.Blockers;
 import net.ixdarklord.whycantisleep.config.WCISClientConfig;
 import net.ixdarklord.whycantisleep.config.WCISConfigs;
 import net.ixdarklord.whycantisleep.sleep.ThreatType;
-import net.ixdarklord.coolcatcore.api.utils.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 

@@ -4,20 +4,21 @@ import net.ixdarklord.coolcatcore.api.registry.CreativeTabs;
 import net.ixdarklord.coolcatcore.api.registry.DeferredRegister;
 import net.ixdarklord.coolcatcore.api.registry.RegistryEntry;
 import net.ixdarklord.folios.api.FoliosBookItem;
+import net.ixdarklord.folios.api.FoliosBooks;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.ixdarklord.folios.api.FoliosBooks;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.level.Level;
 
 /**
- * The mod's one item, in a creative tab of its own ({@link #TAB}): its guide book, a Folios {@link FoliosBookItem} that always opens {@link GuideBookGift#BOOK},
+ * The mod's items, in a creative tab of its own ({@link #TAB}): the bed check's two tools ({@link #DREAMCATCHER},
+ * {@link #BEDSIDE_LANTERN}) and its guide book, a Folios {@link FoliosBookItem} that always opens {@link GuideBookGift#BOOK},
  * named "Insomniac's Handbook". Its stacks carry the book in their NBT too ({@code folios_book}, {@link GuideBookGift#stack}),
  * which Folios draws the cover from; on 1.20.1 a recipe's result can't carry NBT, so a crafted one is given it as it is
  * made, and any stack without it as it sits in an inventory.
@@ -28,6 +29,15 @@ public final class WCISItems {
     public static final RegistryEntry<FoliosBookItem> GUIDE_BOOK = ITEMS.register("guide_book",
             () -> new Handbook(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
 
+    /**
+     * The bed check's tools, each read by sneaking and using a bed with it in hand: a Dreamcatcher tells how a night in
+     * the bed would go; a Bedside Lantern marks where in its room a monster could spawn ({@code sleep/BedCheck}).
+     */
+    public static final RegistryEntry<Item> DREAMCATCHER = ITEMS.register("dreamcatcher",
+            () -> new Item(new Item.Properties().stacksTo(16).rarity(Rarity.UNCOMMON)));
+    public static final RegistryEntry<Item> BEDSIDE_LANTERN = ITEMS.register("bedside_lantern",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+
     private static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(WhyCantISleep.MOD_ID, Registries.CREATIVE_MODE_TAB);
 
     /**
@@ -37,7 +47,11 @@ public final class WCISItems {
     public static final RegistryEntry<CreativeModeTab> TAB = TABS.register("main", () -> CreativeTabs.builder()
             .title(Component.translatable("itemGroup.whycantisleep"))
             .icon(GuideBookGift::stack)
-            .displayItems((parameters, output) -> output.accept(GuideBookGift.stack()))
+            .displayItems((parameters, output) -> {
+                output.accept(GuideBookGift.stack());
+                output.accept(new ItemStack(DREAMCATCHER.get()));
+                output.accept(new ItemStack(BEDSIDE_LANTERN.get()));
+            })
             .build());
 
     private WCISItems() {

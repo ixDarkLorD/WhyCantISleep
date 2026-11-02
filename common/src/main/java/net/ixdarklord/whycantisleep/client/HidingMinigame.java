@@ -1,14 +1,13 @@
 package net.ixdarklord.whycantisleep.client;
 
-import net.ixdarklord.whycantisleep.client.hud.GuiSprites;
 import net.ixdarklord.coolcatcanvas.api.utils.Easing;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientGuiEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
+import net.ixdarklord.whycantisleep.client.hud.GuiSprites;
 import net.ixdarklord.whycantisleep.client.hud.HudFade;
 import net.ixdarklord.whycantisleep.client.hud.HudStyle;
 import net.ixdarklord.whycantisleep.hiding.Hiding;
 import net.ixdarklord.whycantisleep.sound.WCISSounds;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
