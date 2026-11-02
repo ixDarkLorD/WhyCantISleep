@@ -51,3 +51,12 @@ type = "optional"
 versionRange = "*"
 ordering = "NONE"
 side = "BOTH"
+
+# Jade, optional: lines on a bed (how the last night in it went, the respawn point) and on soothing and
+# unsettling blocks, in the tooltip of the block looked at.
+[[dependencies.${modid}]]
+modId = "jade"
+type = "optional"
+versionRange = "*"
+ordering = "NONE"
+side = "CLIENT"
