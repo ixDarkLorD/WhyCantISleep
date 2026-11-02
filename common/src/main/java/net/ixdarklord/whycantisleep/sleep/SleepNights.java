@@ -30,7 +30,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
@@ -321,9 +320,10 @@ public final class SleepNights {
             for (SleepQuality.Factor factor : quality.factors()) lines.add(new WokePayload.Line(factor.label(), factor.points()));
             Optional<WokePayload.Dream> dream = Optional.ofNullable(sleepEffect)
                     .map(effect -> new WokePayload.Dream(effect.name(), effect.kind(), effect.rarity()));
-            // A night slept through teaches them what the things by the bed do.
-            List<Item> discovered = reason == WakeReason.MORNING ? DecorDiscovery.discover(player, SleepDecor.items(level, night.bed)) : List.of();
-            WCISNetwork.sendToPlayer(player, new WokePayload(reason, quality.score(), lines, night.terror, wellRested, dream, discovered));
+            // A night slept through near the things by the bed: noticed, or with a Dreamcatcher in hand, known.
+            DecorDiscovery.Learned learned = reason == WakeReason.MORNING
+                    ? DecorDiscovery.slept(player, SleepDecor.items(level, night.bed), BedTools.holdsDreamcatcher(player)) : DecorDiscovery.Learned.NOTHING;
+            WCISNetwork.sendToPlayer(player, new WokePayload(reason, quality.score(), lines, night.terror, wellRested, dream, learned.known(), learned.noticed()));
         }
     }
 

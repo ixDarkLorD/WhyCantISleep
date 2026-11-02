@@ -116,9 +116,9 @@ public final class WCISServerConfig {
             .comment("Whether each tool shows only its own part of the bed check: a Dreamcatcher how a night would go, a Bedside "
                     + "Lantern the dark spots. Off, either tool shows both.").enabledWhen(BED_CHECK).build();
     public static final ConfigValue<Boolean> DISCOVER_DECOR = BUILDER.bool("discoverDecor", true)
-            .comment("Whether players must find out what the soothing and unsettling things by a bed do before their tooltips say: by "
-                    + "sleeping a night through with one near the bed, or by holding one in the off hand while they check a bed with a "
-                    + "Dreamcatcher. Off, or in creative, everyone knows.").enabledWhen(SLEEP_QUALITY).build();
+            .comment("Whether players must find out what the soothing and unsettling things by a bed do before their tooltips say. "
+                    + "A night slept near one shows that it does something; a night slept near it with a Dreamcatcher in hand shows what. "
+                    + "Off, or in creative, everyone knows.").enabledWhen(SLEEP_QUALITY).build();
     public static final ConfigValue<Boolean> SLEEP_REMINDERS = BUILDER.bool("sleepReminders", true)
             .comment("Whether players are reminded at dusk when they have gone a day or more without sleep, and told when the other "
                     + "players have gone to bed without them.").build();

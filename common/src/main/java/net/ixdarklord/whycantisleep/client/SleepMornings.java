@@ -57,17 +57,24 @@ public final class SleepMornings {
         };
     }
 
-    // Under the title: that they woke well rested, and what by the bed they found out about.
+    // Under the title: that they woke well rested, and what by the bed they came to know, or that something there
+    // did something, without a Dreamcatcher to tell them what.
     private static @Nullable Component morningHint(WokePayload payload) {
         Component rested = payload.wellRested() ? Component.translatable("gui.whycantisleep.woke.rested.hint") : null;
-        if (payload.discovered().isEmpty()) return rested;
-        MutableComponent names = Component.empty();
-        for (int i = 0; i < payload.discovered().size(); i++) {
-            if (i > 0) names.append(", ");
-            names.append(new ItemStack(payload.discovered().get(i)).getHoverName().copy().withColor(HudStyle.SILVER));
+        Component found;
+        if (!payload.discovered().isEmpty()) {
+            MutableComponent names = Component.empty();
+            for (int i = 0; i < payload.discovered().size(); i++) {
+                if (i > 0) names.append(", ");
+                names.append(new ItemStack(payload.discovered().get(i)).getHoverName().copy().withColor(HudStyle.SILVER));
+            }
+            found = Component.translatable("gui.whycantisleep.woke.discovered", names);
+        } else if (!payload.noticed().isEmpty()) {
+            found = Component.translatable("gui.whycantisleep.woke.noticed");
+        } else {
+            return rested;
         }
-        Component learned = Component.translatable("gui.whycantisleep.woke.discovered", names);
-        return rested == null ? learned : Component.empty().append(rested).append(" ").append(learned);
+        return rested == null ? found : Component.empty().append(rested).append(" ").append(found);
     }
 
     // The score, and what mattered most to it, the biggest first.

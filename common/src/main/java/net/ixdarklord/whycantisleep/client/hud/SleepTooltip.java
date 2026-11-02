@@ -86,11 +86,18 @@ public final class SleepTooltip {
         return player == null || !SleepStatus.serverHasMod() || DecorDiscovery.knows(player, stack);
     }
 
+    /** Whether the player has at least slept near an item, so knows it does something to sleep. */
+    public static boolean noticed(ItemStack stack) {
+        LocalPlayer player = Minecraft.getInstance().player;
+        return player == null || !SleepStatus.serverHasMod() || DecorDiscovery.noticed(player, stack);
+    }
+
     private static void append(ItemStack stack, List<Component> lines) {
         int points = SleepDecor.points(stack);
         if (points == 0) return;
         if (!known(stack)) {
-            // Not found out yet: that it is something, and how to find out what.
+            // Never slept near: nothing. Slept near: that it is something, and how to find out what.
+            if (!noticed(stack)) return;
             if (lines.size() > 1) lines.add(Component.empty());
             lines.add(Component.empty().append(sprite(NEUTRAL, "?")).append(" ")
                     .append(Component.translatable("gui.whycantisleep.tooltip.unknown").withStyle(ChatFormatting.GRAY)));

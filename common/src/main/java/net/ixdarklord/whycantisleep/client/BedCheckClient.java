@@ -10,20 +10,16 @@ import net.ixdarklord.whycantisleep.config.WCISClientConfig;
 import net.ixdarklord.whycantisleep.config.WCISConfigs;
 import net.ixdarklord.whycantisleep.config.WCISServerConfig;
 import net.ixdarklord.whycantisleep.network.BedCheckPayload;
-import net.ixdarklord.whycantisleep.network.StudiedPayload;
 import net.ixdarklord.whycantisleep.network.WokePayload;
 import net.ixdarklord.whycantisleep.sleep.BedTools;
-import net.ixdarklord.whycantisleep.sleep.SleepDecor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.BedBlock;
-import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -60,6 +56,7 @@ public final class BedCheckClient {
             if (key == null) return;
             lines.add(Component.translatable("item.whycantisleep." + key + ".tooltip").withStyle(ChatFormatting.GRAY));
             lines.add(Component.translatable("item.whycantisleep.bed_tool.how").withStyle(ChatFormatting.DARK_GRAY));
+            if (key.equals("dreamcatcher")) lines.add(Component.translatable("item.whycantisleep.dreamcatcher.learn").withStyle(ChatFormatting.DARK_GRAY));
         });
         InteractionEvents.USE_BLOCK.register((player, hand, hit) -> {
             if (!player.level().isClientSide() || hand != InteractionHand.MAIN_HAND || !SleepStatus.serverHasMod() || !WCISServerConfig.BED_CHECK.get()) {
@@ -108,18 +105,6 @@ public final class BedCheckClient {
         SleepNotice.Kind shown = SleepNotices.shownKind();
         if (shown == SleepNotice.Kind.BED_CHECK) SleepNotices.refresh(notice, CARD_TICKS);
         else if (shown == null || tick - askedAt <= ASKED_TICKS) SleepNotices.show(notice, CARD_TICKS);
-    }
-
-    /** The player studied something with a Dreamcatcher: what it does by a bed, on a card with the very item. */
-    public static void onStudied(StudiedPayload payload) {
-        ItemStack stack = new ItemStack(payload.item());
-        int points = SleepDecor.points(stack);
-        if (points == 0) return;
-        boolean soothing = points > 0;
-        Component worth = Component.translatable(soothing ? "gui.whycantisleep.studied.soothing" : "gui.whycantisleep.studied.unsettling",
-                Component.literal((soothing ? "+" : "−") + Math.abs(points)).withStyle(soothing ? ChatFormatting.GREEN : ChatFormatting.RED));
-        SleepNotices.show(new SleepNotice(SleepNotice.Kind.STUDIED, Component.translatable("gui.whycantisleep.studied.title", stack.getHoverName()), worth)
-                .withIcon(stack), CARD_TICKS);
     }
 
     // Under the title: the last full night slept in this bed, and how far the forecast is from it.
