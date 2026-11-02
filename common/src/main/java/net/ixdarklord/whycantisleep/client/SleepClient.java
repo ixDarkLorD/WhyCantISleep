@@ -12,13 +12,13 @@ import net.ixdarklord.whycantisleep.hiding.Hiding;
 import net.ixdarklord.whycantisleep.hiding.HidingServer;
 import net.ixdarklord.whycantisleep.network.RoomSafePayload;
 import net.ixdarklord.whycantisleep.network.SleepBlockedPayload;
+import net.ixdarklord.whycantisleep.sleep.BedTools;
 import net.ixdarklord.whycantisleep.sleep.SleepChecks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.AbstractBedBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -74,6 +74,8 @@ public final class SleepClient {
         if (!(state.getBlock() instanceof AbstractBedBlock bedBlock)) return false;
         // Crawling under it, not lying in it; or already under it, where HidingServer refuses every use.
         if (HidingServer.canHide(player) || Hiding.isHiding(player)) return false;
+        // Checking it with a Dreamcatcher or a Bedside Lantern, not lying in it.
+        if (WCISServerConfig.BED_CHECK.get() && SleepStatus.serverHasMod() && BedTools.checksByClick(player)) return false;
         BlockPos bed = state.getValue(AbstractBedBlock.PART) == BedPart.HEAD ? pos.immutable() : pos.relative(state.getValue(AbstractBedBlock.FACING));
         lastBed = bed;
 

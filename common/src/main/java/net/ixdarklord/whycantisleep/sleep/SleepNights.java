@@ -7,9 +7,9 @@ import net.ixdarklord.coolcatcore.api.event.v2.common.ServerLifecycleEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.core.EventResult;
 import net.ixdarklord.coolcatcore.api.registry.ReloadListeners;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
+import net.ixdarklord.whycantisleep.api.SleepContext;
 import net.ixdarklord.whycantisleep.api.SleepEffect;
 import net.ixdarklord.whycantisleep.api.SleepEffects;
-import net.ixdarklord.whycantisleep.api.SleepContext;
 import net.ixdarklord.whycantisleep.api.SleepEvents;
 import net.ixdarklord.whycantisleep.api.SleepModifiers;
 import net.ixdarklord.whycantisleep.api.SleepQuality;
@@ -127,6 +127,29 @@ public final class SleepNights {
     /** How well a player slept last, or null when they haven't slept since the server started. */
     public static @Nullable SleepQuality last(ServerPlayer player) {
         return LAST.get(player.getUUID());
+    }
+
+    /**
+     * How a night in this bed would go, slept through from now, as it looks before lying down: the room, the monsters
+     * about and the music playing now, and the player's sleep trouble as it stands. The bed check's forecast; nothing
+     * has been slept, so {@link SleepEvents#SCORE_QUALITY} listeners have no say in it.
+     */
+    public static SleepQuality forecast(ServerPlayer player, BlockPos head, Bedroom room) {
+        ServerLevel level = player.level();
+        int monsters = level.getEntitiesOfClass(Monster.class, new AABB(head).inflate(PROWL_RANGE), Monster::isAlive).size();
+        Bedroom.Music music = Bedroom.music(level, head);
+        SleepContext context = new SleepContext(player, head, WakeReason.MORNING, FULL_NIGHT, room.enclosed(), room.lit(), room.pillowLight(),
+                room.decor().soothing(), room.decor().unsettling(), monsters, music == Bedroom.Music.CALM, music == Bedroom.Music.CREEPY,
+                music == Bedroom.Music.LOUD, SleepTroubles.get(player).level(), false);
+        return SleepQuality.of(SleepModifiers.score(context));
+    }
+
+    /** The chance of a night terror on lying down, in percent, for the trouble a player is in now (0 when none could come). */
+    public static int terrorChance(ServerPlayer player) {
+        SleepTrouble.Level trouble = SleepTroubles.get(player).level();
+        if (player.entityTags().contains(NIGHTMARE_MARK)) return 100;
+        if (!WCISServerConfig.NIGHT_TERRORS.get() || !trouble.atLeast(SleepTrouble.Level.RESTLESS)) return 0;
+        return Math.min(100, WCISServerConfig.TERROR_CHANCE.get() * (trouble == SleepTrouble.Level.SLEEPLESS ? 2 : 1));
     }
 
     /** Before a try to sleep: the trouble as it stands, before lying down wipes the time since rest. */
@@ -297,7 +320,10 @@ public final class SleepNights {
             for (SleepQuality.Factor factor : quality.factors()) lines.add(new WokePayload.Line(factor.label(), factor.points()));
             Optional<WokePayload.Dream> dream = Optional.ofNullable(sleepEffect)
                     .map(effect -> new WokePayload.Dream(effect.name(), effect.kind(), effect.rarity()));
-            WCISNetwork.sendToPlayer(player, new WokePayload(reason, quality.score(), lines, night.terror, wellRested, dream));
+            // A night slept through near the things by the bed: noticed, or with a Dreamcatcher in hand, known.
+            DecorDiscovery.Learned learned = reason == WakeReason.MORNING
+                    ? DecorDiscovery.slept(player, SleepDecor.items(level, night.bed), BedTools.holdsDreamcatcher(player)) : DecorDiscovery.Learned.NOTHING;
+            WCISNetwork.sendToPlayer(player, new WokePayload(reason, quality.score(), lines, night.terror, wellRested, dream, learned.known(), learned.noticed()));
         }
     }
 

@@ -16,9 +16,13 @@ import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.LevelChunk;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Deque;
+import java.util.List;
 
 /**
  * What a bed's room is like, for how well its sleeper sleeps: whether it is closed (walled and roofed, its doors shut),
@@ -38,6 +42,8 @@ public record Bedroom(boolean enclosed, boolean lit, int pillowLight, SleepDecor
     private static final int ROOM_RADIUS = 12;
     // How far a jukebox is heard from the bed.
     public static final double MUSIC_RANGE = 16.0;
+    /** The most dark spots a look over a room gives: the room's limit is far more, and a few show where to light. */
+    public static final int DARK_SPOTS_MOST = 48;
 
     /** Music heard at a bed, from no matter to the worst to sleep through. */
     public enum Music {
@@ -46,6 +52,15 @@ public record Bedroom(boolean enclosed, boolean lit, int pillowLight, SleepDecor
 
     /** Looks over the room round a bed. */
     public static Bedroom of(ServerLevel level, BlockPos head) {
+        return of(level, head, null);
+    }
+
+    /**
+     * Looks over the room round a bed, and, into {@code darkSpots} when given, the places in a closed room a monster
+     * could spawn: unlit air standing on a solid floor, nearest the bed first, at most {@link #DARK_SPOTS_MOST}.
+     */
+    public static Bedroom of(ServerLevel level, BlockPos head, @Nullable List<BlockPos> darkSpots) {
+        List<BlockPos> dark = new ArrayList<>();
         BlockPos start = head.above();
         LongSet seen = new LongOpenHashSet();
         Deque<BlockPos> open = new ArrayDeque<>();
@@ -53,18 +68,29 @@ public record Bedroom(boolean enclosed, boolean lit, int pillowLight, SleepDecor
         open.add(start);
         boolean enclosed = passable(level, start, level.getBlockState(start));
         boolean lit = true;
+        // The room's own air: what was looked at includes the walls round it, which don't make the room bigger.
+        int size = 0;
         while (enclosed && !open.isEmpty()) {
             BlockPos at = open.poll();
-            if (level.canSeeSky(at) || seen.size() > ROOM_LIMIT || at.distManhattan(start) > ROOM_RADIUS * 2) {
+            if (level.canSeeSky(at) || ++size > ROOM_LIMIT || at.distManhattan(start) > ROOM_RADIUS * 2) {
                 enclosed = false;
                 break;
             }
             // A monster spawns where no block lights it.
-            if (level.getBrightness(LightLayer.BLOCK, at) == 0) lit = false;
+            if (level.getBrightness(LightLayer.BLOCK, at) == 0) {
+                lit = false;
+                BlockPos floor = at.below();
+                if (darkSpots != null && level.getBlockState(floor).isFaceSturdy(level, floor, Direction.UP)) dark.add(at.immutable());
+            }
             for (Direction side : Direction.values()) {
                 BlockPos next = at.relative(side);
                 if (seen.add(next.asLong()) && passable(level, next, level.getBlockState(next))) open.add(next);
             }
+        }
+        // Only a closed room has corners to light: in the open, the dark is everywhere.
+        if (darkSpots != null && enclosed) {
+            dark.sort(Comparator.comparingDouble(pos -> pos.distSqr(head)));
+            darkSpots.addAll(dark.subList(0, Math.min(DARK_SPOTS_MOST, dark.size())));
         }
         return new Bedroom(enclosed, enclosed && lit, level.getBrightness(LightLayer.BLOCK, start), SleepDecor.count(level, head));
     }

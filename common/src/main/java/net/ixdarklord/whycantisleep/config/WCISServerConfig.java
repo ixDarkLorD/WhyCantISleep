@@ -109,6 +109,23 @@ public final class WCISServerConfig {
             .range(0, 100).slider().comment("Percent chance of a sleep effect on waking in the morning.").build();
     public static final ConfigValue<Boolean> WELL_RESTED = BUILDER.bool("wellRested", true)
             .comment("Whether sleeping through the night in a closed, lit room (doors shut, no dark corners) leaves the player well rested.").build();
+    public static final ConfigValue<Boolean> BED_CHECK = BUILDER.bool("bedCheck", true)
+            .comment("Whether a player sneaking and using a bed with a Dreamcatcher or a Bedside Lantern in hand is told how a night "
+                    + "in it would go, before lying down, and shown where in its room a monster could spawn.").enabledWhen(SLEEP_QUALITY).build();
+    public static final ConfigValue<Boolean> BED_CHECK_NEEDS_TOOLS = BUILDER.bool("bedCheckNeedsTools", true)
+            .comment("Whether each tool shows only its own part of the bed check: a Dreamcatcher how a night would go, a Bedside "
+                    + "Lantern the dark spots. Off, either tool shows both.").enabledWhen(BED_CHECK).build();
+    public static final ConfigValue<Boolean> DISCOVER_DECOR = BUILDER.bool("discoverDecor", true)
+            .comment("Whether players must find out what the soothing and unsettling things by a bed do before their tooltips say. "
+                    + "A night slept near one shows that it does something; a night slept near it with a Dreamcatcher in hand shows what. "
+                    + "Off, or in creative, everyone knows.").enabledWhen(SLEEP_QUALITY).build();
+    public static final ConfigValue<Boolean> SLEEP_REMINDERS = BUILDER.bool("sleepReminders", true)
+            .comment("Whether players are reminded at dusk when they have gone a day or more without sleep, and told when the other "
+                    + "players have gone to bed without them.").build();
+    public static final ConfigValue<Integer> REMINDER_DAYS = BUILDER.intValue("reminderDays", 1)
+            .range(1, 10).comment("Days a player must have gone without sleep to be reminded at dusk.").enabledWhen(SLEEP_REMINDERS).build();
+    public static final ConfigValue<Integer> REMINDER_WAIT = BUILDER.intValue("reminderWait", 10)
+            .range(5, 120).comment("Seconds the players in bed wait before those still up are told.").enabledWhen(SLEEP_REMINDERS).build();
     static {
         BUILDER.pop();
         BUILDER.push("advancements", "The mod's advancements.");
