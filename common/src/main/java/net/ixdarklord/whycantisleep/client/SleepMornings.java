@@ -1,11 +1,14 @@
 package net.ixdarklord.whycantisleep.client;
 
+import net.ixdarklord.whycantisleep.client.hud.HudStyle;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotice;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotices;
 import net.ixdarklord.whycantisleep.config.WCISClientConfig;
 import net.ixdarklord.whycantisleep.config.WCISConfigs;
 import net.ixdarklord.whycantisleep.network.WokePayload;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -44,7 +47,7 @@ public final class SleepMornings {
         }
         return switch (payload.reason()) {
             case MORNING -> new SleepNotice(kind(payload.score()), Component.translatable("gui.whycantisleep.woke.quality.title", word),
-                    payload.wellRested() ? Component.translatable("gui.whycantisleep.woke.rested.hint") : null).withQuality(quality(payload));
+                    morningHint(payload)).withQuality(quality(payload));
             case HURT -> new SleepNotice(SleepNotice.Kind.WOKE_EARLY, Component.translatable("gui.whycantisleep.woke.hurt.title"),
                     Component.translatable("gui.whycantisleep.woke.hurt.hint"));
             case BED_GONE -> new SleepNotice(SleepNotice.Kind.WOKE_EARLY, Component.translatable("gui.whycantisleep.woke.bed_gone.title"),
@@ -52,6 +55,19 @@ public final class SleepMornings {
             // Getting up is the player's own doing; anything else, a mod's or a command's, has its own say.
             case GOT_UP, OTHER -> null;
         };
+    }
+
+    // Under the title: that they woke well rested, and what by the bed they found out about.
+    private static @Nullable Component morningHint(WokePayload payload) {
+        Component rested = payload.wellRested() ? Component.translatable("gui.whycantisleep.woke.rested.hint") : null;
+        if (payload.discovered().isEmpty()) return rested;
+        MutableComponent names = Component.empty();
+        for (int i = 0; i < payload.discovered().size(); i++) {
+            if (i > 0) names.append(", ");
+            names.append(new ItemStack(payload.discovered().get(i)).getHoverName().copy().withColor(HudStyle.SILVER));
+        }
+        Component learned = Component.translatable("gui.whycantisleep.woke.discovered", names);
+        return rested == null ? learned : Component.empty().append(rested).append(" ").append(learned);
     }
 
     // The score, and what mattered most to it, the biggest first.

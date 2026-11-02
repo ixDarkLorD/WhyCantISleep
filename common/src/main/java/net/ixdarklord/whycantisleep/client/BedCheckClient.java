@@ -1,31 +1,29 @@
 package net.ixdarklord.whycantisleep.client;
 
-import net.ixdarklord.coolcatcore.api.event.v2.client.ClientPlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ItemTooltipEvents;
-import net.ixdarklord.coolcatcore.api.network.Network;
+import net.ixdarklord.coolcatcore.api.event.v2.common.InteractionEvents;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotice;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotices;
 import net.ixdarklord.whycantisleep.compat.WCISItems;
 import net.ixdarklord.whycantisleep.config.WCISClientConfig;
 import net.ixdarklord.whycantisleep.config.WCISConfigs;
-import net.ixdarklord.whycantisleep.hiding.Hiding;
+import net.ixdarklord.whycantisleep.config.WCISServerConfig;
 import net.ixdarklord.whycantisleep.network.BedCheckPayload;
-import net.ixdarklord.whycantisleep.network.BedCheckRequestPayload;
+import net.ixdarklord.whycantisleep.network.StudiedPayload;
 import net.ixdarklord.whycantisleep.network.WokePayload;
 import net.ixdarklord.whycantisleep.sleep.BedTools;
+import net.ixdarklord.whycantisleep.sleep.SleepDecor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BedPart;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -33,24 +31,19 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * The bed check, on the client. Crouched by a bed and looking at it for a moment, with a tool to read it by
- * ({@link BedTools}: a Dreamcatcher held or hung nearby, a Bedside Lantern held), the player asks the server how a
- * night in it would go ({@link BedCheckRequestPayload}); its answer ({@link BedCheckPayload}) comes up as a card like
- * the morning's, the score a forecast set against the last night slept in that bed ({@link BedBookmarks}), with the
- * places in the room a monster could spawn marked for a while ({@link DarkSpots}). Kept looking, it asks again now and
- * then; the server also answers by itself as the room is changed.
+ * The bed check, on the client. Sneaking and using a bed with a tool to read it by in hand ({@link BedTools#checksByClick}:
+ * a Dreamcatcher for how a night in it would go, a Bedside Lantern for where a monster could spawn), the player asks the
+ * server: the server answers its own side of the use, and here it only stops the client predicting anything else. The
+ * answer ({@link BedCheckPayload}) comes up as a card like the morning's, the score a forecast set against the last night
+ * slept in that bed ({@link BedBookmarks}), with the places in the room a monster could spawn marked for a while
+ * ({@link DarkSpots}). For a few seconds after, the server answers again by itself as the room is changed.
  */
 public final class BedCheckClient {
-    // Looking this long asks; still looking, it asks again this often. The card stays a little longer than that.
-    private static final int HOLD_TICKS = 15;
-    private static final int AGAIN_TICKS = 20 * 5;
     private static final int CARD_TICKS = 20 * 6;
 
     // An answer this soon after asking is the one asked for; later, it is the server following the room as it changes.
     private static final int ASKED_TICKS = 10;
 
-    private static @Nullable BlockPos looking;
-    private static int held;
     private static long tick;
     private static long askedAt = Long.MIN_VALUE / 2;
 
@@ -58,7 +51,9 @@ public final class BedCheckClient {
     }
 
     public static void init() {
-        ClientTickEvents.END.register(BedCheckClient::tick);
+        ClientTickEvents.END.register(minecraft -> {
+            if (!minecraft.isPaused()) tick++;
+        });
         // The tools say what they're for.
         ItemTooltipEvents.APPEND.register((stack, context, player, flag, lines) -> {
             String key = stack.is(WCISItems.DREAMCATCHER.get()) ? "dreamcatcher" : stack.is(WCISItems.BEDSIDE_LANTERN.get()) ? "bedside_lantern" : null;
@@ -66,44 +61,17 @@ public final class BedCheckClient {
             lines.add(Component.translatable("item.whycantisleep." + key + ".tooltip").withStyle(ChatFormatting.GRAY));
             lines.add(Component.translatable("item.whycantisleep.bed_tool.how").withStyle(ChatFormatting.DARK_GRAY));
         });
-        ClientPlayerEvents.LEAVE.register(player -> {
-            looking = null;
-            held = 0;
-        });
-    }
-
-    private static void tick(Minecraft minecraft) {
-        if (minecraft.isPaused()) return;
-        tick++;
-        BlockPos bed = target(minecraft);
-        if (bed == null) {
-            looking = null;
-            held = 0;
-            return;
-        }
-        if (!bed.equals(looking)) {
-            looking = bed;
-            held = 0;
-        }
-        held++;
-        if (held >= HOLD_TICKS && (held - HOLD_TICKS) % AGAIN_TICKS == 0) {
-            Network.sendToServer(new BedCheckRequestPayload(bed));
+        InteractionEvents.USE_BLOCK.register((player, hand, hit) -> {
+            if (!player.level().isClientSide() || hand != InteractionHand.MAIN_HAND || !SleepStatus.serverHasMod() || !WCISServerConfig.BED_CHECK.get()) {
+                return InteractionResult.PASS;
+            }
+            if (!(player.level().getBlockState(hit.getBlockPos()).getBlock() instanceof BedBlock) || !BedTools.checksByClick(player)) {
+                return InteractionResult.PASS;
+            }
+            // The answer is the one asked for, so it may take the place of another card.
             askedAt = tick;
-        }
-    }
-
-    // The head of the bed the player is crouched by and looking at, with a tool to read it by, or null.
-    private static @Nullable BlockPos target(Minecraft minecraft) {
-        LocalPlayer player = minecraft.player;
-        if (player == null || minecraft.level == null || minecraft.screen != null || !SleepStatus.serverHasMod()) return null;
-        if (!WCISConfigs.isEnabled(WCISClientConfig.BED_CHECK)) return null;
-        // Crouching as hiding reads it: the sneak key held, whatever pose the player is in.
-        if (!player.isShiftKeyDown() || player.isSleeping() || Hiding.isHiding(player)) return null;
-        if (!(minecraft.hitResult instanceof BlockHitResult hit) || hit.getType() != HitResult.Type.BLOCK) return null;
-        BlockState state = minecraft.level.getBlockState(hit.getBlockPos());
-        if (!(state.getBlock() instanceof BedBlock)) return null;
-        BlockPos head = state.getValue(BedBlock.PART) == BedPart.HEAD ? hit.getBlockPos().immutable() : hit.getBlockPos().relative(state.getValue(BedBlock.FACING));
-        return BedTools.canCheck(player, head) ? head : null;
+            return InteractionResult.SUCCESS;
+        });
     }
 
     /** The server's answer for a bed: a forecast with a Dreamcatcher, the dark spots with a Bedside Lantern. */
@@ -140,6 +108,18 @@ public final class BedCheckClient {
         SleepNotice.Kind shown = SleepNotices.shownKind();
         if (shown == SleepNotice.Kind.BED_CHECK) SleepNotices.refresh(notice, CARD_TICKS);
         else if (shown == null || tick - askedAt <= ASKED_TICKS) SleepNotices.show(notice, CARD_TICKS);
+    }
+
+    /** The player studied something with a Dreamcatcher: what it does by a bed, on a card with the very item. */
+    public static void onStudied(StudiedPayload payload) {
+        ItemStack stack = new ItemStack(payload.item());
+        int points = SleepDecor.points(stack);
+        if (points == 0) return;
+        boolean soothing = points > 0;
+        Component worth = Component.translatable(soothing ? "gui.whycantisleep.studied.soothing" : "gui.whycantisleep.studied.unsettling",
+                Component.literal((soothing ? "+" : "−") + Math.abs(points)).withStyle(soothing ? ChatFormatting.GREEN : ChatFormatting.RED));
+        SleepNotices.show(new SleepNotice(SleepNotice.Kind.STUDIED, Component.translatable("gui.whycantisleep.studied.title", stack.getHoverName()), worth)
+                .withIcon(stack), CARD_TICKS);
     }
 
     // Under the title: the last full night slept in this bed, and how far the forecast is from it.

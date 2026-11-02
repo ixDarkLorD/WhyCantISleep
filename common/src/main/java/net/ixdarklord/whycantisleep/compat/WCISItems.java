@@ -27,8 +27,8 @@ public final class WCISItems {
                     .setId(ResourceKey.create(Registries.ITEM, WhyCantISleep.id("guide_book")))));
 
     /**
-     * The bed check's tools. A Dreamcatcher, held or hung in an item frame near the bed, tells how a night in a bed would
-     * go; a Bedside Lantern, held, marks where in its room a monster could spawn ({@code sleep/BedCheck}).
+     * The bed check's tools, each read by sneaking and using a bed with it in hand: a Dreamcatcher tells how a night in
+     * the bed would go; a Bedside Lantern marks where in its room a monster could spawn ({@code sleep/BedCheck}).
      */
     public static final RegistryEntry<Item> DREAMCATCHER = ITEMS.register("dreamcatcher",
             () -> new Item(new Item.Properties().stacksTo(16).rarity(Rarity.UNCOMMON)

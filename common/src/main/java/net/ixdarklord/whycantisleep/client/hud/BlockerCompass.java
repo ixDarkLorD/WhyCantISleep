@@ -26,16 +26,21 @@ import java.util.Collection;
 /**
  * The last blocker compass: once the highlights of a refused sleep fade, a single arrow round the crosshair keeps
  * pointing to the nearest of those monsters still about, with its name and how far it is under the crosshair (and how
- * many are left), until the time to clear the room runs out, the room is safe, or they are all dealt with. A soft ping
+ * many are left) in the HUD's notice frame, tinted its color, until the time to clear the room runs out, the room is
+ * safe, or they are all dealt with. A soft ping
  * goes with it, quicker and higher the closer the nearest is; dealing with the last of them chimes, and says so for a
  * moment (client option {@code compassPing}).
  */
 public final class BlockerCompass {
-    // Smaller and nearer the crosshair than the highlights' arrows; the label under the crosshair, clear of the arrow's
-    // ring even when it points straight down (behind the player).
+    // Smaller and nearer the crosshair than the highlights' arrows; the label under the crosshair, its frame clear of the
+    // arrow's ring even when it points straight down (behind the player), and a little see-through.
     private static final float RADIUS = 22.0F;
     private static final float SCALE = 0.8F;
-    private static final int LABEL_BELOW = 33;
+    private static final int LABEL_BELOW = 42;
+    private static final float FRAME_ALPHA = 0.92F;
+    // The dot before the words, and the gap after it.
+    private static final int DOT = 4;
+    private static final int DOT_GAP = 5;
     private static final float FADE_IN_TICKS = 8.0F;
     private static final float FADE_OUT_TICKS = 20.0F;
     // The ping: every this many ticks per block away, never quicker or slower than these; the all-clear's line stays this long.
@@ -123,24 +128,29 @@ public final class BlockerCompass {
             float beat = 0.85F + 0.15F * Mth.sin((tick + partialTick) * 0.25F);
             BlockerArrows.drawArrow(graphics, centerX, centerY, aim.angle(), RADIUS, SCALE, false, color, alpha * beat);
         }
-        Font font = minecraft.font;
-        Component label = TRACKED.size() > 1
-                ? Component.translatable("gui.whycantisleep.compass.more", target.getName(), Mth.floor(aim.distance()), TRACKED.size() - 1)
-                : Component.translatable("gui.whycantisleep.compass.one", target.getName(), Mth.floor(aim.distance()));
-        int x = Math.round(centerX - font.width(label) / 2.0F);
-        int y = Math.round(centerY) + LABEL_BELOW;
-        graphics.fill(x - 3, y - 2, x + font.width(label) + 3, y + 9, HudStyle.color(0x111317, alpha * 0.6F));
-        graphics.text(font, label, x, y, HudStyle.color(color, alpha), false);
+        // Its name in its color, how far in silver, and the rest a step back.
+        Component name = target.getName().copy().withColor(color);
+        Component distance = Component.literal(String.valueOf(Mth.floor(aim.distance()))).withColor(HudStyle.SILVER);
+        Component label = (TRACKED.size() > 1
+                ? Component.translatable("gui.whycantisleep.compass.more", name, distance, TRACKED.size() - 1)
+                : Component.translatable("gui.whycantisleep.compass.one", name, distance)).withColor(HudStyle.MUTED);
+        label(graphics, minecraft.font, label, color, alpha);
     }
 
     // "All dealt with", in green under the crosshair, fading out.
     private static void allClear(GuiGraphicsExtractor graphics, Font font, float age) {
         float alpha = Mth.clamp((1.0F - age) * 3.0F, 0.0F, 1.0F);
-        Component label = Component.translatable("gui.whycantisleep.compass.clear");
-        int x = Math.round(graphics.guiWidth() / 2.0F - font.width(label) / 2.0F);
+        label(graphics, font, Component.translatable("gui.whycantisleep.compass.clear").withColor(HudStyle.GREEN), HudStyle.GREEN, alpha);
+    }
+
+    // A line under the crosshair in the HUD's notice frame, tinted a color, with a dot of that color before it.
+    private static void label(GuiGraphicsExtractor graphics, Font font, Component text, int rgb, float alpha) {
+        int width = DOT + DOT_GAP + font.width(text);
+        int x = Math.round(graphics.guiWidth() / 2.0F - width / 2.0F);
         int y = graphics.guiHeight() / 2 + LABEL_BELOW;
-        graphics.fill(x - 3, y - 2, x + font.width(label) + 3, y + 9, HudStyle.color(0x111317, alpha * 0.6F));
-        graphics.text(font, label, x, y, HudStyle.color(HudStyle.GREEN, alpha), false);
+        HudStyle.notice(graphics, x, y, width, font.lineHeight - 1, rgb, alpha * FRAME_ALPHA);
+        HudStyle.dot(graphics, x, y + 2, rgb, alpha);
+        graphics.text(font, text, x + DOT + DOT_GAP, y, HudStyle.color(HudStyle.WHITE, alpha), false);
     }
 
     private static @Nullable Entity nearest(Minecraft minecraft) {

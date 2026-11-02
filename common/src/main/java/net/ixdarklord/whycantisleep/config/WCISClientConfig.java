@@ -57,7 +57,8 @@ public final class WCISClientConfig {
             .comment("With the last blocker compass, a soft ping that quickens as you close in, and a chime once they're all dealt with.")
             .enabledWhen(BLOCKER_COMPASS).build();
     public static final ConfigValue<Boolean> BED_CHECK = BUILDER.bool("bedCheck", true)
-            .comment("Crouch by a bed and look at it to see how a night in it would go, before you lie down. Needs the mod on the server.")
+            .comment("Sneak and use a bed with a Dreamcatcher or a Bedside Lantern in hand to see how a night in it would go, before "
+                    + "you lie down. Needs the mod on the server.")
             .enabledWhen(WCISServerConfig.BED_CHECK).build();
     public static final ConfigValue<Boolean> DARK_SPOTS = BUILDER.bool("darkSpots", true)
             .comment("With the bed check, marks the places in the room a monster could spawn, so you know where to put a light.").enabledWhen(BED_CHECK).build();

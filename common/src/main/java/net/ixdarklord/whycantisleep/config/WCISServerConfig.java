@@ -110,11 +110,15 @@ public final class WCISServerConfig {
     public static final ConfigValue<Boolean> WELL_RESTED = BUILDER.bool("wellRested", true)
             .comment("Whether sleeping through the night in a closed, lit room (doors shut, no dark corners) leaves the player well rested.").build();
     public static final ConfigValue<Boolean> BED_CHECK = BUILDER.bool("bedCheck", true)
-            .comment("Whether a player crouched by a bed and looking at it is told how a night in it would go, before lying down, "
-                    + "and shown where in its room a monster could spawn.").enabledWhen(SLEEP_QUALITY).build();
+            .comment("Whether a player sneaking and using a bed with a Dreamcatcher or a Bedside Lantern in hand is told how a night "
+                    + "in it would go, before lying down, and shown where in its room a monster could spawn.").enabledWhen(SLEEP_QUALITY).build();
     public static final ConfigValue<Boolean> BED_CHECK_NEEDS_TOOLS = BUILDER.bool("bedCheckNeedsTools", true)
-            .comment("Whether the bed check needs its tools: a Dreamcatcher (held, or in an item frame near the bed) to tell how a night "
-                    + "would go, and a Bedside Lantern (held) to mark the dark spots. Off, everyone sees both.").enabledWhen(BED_CHECK).build();
+            .comment("Whether each tool shows only its own part of the bed check: a Dreamcatcher how a night would go, a Bedside "
+                    + "Lantern the dark spots. Off, either tool shows both.").enabledWhen(BED_CHECK).build();
+    public static final ConfigValue<Boolean> DISCOVER_DECOR = BUILDER.bool("discoverDecor", true)
+            .comment("Whether players must find out what the soothing and unsettling things by a bed do before their tooltips say: by "
+                    + "sleeping a night through with one near the bed, or by holding one in the off hand while they check a bed with a "
+                    + "Dreamcatcher. Off, or in creative, everyone knows.").enabledWhen(SLEEP_QUALITY).build();
     public static final ConfigValue<Boolean> SLEEP_REMINDERS = BUILDER.bool("sleepReminders", true)
             .comment("Whether players are reminded at dusk when they have gone a day or more without sleep, and told when the other "
                     + "players have gone to bed without them.").build();
