@@ -1,6 +1,6 @@
 """Draws the mod's two bedside tools as 16x16 item textures (Pillow), each centered in its square:
-the Dreamcatcher (a leather-wrapped wooden hoop on a loop, a web of string round a violet bead, and three feathers on
-beaded strings) and the Bedside Lantern (an iron lantern with a ring handle, an amethyst set in its cap, and violet
+the Dreamcatcher (a leather-wrapped wooden hoop on a loop, a diamond web round a violet bead, and three
+feathers on strings) and the Bedside Lantern (a tall iron lantern with a ring handle, an amethyst set in its cap, and violet
 glass round a candle's flame). Violet is the bed check's color, the dark spots' too. Light falls from the upper left.
 
 Run from the repository root: python tools/gen_items.py
@@ -34,24 +34,24 @@ DREAMCATCHER_COLORS = {
     "h": (150, 150, 164, 255),   # feather, shadow
 }
 
-# The lantern, pixel by pixel: rows 1 to 14, its outline symmetric about the middle, so it sits centered.
+# The lantern, pixel by pixel: tall and narrow, its outline symmetric about the middle, so it sits centered.
 LANTERN = [
-    "................",
     "......OOOO......",
     ".....O....O.....",
     ".....O....O.....",
     "....OOOOOOOO....",
-    "...OiiIVvIIIO...",
-    "...OPPPPPPPPO...",
-    "...OkpvvvvppO...",
-    "...OkvVyyVvpO...",
-    "...OVVyWWyVvO...",
-    "...OvvVccVvpO...",
-    "...OpvvccvppO...",
-    "...OPPPPPPPPO...",
-    "...OiiIIIIIIO...",
-    "....OOOOOOOO....",
-    "................",
+    "....OiIVvIIO....",
+    "....OPPPPPPO....",
+    "....OkpvvppO....",
+    "....OkvVVvpO....",
+    "....OVVyyVvO....",
+    "....OvyWWyvO....",
+    "....OvVyyVpO....",
+    "....OpvccvpO....",
+    "....OpvccppO....",
+    "....OPPPPPPO....",
+    "....OiIIIIIO....",
+    ".....OOOOOO.....",
 ]
 LANTERN_COLORS = {
     "O": (28, 28, 36, 255),      # outline
@@ -85,14 +85,14 @@ def dreamcatcher():
         if 0 <= x < 16 and 0 <= y < 16:
             grid[y][x] = key
 
-    # The web: a ring round the bead, and the four diagonals from the bead out to the hoop.
+    # The web: a diamond round the bead, tied to the hoop at its four points by short threads.
     for y in range(16):
         for x in range(16):
-            if 2.0 <= math.hypot(x - HOOP_X, y - HOOP_Y) <= 2.6:
+            dx, dy = abs(x - HOOP_X), abs(y - HOOP_Y)
+            if dx + dy == 3:
+                put(x, y, "s")
+            elif dx + dy == 4 and (dx < 1 or dy < 1):
                 put(x, y, "t")
-    for step in (1, 2, 3):
-        for x, y in ((7 - step, 6 - step), (8 + step, 6 - step), (7 - step, 7 + step), (8 + step, 7 + step)):
-            put(x, y, "s")
     # The hoop: wood, lit to the upper left and shaded to the lower right, wrapped in leather at its four sides, outlined.
     for y in range(16):
         for x in range(16):
@@ -115,20 +115,24 @@ def dreamcatcher():
     # The loop it hangs by.
     put(7, 0, "t")
     put(8, 0, "t")
-    # Three feathers, each on a beaded string and tipped violet: one on each side, falling from the hoop, and one in
-    # the middle under it.
-    for fx, out in ((3, -1), (12, 1)):
-        put(fx, 10, "t")
-        put(fx, 11, "v")
-        for y in (12, 13, 14):
-            put(fx, y, "f")
-            put(fx - out, y, "h" if y > 12 else ".")
-        put(fx + out, 13, "g")
-        put(fx, 15, "v")
-    put(7, 13, "V")
-    put(8, 13, "v")
+    # Three feathers on strings, each two pixels wide: lit on its left, in shadow on its right, tipped violet. One on
+    # each side falls from the hoop's lower edge; the middle one hangs under the hoop.
+    for inner, outer in ((3, 2), (12, 13)):
+        lit, dark = min(inner, outer), max(inner, outer)
+        put(inner, 10, "t")
+        put(inner, 11, "f")
+        put(lit, 12, "f")
+        put(dark, 12, "g")
+        put(lit, 13, "f")
+        put(dark, 13, "h")
+        put(lit, 14, "g")
+        put(dark, 14, "h")
+        put(lit, 15, "v")
+        put(dark, 15, "p")
+    put(7, 13, "f")
+    put(8, 13, "g")
     put(7, 14, "f")
-    put(8, 14, "g")
+    put(8, 14, "h")
     put(7, 15, "v")
     put(8, 15, "p")
     return from_rows(["".join(row) for row in grid], DREAMCATCHER_COLORS)
