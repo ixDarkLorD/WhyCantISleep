@@ -20,9 +20,9 @@ import java.util.List;
 /**
  * The buff, debuff and neutral icons (on the morning card, in the sleep status, in tooltips), and the part of an
  * item's tooltip that says it changes sleep quality when placed by a bed ({@link SleepDecor}). That part closes the
- * tooltip (CoolCatLib's {@link ItemTooltipEvents#APPEND}, after every other mod's lines): the buff or debuff icon,
- * "Soothing" or "Unsettling" and the points each one is worth, how far they go together, and a meter of as many pips
- * as count, the first lit: one of them is one pip. The icon and the pips are sprites set in the text.
+ * tooltip (CoolCatLib's {@link ItemTooltipEvents#APPEND}, after every other mod's lines): "Soothing" or "Unsettling" by
+ * the buff or debuff icon, and under it what one is worth by a bed, and a meter of as many pips as count, the first lit
+ * (one of them is one pip), with how far they go together. The icon and the pips are sprites set in the text.
  */
 public final class SleepTooltip {
     public static final Identifier BUFF = WhyCantISleep.id("hud/buff");
@@ -33,6 +33,8 @@ public final class SleepTooltip {
     private static final Identifier PIP_SOOTHING = WhyCantISleep.id("hud/pip_soothing");
     private static final Identifier PIP_UNSETTLING = WhyCantISleep.id("hud/pip_unsettling");
     private static final Identifier PIP_EMPTY = WhyCantISleep.id("hud/pip_empty");
+    // The lines under the heading start under its word: a sprite in text is 8 wide, and a space 4, three spaces in all.
+    private static final String INDENT = "   ";
 
     private SleepTooltip() {
     }
@@ -80,15 +82,17 @@ public final class SleepTooltip {
         // A blank line sets the section apart from the lines above it, but not from the name alone, where it would only
         // leave a gap.
         if (lines.size() > 1) lines.add(Component.empty());
-        lines.add(sprite(soothing ? BUFF : DEBUFF, soothing ? "+" : "-").append(" ")
-                .append(Component.translatable(soothing ? "gui.whycantisleep.tooltip.soothing" : "gui.whycantisleep.tooltip.unsettling").withStyle(color))
-                .append(Component.literal("  ").append(Component.translatable("gui.whycantisleep.tooltip.points", signed(points))).withStyle(ChatFormatting.WHITE)));
-        lines.add(Component.translatable(soothing ? "gui.whycantisleep.tooltip.soothing.hint" : "gui.whycantisleep.tooltip.unsettling.hint", signed(most))
-                .withStyle(ChatFormatting.GRAY));
-        // As many pips as count before the most is reached, the first lit: one of them is one pip.
-        MutableComponent meter = Component.empty();
+        // The kind by its icon, as a heading; under it, in line with its word, what one is worth by a bed, then the
+        // meter: as many pips as count before the most is reached, the first lit (one of them is one pip), and that most.
+        lines.add(Component.empty().append(sprite(soothing ? BUFF : DEBUFF, soothing ? "+" : "-")).append(" ")
+                .append(Component.translatable(soothing ? "gui.whycantisleep.tooltip.soothing" : "gui.whycantisleep.tooltip.unsettling").withStyle(color)));
+        lines.add(Component.literal(INDENT).append(Component.translatable("gui.whycantisleep.tooltip.worth",
+                Component.literal(signed(points)).withStyle(color)).withStyle(ChatFormatting.GRAY)));
+        MutableComponent meter = Component.literal(INDENT);
         int pips = Math.max(1, Math.abs(most / points));
         for (int i = 0; i < pips; i++) meter.append(sprite(i == 0 ? (soothing ? PIP_SOOTHING : PIP_UNSETTLING) : PIP_EMPTY, i == 0 ? "#" : "-"));
+        meter.append(Component.literal(" ").append(Component.translatable(soothing ? "gui.whycantisleep.tooltip.soothing.most" : "gui.whycantisleep.tooltip.unsettling.most",
+                signed(most))).withStyle(ChatFormatting.DARK_GRAY));
         lines.add(meter);
     }
 
