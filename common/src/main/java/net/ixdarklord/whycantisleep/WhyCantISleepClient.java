@@ -3,6 +3,7 @@ package net.ixdarklord.whycantisleep;
 import net.ixdarklord.coolcatcore.api.core.ClientModConstructor;
 import net.ixdarklord.whycantisleep.client.BedBookmarks;
 import net.ixdarklord.whycantisleep.client.BedCheckClient;
+import net.ixdarklord.whycantisleep.client.BedNamingClient;
 import net.ixdarklord.whycantisleep.client.DarkSpots;
 import net.ixdarklord.whycantisleep.client.Eyelids;
 import net.ixdarklord.whycantisleep.client.HidingAcoustics;
@@ -53,6 +54,7 @@ public final class WhyCantISleepClient implements ClientModConstructor {
         SleepStatus.init();
         BedBookmarks.init();
         BedCheckClient.init();
+        BedNamingClient.init();
         DarkSpots.init();
         SleepTooltip.init();
         NightTerrorClient.init();

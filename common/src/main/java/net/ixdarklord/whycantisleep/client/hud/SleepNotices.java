@@ -100,6 +100,19 @@ public final class SleepNotices {
         if (SleepNotices.notice != null) SleepNotices.notice = notice;
     }
 
+    /**
+     * Changes what the card up says and keeps it up this many more ticks, without it coming in again or its sound: a
+     * card following something live (the bed check, as the room is changed). Shows it as new when none is up.
+     */
+    public static void refresh(SleepNotice notice, int ticks) {
+        if (SleepNotices.notice == null) {
+            show(notice, ticks);
+            return;
+        }
+        SleepNotices.notice = notice;
+        duration = (int) (tick - shownAt) + ticks;
+    }
+
     /** The kind of card up, or null when none is. */
     public static @Nullable SleepNotice.Kind shownKind() {
         return notice == null ? null : notice.kind();
@@ -223,7 +236,8 @@ public final class SleepNotices {
         int textX = x + SLOT_SIZE + SLOT_GAP;
         int textWidth = scoreX - textX - 6;
         graphics.text(font, font.split(shown.title(), textWidth).getFirst(), textX, y + 1, HudStyle.color(rgb, alpha), false);
-        Component label = Component.translatable(quality.forecast() ? "gui.whycantisleep.bed_check.label" : "gui.whycantisleep.woke.quality.label");
+        Component label = quality.label() != null ? quality.label()
+                : Component.translatable(quality.forecast() ? "gui.whycantisleep.bed_check.label" : "gui.whycantisleep.woke.quality.label");
         graphics.text(font, font.split(label, textWidth).getFirst(), textX, y + 11, HudStyle.color(HudStyle.MUTED, alpha), false);
         int cursor = y + SLOT_SIZE + 5;
         HudStyle.pips(graphics, x, cursor, width, QUALITY_PIP_HEIGHT, quality.score() / 100.0F * fill, rgb, alpha);

@@ -54,6 +54,22 @@
           }
         }
       ]
+    },
+    {
+      "elements": [
+        {
+          "type": "spotlight",
+          "item": "whycantisleep:dreamcatcher",
+          "title": "guide.whycantisleep.guide.entry.quality.bedside.page3.element1.title",
+          "text": "guide.whycantisleep.guide.entry.quality.bedside.page3.element1.text"
+        },
+        {
+          "type": "spotlight",
+          "item": "whycantisleep:bedside_lantern",
+          "title": "guide.whycantisleep.guide.entry.quality.bedside.page3.element2.title",
+          "text": "guide.whycantisleep.guide.entry.quality.bedside.page3.element2.text"
+        }
+      ]
     }
   ]
 }
