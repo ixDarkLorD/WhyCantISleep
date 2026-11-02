@@ -16,7 +16,6 @@ import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.LevelChunk;
-
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
