@@ -1,11 +1,14 @@
 package net.ixdarklord.whycantisleep.client;
 
+import net.ixdarklord.whycantisleep.client.hud.HudStyle;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotice;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotices;
 import net.ixdarklord.whycantisleep.config.WCISClientConfig;
 import net.ixdarklord.whycantisleep.config.WCISConfigs;
 import net.ixdarklord.whycantisleep.network.WokePayload;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -30,6 +33,7 @@ public final class SleepMornings {
 
     public static void onWoke(WokePayload payload) {
         SleepStatus.onWoke(payload);
+        BedBookmarks.onWoke(payload);
         if (!WCISConfigs.isEnabled(WCISClientConfig.MORNING_CARD)) return;
         SleepNotice notice = notice(payload);
         if (notice != null) SleepNotices.show(notice, CARD_TICKS);
@@ -43,7 +47,7 @@ public final class SleepMornings {
         }
         return switch (payload.reason()) {
             case MORNING -> new SleepNotice(kind(payload.score()), Component.translatable("gui.whycantisleep.woke.quality.title", word),
-                    payload.wellRested() ? Component.translatable("gui.whycantisleep.woke.rested.hint") : null).withQuality(quality(payload));
+                    morningHint(payload)).withQuality(quality(payload));
             case HURT -> new SleepNotice(SleepNotice.Kind.WOKE_EARLY, Component.translatable("gui.whycantisleep.woke.hurt.title"),
                     Component.translatable("gui.whycantisleep.woke.hurt.hint"));
             case BED_GONE -> new SleepNotice(SleepNotice.Kind.WOKE_EARLY, Component.translatable("gui.whycantisleep.woke.bed_gone.title"),
@@ -51,6 +55,26 @@ public final class SleepMornings {
             // Getting up is the player's own doing; anything else, a mod's or a command's, has its own say.
             case GOT_UP, OTHER -> null;
         };
+    }
+
+    // Under the title: that they woke well rested, and what by the bed they came to know, or that something there
+    // did something, without a Dreamcatcher to tell them what.
+    private static @Nullable Component morningHint(WokePayload payload) {
+        Component rested = payload.wellRested() ? Component.translatable("gui.whycantisleep.woke.rested.hint") : null;
+        Component found;
+        if (!payload.discovered().isEmpty()) {
+            MutableComponent names = Component.empty();
+            for (int i = 0; i < payload.discovered().size(); i++) {
+                if (i > 0) names.append(", ");
+                names.append(new ItemStack(payload.discovered().get(i)).getHoverName().copy().withColor(HudStyle.SILVER));
+            }
+            found = Component.translatable("gui.whycantisleep.woke.discovered", names);
+        } else if (!payload.noticed().isEmpty()) {
+            found = Component.translatable("gui.whycantisleep.woke.noticed");
+        } else {
+            return rested;
+        }
+        return rested == null ? found : Component.empty().append(rested).append(" ").append(found);
     }
 
     // The score, and what mattered most to it, the biggest first.
@@ -63,7 +87,8 @@ public final class SleepMornings {
         return new SleepNotice.Quality(payload.score(), details, payload.dream().orElse(null));
     }
 
-    private static String word(int score) {
+    /** The word for a night's score, for the {@code gui.whycantisleep.woke.word.*} keys: great, good, fair, poor, awful. */
+    static String word(int score) {
         if (score >= GREAT) return "great";
         if (score >= GOOD) return "good";
         if (score >= FAIR) return "fair";

@@ -1,9 +1,9 @@
 package net.ixdarklord.whycantisleep.client.hud;
 
+import net.ixdarklord.coolcatcanvas.api.utils.Easing;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientGuiEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientPlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
-import net.ixdarklord.coolcatcanvas.api.utils.Easing;
 import net.ixdarklord.whycantisleep.api.SleepEffect;
 import net.ixdarklord.whycantisleep.client.fx.SleepEffects;
 import net.ixdarklord.whycantisleep.network.WokePayload;
@@ -98,6 +98,19 @@ public final class SleepNotices {
      */
     public static void replace(SleepNotice notice) {
         if (SleepNotices.notice != null) SleepNotices.notice = notice;
+    }
+
+    /**
+     * Changes what the card up says and keeps it up this many more ticks, without it coming in again or its sound: a
+     * card following something live (the bed check, as the room is changed). Shows it as new when none is up.
+     */
+    public static void refresh(SleepNotice notice, int ticks) {
+        if (SleepNotices.notice == null) {
+            show(notice, ticks);
+            return;
+        }
+        SleepNotices.notice = notice;
+        duration = (int) (tick - shownAt) + ticks;
     }
 
     /** The kind of card up, or null when none is. */
@@ -223,8 +236,9 @@ public final class SleepNotices {
         int textX = x + SLOT_SIZE + SLOT_GAP;
         int textWidth = scoreX - textX - 6;
         graphics.text(font, font.split(shown.title(), textWidth).getFirst(), textX, y + 1, HudStyle.color(rgb, alpha), false);
-        graphics.text(font, font.split(Component.translatable("gui.whycantisleep.woke.quality.label"), textWidth).getFirst(), textX, y + 11,
-                HudStyle.color(HudStyle.MUTED, alpha), false);
+        Component label = quality.label() != null ? quality.label()
+                : Component.translatable(quality.forecast() ? "gui.whycantisleep.bed_check.label" : "gui.whycantisleep.woke.quality.label");
+        graphics.text(font, font.split(label, textWidth).getFirst(), textX, y + 11, HudStyle.color(HudStyle.MUTED, alpha), false);
         int cursor = y + SLOT_SIZE + 5;
         HudStyle.pips(graphics, x, cursor, width, QUALITY_PIP_HEIGHT, quality.score() / 100.0F * fill, rgb, alpha);
         cursor += QUALITY_PIP_HEIGHT;
@@ -233,7 +247,8 @@ public final class SleepNotices {
         int row = 0;
         if (!details.isEmpty()) {
             cursor = partDivider(graphics, x, width, cursor, alpha);
-            graphics.text(font, Component.translatable("gui.whycantisleep.woke.factors"), x, cursor, HudStyle.color(HudStyle.MUTED, alpha), false);
+            graphics.text(font, Component.translatable(quality.forecast() ? "gui.whycantisleep.bed_check.factors" : "gui.whycantisleep.woke.factors"), x, cursor,
+                    HudStyle.color(HudStyle.MUTED, alpha), false);
             if (more > 0) {
                 Component moreText = Component.translatable("gui.whycantisleep.woke.more", more);
                 graphics.text(font, moreText, x + width - font.width(moreText), cursor, HudStyle.color(HudStyle.FAINT, alpha), false);

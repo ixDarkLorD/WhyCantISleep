@@ -26,6 +26,9 @@
     ],
     "voicechat": [
       "net.ixdarklord.whycantisleep.compat.voicechat.WCISVoicechatPlugin"
+    ],
+    "jade": [
+      "net.ixdarklord.whycantisleep.compat.jade.WCISJadePlugin"
     ]
   },
   "mixins": [
@@ -47,6 +50,8 @@
     "folios": ">=${folios_min_version}"
   },
   "suggests": {
-    "voicechat": "*"
+    "voicechat": "*",
+    "jade": "*",
+    "wthit": "*"
   }
 }

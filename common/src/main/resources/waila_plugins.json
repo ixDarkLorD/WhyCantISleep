@@ -1,0 +1,9 @@
+{
+  "whycantisleep:sleep": {
+    "entrypoints": {
+      "client": "net.ixdarklord.whycantisleep.compat.wthit.WCISWthitPlugin"
+    },
+    "side": "*",
+    "required": []
+  }
+}

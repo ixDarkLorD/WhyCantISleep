@@ -11,4 +11,6 @@ dependencies {
     localRuntime("net.ixdarklord.mcp_bridge:mcp_bridge-fabric:${mcp_bridge_version}") { transitive = false }
     // Dev runs only: Simple Voice Chat, to try the optional integration (Modrinth's maven comes from the shared scripts).
     localRuntime("maven.modrinth:simple-voice-chat:fabric-${voicechat_version}") { transitive = false }
+    // Dev runs only: Jade, to see the optional tooltip lines.
+    localRuntime("maven.modrinth:jade:${jade_fabric_version}") { transitive = false }
 }
