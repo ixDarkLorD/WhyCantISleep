@@ -12,12 +12,14 @@ This file is for listing all the changes to this project
 - **Four new night terrors**: a terror is no longer always the shadow at the foot of the bed. The room may fill with black water, drowned shapes rising out of it once it is high and pale hands pulling from below; bugs may pour in from the dark by the hundred, solid, many-legged things that climb the bed and crawl all over you before they reach your face; the floor may give way and drop you down a black shaft rushing past, eyes opening in its walls and blocks tumbling with you, shadows flying round you that dive and grab just before you hit the ground; or tall pale-faced figures may stand in the mist, nearer each time your eyes blink, until one is face to face. Each terror is one of the five at random, and a shared one is the same for everyone in it. Operators can pick one: `/whycantisleep nightmare <players> <shadow|drowning|swarm|falling|watchers>`.
 - The shadow now leaves a red afterimage each time it glitches, and ash drifts down through the room.
 - The Insomniac's Handbook has pages on all of it: your dream journal and deep sleep in Waking With an Effect, a nightlight and sharing a terror in Night Terrors, napping and sleepwalking in Sleep Trouble.
+- `/whycantisleep config` opens the mod's config screens, and `/whycantisleep config <name>` just one of them. Operators can reload the config files after editing them by hand with `/whycantisleep config reload`.
 
 ### 🐛 Bug Fixes
 - The shadow's hands no longer twist round strangely as they come for your face: the hands beside the bed stay there, and those that grab come in flat from past the top and sides of the view.
 
 ### 🛠️ Changes
 - Data pack sleep modifiers can test for a nightlight (`"nightlight": true`) and a nap since the last night (`"napped": true`).
+- Now needs CoolCatLib 8.3.0 or newer.
 
 ## v0.3.0 Beta | Nov 16, 2026
 ### ✨ New Features
