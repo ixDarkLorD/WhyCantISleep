@@ -1,7 +1,7 @@
 #version 330
 #extension GL_ARB_separate_shader_objects : require
 
-#include <coolcatlib:screen_effect.glsl>
+#include <coolcatcanvas:screen_effect.glsl>
 
 // The night terror's warped surroundings (NightTerrorClient): the world ripples and slowly twists, more towards the
 // edges of the view than in its middle, where the demon is; each heartbeat swells it and pulls the view in a little,
