@@ -1,7 +1,7 @@
 # Changelog
 This file is for listing all the changes to this project
 
-## v0.4.0 Beta | Unreleased
+## v0.4.0 Beta | Nov 17, 2026
 ### ✨ New Features
 - **Dream journal**: every sleep effect you wake with is written into your journal, a page of the Insomniac's Handbook listing all of them, the ones you've found by name and the rest hidden, with how many you've found. The morning card says when a dream is new to it. Server option `dreamJournal`.
 - **Deep sleep**: now and then a great night (90 or more as you lie down) sinks into a deep sleep: your eyes fall shut at once, the world goes almost silent, and you hear your heart slow. You wake with a good sleep effect a level stronger and lasting twice as long, and the morning card says you slept like a log. Server options `deepSleep` and `deepSleepChance` (20%); operators can give one with `/whycantisleep deepsleep`.
@@ -19,7 +19,7 @@ This file is for listing all the changes to this project
 
 ### 🛠️ Changes
 - Data pack sleep modifiers can test for a nightlight (`"nightlight": true`) and a nap since the last night (`"napped": true`).
-- Now needs CoolCatLib 8.3.0 or newer.
+- Now needs CoolCatLib 9.0.0 or newer.
 
 ## v0.3.0 Beta | Nov 16, 2026
 ### ✨ New Features
