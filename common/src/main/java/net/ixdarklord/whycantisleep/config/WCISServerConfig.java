@@ -119,6 +119,26 @@ public final class WCISServerConfig {
     public static final ConfigValue<Boolean> NIGHT_GUARDS = BUILDER.bool("nightGuards", true)
             .comment("Whether an iron golem near the bed, or a tamed wolf or cat sitting by it, makes a night guard: it adds to the sleep quality, "
                     + "and once a night it scares off a monster keeping its owner from sleeping.").build();
+    public static final ConfigValue<Boolean> NIGHTLIGHTS = BUILDER.bool("nightlights", true)
+            .comment("Whether a soft light near the bed (a lit candle, a lantern or a sea pickle within three blocks, short of too bright at the pillow) "
+                    + "halves the chance of a night terror and adds a little to sleep quality.").build();
+    public static final ConfigValue<Boolean> NAPS = BUILDER.bool("naps", true)
+            .comment("Whether a player a day or more without sleep may nap in the day: a short sleep that takes half a day off their sleep debt, "
+                    + "once between nights, and costs a little of the next night's sleep quality.").build();
+    public static final ConfigValue<Boolean> SLEEPWALKING = BUILDER.bool("sleepwalking", true)
+            .comment("Whether a sleepless player can wake in the morning a few blocks from their bed. A closed room keeps them in it.").build();
+    public static final ConfigValue<Integer> SLEEPWALK_CHANCE = BUILDER.intValue("sleepwalkChance", 25)
+            .range(0, 100).slider().comment("Percent chance a sleepless player sleepwalks, in a room that isn't closed.").enabledWhen(SLEEPWALKING).build();
+    public static final ConfigValue<Boolean> DREAM_JOURNAL = BUILDER.bool("dreamJournal", true)
+            .comment("Whether each sleep effect a player wakes with is written into their dream journal, a page of the Insomniac's Handbook.").build();
+    public static final ConfigValue<Boolean> LUCID_DREAMS = BUILDER.bool("lucidDreams", true)
+            .comment("Whether a great night (90 or more, as it looks on lying down) can turn into a lucid dream: the player drifts through a pale dream "
+                    + "of their room for a few seconds, and wakes with a stronger sleep effect.").build();
+    public static final ConfigValue<Integer> LUCID_CHANCE = BUILDER.intValue("lucidChance", 20)
+            .range(0, 100).slider().comment("Percent chance of a lucid dream on a great night.").enabledWhen(LUCID_DREAMS).build();
+    public static final ConfigValue<Boolean> SHARED_NIGHTMARES = BUILDER.bool("sharedNightmares", true)
+            .comment("Whether a night terror is shared by every player asleep within three blocks, and whoever leaves their bed first shakes "
+                    + "the others awake, cutting it short.").enabledWhen(NIGHT_TERRORS).build();
     public static final ConfigValue<Boolean> WELL_RESTED = BUILDER.bool("wellRested", true)
             .comment("Whether sleeping through the night in a closed, lit room (doors shut, no dark corners) leaves the player well rested.").build();
     public static final ConfigValue<Boolean> BED_CHECK = BUILDER.bool("bedCheck", true)

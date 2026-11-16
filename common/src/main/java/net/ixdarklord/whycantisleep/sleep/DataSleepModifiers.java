@@ -156,10 +156,12 @@ public final class DataSleepModifiers extends SimpleJsonResourceReloadListener<J
                               Optional<Range> soothing, Optional<Range> unsettling, Optional<Boolean> calmMusic, Optional<Boolean> creepyMusic,
                               Optional<Boolean> loudMusic, Optional<List<SleepTrouble.Level>> trouble, Optional<Boolean> nightmare,
                               Optional<List<WakeReason>> reason, Optional<ResourceKey<Level>> dimension, Optional<String> biome,
-                              Optional<Weather> weather, Optional<NearBlocks> nearBlocks, Optional<Range> guards) {
+                              Optional<Weather> weather, Optional<NearBlocks> nearBlocks, Optional<Range> guards, Optional<Boolean> nightlight,
+                              Optional<Boolean> napped) {
         private static final Conditions ALWAYS = new Conditions(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
                 Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+                Optional.empty());
         // Sixteen fields is as many as one codec group takes: the rest are read beside them.
         private static final MapCodec<Conditions> FIRST = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 Codec.BOOL.optionalFieldOf("enclosed").forGetter(Conditions::enclosed),
@@ -180,13 +182,24 @@ public final class DataSleepModifiers extends SimpleJsonResourceReloadListener<J
                 NearBlocks.CODEC.optionalFieldOf("near_blocks").forGetter(Conditions::nearBlocks)
         ).apply(instance, (enclosed, lit, pillowLight, monsters, soothing, unsettling, calmMusic, creepyMusic, loudMusic, trouble, nightmare, reason,
                 dimension, biome, weather, nearBlocks) -> new Conditions(enclosed, lit, pillowLight, monsters, soothing, unsettling, calmMusic,
-                creepyMusic, loudMusic, trouble, nightmare, reason, dimension, biome, weather, nearBlocks, Optional.empty())));
-        private static final Codec<Conditions> CODEC = Codec.mapPair(FIRST, Range.CODEC.optionalFieldOf("guards")).xmap(
-                pair -> pair.getFirst().withGuards(pair.getSecond()), conditions -> Pair.of(conditions, conditions.guards())).codec();
+                creepyMusic, loudMusic, trouble, nightmare, reason, dimension, biome, weather, nearBlocks, Optional.empty(), Optional.empty(), Optional.empty())));
+        private static final MapCodec<Later> SECOND = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                Range.CODEC.optionalFieldOf("guards").forGetter(Later::guards),
+                Codec.BOOL.optionalFieldOf("nightlight").forGetter(Later::nightlight),
+                Codec.BOOL.optionalFieldOf("napped").forGetter(Later::napped)
+        ).apply(instance, Later::new));
+        private static final Codec<Conditions> CODEC = Codec.mapPair(FIRST, SECOND).xmap(
+                pair -> pair.getFirst().with(pair.getSecond()), conditions -> Pair.of(conditions, new Later(conditions.guards(), conditions.nightlight(),
+                        conditions.napped()))).codec();
 
-        private Conditions withGuards(Optional<Range> guards) {
+        private Conditions with(Later later) {
             return new Conditions(this.enclosed, this.lit, this.pillowLight, this.monsters, this.soothing, this.unsettling, this.calmMusic, this.creepyMusic,
-                    this.loudMusic, this.trouble, this.nightmare, this.reason, this.dimension, this.biome, this.weather, this.nearBlocks, guards);
+                    this.loudMusic, this.trouble, this.nightmare, this.reason, this.dimension, this.biome, this.weather, this.nearBlocks, later.guards(),
+                    later.nightlight(), later.napped());
+        }
+
+        // The conditions added after the first sixteen, read beside them.
+        private record Later(Optional<Range> guards, Optional<Boolean> nightlight, Optional<Boolean> napped) {
         }
 
         private boolean test(SleepContext context) {
@@ -196,6 +209,8 @@ public final class DataSleepModifiers extends SimpleJsonResourceReloadListener<J
             if (this.pillowLight.isPresent() && !this.pillowLight.get().test(context.pillowLight())) return false;
             if (this.monsters.isPresent() && !this.monsters.get().test(context.monsters())) return false;
             if (this.guards.isPresent() && !this.guards.get().test(context.guards())) return false;
+            if (this.nightlight.isPresent() && this.nightlight.get() != context.nightlight()) return false;
+            if (this.napped.isPresent() && this.napped.get() != context.napped()) return false;
             if (this.soothing.isPresent() && !this.soothing.get().test(context.soothing())) return false;
             if (this.unsettling.isPresent() && !this.unsettling.get().test(context.unsettling())) return false;
             if (this.calmMusic.isPresent() && this.calmMusic.get() != context.calmMusic()) return false;

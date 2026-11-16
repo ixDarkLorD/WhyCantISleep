@@ -33,6 +33,10 @@ public record SleepQuality(int score, List<Factor> factors) {
     public static final Identifier MONSTERS = WhyCantISleep.id("monsters");
     /** Night guards about the bed: iron golems near it, the sleeper's own wolves and cats sitting by it. */
     public static final Identifier NIGHT_GUARD = WhyCantISleep.id("night_guard");
+    /** A soft light near the bed, short of too bright at the pillow. */
+    public static final Identifier NIGHTLIGHT = WhyCantISleep.id("nightlight");
+    /** A nap in the day since the last night. */
+    public static final Identifier DAYTIME_NAP = WhyCantISleep.id("daytime_nap");
     /** Calm music from a jukebox near the bed. */
     public static final Identifier CALM_MUSIC = WhyCantISleep.id("calm_music");
     /** Creepy music from a jukebox near the bed ({@code #whycantisleep:creepy} songs). */

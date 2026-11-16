@@ -1,6 +1,7 @@
 package net.ixdarklord.whycantisleep.mixin;
 
 import com.mojang.datafixers.util.Either;
+import net.ixdarklord.whycantisleep.sleep.Naps;
 import net.ixdarklord.whycantisleep.sleep.NightGuards;
 import net.ixdarklord.whycantisleep.sleep.SleepChecks;
 import net.ixdarklord.whycantisleep.sleep.SleepNights;
@@ -38,9 +39,18 @@ public abstract class ServerPlayerMixin {
         SleepNights.beforeSleep((ServerPlayer) (Object) this);
     }
 
-    @Inject(method = "startSleepInBed", at = @At("RETURN"))
+    // Cancellable so a nap can stand in for the game's daytime refusal.
+    @Inject(method = "startSleepInBed", at = @At("RETURN"), cancellable = true)
     private void whycantisleep$onSleepResult(BlockPos pos, CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir) {
         ServerPlayer player = (ServerPlayer) (Object) this;
+        // Turned away for it being day, a tired player naps instead (Naps): lying down, but no night begins.
+        Player.BedSleepingProblem refused = cir.getReturnValue().left().orElse(null);
+        Either<Player.BedSleepingProblem, Unit> nap = refused == null ? null : Naps.tryNap(player, pos, refused);
+        if (nap != null) {
+            cir.setReturnValue(nap);
+            nap.ifLeft(problem -> SleepServer.onSleepFailed(player, pos, problem));
+            return;
+        }
         cir.getReturnValue().ifRight(unit -> SleepServer.onLayDown(player, pos)).ifLeft(problem -> SleepServer.onSleepFailed(player, pos, problem));
     }
 
@@ -61,6 +71,7 @@ public abstract class ServerPlayerMixin {
     @Inject(method = "stopSleepInBed", at = @At("HEAD"))
     private void whycantisleep$onWake(boolean forcefulWakeUp, boolean updateLevelList, CallbackInfo ci) {
         ServerPlayer player = (ServerPlayer) (Object) this;
+        Naps.onWake(player);
         if (player.isSleeping()) SleepNights.onWake(player, forcefulWakeUp);
     }
 }

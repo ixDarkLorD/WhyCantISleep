@@ -92,7 +92,11 @@ public record SleepNotice(Kind kind, Component title, @Nullable Component hint, 
         // How a night in a bed would go, before lying down (the card shows the very bed).
         BED_CHECK(HudStyle.AQUA, () -> Items.RED_BED),
         // Night falling on a player who hasn't slept in a day or more.
-        REMINDER(HudStyle.GOLD, () -> Items.CLOCK);
+        REMINDER(HudStyle.GOLD, () -> Items.CLOCK),
+        // A nap in the day, slept out or cut short.
+        NAP(HudStyle.AQUA, () -> Items.WHITE_BED),
+        // Waking somewhere other than the bed.
+        SLEEPWALKED(HudStyle.LIGHT_PURPLE, () -> Items.LEATHER_BOOTS);
 
         private final int color;
         private final Supplier<Item> item;

@@ -151,7 +151,7 @@ public final class BedCheck {
             for (SleepQuality.Factor factor : quality.factors()) lines.add(new WokePayload.Line(factor.label(), factor.points()));
         }
         WCISNetwork.sendToPlayer(player, new BedCheckPayload(head, forecast, score, lines, spots ? dark : List.of(), spots, room.enclosed(),
-                forecast ? SleepNights.terrorChance(player) : 0));
+                forecast ? SleepNights.terrorChance(player, room) : 0));
     }
 
     private static final class Watch {

@@ -15,6 +15,16 @@
       "title": "guide.whycantisleep.guide.entry.effects.terrors.page3.title",
       "anchor": "center",
       "text": "guide.whycantisleep.guide.entry.effects.terrors.page3.text"
+    },
+    {
+      "type": "spotlight",
+      "item": "minecraft:lantern",
+      "title": "guide.whycantisleep.guide.entry.effects.terrors.page4.title",
+      "text": "guide.whycantisleep.guide.entry.effects.terrors.page4.text"
+    },
+    {
+      "title": "guide.whycantisleep.guide.entry.effects.terrors.page5.title",
+      "text": "guide.whycantisleep.guide.entry.effects.terrors.page5.text"
     }
   ]
 }

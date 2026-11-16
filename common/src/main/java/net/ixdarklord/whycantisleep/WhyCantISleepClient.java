@@ -8,12 +8,14 @@ import net.ixdarklord.whycantisleep.client.Blockers;
 import net.ixdarklord.whycantisleep.client.DarkSpots;
 import net.ixdarklord.whycantisleep.client.Eyelids;
 import net.ixdarklord.whycantisleep.client.GuideBookDecor;
+import net.ixdarklord.whycantisleep.client.GuideBookDreams;
 import net.ixdarklord.whycantisleep.client.GuideBookMusic;
 import net.ixdarklord.whycantisleep.client.HideCooldown;
 import net.ixdarklord.whycantisleep.client.HidingAcoustics;
 import net.ixdarklord.whycantisleep.client.HidingClient;
 import net.ixdarklord.whycantisleep.client.HidingMinigame;
 import net.ixdarklord.whycantisleep.client.HidingVoices;
+import net.ixdarklord.whycantisleep.client.LucidDreamClient;
 import net.ixdarklord.whycantisleep.client.NightTerrorClient;
 import net.ixdarklord.whycantisleep.client.SleepClient;
 import net.ixdarklord.whycantisleep.client.SleepDebtMoon;
@@ -59,8 +61,10 @@ public final class WhyCantISleepClient implements ClientModConstructor {
         DarkSpots.init();
         SleepTooltip.init();
         NightTerrorClient.init();
+        LucidDreamClient.init();
         GuideBookMusic.init();
         GuideBookDecor.init();
+        GuideBookDreams.init();
         // Last, so the minigame draws over everything else on the HUD.
         HidingMinigame.init();
     }

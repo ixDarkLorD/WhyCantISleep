@@ -14,6 +14,27 @@
         "effects/bad",
         "effects/odd"
       ]
+    },
+    {
+      "title": "guide.whycantisleep.guide.entry.effects.waking.page3.title",
+      "text": {
+        "translate": "guide.whycantisleep.guide.entry.effects.waking.page3.text"
+      },
+      "overflow": {
+        "mode": "flip",
+        "height": "fill"
+      },
+      "observe": {
+        "source": "whycantisleep:dream_journal",
+        "row": "{$show}",
+        "separator": "\n"
+      }
+    },
+    {
+      "type": "spotlight",
+      "item": "minecraft:amethyst_shard",
+      "title": "guide.whycantisleep.guide.entry.effects.waking.page4.title",
+      "text": "guide.whycantisleep.guide.entry.effects.waking.page4.text"
     }
   ]
 }

@@ -1,0 +1,7 @@
+{
+  "label": "gui.whycantisleep.quality.nightlight",
+  "points": 5,
+  "when": {
+    "nightlight": true
+  }
+}

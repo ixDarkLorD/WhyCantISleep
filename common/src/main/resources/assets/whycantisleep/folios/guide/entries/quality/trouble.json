@@ -19,6 +19,18 @@
       "item": "minecraft:clock",
       "title": "guide.whycantisleep.guide.entry.quality.trouble.page3.title",
       "text": "guide.whycantisleep.guide.entry.quality.trouble.page3.text"
+    },
+    {
+      "type": "spotlight",
+      "item": "minecraft:white_bed",
+      "title": "guide.whycantisleep.guide.entry.quality.trouble.page4.title",
+      "text": "guide.whycantisleep.guide.entry.quality.trouble.page4.text"
+    },
+    {
+      "type": "spotlight",
+      "item": "minecraft:leather_boots",
+      "title": "guide.whycantisleep.guide.entry.quality.trouble.page5.title",
+      "text": "guide.whycantisleep.guide.entry.quality.trouble.page5.text"
     }
   ]
 }

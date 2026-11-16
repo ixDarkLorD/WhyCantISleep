@@ -1,0 +1,7 @@
+{
+  "label": "gui.whycantisleep.quality.daytime_nap",
+  "points": -10,
+  "when": {
+    "napped": true
+  }
+}

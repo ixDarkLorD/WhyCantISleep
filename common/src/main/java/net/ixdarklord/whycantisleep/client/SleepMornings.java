@@ -57,24 +57,31 @@ public final class SleepMornings {
         };
     }
 
-    // Under the title: that they woke well rested, and what by the bed they came to know, or that something there
-    // did something, without a Dreamcatcher to tell them what.
+    // Under the title: that the night was a lucid dream, that they woke well rested, that the dream is new to their
+    // journal, and what by the bed they came to know, or that something there did something, without a Dreamcatcher
+    // to tell them what.
     private static @Nullable Component morningHint(WokePayload payload) {
-        Component rested = payload.wellRested() ? Component.translatable("gui.whycantisleep.woke.rested.hint") : null;
-        Component found;
+        List<Component> parts = new ArrayList<>();
+        if (payload.lucid()) parts.add(Component.translatable("gui.whycantisleep.woke.lucid.hint"));
+        if (payload.wellRested()) parts.add(Component.translatable("gui.whycantisleep.woke.rested.hint"));
+        if (payload.newInJournal()) parts.add(Component.translatable("gui.whycantisleep.woke.journal.hint"));
         if (!payload.discovered().isEmpty()) {
             MutableComponent names = Component.empty();
             for (int i = 0; i < payload.discovered().size(); i++) {
                 if (i > 0) names.append(", ");
                 names.append(new ItemStack(payload.discovered().get(i)).getHoverName().copy().withColor(HudStyle.SILVER));
             }
-            found = Component.translatable("gui.whycantisleep.woke.discovered", names);
+            parts.add(Component.translatable("gui.whycantisleep.woke.discovered", names));
         } else if (!payload.noticed().isEmpty()) {
-            found = Component.translatable("gui.whycantisleep.woke.noticed");
-        } else {
-            return rested;
+            parts.add(Component.translatable("gui.whycantisleep.woke.noticed"));
         }
-        return rested == null ? found : Component.empty().append(rested).append(" ").append(found);
+        if (parts.isEmpty()) return null;
+        MutableComponent hint = Component.empty();
+        for (int i = 0; i < parts.size(); i++) {
+            if (i > 0) hint.append(" ");
+            hint.append(parts.get(i));
+        }
+        return hint;
     }
 
     // The score, and what mattered most to it, the biggest first.

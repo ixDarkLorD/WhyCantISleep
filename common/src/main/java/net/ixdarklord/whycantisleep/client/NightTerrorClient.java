@@ -16,6 +16,7 @@ import net.ixdarklord.coolcatcore.api.event.v2.client.ClientGuiEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientPlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.client.ClientTickEvents;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
+import net.ixdarklord.whycantisleep.network.ShakenAwakePayload;
 import net.ixdarklord.whycantisleep.network.TerrorPayload;
 import net.ixdarklord.whycantisleep.sound.WCISSounds;
 import net.minecraft.client.Camera;
@@ -305,6 +306,14 @@ public final class NightTerrorClient {
         wokeAt = tick;
         play(minecraft, WCISSounds.TERROR_WAKE, 0.9F, 1.0F);
         if (openEyes) Eyelids.play(24.0F, Eyelids.Mood.STILL, 0.0F, 0.0F, 0.2F, 0.55F, 0.3F, 0.85F, 0.5F, 0.25F, 0.6F, 0.4F, 1.0F, 0.0F);
+    }
+
+    /** Shaken awake by someone sharing the terror: it jumps to its jolt, and ends. */
+    public static void shake(ShakenAwakePayload payload) {
+        if (!running()) return;
+        long jumped = tick - (joltTick() - 1);
+        if (jumped < since) return;
+        since = jumped;
     }
 
     private static void stop() {

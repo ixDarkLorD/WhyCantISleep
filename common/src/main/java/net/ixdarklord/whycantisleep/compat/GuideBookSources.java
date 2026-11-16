@@ -44,11 +44,12 @@ public final class GuideBookSources {
             Map.entry(SleepQuality.SOOTHING, "minecraft:poppy"), Map.entry(SleepQuality.UNSETTLING, "minecraft:skeleton_skull"),
             Map.entry(SleepQuality.RESTLESS, "minecraft:clock"), Map.entry(SleepQuality.SLEEPLESS, "minecraft:phantom_membrane"),
             Map.entry(SleepQuality.NIGHTMARE, "minecraft:wither_rose"), Map.entry(SleepQuality.WOKE_EARLY, "minecraft:bell"),
-            Map.entry(SleepQuality.ROUTINE, "minecraft:red_bed"), Map.entry(SleepQuality.NIGHT_GUARD, "minecraft:bone"));
+            Map.entry(SleepQuality.ROUTINE, "minecraft:red_bed"), Map.entry(SleepQuality.NIGHT_GUARD, "minecraft:bone"),
+            Map.entry(SleepQuality.NIGHTLIGHT, "minecraft:candle"), Map.entry(SleepQuality.DAYTIME_NAP, "minecraft:white_bed"));
     private static final Set<Identifier> HINTED = Set.of(SleepQuality.ENCLOSED, SleepQuality.EXPOSED, SleepQuality.DARK_CORNERS,
             SleepQuality.TOO_BRIGHT, SleepQuality.MONSTERS, SleepQuality.CALM_MUSIC, SleepQuality.CREEPY_MUSIC, SleepQuality.LOUD_MUSIC,
             SleepQuality.SOOTHING, SleepQuality.UNSETTLING, SleepQuality.RESTLESS, SleepQuality.SLEEPLESS, SleepQuality.NIGHTMARE,
-            SleepQuality.WOKE_EARLY, SleepQuality.ROUTINE, SleepQuality.NIGHT_GUARD);
+            SleepQuality.WOKE_EARLY, SleepQuality.ROUTINE, SleepQuality.NIGHT_GUARD, SleepQuality.NIGHTLIGHT, SleepQuality.DAYTIME_NAP);
     // The game's rarity and buff colors are made for dark tooltips: these are mid tones, read on the book's light pages
     // and its dark mode alike (common in the page's own color).
     private static final int[] RARITY = {-1, 0xC9A227, 0x2BA3B5, 0xB05CC8, 0xE07B1F};

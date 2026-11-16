@@ -4,6 +4,8 @@ import net.ixdarklord.coolcatcore.api.network.Network;
 import net.ixdarklord.whycantisleep.client.BedCheckClient;
 import net.ixdarklord.whycantisleep.client.HideCooldown;
 import net.ixdarklord.whycantisleep.client.HidingClient;
+import net.ixdarklord.whycantisleep.client.LucidDreamClient;
+import net.ixdarklord.whycantisleep.client.NightNotices;
 import net.ixdarklord.whycantisleep.client.NightTerrorClient;
 import net.ixdarklord.whycantisleep.client.SleepClient;
 import net.ixdarklord.whycantisleep.client.SleepMornings;
@@ -37,6 +39,9 @@ public final class WCISNetwork {
         Network.registerClientbound(HideTimePayload.class, (payload, context) -> context.queue(() -> HidingClient.on(payload)));
         Network.registerClientbound(BedCheckPayload.class, (payload, context) -> context.queue(() -> BedCheckClient.onCheck(payload)));
         Network.registerClientbound(ReminderPayload.class, (payload, context) -> context.queue(() -> SleepRemindersClient.on(payload)));
+        Network.registerClientbound(NightNoticePayload.class, (payload, context) -> context.queue(() -> NightNotices.on(payload)));
+        Network.registerClientbound(LucidPayload.class, (payload, context) -> context.queue(() -> LucidDreamClient.on(payload)));
+        Network.registerClientbound(ShakenAwakePayload.class, (payload, context) -> context.queue(() -> NightTerrorClient.shake(payload)));
         Network.registerServerbound(BedCheckRequestPayload.class, (payload, context) -> context.queue(() -> {
             if (context.getPlayer() instanceof ServerPlayer player) BedCheck.onRequest(player, payload);
         }));

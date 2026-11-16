@@ -38,6 +38,8 @@ public final class DecorDiscovery {
     }
 
     public static void register() {
+        // The dream journal's attachment is in the same registry: it is built before the registry is registered.
+        DreamJournal.touch();
         ATTACHMENTS.register();
     }
 

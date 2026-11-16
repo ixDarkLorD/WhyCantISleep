@@ -16,6 +16,8 @@ import net.ixdarklord.whycantisleep.api.SleepQuality;
 import net.ixdarklord.whycantisleep.api.SleepTrouble;
 import net.ixdarklord.whycantisleep.api.WakeReason;
 import net.ixdarklord.whycantisleep.config.WCISServerConfig;
+import net.ixdarklord.whycantisleep.network.LucidPayload;
+import net.ixdarklord.whycantisleep.network.ShakenAwakePayload;
 import net.ixdarklord.whycantisleep.network.TerrorPayload;
 import net.ixdarklord.whycantisleep.network.WCISNetwork;
 import net.ixdarklord.whycantisleep.network.WokePayload;
@@ -82,6 +84,14 @@ public final class SleepNights {
     // A player marked for a nightmare the next time they lie down (/whycantisleep nightmare on someone awake): kept as
     // a tag on them, so it lasts through leaving and coming back.
     private static final String NIGHTMARE_MARK = "whycantisleep.nightmare";
+    private static final String LUCID_MARK = "whycantisleep.lucid";
+    // How near another sleeper's bed must be to share a night terror, and how long one shaken awake still takes.
+    private static final double SHARE_RANGE = 3.0;
+    private static final int SHAKE_TICKS = 20;
+    // A night has to look this good on lying down to turn lucid, and a lucid dream's sleep effect lasts this many times
+    // as long, a level stronger.
+    private static final int LUCID_FROM = 90;
+    private static final int LUCID_DURATION = 2;
 
     private SleepNights() {
     }
@@ -102,7 +112,12 @@ public final class SleepNights {
                 .then(Commands.literal("nightmare").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                         .executes(command -> nightmare(command.getSource(), List.of(command.getSource().getPlayerOrException())))
                         .then(Commands.argument("targets", EntityArgument.players())
-                                .executes(command -> nightmare(command.getSource(), EntityArgument.getPlayers(command, "targets")))))));
+                                .executes(command -> nightmare(command.getSource(), EntityArgument.getPlayers(command, "targets")))))
+                // /whycantisleep lucid [players]: a lucid dream, as nightmare gives a terror.
+                .then(Commands.literal("lucid").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                        .executes(command -> lucid(command.getSource(), List.of(command.getSource().getPlayerOrException())))
+                        .then(Commands.argument("targets", EntityArgument.players())
+                                .executes(command -> lucid(command.getSource(), EntityArgument.getPlayers(command, "targets")))))));
         LivingEvents.DAMAGE.register((entity, source, amount) -> {
             if (entity instanceof ServerPlayer player && player.isSleeping()) HURT_AT.put(player.getUUID(), player.level().getGameTime());
             return EventResult.PASS;
@@ -140,8 +155,20 @@ public final class SleepNights {
         Bedroom.Music music = Bedroom.music(level, head);
         SleepContext context = new SleepContext(player, head, WakeReason.MORNING, FULL_NIGHT, room.enclosed(), room.lit(), room.pillowLight(),
                 room.decor().soothing(), room.decor().unsettling(), monsters, music == Bedroom.Music.CALM, music == Bedroom.Music.CREEPY,
-                music == Bedroom.Music.LOUD, SleepTroubles.get(player).level(), false, NightGuards.count(level, player, head));
+                music == Bedroom.Music.LOUD, SleepTroubles.get(player).level(), false, NightGuards.count(level, player, head), nightlight(room),
+                Naps.napped(player));
         return SleepQuality.of(SleepModifiers.score(context));
+    }
+
+    // Whether a room has a nightlight that counts: the server's option, and the room's own look.
+    private static boolean nightlight(Bedroom room) {
+        return WCISServerConfig.NIGHTLIGHTS.get() && room.nightlight();
+    }
+
+    /** The chance of a night terror on lying down in a room, in percent: halved by a nightlight. */
+    public static int terrorChance(ServerPlayer player, Bedroom room) {
+        int chance = terrorChance(player);
+        return chance >= 100 || !nightlight(room) ? chance : chance / 2;
     }
 
     /** The chance of a night terror on lying down, in percent, for the trouble a player is in now (0 when none could come). */
@@ -171,12 +198,21 @@ public final class SleepNights {
         boolean rolled = false;
         if (!marked && WCISServerConfig.NIGHT_TERRORS.get() && trouble.level().atLeast(SleepTrouble.Level.RESTLESS)) {
             int chance = WCISServerConfig.TERROR_CHANCE.get() * (trouble.level() == SleepTrouble.Level.SLEEPLESS ? 2 : 1);
+            // A soft light by the bed keeps half of them away.
+            if (nightlight(night.room)) chance /= 2;
             rolled = level.getRandom().nextInt(100) < chance;
         }
         if (marked || rolled) {
             SleepEvents.NightTerror event = new SleepEvents.NightTerror(player, trouble);
             SleepEvents.NIGHT_TERROR.invoke(event);
             if (!event.isCancelled()) startTerror(player, night, level);
+        }
+        // A great night, with no terror in it, can turn lucid: marked for one, or at the server's chance.
+        boolean lucidMarked = player.entityTags().contains(LUCID_MARK);
+        if (lucidMarked) player.removeTag(LUCID_MARK);
+        if (!night.terror && (lucidMarked || WCISServerConfig.LUCID_DREAMS.get() && nightScore(player, night) >= LUCID_FROM
+                && level.getRandom().nextInt(100) < WCISServerConfig.LUCID_CHANCE.get())) {
+            startLucid(player, night, level);
         }
     }
 
@@ -199,19 +235,81 @@ public final class SleepNights {
         else WCISNetwork.sendToPlayer(player, new TerrorPayload(true, 1.0F, false));
     }
 
+    /** Whether the night waits for a player before it passes: a night terror or a lucid dream is under way. */
+    public static boolean holdsTheNight(ServerPlayer player) {
+        Night night = NIGHTS.get(player.getUUID());
+        return inTerror(player) || night != null && player.level().getGameTime() < night.lucidUntil;
+    }
+
+    /** Gives a sleeping player a lucid dream now, or marks them for one the next time they lie down. */
+    public static void markLucid(ServerPlayer player) {
+        Night night = NIGHTS.get(player.getUUID());
+        if (night != null && player.isSleeping() && !night.terror) startLucid(player, night, player.level());
+        else player.addTag(LUCID_MARK);
+    }
+
+    private static void startLucid(ServerPlayer player, Night night, ServerLevel level) {
+        night.lucid = true;
+        night.lucidUntil = level.getGameTime() + LucidPayload.TICKS;
+        WCISNetwork.sendToPlayer(player, new LucidPayload(LucidPayload.TICKS));
+    }
+
+    private static int lucid(CommandSourceStack source, Collection<ServerPlayer> targets) {
+        for (ServerPlayer target : targets) markLucid(target);
+        if (targets.size() == 1) {
+            ServerPlayer target = targets.iterator().next();
+            source.sendSuccess(() -> Component.translatable(target.isSleeping() ? "commands.whycantisleep.lucid.asleep" : "commands.whycantisleep.lucid.awake",
+                    target.getDisplayName()), true);
+        } else {
+            source.sendSuccess(() -> Component.translatable("commands.whycantisleep.lucid.many", targets.size()), true);
+        }
+        return targets.size();
+    }
+
     /** Whether a player is in the middle of a night terror: the night waits for it before it passes. */
     public static boolean inTerror(ServerPlayer player) {
         Night night = NIGHTS.get(player.getUUID());
         return night != null && player.level().getGameTime() < night.terrorUntil;
     }
 
-    // A night terror, as bad as the night was going to be.
+    // A night terror, as bad as the night was going to be; shared, at the same pitch, with everyone asleep within
+    // SHARE_RANGE of the bed who isn't in one already (the server's sharedNightmares).
     private static void startTerror(ServerPlayer player, Night night, ServerLevel level) {
         float intensity = terrorIntensity(player, night);
+        terror(player, night, level, intensity);
+        if (!WCISServerConfig.SHARED_NIGHTMARES.get()) return;
+        Set<UUID> sharing = new HashSet<>();
+        sharing.add(player.getUUID());
+        for (ServerPlayer other : level.players()) {
+            Night theirs = NIGHTS.get(other.getUUID());
+            if (other == player || theirs == null || theirs.terror || !other.isSleeping() || !theirs.bed.closerThan(night.bed, SHARE_RANGE)) continue;
+            terror(other, theirs, level, intensity);
+            sharing.add(other.getUUID());
+        }
+        if (sharing.size() < 2) return;
+        for (UUID id : sharing) {
+            Night shared = NIGHTS.get(id);
+            if (shared != null) shared.sharedWith = sharing;
+        }
+    }
+
+    private static void terror(ServerPlayer player, Night night, ServerLevel level, float intensity) {
         night.terror = true;
         night.terrorIntensity = intensity;
         night.terrorUntil = level.getGameTime() + TerrorPayload.ticks(intensity);
         WCISNetwork.sendToPlayer(player, new TerrorPayload(true, intensity, true));
+    }
+
+    // Someone sharing a night terror is out of bed while it runs: they shake the others awake, the terror jumping to
+    // its jolt, and the night waits only for that.
+    private static void shakeOthers(ServerPlayer player, Night night, ServerLevel level) {
+        if (night.sharedWith.isEmpty() || level.getGameTime() >= night.terrorUntil) return;
+        for (UUID id : night.sharedWith) {
+            Night other = NIGHTS.get(id);
+            if (id.equals(player.getUUID()) || other == null || level.getGameTime() >= other.terrorUntil) continue;
+            other.terrorUntil = Math.min(other.terrorUntil, level.getGameTime() + SHAKE_TICKS);
+            if (level.getServer().getPlayerList().getPlayer(id) instanceof ServerPlayer shaken) WCISNetwork.sendToPlayer(shaken, new ShakenAwakePayload(true));
+        }
     }
 
     /**
@@ -219,13 +317,19 @@ public final class SleepNights {
      * known as they lie down), the worse; worse again sleepless. Never quite mild: a terror is a terror.
      */
     private static float terrorIntensity(ServerPlayer player, Night night) {
-        Bedroom room = night.room;
-        SleepContext context = new SleepContext(player, night.bed, WakeReason.MORNING, FULL_NIGHT, room.enclosed(), room.lit(), room.pillowLight(),
-                room.decor().soothing(), room.decor().unsettling(), night.monsters, night.calm, night.creepy, night.loud, night.trouble.level(), false, night.guards);
-        int score = SleepQuality.of(SleepModifiers.score(context)).score();
+        int score = nightScore(player, night);
         float sleepless = night.trouble.level() == SleepTrouble.Level.SLEEPLESS ? TERROR_SLEEPLESS : 0.0F;
         float days = harsh() ? Math.min(TERROR_DAYS_MOST, Math.max(0, daysAwake(night) - 1) * TERROR_PER_DAY) : 0.0F;
         return Mth.clamp(1.0F - score / 100.0F + sleepless + days, TERROR_MILDEST, 1.0F);
+    }
+
+    // How the night was going to score, slept through, from what is known as they lie down.
+    private static int nightScore(ServerPlayer player, Night night) {
+        Bedroom room = night.room;
+        SleepContext context = new SleepContext(player, night.bed, WakeReason.MORNING, FULL_NIGHT, room.enclosed(), room.lit(), room.pillowLight(),
+                room.decor().soothing(), room.decor().unsettling(), night.monsters, night.calm, night.creepy, night.loud, night.trouble.level(), false, night.guards, nightlight(room),
+                Naps.napped(player));
+        return SleepQuality.of(SleepModifiers.score(context)).score();
     }
 
     private static boolean harsh() {
@@ -294,13 +398,16 @@ public final class SleepNights {
         if (night == null) return;
         ServerLevel level = player.level();
         WakeReason reason = reason(player, level, night, morning, forceful);
+        shakeOthers(player, night, level);
         int slept = (int) (level.getGameTime() - night.since);
 
         Bedroom room = night.room;
         SleepContext context = new SleepContext(player, night.bed, reason, slept, room.enclosed(), room.lit(), room.pillowLight(), room.decor().soothing(),
                 room.decor().unsettling(), night.monsters, night.calm, night.creepy, night.loud, night.trouble.level(), night.terror,
-                Math.max(night.guards, NightGuards.count(level, player, night.bed)));
+                Math.max(night.guards, NightGuards.count(level, player, night.bed)), nightlight(room), Naps.napped(player));
         List<SleepQuality.Factor> factors = SleepModifiers.score(context);
+        // The nap since the last night counts against this one only.
+        Naps.slept(player);
 
         SleepEvents.QualityScoring scoring = new SleepEvents.QualityScoring(player, reason, factors);
         SleepEvents.SCORE_QUALITY.invoke(scoring);
@@ -311,10 +418,14 @@ public final class SleepNights {
                 && quality.factors().stream().anyMatch(factor -> factor.id().equals(SleepQuality.ROUTINE) && factor.points() > 0);
 
         if (night.terror) shaken(player, night);
+        // Sleepless, in a room that lets them out, they may wake somewhere else.
+        if (reason == WakeReason.MORNING) Sleepwalking.onMorning(player, night.bed, night.trouble.level(), room.enclosed());
         if (wellRested) player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, RESTED_REGENERATION_TICKS, 0, false, true, true));
         if (night.terror) WCISNetwork.sendToPlayer(player, new TerrorPayload(false, 0.0F, false));
 
-        SleepEffect sleepEffect = reason.rested() ? sleepEffect(player, quality) : null;
+        // A lucid dream always leaves a good sleep effect, stronger and longer than any night's.
+        SleepEffect sleepEffect = !reason.rested() ? null : night.lucid ? lucidEffect(player, quality) : sleepEffect(player, quality);
+        boolean newInJournal = sleepEffect != null && DreamJournal.write(player, sleepEffect);
         SleepEvents.WOKE.invoke(new SleepEvents.Woke(player, reason, quality, slept, night.terror, wellRested, sleepEffect));
         if (WCISServerConfig.SLEEP_QUALITY.get()) {
             List<WokePayload.Line> lines = new ArrayList<>();
@@ -324,7 +435,8 @@ public final class SleepNights {
             // A night slept through near the things by the bed: noticed, or with a Dreamcatcher in hand, known.
             DecorDiscovery.Learned learned = reason == WakeReason.MORNING
                     ? DecorDiscovery.slept(player, SleepDecor.items(level, night.bed), BedTools.holdsDreamcatcher(player)) : DecorDiscovery.Learned.NOTHING;
-            WCISNetwork.sendToPlayer(player, new WokePayload(reason, quality.score(), lines, night.terror, wellRested, dream, learned.known(), learned.noticed()));
+            WCISNetwork.sendToPlayer(player, new WokePayload(reason, quality.score(), lines, night.terror, wellRested, dream, learned.known(), learned.noticed(),
+                    newInJournal, night.lucid));
         }
     }
 
@@ -338,6 +450,22 @@ public final class SleepNights {
         SleepEvents.SLEEP_EFFECT.invoke(event);
         if (event.isCancelled()) return null;
         event.effect().apply(player);
+        return event.effect();
+    }
+
+    // The sleep effect a lucid dream leaves: a good one, whatever the server's chance, a level stronger and lasting
+    // LUCID_DURATION times as long; unless a listener says otherwise.
+    private static @Nullable SleepEffect lucidEffect(ServerPlayer player, SleepQuality quality) {
+        if (!WCISServerConfig.SLEEP_EFFECTS.get()) return null;
+        SleepEffect drawn = SleepEffects.draw(SleepEffect.Kind.POSITIVE, quality.score(), player.getRandom());
+        if (drawn == null) return null;
+        SleepEvents.SleepEffectDrawn event = new SleepEvents.SleepEffectDrawn(player, quality, drawn);
+        SleepEvents.SLEEP_EFFECT.invoke(event);
+        if (event.isCancelled()) return null;
+        event.effect().apply(player);
+        for (SleepEffect.Effect one : event.effect().effects()) {
+            player.addEffect(new MobEffectInstance(one.effect(), one.duration() * LUCID_DURATION, one.amplifier() + 1));
+        }
         return event.effect();
     }
 
@@ -373,6 +501,11 @@ public final class SleepNights {
         private float terrorIntensity;
         // Until when a night terror runs (game time): the night waits for it.
         private long terrorUntil = Long.MIN_VALUE;
+        // Everyone sharing this night's terror (them included), or nobody.
+        private Set<UUID> sharedWith = Set.of();
+        // A lucid dream, and until when it runs: the night waits for it too.
+        private boolean lucid;
+        private long lucidUntil = Long.MIN_VALUE;
 
         private Night(BlockPos bed, long since, SleepTrouble trouble, Bedroom room) {
             this.bed = bed;

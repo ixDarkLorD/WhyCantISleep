@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.JukeboxSong;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -29,13 +30,19 @@ import java.util.List;
  * whether it is lit all through (no dark corner a monster could spawn in), how bright it is at the pillow, what is placed
  * round it that soothes or unsettles ({@link SleepDecor}), and what music plays near it.
  */
-public record Bedroom(boolean enclosed, boolean lit, int pillowLight, SleepDecor.Count decor) {
+public record Bedroom(boolean enclosed, boolean lit, int pillowLight, SleepDecor.Count decor, boolean nightlight) {
     /** Songs that keep a sleeper up: the eerie discs (11, 13, ward, 5, mellohi) and any a pack adds. */
     public static final TagKey<JukeboxSong> CREEPY = TagKey.create(Registries.JUKEBOX_SONG, WhyCantISleep.id("creepy"));
     /** Songs that lull a sleeper off. */
     public static final TagKey<JukeboxSong> CALM = TagKey.create(Registries.JUKEBOX_SONG, WhyCantISleep.id("calm"));
     /** Songs too loud and lively to sleep through (Pigstep, Otherside, Blocks, Creator). */
     public static final TagKey<JukeboxSong> LOUD = TagKey.create(Registries.JUKEBOX_SONG, WhyCantISleep.id("loud"));
+    /** Soft lights that make a nightlight by a bed: candles, lanterns, sea pickles. */
+    public static final TagKey<Block> NIGHTLIGHTS = TagKey.create(Registries.BLOCK, WhyCantISleep.id("nightlights"));
+    // How far round the bed a nightlight is looked for, and the light at the pillow from which it is too bright to
+    // count as one (the "Light in Your Eyes" modifier's own).
+    private static final int NIGHTLIGHT_RANGE = 3;
+    private static final int TOO_BRIGHT = 13;
     // A room is the air round the bed reached without passing walls or shut doors; one bigger than ROOM_LIMIT blocks,
     // or reaching further than ROOM_RADIUS, or under the open sky, isn't closed.
     private static final int ROOM_LIMIT = 600;
@@ -92,7 +99,17 @@ public record Bedroom(boolean enclosed, boolean lit, int pillowLight, SleepDecor
             dark.sort(Comparator.comparingDouble(pos -> pos.distSqr(head)));
             darkSpots.addAll(dark.subList(0, Math.min(DARK_SPOTS_MOST, dark.size())));
         }
-        return new Bedroom(enclosed, enclosed && lit, level.getBrightness(LightLayer.BLOCK, start), SleepDecor.count(level, head));
+        int pillowLight = level.getBrightness(LightLayer.BLOCK, start);
+        return new Bedroom(enclosed, enclosed && lit, pillowLight, SleepDecor.count(level, head), pillowLight < TOO_BRIGHT && nightlight(level, head));
+    }
+
+    // A lit soft light within NIGHTLIGHT_RANGE of the bed's head, a block down to two up.
+    private static boolean nightlight(ServerLevel level, BlockPos head) {
+        for (BlockPos pos : BlockPos.betweenClosed(head.offset(-NIGHTLIGHT_RANGE, -1, -NIGHTLIGHT_RANGE), head.offset(NIGHTLIGHT_RANGE, 2, NIGHTLIGHT_RANGE))) {
+            BlockState state = level.getBlockState(pos);
+            if (state.is(NIGHTLIGHTS) && state.getLightEmission() > 0) return true;
+        }
+        return false;
     }
 
     // Air, and what lets air through: anything without a shape to bump into, and doors, trapdoors and gates left open.

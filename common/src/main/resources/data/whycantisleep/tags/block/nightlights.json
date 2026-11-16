@@ -1,0 +1,12 @@
+{
+  "values": [
+    "#minecraft:candles",
+    "minecraft:lantern",
+    "minecraft:soul_lantern",
+    "minecraft:sea_pickle",
+    {
+      "id": "#minecraft:lanterns",
+      "required": false
+    }
+  ]
+}
