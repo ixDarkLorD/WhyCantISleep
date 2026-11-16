@@ -49,7 +49,7 @@ public final class WCISServerConfig {
             .range(0, 600).comment("Seconds a player waits between nudges.").build();
     static {
         BUILDER.pop();
-        BUILDER.push("hiding", "Hiding under beds and tables, in chests and closets, behind curtains, in hay, barrels and bookshelves.");
+        BUILDER.push("hiding", "Hiding under beds and tables, in chests and closets.");
     }
     public static final ConfigValue<Boolean> ALLOW_HIDING = BUILDER.bool("allowHiding", true)
             .comment("Whether players may hide (sneak and use a bed, table, double chest or closet door with empty hands), where nothing can see them.").build();
@@ -61,14 +61,6 @@ public final class WCISServerConfig {
             .comment("Whether players may hide in double chests.").enabledWhen(ALLOW_HIDING).build();
     public static final ConfigValue<Boolean> HIDE_IN_CLOSETS = BUILDER.bool("hideInClosets", true)
             .comment("Whether players may hide in closets: a door, or a double door, with a nook behind it walled in by blocks or trapdoors.").enabledWhen(ALLOW_HIDING).build();
-    public static final ConfigValue<Boolean> HIDE_BEHIND_CURTAINS = BUILDER.bool("hideBehindCurtains", true)
-            .comment("Whether players may hide behind curtains: a nook two high, walled in, its front hung with a banner from above or shut with wool.").enabledWhen(ALLOW_HIDING).build();
-    public static final ConfigValue<Boolean> HIDE_IN_HAY = BUILDER.bool("hideInHay", true)
-            .comment("Whether players may burrow into hay piles: a gap two long and one high under hay bales, walled along its sides.").enabledWhen(ALLOW_HIDING).build();
-    public static final ConfigValue<Boolean> HIDE_IN_BARRELS = BUILDER.bool("hideInBarrels", true)
-            .comment("Whether players may squeeze into barrel stacks: a gap two high between barrels, open at the front.").enabledWhen(ALLOW_HIDING).build();
-    public static final ConfigValue<Boolean> HIDE_IN_BOOKSHELVES = BUILDER.bool("hideInBookshelves", true)
-            .comment("Whether players may stand in bookshelf alcoves: a gap two high lined with bookshelves, open at the front.").enabledWhen(ALLOW_HIDING).build();
     public static final ConfigValue<Integer> HIDE_TIME = BUILDER.intValue("hideTime", 15)
             .range(3, 120).slider().comment("Seconds a player must stay hidden before the monsters after them give up and vanish.").build();
     public static final ConfigValue<Integer> HIDE_COOLDOWN = BUILDER.intValue("hideCooldown", 10)
