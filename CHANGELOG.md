@@ -4,12 +4,12 @@ This file is for listing all the changes to this project
 ## v0.4.0 Beta | Unreleased
 ### ✨ New Features
 - **Dream journal**: every sleep effect you wake with is written into your journal, a page of the Insomniac's Handbook listing all of them, the ones you've found by name and the rest hidden, with how many you've found. The morning card says when a dream is new to it. Server option `dreamJournal`.
-- **Lucid dreams**: now and then a great night (90 or more as you lie down) turns lucid. Your eyes open on a pale, glowing copy of your room, motes of light rising through it, and for a few seconds you can float about it: the walking keys move you where you look, jump to rise, sneak to sink, never through a wall or far from the bed. You wake with a good sleep effect a level stronger and lasting twice as long. Server options `lucidDreams` and `lucidChance` (20%); operators can give one with `/whycantisleep lucid`.
+- **Deep sleep**: now and then a great night (90 or more as you lie down) sinks into a deep sleep: your eyes fall shut at once, the world goes almost silent, and you hear your heart slow. You wake with a good sleep effect a level stronger and lasting twice as long, and the morning card says you slept like a log. Server options `deepSleep` and `deepSleepChance` (20%); operators can give one with `/whycantisleep deepsleep`.
 - **Shared nightmares**: a night terror is shared by everyone asleep within three blocks, the same demon and the same hands, and whoever gets out of bed first shakes the others awake, ending theirs at once. Server option `sharedNightmares`.
 - **Naps**: a day or more without sleep, a bed lets you nap in the day: a few seconds lying down, and you get up with half a day taken off your sleep debt. One nap between nights; the next night scores a little worse for it ("Daytime Nap", −10), and getting up early recovers nothing. Server option `naps`.
 - **Sleepwalking**: sleepless, you may wake in the morning a few blocks from your bed, often lower down, with a card saying you don't remember getting there. A closed room keeps you in it. Server options `sleepwalking` and `sleepwalkChance` (25%).
 - **Nightlights**: a soft light near the bed (a lit candle, a lantern or a sea pickle within three blocks, short of too bright at the pillow) keeps half the night terrors away and adds to the night's score ("Nightlight", +5). Server option `nightlights`.
-- The Insomniac's Handbook has pages on all of it: your dream journal and lucid dreams in Waking With an Effect, a nightlight and sharing a terror in Night Terrors, napping and sleepwalking in Sleep Trouble.
+- The Insomniac's Handbook has pages on all of it: your dream journal and deep sleep in Waking With an Effect, a nightlight and sharing a terror in Night Terrors, napping and sleepwalking in Sleep Trouble.
 
 ### 🛠️ Changes
 - Data pack sleep modifiers can test for a nightlight (`"nightlight": true`) and a nap since the last night (`"napped": true`).

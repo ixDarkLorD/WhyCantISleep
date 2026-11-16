@@ -64,9 +64,10 @@ public final class SleepEyes {
         if (minecraft.isPaused()) return;
         LocalPlayer player = minecraft.player;
         boolean sleeping = player != null && player.isSleeping() && !HidingClient.isLocalHiding();
-        // A night terror or a lucid dream has the eyes while it runs; once it is over they are shut, and sleep goes on
-        // from there.
-        if (NightTerrorClient.running() || LucidDreamClient.running()) {
+        // A night terror, or a deep sleep while still asleep, has the eyes while it runs; once it is over they are shut,
+        // and sleep goes on from there. (A deep sleep may notice the waking a tick after this does: the eyes still
+        // open then.)
+        if (NightTerrorClient.running() || DeepSleepClient.running() && sleeping) {
             inBed = sleeping;
             closing = sleeping;
             listen(minecraft);

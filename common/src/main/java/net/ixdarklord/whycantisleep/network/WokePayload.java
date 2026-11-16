@@ -15,10 +15,10 @@ import java.util.Optional;
  * Server to client: the player woke up. Why, how well they slept (0 to 100) and what made it so, and whether they
  * woke shaken from a night terror or well rested, the sleep effect they woke with, if any, and the things by the bed
  * they came to know (slept with a Dreamcatcher) or only noticed ({@link DecorDiscovery}), whether that sleep effect is
- * new to their dream journal, and whether the night was a lucid dream.
+ * new to their dream journal, and whether they slept deeply.
  */
 public record WokePayload(WakeReason reason, int score, List<Line> lines, boolean shaken, boolean wellRested, Optional<Dream> dream,
-                          List<Item> discovered, List<Item> noticed, boolean newInJournal, boolean lucid)
+                          List<Item> discovered, List<Item> noticed, boolean newInJournal, boolean deepSleep)
         implements CustomPacketPayload {
     public static final Type<WokePayload> TYPE = new Type<>(WhyCantISleep.id("woke"));
 

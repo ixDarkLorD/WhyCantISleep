@@ -3,7 +3,6 @@ package net.ixdarklord.whycantisleep.mixin.client;
 import net.ixdarklord.whycantisleep.client.Eyelids;
 import net.ixdarklord.whycantisleep.client.HidingClient;
 import net.ixdarklord.whycantisleep.client.HidingMinigame;
-import net.ixdarklord.whycantisleep.client.LucidDreamClient;
 import net.ixdarklord.whycantisleep.client.NightTerrorClient;
 import net.ixdarklord.whycantisleep.client.SleepClient;
 import net.ixdarklord.whycantisleep.client.hud.HudFade;
@@ -44,10 +43,10 @@ public abstract class GuiMixin {
         HudFade.end();
     }
 
-    // The game's fade to dark in bed waits while a night terror or a lucid dream runs: that is what they see.
+    // The game's fade to dark in bed waits while a night terror runs: the terror is what they see.
     @Inject(method = "extractSleepOverlay", at = @At("HEAD"), cancellable = true)
     private void whycantisleep$terrorHoldsTheDark(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-        if (NightTerrorClient.running() || LucidDreamClient.running()) ci.cancel();
+        if (NightTerrorClient.running()) ci.cancel();
     }
 
     // The crosshair fades with the HUD in the minigame, and out while hiding (HudFade.crosshair); gone, not drawn.

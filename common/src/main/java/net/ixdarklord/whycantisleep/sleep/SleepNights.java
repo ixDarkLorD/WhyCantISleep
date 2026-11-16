@@ -16,7 +16,7 @@ import net.ixdarklord.whycantisleep.api.SleepQuality;
 import net.ixdarklord.whycantisleep.api.SleepTrouble;
 import net.ixdarklord.whycantisleep.api.WakeReason;
 import net.ixdarklord.whycantisleep.config.WCISServerConfig;
-import net.ixdarklord.whycantisleep.network.LucidPayload;
+import net.ixdarklord.whycantisleep.network.DeepSleepPayload;
 import net.ixdarklord.whycantisleep.network.ShakenAwakePayload;
 import net.ixdarklord.whycantisleep.network.TerrorPayload;
 import net.ixdarklord.whycantisleep.network.WCISNetwork;
@@ -84,14 +84,14 @@ public final class SleepNights {
     // A player marked for a nightmare the next time they lie down (/whycantisleep nightmare on someone awake): kept as
     // a tag on them, so it lasts through leaving and coming back.
     private static final String NIGHTMARE_MARK = "whycantisleep.nightmare";
-    private static final String LUCID_MARK = "whycantisleep.lucid";
+    private static final String DEEP_MARK = "whycantisleep.deep_sleep";
     // How near another sleeper's bed must be to share a night terror, and how long one shaken awake still takes.
     private static final double SHARE_RANGE = 3.0;
     private static final int SHAKE_TICKS = 20;
-    // A night has to look this good on lying down to turn lucid, and a lucid dream's sleep effect lasts this many times
-    // as long, a level stronger.
-    private static final int LUCID_FROM = 90;
-    private static final int LUCID_DURATION = 2;
+    // A night has to look this good on lying down to sink into a deep sleep, and a deep sleep's sleep effect lasts this
+    // many times as long, a level stronger.
+    private static final int DEEP_FROM = 90;
+    private static final int DEEP_DURATION = 2;
 
     private SleepNights() {
     }
@@ -113,11 +113,11 @@ public final class SleepNights {
                         .executes(command -> nightmare(command.getSource(), List.of(command.getSource().getPlayerOrException())))
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .executes(command -> nightmare(command.getSource(), EntityArgument.getPlayers(command, "targets")))))
-                // /whycantisleep lucid [players]: a lucid dream, as nightmare gives a terror.
-                .then(Commands.literal("lucid").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
-                        .executes(command -> lucid(command.getSource(), List.of(command.getSource().getPlayerOrException())))
+                // /whycantisleep deepsleep [players]: a deep sleep, as nightmare gives a terror.
+                .then(Commands.literal("deepsleep").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                        .executes(command -> deepSleep(command.getSource(), List.of(command.getSource().getPlayerOrException())))
                         .then(Commands.argument("targets", EntityArgument.players())
-                                .executes(command -> lucid(command.getSource(), EntityArgument.getPlayers(command, "targets")))))));
+                                .executes(command -> deepSleep(command.getSource(), EntityArgument.getPlayers(command, "targets")))))));
         LivingEvents.DAMAGE.register((entity, source, amount) -> {
             if (entity instanceof ServerPlayer player && player.isSleeping()) HURT_AT.put(player.getUUID(), player.level().getGameTime());
             return EventResult.PASS;
@@ -207,12 +207,12 @@ public final class SleepNights {
             SleepEvents.NIGHT_TERROR.invoke(event);
             if (!event.isCancelled()) startTerror(player, night, level);
         }
-        // A great night, with no terror in it, can turn lucid: marked for one, or at the server's chance.
-        boolean lucidMarked = player.entityTags().contains(LUCID_MARK);
-        if (lucidMarked) player.removeTag(LUCID_MARK);
-        if (!night.terror && (lucidMarked || WCISServerConfig.LUCID_DREAMS.get() && nightScore(player, night) >= LUCID_FROM
-                && level.getRandom().nextInt(100) < WCISServerConfig.LUCID_CHANCE.get())) {
-            startLucid(player, night, level);
+        // A great night, with no terror in it, can sink into a deep sleep: marked for one, or at the server's chance.
+        boolean deepMarked = player.entityTags().contains(DEEP_MARK);
+        if (deepMarked) player.removeTag(DEEP_MARK);
+        if (!night.terror && (deepMarked || WCISServerConfig.DEEP_SLEEP.get() && nightScore(player, night) >= DEEP_FROM
+                && level.getRandom().nextInt(100) < WCISServerConfig.DEEP_SLEEP_CHANCE.get())) {
+            startDeepSleep(player, night, level);
         }
     }
 
@@ -235,33 +235,33 @@ public final class SleepNights {
         else WCISNetwork.sendToPlayer(player, new TerrorPayload(true, 1.0F, false));
     }
 
-    /** Whether the night waits for a player before it passes: a night terror or a lucid dream is under way. */
+    /** Whether the night waits for a player before it passes: a night terror or a deep sleep is under way. */
     public static boolean holdsTheNight(ServerPlayer player) {
         Night night = NIGHTS.get(player.getUUID());
-        return inTerror(player) || night != null && player.level().getGameTime() < night.lucidUntil;
+        return inTerror(player) || night != null && player.level().getGameTime() < night.deepUntil;
     }
 
-    /** Gives a sleeping player a lucid dream now, or marks them for one the next time they lie down. */
-    public static void markLucid(ServerPlayer player) {
+    /** Sinks a sleeping player into a deep sleep now, or marks them for one the next time they lie down. */
+    public static void markDeepSleep(ServerPlayer player) {
         Night night = NIGHTS.get(player.getUUID());
-        if (night != null && player.isSleeping() && !night.terror) startLucid(player, night, player.level());
-        else player.addTag(LUCID_MARK);
+        if (night != null && player.isSleeping() && !night.terror) startDeepSleep(player, night, player.level());
+        else player.addTag(DEEP_MARK);
     }
 
-    private static void startLucid(ServerPlayer player, Night night, ServerLevel level) {
-        night.lucid = true;
-        night.lucidUntil = level.getGameTime() + LucidPayload.TICKS;
-        WCISNetwork.sendToPlayer(player, new LucidPayload(LucidPayload.TICKS));
+    private static void startDeepSleep(ServerPlayer player, Night night, ServerLevel level) {
+        night.deep = true;
+        night.deepUntil = level.getGameTime() + DeepSleepPayload.TICKS;
+        WCISNetwork.sendToPlayer(player, new DeepSleepPayload(DeepSleepPayload.TICKS));
     }
 
-    private static int lucid(CommandSourceStack source, Collection<ServerPlayer> targets) {
-        for (ServerPlayer target : targets) markLucid(target);
+    private static int deepSleep(CommandSourceStack source, Collection<ServerPlayer> targets) {
+        for (ServerPlayer target : targets) markDeepSleep(target);
         if (targets.size() == 1) {
             ServerPlayer target = targets.iterator().next();
-            source.sendSuccess(() -> Component.translatable(target.isSleeping() ? "commands.whycantisleep.lucid.asleep" : "commands.whycantisleep.lucid.awake",
+            source.sendSuccess(() -> Component.translatable(target.isSleeping() ? "commands.whycantisleep.deep_sleep.asleep" : "commands.whycantisleep.deep_sleep.awake",
                     target.getDisplayName()), true);
         } else {
-            source.sendSuccess(() -> Component.translatable("commands.whycantisleep.lucid.many", targets.size()), true);
+            source.sendSuccess(() -> Component.translatable("commands.whycantisleep.deep_sleep.many", targets.size()), true);
         }
         return targets.size();
     }
@@ -423,8 +423,8 @@ public final class SleepNights {
         if (wellRested) player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, RESTED_REGENERATION_TICKS, 0, false, true, true));
         if (night.terror) WCISNetwork.sendToPlayer(player, new TerrorPayload(false, 0.0F, false));
 
-        // A lucid dream always leaves a good sleep effect, stronger and longer than any night's.
-        SleepEffect sleepEffect = !reason.rested() ? null : night.lucid ? lucidEffect(player, quality) : sleepEffect(player, quality);
+        // A deep sleep always leaves a good sleep effect, stronger and longer than any night's.
+        SleepEffect sleepEffect = !reason.rested() ? null : night.deep ? deepSleepEffect(player, quality) : sleepEffect(player, quality);
         boolean newInJournal = sleepEffect != null && DreamJournal.write(player, sleepEffect);
         SleepEvents.WOKE.invoke(new SleepEvents.Woke(player, reason, quality, slept, night.terror, wellRested, sleepEffect));
         if (WCISServerConfig.SLEEP_QUALITY.get()) {
@@ -436,7 +436,7 @@ public final class SleepNights {
             DecorDiscovery.Learned learned = reason == WakeReason.MORNING
                     ? DecorDiscovery.slept(player, SleepDecor.items(level, night.bed), BedTools.holdsDreamcatcher(player)) : DecorDiscovery.Learned.NOTHING;
             WCISNetwork.sendToPlayer(player, new WokePayload(reason, quality.score(), lines, night.terror, wellRested, dream, learned.known(), learned.noticed(),
-                    newInJournal, night.lucid));
+                    newInJournal, night.deep));
         }
     }
 
@@ -453,9 +453,9 @@ public final class SleepNights {
         return event.effect();
     }
 
-    // The sleep effect a lucid dream leaves: a good one, whatever the server's chance, a level stronger and lasting
-    // LUCID_DURATION times as long; unless a listener says otherwise.
-    private static @Nullable SleepEffect lucidEffect(ServerPlayer player, SleepQuality quality) {
+    // The sleep effect a deep sleep leaves: a good one, whatever the server's chance, a level stronger and lasting
+    // DEEP_DURATION times as long; unless a listener says otherwise.
+    private static @Nullable SleepEffect deepSleepEffect(ServerPlayer player, SleepQuality quality) {
         if (!WCISServerConfig.SLEEP_EFFECTS.get()) return null;
         SleepEffect drawn = SleepEffects.draw(SleepEffect.Kind.POSITIVE, quality.score(), player.getRandom());
         if (drawn == null) return null;
@@ -464,7 +464,7 @@ public final class SleepNights {
         if (event.isCancelled()) return null;
         event.effect().apply(player);
         for (SleepEffect.Effect one : event.effect().effects()) {
-            player.addEffect(new MobEffectInstance(one.effect(), one.duration() * LUCID_DURATION, one.amplifier() + 1));
+            player.addEffect(new MobEffectInstance(one.effect(), one.duration() * DEEP_DURATION, one.amplifier() + 1));
         }
         return event.effect();
     }
@@ -503,9 +503,9 @@ public final class SleepNights {
         private long terrorUntil = Long.MIN_VALUE;
         // Everyone sharing this night's terror (them included), or nobody.
         private Set<UUID> sharedWith = Set.of();
-        // A lucid dream, and until when it runs: the night waits for it too.
-        private boolean lucid;
-        private long lucidUntil = Long.MIN_VALUE;
+        // A deep sleep, and until when it runs: the night waits for it too.
+        private boolean deep;
+        private long deepUntil = Long.MIN_VALUE;
 
         private Night(BlockPos bed, long since, SleepTrouble trouble, Bedroom room) {
             this.bed = bed;

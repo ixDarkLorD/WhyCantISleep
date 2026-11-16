@@ -2,7 +2,6 @@ package net.ixdarklord.whycantisleep.mixin.client;
 
 import net.ixdarklord.whycantisleep.api.HidingPosture;
 import net.ixdarklord.whycantisleep.client.HidingClient;
-import net.ixdarklord.whycantisleep.client.LucidDreamClient;
 import net.ixdarklord.whycantisleep.hiding.HidingView;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -41,9 +40,6 @@ public abstract class CameraMixin {
     protected abstract void setPosition(double x, double y, double z);
 
     @Shadow
-    protected abstract void setPosition(Vec3 position);
-
-    @Shadow
     protected abstract void move(float forwards, float up, float right);
 
     @Shadow
@@ -55,22 +51,10 @@ public abstract class CameraMixin {
     public abstract Vec3 position();
 
     @Shadow
-    protected abstract void setRotation(float yRot, float xRot);
-
-    @Shadow
     public abstract boolean isDetached();
 
     @Shadow
     public abstract Entity entity();
-
-    // In a lucid dream the view floats free of the sleeping body, looking where the player looks (LucidDreamClient).
-    @Inject(method = "alignWithEntity", at = @At("TAIL"))
-    private void whycantisleep$dreaming(float partialTicks, CallbackInfo ci) {
-        if (!LucidDreamClient.running() || this.entity() != Minecraft.getInstance().player) return;
-        Entity player = this.entity();
-        this.setPosition(LucidDreamClient.view(partialTicks));
-        this.setRotation(player.getViewYRot(partialTicks), player.getViewXRot(partialTicks));
-    }
 
     @Inject(method = "alignWithEntity", at = @At("TAIL"))
     private void whycantisleep$underTheBed(float partialTicks, CallbackInfo ci) {

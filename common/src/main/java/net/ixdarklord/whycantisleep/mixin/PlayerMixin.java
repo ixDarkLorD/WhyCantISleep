@@ -23,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * sees it), or stands in a closet. Who can still see them
  * is {@code TargetingConditionsMixin} and {@code LivingEntityMixin}'s business, which know who is looking. And they
  * don't move: no momentum carries them on, so the client never drifts from where the server holds them. A player in
- * a night terror or a lucid dream hasn't slept long enough yet: the night waits for it to end before it passes, and one
+ * a night terror or a deep sleep hasn't slept long enough yet: the night waits for it to end before it passes, and one
  * napping never has, so a nap never skips the day; nor does the day wake them.
  */
 @Mixin(Player.class)

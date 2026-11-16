@@ -57,12 +57,12 @@ public final class SleepMornings {
         };
     }
 
-    // Under the title: that the night was a lucid dream, that they woke well rested, that the dream is new to their
+    // Under the title: that they slept deeply, that they woke well rested, that the dream is new to their
     // journal, and what by the bed they came to know, or that something there did something, without a Dreamcatcher
     // to tell them what.
     private static @Nullable Component morningHint(WokePayload payload) {
         List<Component> parts = new ArrayList<>();
-        if (payload.lucid()) parts.add(Component.translatable("gui.whycantisleep.woke.lucid.hint"));
+        if (payload.deepSleep()) parts.add(Component.translatable("gui.whycantisleep.woke.deep_sleep.hint"));
         if (payload.wellRested()) parts.add(Component.translatable("gui.whycantisleep.woke.rested.hint"));
         if (payload.newInJournal()) parts.add(Component.translatable("gui.whycantisleep.woke.journal.hint"));
         if (!payload.discovered().isEmpty()) {

@@ -131,11 +131,11 @@ public final class WCISServerConfig {
             .range(0, 100).slider().comment("Percent chance a sleepless player sleepwalks, in a room that isn't closed.").enabledWhen(SLEEPWALKING).build();
     public static final ConfigValue<Boolean> DREAM_JOURNAL = BUILDER.bool("dreamJournal", true)
             .comment("Whether each sleep effect a player wakes with is written into their dream journal, a page of the Insomniac's Handbook.").build();
-    public static final ConfigValue<Boolean> LUCID_DREAMS = BUILDER.bool("lucidDreams", true)
-            .comment("Whether a great night (90 or more, as it looks on lying down) can turn into a lucid dream: the player drifts through a pale dream "
-                    + "of their room for a few seconds, and wakes with a stronger sleep effect.").build();
-    public static final ConfigValue<Integer> LUCID_CHANCE = BUILDER.intValue("lucidChance", 20)
-            .range(0, 100).slider().comment("Percent chance of a lucid dream on a great night.").enabledWhen(LUCID_DREAMS).build();
+    public static final ConfigValue<Boolean> DEEP_SLEEP = BUILDER.bool("deepSleep", true)
+            .comment("Whether a great night (90 or more, as it looks on lying down) can sink into a deep sleep: the eyes fall shut, the world goes "
+                    + "almost silent, and the player wakes with a stronger, longer sleep effect.").build();
+    public static final ConfigValue<Integer> DEEP_SLEEP_CHANCE = BUILDER.intValue("deepSleepChance", 20)
+            .range(0, 100).slider().comment("Percent chance of a deep sleep on a great night.").enabledWhen(DEEP_SLEEP).build();
     public static final ConfigValue<Boolean> SHARED_NIGHTMARES = BUILDER.bool("sharedNightmares", true)
             .comment("Whether a night terror is shared by every player asleep within three blocks, and whoever leaves their bed first shakes "
                     + "the others awake, cutting it short.").enabledWhen(NIGHT_TERRORS).build();
