@@ -75,7 +75,6 @@ public final class BuiltinHidingSpots {
         HidingSpots.register(new Table());
         HidingSpots.register(new Chest());
         HidingSpots.register(new Closet());
-        NookHidingSpots.register();
     }
 
     /** Whether a block has a solid top to lie on. */
