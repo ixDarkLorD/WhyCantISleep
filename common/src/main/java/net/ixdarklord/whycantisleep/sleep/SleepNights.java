@@ -1,5 +1,8 @@
 package net.ixdarklord.whycantisleep.sleep;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.ixdarklord.coolcatcore.api.event.v2.common.CommandEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.LivingEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.PlayerEvents;
@@ -23,6 +26,7 @@ import net.ixdarklord.whycantisleep.network.WCISNetwork;
 import net.ixdarklord.whycantisleep.network.WokePayload;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -37,6 +41,7 @@ import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -84,6 +89,10 @@ public final class SleepNights {
     // A player marked for a nightmare the next time they lie down (/whycantisleep nightmare on someone awake): kept as
     // a tag on them, so it lasts through leaving and coming back.
     private static final String NIGHTMARE_MARK = "whycantisleep.nightmare";
+    // And which nightmare, when one was named: this followed by its id.
+    private static final String KIND_MARK = "whycantisleep.nightmare.";
+    private static final DynamicCommandExceptionType UNKNOWN_KIND = new DynamicCommandExceptionType(
+            id -> Component.translatable("commands.whycantisleep.nightmare.unknown", id));
     private static final String DEEP_MARK = "whycantisleep.deep_sleep";
     // How near another sleeper's bed must be to share a night terror, and how long one shaken awake still takes.
     private static final double SHARE_RANGE = 3.0;
@@ -110,9 +119,14 @@ public final class SleepNights {
         // next time they lie down.
         CommandEvents.REGISTER.register((dispatcher, context, selection) -> dispatcher.register(Commands.literal("whycantisleep")
                 .then(Commands.literal("nightmare").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
-                        .executes(command -> nightmare(command.getSource(), List.of(command.getSource().getPlayerOrException())))
+                        .executes(command -> nightmare(command.getSource(), List.of(command.getSource().getPlayerOrException()), null))
                         .then(Commands.argument("targets", EntityArgument.players())
-                                .executes(command -> nightmare(command.getSource(), EntityArgument.getPlayers(command, "targets")))))
+                                .executes(command -> nightmare(command.getSource(), EntityArgument.getPlayers(command, "targets"), null))
+                                // And which nightmare: shadow, drowning, swarm, falling or watchers.
+                                .then(Commands.argument("kind", StringArgumentType.word())
+                                        .suggests((command, builder) -> SharedSuggestionProvider.suggest(Arrays.stream(NightmareKind.values()).map(NightmareKind::id), builder))
+                                        .executes(command -> nightmare(command.getSource(), EntityArgument.getPlayers(command, "targets"),
+                                                kind(StringArgumentType.getString(command, "kind")))))))
                 // /whycantisleep deepsleep [players]: a deep sleep, as nightmare gives a terror.
                 .then(Commands.literal("deepsleep").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                         .executes(command -> deepSleep(command.getSource(), List.of(command.getSource().getPlayerOrException())))
@@ -195,6 +209,7 @@ public final class SleepNights {
         // Marked for one, they have it this time, whatever the chance; else restless or worse, at the server's chance.
         boolean marked = player.entityTags().contains(NIGHTMARE_MARK);
         if (marked) player.removeTag(NIGHTMARE_MARK);
+        NightmareKind markedKind = markedKind(player);
         boolean rolled = false;
         if (!marked && WCISServerConfig.NIGHT_TERRORS.get() && trouble.level().atLeast(SleepTrouble.Level.RESTLESS)) {
             int chance = WCISServerConfig.TERROR_CHANCE.get() * (trouble.level() == SleepTrouble.Level.SLEEPLESS ? 2 : 1);
@@ -205,7 +220,7 @@ public final class SleepNights {
         if (marked || rolled) {
             SleepEvents.NightTerror event = new SleepEvents.NightTerror(player, trouble);
             SleepEvents.NIGHT_TERROR.invoke(event);
-            if (!event.isCancelled()) startTerror(player, night, level);
+            if (!event.isCancelled()) startTerror(player, night, level, markedKind);
         }
         // A great night, with no terror in it, can sink into a deep sleep: marked for one, or at the server's chance.
         boolean deepMarked = player.entityTags().contains(DEEP_MARK);
@@ -221,8 +236,27 @@ public final class SleepNights {
      * asleep has it now instead.
      */
     public static void markNightmare(ServerPlayer player) {
-        if (player.isSleeping() && NIGHTS.containsKey(player.getUUID())) nightmare(player);
-        else player.addTag(NIGHTMARE_MARK);
+        markNightmare(player, null);
+    }
+
+    /** As {@link #markNightmare(ServerPlayer)}, with which nightmare it is (null for any). */
+    public static void markNightmare(ServerPlayer player, @Nullable NightmareKind kind) {
+        if (player.isSleeping() && NIGHTS.containsKey(player.getUUID())) {
+            nightmare(player, kind);
+            return;
+        }
+        player.addTag(NIGHTMARE_MARK);
+        for (NightmareKind each : NightmareKind.values()) player.removeTag(KIND_MARK + each.id());
+        if (kind != null) player.addTag(KIND_MARK + kind.id());
+    }
+
+    // The nightmare a player was marked for, if one was named, the mark taken off.
+    private static @Nullable NightmareKind markedKind(ServerPlayer player) {
+        NightmareKind marked = null;
+        for (NightmareKind each : NightmareKind.values()) {
+            if (player.removeTag(KIND_MARK + each.id())) marked = each;
+        }
+        return marked;
     }
 
     /**
@@ -230,9 +264,14 @@ public final class SleepNights {
      * wake shaken, and the night is scored for it; one awake only sees it.
      */
     public static void nightmare(ServerPlayer player) {
+        nightmare(player, null);
+    }
+
+    /** As {@link #nightmare(ServerPlayer)}, with which nightmare it is (null for any). */
+    public static void nightmare(ServerPlayer player, @Nullable NightmareKind kind) {
         Night night = NIGHTS.get(player.getUUID());
-        if (night != null && player.isSleeping()) startTerror(player, night, player.level());
-        else WCISNetwork.sendToPlayer(player, new TerrorPayload(true, 1.0F, false));
+        if (night != null && player.isSleeping()) startTerror(player, night, player.level(), kind);
+        else WCISNetwork.sendToPlayer(player, new TerrorPayload(true, 1.0F, false, kind != null ? kind : NightmareKind.random(player.getRandom())));
     }
 
     /** Whether the night waits for a player before it passes: a night terror or a deep sleep is under way. */
@@ -274,16 +313,17 @@ public final class SleepNights {
 
     // A night terror, as bad as the night was going to be; shared, at the same pitch, with everyone asleep within
     // SHARE_RANGE of the bed who isn't in one already (the server's sharedNightmares).
-    private static void startTerror(ServerPlayer player, Night night, ServerLevel level) {
+    private static void startTerror(ServerPlayer player, Night night, ServerLevel level, @Nullable NightmareKind kind) {
         float intensity = terrorIntensity(player, night);
-        terror(player, night, level, intensity);
+        if (kind == null) kind = NightmareKind.random(level.getRandom());
+        terror(player, night, level, intensity, kind);
         if (!WCISServerConfig.SHARED_NIGHTMARES.get()) return;
         Set<UUID> sharing = new HashSet<>();
         sharing.add(player.getUUID());
         for (ServerPlayer other : level.players()) {
             Night theirs = NIGHTS.get(other.getUUID());
             if (other == player || theirs == null || theirs.terror || !other.isSleeping() || !theirs.bed.closerThan(night.bed, SHARE_RANGE)) continue;
-            terror(other, theirs, level, intensity);
+            terror(other, theirs, level, intensity, kind);
             sharing.add(other.getUUID());
         }
         if (sharing.size() < 2) return;
@@ -293,11 +333,11 @@ public final class SleepNights {
         }
     }
 
-    private static void terror(ServerPlayer player, Night night, ServerLevel level, float intensity) {
+    private static void terror(ServerPlayer player, Night night, ServerLevel level, float intensity, NightmareKind kind) {
         night.terror = true;
         night.terrorIntensity = intensity;
         night.terrorUntil = level.getGameTime() + TerrorPayload.ticks(intensity);
-        WCISNetwork.sendToPlayer(player, new TerrorPayload(true, intensity, true));
+        WCISNetwork.sendToPlayer(player, new TerrorPayload(true, intensity, true, kind));
     }
 
     // Someone sharing a night terror is out of bed while it runs: they shake the others awake, the terror jumping to
@@ -363,8 +403,14 @@ public final class SleepNights {
         if (daysAwake(night) >= HURT_FROM_DAYS) HURT_LATER.put(player.getUUID(), TERROR_HURT_MOST * intensity);
     }
 
-    private static int nightmare(CommandSourceStack source, Collection<ServerPlayer> targets) {
-        for (ServerPlayer target : targets) markNightmare(target);
+    private static NightmareKind kind(String id) throws CommandSyntaxException {
+        NightmareKind kind = NightmareKind.byId(id);
+        if (kind == null) throw UNKNOWN_KIND.create(id);
+        return kind;
+    }
+
+    private static int nightmare(CommandSourceStack source, Collection<ServerPlayer> targets, @Nullable NightmareKind kind) {
+        for (ServerPlayer target : targets) markNightmare(target, kind);
         if (targets.size() == 1) {
             ServerPlayer target = targets.iterator().next();
             source.sendSuccess(() -> Component.translatable(target.isSleeping() ? "commands.whycantisleep.nightmare.asleep" : "commands.whycantisleep.nightmare.awake",
@@ -421,7 +467,7 @@ public final class SleepNights {
         // Sleepless, in a room that lets them out, they may wake somewhere else.
         if (reason == WakeReason.MORNING) Sleepwalking.onMorning(player, night.bed, night.trouble.level(), room.enclosed());
         if (wellRested) player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, RESTED_REGENERATION_TICKS, 0, false, true, true));
-        if (night.terror) WCISNetwork.sendToPlayer(player, new TerrorPayload(false, 0.0F, false));
+        if (night.terror) WCISNetwork.sendToPlayer(player, new TerrorPayload(false, 0.0F, false, NightmareKind.SHADOW));
 
         // A deep sleep always leaves a good sleep effect, stronger and longer than any night's.
         SleepEffect sleepEffect = !reason.rested() ? null : night.deep ? deepSleepEffect(player, quality) : sleepEffect(player, quality);
