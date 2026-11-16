@@ -26,3 +26,4 @@ build_numbers.json
 
 # Page text, logo and screenshots for the mod's pages: kept locally, not in the repo
 publishing/
+tools/
