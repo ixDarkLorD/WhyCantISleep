@@ -1,7 +1,8 @@
 package net.ixdarklord.whycantisleep.sleep;
 
-import net.ixdarklord.coolcatcore.api.event.v2.common.CommandEvents;
+import net.ixdarklord.coolcatcore.api.command.ModCommands;
 import net.ixdarklord.coolcatcore.api.event.v2.common.ServerLifecycleEvents;
+import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.whycantisleep.api.SleepEvents;
 import net.ixdarklord.whycantisleep.config.WCISServerConfig;
 import net.ixdarklord.whycantisleep.mixin.ServerLevelAccessor;
@@ -42,10 +43,10 @@ public final class SleepVotes {
     }
 
     public static void init() {
-        CommandEvents.REGISTER.register((dispatcher, context, selection) -> dispatcher.register(Commands.literal("whycantisleep")
+        ModCommands.register(WhyCantISleep.MOD_ID, "whycantisleep", (root, context, selection) -> root
                 .then(Commands.literal("vote")
                         .then(Commands.literal("yes").executes(command -> answer(command.getSource().getPlayerOrException(), true)))
-                        .then(Commands.literal("no").executes(command -> answer(command.getSource().getPlayerOrException(), false))))));
+                        .then(Commands.literal("no").executes(command -> answer(command.getSource().getPlayerOrException(), false)))));
         ServerLifecycleEvents.STOPPED.register(server -> VOTES.clear());
     }
 

@@ -1,6 +1,13 @@
 # Changelog
 This file is for listing all the changes to this project
 
+## v0.4.0 Beta | Unreleased
+### ✨ New Features
+- `/whycantisleep config` opens the mod's config screens, and `/whycantisleep config <name>` just one of them. Operators can reload the config files after editing them by hand with `/whycantisleep config reload`.
+
+### 🛠️ Changes
+- Now needs CoolCatLib 8.3.0 or newer.
+
 ## v0.3.0 Beta | Nov 16, 2026
 ### ✨ New Features
 - **Monster memory**: monsters remember the spots they lost you in. At night, those that turn up near one come to look there first, and may find whoever hides in it; each time a spot shakes monsters off, it takes longer to hide in and is searched harder. Moving rooms or building another spot pays off: a spot is forgotten a few days after it was last used. Server option `monsterMemory`.
