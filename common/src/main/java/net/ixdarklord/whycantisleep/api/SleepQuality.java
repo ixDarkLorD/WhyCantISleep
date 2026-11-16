@@ -31,6 +31,8 @@ public record SleepQuality(int score, List<Factor> factors) {
     public static final ResourceLocation TOO_BRIGHT = WhyCantISleep.id("too_bright");
     /** Monsters prowling near the bed through the night. */
     public static final ResourceLocation MONSTERS = WhyCantISleep.id("monsters");
+    /** Night guards about the bed: iron golems near it, the sleeper's own wolves and cats sitting by it. */
+    public static final ResourceLocation NIGHT_GUARD = WhyCantISleep.id("night_guard");
     /** Calm music from a jukebox near the bed. */
     public static final ResourceLocation CALM_MUSIC = WhyCantISleep.id("calm_music");
     /** Creepy music from a jukebox near the bed ({@code #whycantisleep:creepy} songs). */

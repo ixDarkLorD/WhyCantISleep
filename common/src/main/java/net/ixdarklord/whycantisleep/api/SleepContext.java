@@ -21,8 +21,17 @@ import net.minecraft.server.level.ServerPlayer;
  * @param loudMusic    whether loud music did ({@code #whycantisleep:loud})
  * @param trouble      how badly they had been sleeping before they lay down
  * @param nightmare    whether they had a night terror
+ * @param guards       the most night guards about the bed at any time of the night: iron golems near it, and the
+ *                     sleeper's own wolves and cats sitting by it
  */
 public record SleepContext(ServerPlayer player, BlockPos bed, WakeReason reason, int sleptTicks, boolean enclosed, boolean lit, int pillowLight,
                            int soothing, int unsettling, int monsters, boolean calmMusic, boolean creepyMusic, boolean loudMusic,
-                           SleepTrouble.Level trouble, boolean nightmare) {
+                           SleepTrouble.Level trouble, boolean nightmare, int guards) {
+    /** A night with no night guards about (as the context was before they counted). */
+    public SleepContext(ServerPlayer player, BlockPos bed, WakeReason reason, int sleptTicks, boolean enclosed, boolean lit, int pillowLight,
+                        int soothing, int unsettling, int monsters, boolean calmMusic, boolean creepyMusic, boolean loudMusic,
+                        SleepTrouble.Level trouble, boolean nightmare) {
+        this(player, bed, reason, sleptTicks, enclosed, lit, pillowLight, soothing, unsettling, monsters, calmMusic, creepyMusic, loudMusic,
+                trouble, nightmare, 0);
+    }
 }

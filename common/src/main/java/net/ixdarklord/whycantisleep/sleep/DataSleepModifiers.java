@@ -2,9 +2,11 @@ package net.ixdarklord.whycantisleep.sleep;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.ixdarklord.whycantisleep.WhyCantISleep;
 import net.ixdarklord.whycantisleep.api.SleepContext;
@@ -115,7 +117,7 @@ public final class DataSleepModifiers extends SimpleJsonResourceReloadListener {
 
     /** What a count of a modifier's points is of. */
     private enum Per {
-        MONSTERS, SOOTHING, UNSETTLING, PILLOW_LIGHT, NEAR_BLOCKS
+        MONSTERS, SOOTHING, UNSETTLING, PILLOW_LIGHT, NEAR_BLOCKS, GUARDS
     }
 
     private enum Weather {
@@ -153,11 +155,12 @@ public final class DataSleepModifiers extends SimpleJsonResourceReloadListener {
                               Optional<Range> soothing, Optional<Range> unsettling, Optional<Boolean> calmMusic, Optional<Boolean> creepyMusic,
                               Optional<Boolean> loudMusic, Optional<List<SleepTrouble.Level>> trouble, Optional<Boolean> nightmare,
                               Optional<List<WakeReason>> reason, Optional<ResourceKey<Level>> dimension, Optional<String> biome,
-                              Optional<Weather> weather, Optional<NearBlocks> nearBlocks) {
+                              Optional<Weather> weather, Optional<NearBlocks> nearBlocks, Optional<Range> guards) {
         private static final Conditions ALWAYS = new Conditions(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
                 Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
-        private static final Codec<Conditions> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+        // Sixteen fields is as many as one codec group takes: the rest are read beside them.
+        private static final MapCodec<Conditions> FIRST = RecordCodecBuilder.mapCodec(instance -> instance.group(
                 Codec.BOOL.optionalFieldOf("enclosed").forGetter(Conditions::enclosed),
                 Codec.BOOL.optionalFieldOf("lit").forGetter(Conditions::lit),
                 Range.CODEC.optionalFieldOf("pillow_light").forGetter(Conditions::pillowLight),
@@ -174,7 +177,16 @@ public final class DataSleepModifiers extends SimpleJsonResourceReloadListener {
                 Codec.STRING.optionalFieldOf("biome").forGetter(Conditions::biome),
                 lowerCase(Weather.class).optionalFieldOf("weather").forGetter(Conditions::weather),
                 NearBlocks.CODEC.optionalFieldOf("near_blocks").forGetter(Conditions::nearBlocks)
-        ).apply(instance, Conditions::new));
+        ).apply(instance, (enclosed, lit, pillowLight, monsters, soothing, unsettling, calmMusic, creepyMusic, loudMusic, trouble, nightmare, reason,
+                dimension, biome, weather, nearBlocks) -> new Conditions(enclosed, lit, pillowLight, monsters, soothing, unsettling, calmMusic,
+                creepyMusic, loudMusic, trouble, nightmare, reason, dimension, biome, weather, nearBlocks, Optional.empty())));
+        private static final Codec<Conditions> CODEC = Codec.mapPair(FIRST, Range.CODEC.optionalFieldOf("guards")).xmap(
+                pair -> pair.getFirst().withGuards(pair.getSecond()), conditions -> Pair.of(conditions, conditions.guards())).codec();
+
+        private Conditions withGuards(Optional<Range> guards) {
+            return new Conditions(this.enclosed, this.lit, this.pillowLight, this.monsters, this.soothing, this.unsettling, this.calmMusic, this.creepyMusic,
+                    this.loudMusic, this.trouble, this.nightmare, this.reason, this.dimension, this.biome, this.weather, this.nearBlocks, guards);
+        }
 
         private boolean test(SleepContext context) {
             ServerLevel level = context.player().serverLevel();
@@ -182,6 +194,7 @@ public final class DataSleepModifiers extends SimpleJsonResourceReloadListener {
             if (this.lit.isPresent() && this.lit.get() != context.lit()) return false;
             if (this.pillowLight.isPresent() && !this.pillowLight.get().test(context.pillowLight())) return false;
             if (this.monsters.isPresent() && !this.monsters.get().test(context.monsters())) return false;
+            if (this.guards.isPresent() && !this.guards.get().test(context.guards())) return false;
             if (this.soothing.isPresent() && !this.soothing.get().test(context.soothing())) return false;
             if (this.unsettling.isPresent() && !this.unsettling.get().test(context.unsettling())) return false;
             if (this.calmMusic.isPresent() && this.calmMusic.get() != context.calmMusic()) return false;
@@ -245,6 +258,7 @@ public final class DataSleepModifiers extends SimpleJsonResourceReloadListener {
                 case SOOTHING -> context.soothing();
                 case UNSETTLING -> context.unsettling();
                 case PILLOW_LIGHT -> context.pillowLight();
+                case GUARDS -> context.guards();
                 case NEAR_BLOCKS -> {
                     NearBlocks near = this.definition.when().nearBlocks().orElse(null);
                     yield near == null ? 0 : near.count(context.player().serverLevel(), context.bed());

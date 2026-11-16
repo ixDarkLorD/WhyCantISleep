@@ -13,6 +13,16 @@
       "title": "guide.whycantisleep.guide.entry.hiding.quiet.page2.title",
       "zoom": 1.6,
       "text": "guide.whycantisleep.guide.entry.hiding.quiet.page2.text"
+    },
+    {
+      "title": "guide.whycantisleep.guide.entry.hiding.quiet.page3.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.quiet.page3.text"
+    },
+    {
+      "type": "spotlight",
+      "item": "minecraft:snowball",
+      "title": "guide.whycantisleep.guide.entry.hiding.quiet.page4.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.quiet.page4.text"
     }
   ]
 }
