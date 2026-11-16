@@ -1,6 +1,6 @@
 package net.ixdarklord.whycantisleep.sleep;
 
-import net.ixdarklord.coolcatcore.api.event.v2.common.CommandEvents;
+import net.ixdarklord.coolcatcore.api.command.ModCommands;
 import net.ixdarklord.coolcatcore.api.event.v2.common.LivingEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.PlayerEvents;
 import net.ixdarklord.coolcatcore.api.event.v2.common.ServerLifecycleEvents;
@@ -98,11 +98,11 @@ public final class SleepNights {
         });
         // /whycantisleep nightmare [players]: a night terror for operators to hand out: now for one asleep, else the
         // next time they lie down.
-        CommandEvents.REGISTER.register((dispatcher, context, selection) -> dispatcher.register(Commands.literal("whycantisleep")
+        ModCommands.register(WhyCantISleep.MOD_ID, "whycantisleep", (root, context, selection) -> root
                 .then(Commands.literal("nightmare").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                         .executes(command -> nightmare(command.getSource(), List.of(command.getSource().getPlayerOrException())))
                         .then(Commands.argument("targets", EntityArgument.players())
-                                .executes(command -> nightmare(command.getSource(), EntityArgument.getPlayers(command, "targets")))))));
+                                .executes(command -> nightmare(command.getSource(), EntityArgument.getPlayers(command, "targets"))))));
         LivingEvents.DAMAGE.register((entity, source, amount) -> {
             if (entity instanceof ServerPlayer player && player.isSleeping()) HURT_AT.put(player.getUUID(), player.level().getGameTime());
             return EventResult.PASS;
