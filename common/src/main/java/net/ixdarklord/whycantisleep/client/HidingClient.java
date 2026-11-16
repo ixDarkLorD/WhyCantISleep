@@ -12,8 +12,10 @@ import net.ixdarklord.whycantisleep.api.HidingPosture;
 import net.ixdarklord.whycantisleep.client.hud.Explanations;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotice;
 import net.ixdarklord.whycantisleep.client.hud.SleepNotices;
+import net.ixdarklord.whycantisleep.config.WCISServerConfig;
 import net.ixdarklord.whycantisleep.hiding.Hiding;
 import net.ixdarklord.whycantisleep.hiding.HidingView;
+import net.ixdarklord.whycantisleep.network.HideTimePayload;
 import net.ixdarklord.whycantisleep.network.HidingPayload;
 import net.ixdarklord.whycantisleep.network.LeaveHidingPayload;
 import net.ixdarklord.whycantisleep.network.NoisePayload;
@@ -21,6 +23,7 @@ import net.ixdarklord.whycantisleep.network.OvertimePayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Monster;
@@ -78,6 +81,12 @@ public final class HidingClient {
     private static final float NOISE_FALL = 0.02F;
     private static final float RESTLESS_FROM = 0.12F;
     private static final float CALM_BELOW = 0.04F;
+    // Cramp: from CRAMP_AFTER ticks past the hide time their legs start to cramp, worse and worse over CRAMP_RAMP, and
+    // their fidgeting is noise, up to CRAMP_NOISE a tick: past about a minute and a half more it outruns NOISE_FALL,
+    // so the noise climbs however still they keep. Now and then the fidget is heard as a rustle.
+    private static final int CRAMP_AFTER = 20 * 60;
+    private static final int CRAMP_RAMP = 20 * 60;
+    private static final float CRAMP_NOISE = 0.035F;
     // The local player's card while hiding: what it shows, where it says they are, and which card it is.
     private static ItemStack icon = ItemStack.EMPTY;
     private static Component where = Component.empty();
@@ -94,7 +103,8 @@ public final class HidingClient {
     private enum Card {
         QUIET,
         DANGER,
-        RESTLESS
+        RESTLESS,
+        CRAMPED
     }
 
     public static void init() {
@@ -242,6 +252,12 @@ public final class HidingClient {
         }
     }
 
+    /** The server cut the local player's hide time short (a distraction): this much is left from now. */
+    public static void on(HideTimePayload payload) {
+        if (!isLocalHiding()) return;
+        hideTicks = Math.max(1, (int) (tick - hidAt) + payload.ticksLeft());
+    }
+
     // The hiding card: all quiet; a warning that something is out there; moving about while it is, a call to hold
     // still. It shows what they hide in. All quiet, it has no timer; with something out there, its timer runs down the
     // time left to hold out until it gives up; and on the call to hold still, it is the noise being made.
@@ -250,6 +266,7 @@ public final class HidingClient {
             case QUIET -> Explanations.notice(SleepNotice.Kind.HIDING, "hiding", where);
             case DANGER -> Explanations.notice(SleepNotice.Kind.HIDING_DANGER, "hiding_danger").withProgress(() -> 1.0 - hideProgress());
             case RESTLESS -> Explanations.notice(SleepNotice.Kind.HIDING_DANGER, "hiding_restless").withProgress(() -> noise);
+            case CRAMPED -> Explanations.notice(SleepNotice.Kind.HIDING, "hiding_cramped").withProgress(HidingClient::cramp);
         };
         return icon.isEmpty() ? notice : notice.withIcon(icon);
     }
@@ -270,6 +287,12 @@ public final class HidingClient {
         if (HidingMinigame.running()) made = 0.0F;
         // Their voice is noise whatever they do (Simple Voice Chat, HidingVoices).
         made += HidingVoices.takeNoise();
+        // Hidden too long, their legs cramp and they fidget, minigame or not.
+        float cramp = cramp();
+        made += cramp * CRAMP_NOISE;
+        if (cramp > 0.0F && minecraft.player.getRandom().nextFloat() < cramp * 0.02F) {
+            minecraft.player.playSound(SoundEvents.WOOL_STEP, 0.15F + 0.25F * cramp, 0.8F + minecraft.player.getRandom().nextFloat() * 0.3F);
+        }
         noise = Mth.clamp(noise + made - NOISE_FALL, 0.0F, 1.0F);
         // The server hears of it in tenths, when that changes.
         float rounded = Math.round(noise * 10.0F) / 10.0F;
@@ -277,6 +300,16 @@ public final class HidingClient {
             sentNoise = rounded;
             Network.sendToServer(new NoisePayload(rounded));
         }
+    }
+
+    /**
+     * How cramped the local player's legs are, 0 to 1: nothing until CRAMP_AFTER ticks past the hide time, then rising
+     * over CRAMP_RAMP. Always 0 with the server's cramp off.
+     */
+    public static float cramp() {
+        if (!isLocalHiding() || !WCISServerConfig.CRAMP.get()) return 0.0F;
+        long over = tick - hidAt - hideTicks - CRAMP_AFTER;
+        return over <= 0 ? 0.0F : Math.min(1.0F, over / (float) CRAMP_RAMP);
     }
 
     // How far through the hide time the local player is, 0 to 1.
@@ -330,7 +363,7 @@ public final class HidingClient {
             sentNoise = 1.0F;
             Network.sendToServer(new NoisePayload(1.0F));
         }
-        Card next = !danger ? Card.QUIET
+        Card next = !danger ? (cramp() > 0.0F ? Card.CRAMPED : Card.QUIET)
                 : card == Card.RESTLESS ? (noise > CALM_BELOW ? Card.RESTLESS : Card.DANGER)
                 : (noise > RESTLESS_FROM ? Card.RESTLESS : Card.DANGER);
         SleepNotice.Kind shown = SleepNotices.shownKind();

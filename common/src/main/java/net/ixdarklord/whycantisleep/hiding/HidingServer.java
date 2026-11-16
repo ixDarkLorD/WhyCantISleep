@@ -14,6 +14,7 @@ import net.ixdarklord.whycantisleep.api.HidingSpotType;
 import net.ixdarklord.whycantisleep.api.HidingSpots;
 import net.ixdarklord.whycantisleep.config.WCISServerConfig;
 import net.ixdarklord.whycantisleep.network.HideCooldownPayload;
+import net.ixdarklord.whycantisleep.network.HideTimePayload;
 import net.ixdarklord.whycantisleep.network.HidingPayload;
 import net.ixdarklord.whycantisleep.network.WCISNetwork;
 import net.minecraft.core.BlockPos;
@@ -95,6 +96,17 @@ public final class HidingServer {
     private static final float SEARCH_NOISE = 0.5F;
     // Each wall close around a spot takes this much off the hide time.
     private static final float COVER_PER_WALL = 0.1F;
+    // A remembered spot: the hide time longer, and a search's chance higher, for each time it was used before.
+    private static final float MEMORY_LONGER = 0.15F;
+    private static final float MEMORY_SEARCH = 0.1F;
+    // Distractions: how far from the spot one must land to fool anything, how far round it monsters hear it, how much of
+    // the hide time each cuts, and how many a hide may have.
+    private static final double DISTRACT_MIN = 6.0;
+    private static final double DISTRACT_RANGE = 16.0;
+    private static final float DISTRACT_CUT = 0.3F;
+    private static final int DISTRACT_MOST = 2;
+    private static final double DISTRACT_SPEED = 1.0;
+    private static final double THROW_HEIGHT = 1.3;
     // At the end of a hunted player's hide time, how long their client's word (overtime or done) is waited for, and how
     // near the end it may ask for overtime.
     private static final int VERDICT_WAIT = 20;
@@ -109,6 +121,8 @@ public final class HidingServer {
 
     public static void init() {
         BuiltinHidingSpots.register();
+        MonsterMemory.init();
+        Distractions.init();
         ReloadListeners.registerServer(WhyCantISleep.id("hiding_spots"), DataHidingSpots.INSTANCE);
         // Both sides answer the same for the spots both know of, so the client doesn't predict a sleep (or a door
         // swinging, a chest opening) instead. Data pack spots only the server knows: the client predicts the block's
@@ -250,8 +264,12 @@ public final class HidingServer {
         // Now and then something got there first.
         if (level.getRandom().nextInt(100) < WCISServerConfig.CRITTER_CHANCE.get() && startle(level, player, spot)) return true;
 
-        int hideTicks = Math.max(20, Mth.floor(WCISServerConfig.HIDE_TIME.get() * 20 * spot.hideTimeScale() * coverScale(level, spot, type)));
+        // A spot monsters remember takes longer to hide in, each time more (MonsterMemory).
+        int remembered = MonsterMemory.times(level, spot.anchor());
+        float memory = 1.0F + MEMORY_LONGER * remembered;
+        int hideTicks = Math.max(20, Mth.floor(WCISServerConfig.HIDE_TIME.get() * 20 * spot.hideTimeScale() * coverScale(level, spot, type) * memory));
         Hide hide = new Hide(type, spot, level.dimension(), player.position(), hideTicks);
+        hide.remembered = remembered;
         for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(HUNTER_RANGE), mob -> mob.getTarget() == player && !mob.getType().is(IGNORES_HIDING))) {
             hide.hunters.add(mob.getUUID());
             mob.setTarget(null);
@@ -270,6 +288,10 @@ public final class HidingServer {
         else player.teleportTo(at.x, at.y, at.z);
         enterSound(level, spot, player, true);
         broadcast(level, player, hide);
+        // Said after the hiding card is up, so it shows over it for a moment (said before, the card would cover it).
+        if (remembered > 0) {
+            player.sendSystemMessage(Component.translatableWithFallback("gui.whycantisleep.hide.remembered", "They've lost you here before. They'll look harder."), true);
+        }
         return true;
     }
 
@@ -522,10 +544,18 @@ public final class HidingServer {
     // Keeps a searching mob walking to a place: asked again every few ticks whenever its own idle goals have sent it
     // somewhere else, or it has stopped short.
     private static void walk(Mob mob, Vec3 to, int ticks) {
+        walk(mob, to, ticks, SEARCH_SPEED);
+    }
+
+    /**
+     * Keeps a mob walking to a place at a speed, called each tick with a count that goes up by one: asked again every
+     * few ticks whenever its own idle goals have sent it somewhere else, or it has stopped short.
+     */
+    static void walk(Mob mob, Vec3 to, int ticks, double speed) {
         if (ticks % SEARCH_REPATH != 1) return;
         BlockPos heading = mob.getNavigation().getTargetPos();
         boolean onTheWay = !mob.getNavigation().isDone() && heading != null && heading.closerToCenterThan(to, SEARCH_REACH + 1.0);
-        if (!onTheWay) mob.getNavigation().moveTo(to.x, to.y, to.z, SEARCH_SPEED);
+        if (!onTheWay) mob.getNavigation().moveTo(to.x, to.y, to.z, speed);
     }
 
     // The chance a search finds them: the server's search chance, by the difficulty (none on peaceful, half on easy,
@@ -539,7 +569,80 @@ public final class HidingServer {
             case HARD -> 1.5F;
         };
         if (difficulty == 0.0F) return 0.0F;
-        return Mth.clamp(base * difficulty + hide.noise * SEARCH_NOISE, 0.0F, 1.0F);
+        return Mth.clamp(base * difficulty + hide.noise * SEARCH_NOISE + hide.remembered * MEMORY_SEARCH, 0.0F, 1.0F);
+    }
+
+    /**
+     * Where something a hiding player throws leaves their spot: out of a chest's lid or past a closet's door, a step out
+     * of a nook's open front, or else where they went in; at about the height of a throw. Null when they aren't hiding.
+     */
+    static @Nullable Vec3 mouth(ServerPlayer player) {
+        Hide hide = HIDING.get(player.getUUID());
+        if (hide == null || player.level().dimension() != hide.dimension) return null;
+        Vec3 out = front(player.serverLevel(), player, hide.spot);
+        if (out == null && NookHidingSpots.isNook(hide.spot.type()) && hide.spot.posture() == HidingPosture.STANDING) {
+            Direction front = Direction.fromYRot(hide.spot.yaw());
+            out = hide.spot.position().add(front.getStepX() * 0.9, 0.0, front.getStepZ() * 0.9);
+        }
+        if (out == null) out = hide.exit;
+        return out.add(0.0, THROW_HEIGHT, 0.0);
+    }
+
+    /**
+     * Something a hiding player threw has landed: far enough from the spot, it is heard. What was after them and the
+     * monsters about go to look there (a search under way is given up), and the hide time is cut short.
+     */
+    static void distract(ServerPlayer player, Vec3 landing) {
+        Hide hide = HIDING.get(player.getUUID());
+        ServerLevel level = player.serverLevel();
+        if (hide == null || level.dimension() != hide.dimension) return;
+        if (landing.distanceToSqr(hide.spot.position()) < DISTRACT_MIN * DISTRACT_MIN) {
+            player.sendSystemMessage(Component.translatableWithFallback("gui.whycantisleep.hide.distract_close", "Too close. That won't fool anything."), true);
+            return;
+        }
+        if (hide.distractions >= DISTRACT_MOST) {
+            player.sendSystemMessage(Component.translatableWithFallback("gui.whycantisleep.hide.distract_again", "They won't fall for that again."), true);
+            return;
+        }
+        hide.distractions++;
+        List<Mob> lured = new ArrayList<>();
+        for (UUID id : hide.hunters) {
+            if (level.getEntity(id) instanceof Mob hunter && hunter.isAlive() && hunter.distanceToSqr(player) < HUNTER_RANGE * HUNTER_RANGE) lured.add(hunter);
+        }
+        AABB heard = new AABB(BlockPos.containing(landing)).inflate(DISTRACT_RANGE).minmax(new AABB(hide.spot.anchor()).inflate(PROWLER_RANGE));
+        for (Monster monster : level.getEntitiesOfClass(Monster.class, heard, Monster::isAlive)) {
+            if (!lured.contains(monster) && !monster.getType().is(IGNORES_HIDING)) lured.add(monster);
+        }
+        for (Mob mob : lured) {
+            if (mob.getTarget() == player) mob.setTarget(null);
+            Distractions.lure(mob, landing, DISTRACT_SPEED);
+        }
+        if (hide.search != null && lured.stream().anyMatch(mob -> mob.getUUID().equals(hide.search.hunter))) hide.search = null;
+        // The hide time is cut short, never to less than a second from now; the client is told so its card keeps up.
+        if (hide.ticks < hide.hideTicks) {
+            int cut = Math.round(hide.baseHideTicks * DISTRACT_CUT);
+            hide.hideTicks = Math.max(hide.ticks + 20, hide.hideTicks - cut);
+            if (WCISNetwork.hasMod(player)) WCISNetwork.sendToPlayer(player, new HideTimePayload(hide.hideTicks - hide.ticks));
+        }
+        player.sendSystemMessage(lured.isEmpty() ? Component.translatableWithFallback("gui.whycantisleep.hide.distract_nothing", "Nothing out there to fool.")
+                : Component.translatableWithFallback("gui.whycantisleep.hide.distracted", "They heard it, and went to look."), true);
+    }
+
+    /**
+     * A monster drawn to a spot it remembers ({@link MonsterMemory}) has come and looked it over: whoever hides there is
+     * found by the search's chance (never while they keep their heart slow), and pulled out.
+     */
+    static void lookedIn(ServerLevel level, Mob mob, BlockPos anchor) {
+        for (Map.Entry<UUID, Hide> entry : HIDING.entrySet()) {
+            Hide hide = entry.getValue();
+            if (hide.dimension != level.dimension() || !hide.spot.anchor().equals(anchor) || hide.hunted) continue;
+            if (!(level.getEntity(entry.getKey()) instanceof ServerPlayer hider)) continue;
+            if (level.getRandom().nextFloat() >= findChance(level, hide)) continue;
+            stop(hider, HidingEvents.Reason.FOUND);
+            mob.setTarget(hider);
+            hider.sendSystemMessage(Component.translatableWithFallback("gui.whycantisleep.hide.found_remembered", "It came back for this spot, and found you!"), true);
+            return;
+        }
     }
 
     // Whoever hides in a chest or closet whose block another player just opened is found and comes out.
@@ -655,6 +758,9 @@ public final class HidingServer {
                 BlockState doorState = level.getBlockState(pos);
                 if (doorState.getBlock() instanceof DoorBlock door && door.isOpen(doorState)) door.setOpen(player, level, doorState, pos, false);
             }
+        } else if (NookHidingSpots.isNook(spot.type())) {
+            // Brushing past what the nook is made of: a curtain's cloth, straw, wood.
+            level.playSound(null, anchor, state.getSoundType().getStepSound(), SoundSource.PLAYERS, 0.8F, in ? 0.7F : 0.9F);
         } else {
             level.playSound(null, anchor, SoundEvents.WOOL_STEP, SoundSource.PLAYERS, 0.8F, in ? 0.7F : 0.9F);
         }
@@ -664,6 +770,8 @@ public final class HidingServer {
     private static void shakeOff(ServerLevel level, ServerPlayer player, Hide hide) {
         // They vanish only if the server lets them, and only if nobody near is out in the open to see it: everyone
         // about has to be hiding too. Else they just lose the player (they lost them going in), and stay.
+        // What was after them lost them here, and remembers it.
+        if (!hide.hunters.isEmpty()) MonsterMemory.remember(level, hide.spot.anchor());
         if (!WCISServerConfig.HIDING_CLEARS_MONSTERS.get()) {
             player.sendSystemMessage(Component.translatableWithFallback("gui.whycantisleep.hide.lost_you", "They lost you, but they're still out there."), true);
             return;
@@ -683,6 +791,7 @@ public final class HidingServer {
         }
         HidingEvents.ShakenOff event = new HidingEvents.ShakenOff(player, hide.spot, gone);
         HidingEvents.SHAKEN_OFF.invoke(event);
+        if (hide.hunters.isEmpty() && !event.hunters().isEmpty()) MonsterMemory.remember(level, hide.spot.anchor());
         for (Entity entity : event.hunters()) {
             if (!entity.isAlive()) continue;
             level.sendParticles(ParticleTypes.LARGE_SMOKE, entity.getX(), entity.getY() + entity.getBbHeight() / 2.0, entity.getZ(), 14,
@@ -754,6 +863,10 @@ public final class HidingServer {
         private int ticks;
         private float noise;
         private boolean hunted;
+        // How many times monsters were shaken off from this spot before, and remember it.
+        private int remembered;
+        // How many distractions they have thrown from this spot.
+        private int distractions;
         private @Nullable Search search;
 
         private Hide(HidingSpotType type, HidingSpot spot, ResourceKey<Level> dimension, Vec3 exit, int hideTicks) {

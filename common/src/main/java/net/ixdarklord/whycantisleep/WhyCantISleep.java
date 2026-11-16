@@ -12,6 +12,7 @@ import net.ixdarklord.whycantisleep.network.WCISNetwork;
 import net.ixdarklord.whycantisleep.sleep.BedCheck;
 import net.ixdarklord.whycantisleep.sleep.BedNaming;
 import net.ixdarklord.whycantisleep.sleep.DecorDiscovery;
+import net.ixdarklord.whycantisleep.sleep.NightGuards;
 import net.ixdarklord.whycantisleep.sleep.RoomClearing;
 import net.ixdarklord.whycantisleep.sleep.SleepBoardServer;
 import net.ixdarklord.whycantisleep.sleep.SleepNights;
@@ -49,6 +50,7 @@ public final class WhyCantISleep implements ModConstructor {
         BedCheck.init();
         BedNaming.init();
         SleepReminders.init();
+        NightGuards.init();
         HidingServer.init();
         GuideBookGift.init();
         GuideBookSources.init();
