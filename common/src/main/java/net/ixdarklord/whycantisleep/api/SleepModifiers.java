@@ -22,11 +22,11 @@ import java.util.Map;
  *   "label": "mymod.modifier.rainy_night",     // a translation key, or plain text; a name in Title Case
  *   "points": 5,                               // fixed points: above 0 a buff, below a debuff
  *   "per": "near_blocks", "each": 2,           // and/or points per count of: monsters, soothing, unsettling,
- *   "most": 10,                                //   pillow_light or near_blocks; held to "most" (optional)
+ *   "most": 10,                                //   pillow_light, guards or near_blocks; held to "most"
  *   "when": {                                  // optional; every condition given must hold
  *     "enclosed": true, "lit": true,           // the room: closed, lit all through
  *     "pillow_light": { "min": 0, "max": 7 },  // ranges: "min" and "max", both optional
- *     "monsters": { "max": 0 }, "soothing": { "min": 1 }, "unsettling": { "max": 0 },
+ *     "monsters": { "max": 0 }, "soothing": { "min": 1 }, "unsettling": { "max": 0 }, "guards": { "min": 1 },
  *     "calm_music": true, "creepy_music": false, "loud_music": false, "nightmare": false,
  *     "trouble": ["rested", "restless", "sleepless"],
  *     "reason": ["morning", "got_up", "hurt", "bed_gone", "other"],

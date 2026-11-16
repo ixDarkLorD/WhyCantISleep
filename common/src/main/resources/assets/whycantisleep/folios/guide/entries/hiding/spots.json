@@ -41,6 +41,24 @@
         "double_closet"
       ],
       "text": "guide.whycantisleep.guide.entry.hiding.spots.page6.text"
+    },
+    {
+      "type": "spotlight",
+      "item": "minecraft:white_banner",
+      "title": "guide.whycantisleep.guide.entry.hiding.spots.page7.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.spots.page7.text"
+    },
+    {
+      "type": "spotlight",
+      "item": "minecraft:hay_block",
+      "title": "guide.whycantisleep.guide.entry.hiding.spots.page8.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.spots.page8.text"
+    },
+    {
+      "type": "spotlight",
+      "item": "minecraft:barrel",
+      "title": "guide.whycantisleep.guide.entry.hiding.spots.page9.title",
+      "text": "guide.whycantisleep.guide.entry.hiding.spots.page9.text"
     }
   ]
 }

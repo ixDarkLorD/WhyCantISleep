@@ -1,6 +1,7 @@
 package net.ixdarklord.whycantisleep.mixin;
 
 import com.mojang.datafixers.util.Either;
+import net.ixdarklord.whycantisleep.sleep.NightGuards;
 import net.ixdarklord.whycantisleep.sleep.SleepChecks;
 import net.ixdarklord.whycantisleep.sleep.SleepNights;
 import net.ixdarklord.whycantisleep.sleep.SleepServer;
@@ -56,7 +57,8 @@ public abstract class ServerPlayerMixin {
         if (pos == null) return monsters;
         @SuppressWarnings("unchecked")
         List<Monster> ruled = (List<Monster>) (List<?>) SleepChecks.applyRules((ServerPlayer) (Object) this, pos, monsters);
-        return ruled;
+        // A night guard about the bed scares one of them off, once a night.
+        return NightGuards.scareOff((ServerPlayer) (Object) this, pos, ruled);
     }
 
     @Inject(method = "stopSleepInBed", at = @At("HEAD"))

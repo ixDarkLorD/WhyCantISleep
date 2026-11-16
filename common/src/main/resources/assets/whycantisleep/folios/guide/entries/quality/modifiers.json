@@ -40,6 +40,13 @@
           "translate": "guide.whycantisleep.guide.entry.quality.modifiers.page2.list.empty"
         }
       }
+    },
+    {
+      "type": "entity",
+      "entity": "minecraft:iron_golem",
+      "zoom": 0.9,
+      "title": "guide.whycantisleep.guide.entry.quality.modifiers.page3.title",
+      "text": "guide.whycantisleep.guide.entry.quality.modifiers.page3.text"
     }
   ]
 }
