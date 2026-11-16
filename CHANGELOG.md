@@ -1,12 +1,12 @@
 # Changelog
 This file is for listing all the changes to this project
 
-## v0.4.0 Beta | Unreleased
+## v0.4.0 Beta | Nov 17, 2026
 ### ✨ New Features
 - `/whycantisleep config` opens the mod's config screens, and `/whycantisleep config <name>` just one of them. Operators can reload the config files after editing them by hand with `/whycantisleep config reload`.
 
 ### 🛠️ Changes
-- Now needs CoolCatLib 8.3.0 or newer.
+- Now needs CoolCatLib 9.0.0 or newer.
 
 ## v0.3.0 Beta | Nov 16, 2026
 ### ✨ New Features
