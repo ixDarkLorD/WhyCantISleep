@@ -140,7 +140,7 @@ public final class SleepNights {
         Bedroom.Music music = Bedroom.music(level, head);
         SleepContext context = new SleepContext(player, head, WakeReason.MORNING, FULL_NIGHT, room.enclosed(), room.lit(), room.pillowLight(),
                 room.decor().soothing(), room.decor().unsettling(), monsters, music == Bedroom.Music.CALM, music == Bedroom.Music.CREEPY,
-                music == Bedroom.Music.LOUD, SleepTroubles.get(player).level(), false);
+                music == Bedroom.Music.LOUD, SleepTroubles.get(player).level(), false, NightGuards.count(level, player, head));
         return SleepQuality.of(SleepModifiers.score(context));
     }
 
@@ -221,7 +221,7 @@ public final class SleepNights {
     private static float terrorIntensity(ServerPlayer player, Night night) {
         Bedroom room = night.room;
         SleepContext context = new SleepContext(player, night.bed, WakeReason.MORNING, FULL_NIGHT, room.enclosed(), room.lit(), room.pillowLight(),
-                room.decor().soothing(), room.decor().unsettling(), night.monsters, night.calm, night.creepy, night.loud, night.trouble.level(), false);
+                room.decor().soothing(), room.decor().unsettling(), night.monsters, night.calm, night.creepy, night.loud, night.trouble.level(), false, night.guards);
         int score = SleepQuality.of(SleepModifiers.score(context)).score();
         float sleepless = night.trouble.level() == SleepTrouble.Level.SLEEPLESS ? TERROR_SLEEPLESS : 0.0F;
         float days = harsh() ? Math.min(TERROR_DAYS_MOST, Math.max(0, daysAwake(night) - 1) * TERROR_PER_DAY) : 0.0F;
@@ -298,7 +298,8 @@ public final class SleepNights {
 
         Bedroom room = night.room;
         SleepContext context = new SleepContext(player, night.bed, reason, slept, room.enclosed(), room.lit(), room.pillowLight(), room.decor().soothing(),
-                room.decor().unsettling(), night.monsters, night.calm, night.creepy, night.loud, night.trouble.level(), night.terror);
+                room.decor().unsettling(), night.monsters, night.calm, night.creepy, night.loud, night.trouble.level(), night.terror,
+                Math.max(night.guards, NightGuards.count(level, player, night.bed)));
         List<SleepQuality.Factor> factors = SleepModifiers.score(context);
 
         SleepEvents.QualityScoring scoring = new SleepEvents.QualityScoring(player, reason, factors);
@@ -352,7 +353,10 @@ public final class SleepNights {
     // Through the night: the monsters about, at their most, and the music heard.
     private static void look(ServerPlayer player) {
         Night night = NIGHTS.get(player.getUUID());
-        if (night != null && player.isSleeping()) night.observe(player.level());
+        if (night != null && player.isSleeping()) {
+            night.observe(player.level());
+            night.guards = Math.max(night.guards, NightGuards.count(player.level(), player, night.bed));
+        }
     }
 
     private static final class Night {
@@ -361,6 +365,7 @@ public final class SleepNights {
         private final SleepTrouble trouble;
         private final Bedroom room;
         private int monsters;
+        private int guards;
         private boolean creepy;
         private boolean loud;
         private boolean calm;

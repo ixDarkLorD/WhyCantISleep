@@ -1,0 +1,11 @@
+{
+  "label": "gui.whycantisleep.quality.night_guard",
+  "per": "guards",
+  "each": 5,
+  "most": 10,
+  "when": {
+    "guards": {
+      "min": 1
+    }
+  }
+}

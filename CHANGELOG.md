@@ -1,6 +1,18 @@
 # Changelog
 This file is for listing all the changes to this project
 
+## v0.3.0 Beta | Unreleased
+### ✨ New Features
+- **More hiding spots**: behind a **curtain** (a nook two high, walled in, a banner hanging over its front from the block above, or two blocks of wool shutting it), in a **hay pile** (a gap two long and one high under hay bales, walled along its sides; you lie burrowed in, peering through the straw), and in a **barrel stack** or a **bookshelf alcove** (a gap two high with barrels or bookshelves on both sides, open at the front). Each has its own squint and hide time, and getting in sounds of what it's made of. Server options `hideBehindCurtains`, `hideInHay`, `hideInBarrels` and `hideInBookshelves`.
+- **Monster memory**: monsters remember the spots they lost you in. At night, those that turn up near one come to look there first, and may find whoever hides in it; each time a spot shakes monsters off, it takes longer to hide in and is searched harder. Moving rooms or building another spot pays off: a spot is forgotten a few days after it was last used. Server option `monsterMemory`.
+- **Distractions**: hiding, throw a snowball or an egg, or shoot an arrow, out of your spot. Where it lands makes a noise: what's out there goes to look (a search on its way to you is given up), and your hide time is cut short. It must land six blocks away or more, and they fall for it twice a hide. Server option `distractions`.
+- **Cramp**: staying hidden a minute past the hide time cramps your legs. You fidget, and the noise builds however still you keep, so a hiding spot is no place to stay for good. The card says when your legs are cramping. Server option `cramp`.
+- **Night guards**: an iron golem near your bed, or your own tamed wolf or cat sitting by it, keeps watch: +5 each to the night's sleep quality, up to +10 ("Night Guard"). Once a night a guard also scares off a monster keeping you from sleeping, and if it was the only one, you lie down. Server option `nightGuards`.
+- The Insomniac's Handbook has pages on all of it: the new spots, staying too long, throwing them off, how monsters remember, and night guards.
+
+### 🛠️ Changes
+- Data pack sleep modifiers can count night guards (`"per": "guards"`, and a `guards` range in `when`).
+
 ## v0.2.0 Beta | Nov 2, 2026
 ### ✨ New Features
 - **Bed check**: hold a **Dreamcatcher**, sneak and use a bed, and a card says at once how a night in it would go before you lie down: the score it would have, what matters most to it, how it compares with the last night you slept there, and whether a night terror is waiting. The card follows the room live: place a candle, break a pot or open the door and it changes within a moment. Server options `bedCheck` and `bedCheckNeedsTools` (off, either tool shows both the forecast and the dark spots), client option `bedCheck`.

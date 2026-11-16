@@ -49,7 +49,7 @@ public final class WCISServerConfig {
             .range(0, 600).comment("Seconds a player waits between nudges.").build();
     static {
         BUILDER.pop();
-        BUILDER.push("hiding", "Hiding under beds and tables, in chests and closets.");
+        BUILDER.push("hiding", "Hiding under beds and tables, in chests and closets, behind curtains, in hay, barrels and bookshelves.");
     }
     public static final ConfigValue<Boolean> ALLOW_HIDING = BUILDER.bool("allowHiding", true)
             .comment("Whether players may hide (sneak and use a bed, table, double chest or closet door with empty hands), where nothing can see them.").build();
@@ -61,6 +61,14 @@ public final class WCISServerConfig {
             .comment("Whether players may hide in double chests.").enabledWhen(ALLOW_HIDING).build();
     public static final ConfigValue<Boolean> HIDE_IN_CLOSETS = BUILDER.bool("hideInClosets", true)
             .comment("Whether players may hide in closets: a door, or a double door, with a nook behind it walled in by blocks or trapdoors.").enabledWhen(ALLOW_HIDING).build();
+    public static final ConfigValue<Boolean> HIDE_BEHIND_CURTAINS = BUILDER.bool("hideBehindCurtains", true)
+            .comment("Whether players may hide behind curtains: a nook two high, walled in, its front hung with a banner from above or shut with wool.").enabledWhen(ALLOW_HIDING).build();
+    public static final ConfigValue<Boolean> HIDE_IN_HAY = BUILDER.bool("hideInHay", true)
+            .comment("Whether players may burrow into hay piles: a gap two long and one high under hay bales, walled along its sides.").enabledWhen(ALLOW_HIDING).build();
+    public static final ConfigValue<Boolean> HIDE_IN_BARRELS = BUILDER.bool("hideInBarrels", true)
+            .comment("Whether players may squeeze into barrel stacks: a gap two high between barrels, open at the front.").enabledWhen(ALLOW_HIDING).build();
+    public static final ConfigValue<Boolean> HIDE_IN_BOOKSHELVES = BUILDER.bool("hideInBookshelves", true)
+            .comment("Whether players may stand in bookshelf alcoves: a gap two high lined with bookshelves, open at the front.").enabledWhen(ALLOW_HIDING).build();
     public static final ConfigValue<Integer> HIDE_TIME = BUILDER.intValue("hideTime", 15)
             .range(3, 120).slider().comment("Seconds a player must stay hidden before the monsters after them give up and vanish.").build();
     public static final ConfigValue<Integer> HIDE_COOLDOWN = BUILDER.intValue("hideCooldown", 10)
@@ -78,6 +86,15 @@ public final class WCISServerConfig {
     public static final ConfigValue<Boolean> VOICE_GIVES_AWAY = BUILDER.bool("voiceGivesAway", true)
             .comment("With Simple Voice Chat: whether speaking while hiding is noise, as loud as the voice (whispering hardly counts), "
                     + "so talking with monsters near gives a hiding player away.").enabledWhen(NOISE_GIVES_AWAY).build();
+    public static final ConfigValue<Boolean> CRAMP = BUILDER.bool("cramp", true)
+            .comment("Whether staying hidden a minute past the hide time cramps a player's legs: they start to fidget, and the noise builds, "
+                    + "so a hiding spot is no place to stay for good.").enabledWhen(ALLOW_HIDING).build();
+    public static final ConfigValue<Boolean> MONSTER_MEMORY = BUILDER.bool("monsterMemory", true)
+            .comment("Whether monsters remember the spots players shook them off from: at night, those that spawn near come to look there first, "
+                    + "and each time a spot is used it takes longer to hide in and is searched harder. Forgotten after a few days.").enabledWhen(ALLOW_HIDING).build();
+    public static final ConfigValue<Boolean> DISTRACTIONS = BUILDER.bool("distractions", true)
+            .comment("Whether a hiding player may throw a snowball or an egg, or shoot an arrow, out of their spot: where it lands makes a noise, "
+                    + "the monsters about go to look, and the hide time is cut short.").enabledWhen(ALLOW_HIDING).build();
     public static final ConfigValue<Boolean> HEARTBEAT_MINIGAME = BUILDER.bool("heartbeatMinigame", true)
             .comment("Whether a player who hides with monsters chasing them must keep their heart slow: clicking on the beat, three misses and they gasp.").enabledWhen(ALLOW_HIDING).build();
     public static final ConfigValue<Boolean> HUNTER_SEARCH = BUILDER.bool("hunterSearch", true)
@@ -107,6 +124,9 @@ public final class WCISServerConfig {
             .comment("Whether waking in the morning can leave a sleep effect: positive after good nights, negative after bad ones, neutral after any. Data packs add more.").build();
     public static final ConfigValue<Integer> SLEEP_EFFECT_CHANCE = BUILDER.intValue("sleepEffectChance", 50)
             .range(0, 100).slider().comment("Percent chance of a sleep effect on waking in the morning.").build();
+    public static final ConfigValue<Boolean> NIGHT_GUARDS = BUILDER.bool("nightGuards", true)
+            .comment("Whether an iron golem near the bed, or a tamed wolf or cat sitting by it, makes a night guard: it adds to the sleep quality, "
+                    + "and once a night it scares off a monster keeping its owner from sleeping.").build();
     public static final ConfigValue<Boolean> WELL_RESTED = BUILDER.bool("wellRested", true)
             .comment("Whether sleeping through the night in a closed, lit room (doors shut, no dark corners) leaves the player well rested.").build();
     public static final ConfigValue<Boolean> BED_CHECK = BUILDER.bool("bedCheck", true)
