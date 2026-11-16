@@ -569,17 +569,13 @@ public final class HidingServer {
     }
 
     /**
-     * Where something a hiding player throws leaves their spot: out of a chest's lid or past a closet's door, a step out
-     * of a nook's open front, or else where they went in; at about the height of a throw. Null when they aren't hiding.
+     * Where something a hiding player throws leaves their spot: out of a chest's lid or past a closet's door, or else
+     * where they went in; at about the height of a throw. Null when they aren't hiding.
      */
     static @Nullable Vec3 mouth(ServerPlayer player) {
         Hide hide = HIDING.get(player.getUUID());
         if (hide == null || player.level().dimension() != hide.dimension) return null;
         Vec3 out = front(player.level(), player, hide.spot);
-        if (out == null && NookHidingSpots.isNook(hide.spot.type()) && hide.spot.posture() == HidingPosture.STANDING) {
-            Direction front = Direction.fromYRot(hide.spot.yaw());
-            out = hide.spot.position().add(front.getStepX() * 0.9, 0.0, front.getStepZ() * 0.9);
-        }
         if (out == null) out = hide.exit;
         return out.add(0.0, THROW_HEIGHT, 0.0);
     }
@@ -754,9 +750,6 @@ public final class HidingServer {
                 BlockState doorState = level.getBlockState(pos);
                 if (doorState.getBlock() instanceof DoorBlock door && door.isOpen(doorState)) door.setOpen(player, level, doorState, pos, false);
             }
-        } else if (NookHidingSpots.isNook(spot.type())) {
-            // Brushing past what the nook is made of: a curtain's cloth, straw, wood.
-            level.playSound(null, anchor, state.getSoundType().getStepSound(), SoundSource.PLAYERS, 0.8F, in ? 0.7F : 0.9F);
         } else {
             level.playSound(null, anchor, SoundEvents.WOOL_STEP, SoundSource.PLAYERS, 0.8F, in ? 0.7F : 0.9F);
         }
