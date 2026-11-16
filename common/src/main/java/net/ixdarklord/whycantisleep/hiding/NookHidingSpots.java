@@ -23,6 +23,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -128,7 +129,8 @@ public final class NookHidingSpots {
             // Wool: the nook is behind it, away from the player, the wool its front two high.
             BlockPos wool = level.getBlockState(pos.below()).is(BlockTags.WOOL) ? pos.below() : pos;
             if (!level.getBlockState(wool.above()).is(BlockTags.WOOL)) return Lookup.NONE;
-            Direction away = towards(wool, player).getLast();
+            List<Direction> sides = towards(wool, player);
+            Direction away = sides.get(sides.size() - 1);
             return at(level, wool.relative(away), away.getOpposite(), wool, player);
         }
 
@@ -174,7 +176,10 @@ public final class NookHidingSpots {
             starts.add(pos.below());
             for (Direction side : towards(pos, player)) starts.add(pos.relative(side));
             for (BlockPos start : starts) {
-                for (Direction along : towards(start, player).reversed()) {
+                // Along the sides facing away from the player first: the gap runs on from where they reach in.
+                List<Direction> alongs = towards(start, player);
+                Collections.reverse(alongs);
+                for (Direction along : alongs) {
                     Lookup lookup = at(level, start, along, player);
                     if (lookup.spot() != null) return lookup;
                 }

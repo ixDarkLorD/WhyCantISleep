@@ -16,6 +16,7 @@ import net.minecraft.world.entity.animal.feline.Cat;
 import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -70,7 +71,7 @@ public final class NightGuards {
         long night = (level.getDefaultClockTime() + 12000L) / 24000L;
         Long last = SCARED.get(player.getUUID());
         if (last != null && last == night) return blockers;
-        T blocker = blockers.stream().filter(NightGuards::mayScare).min(Comparator.comparingDouble(mob -> mob.distanceToSqr(bed.getCenter()))).orElse(null);
+        T blocker = blockers.stream().filter(NightGuards::mayScare).min(Comparator.comparingDouble(mob -> mob.distanceToSqr(Vec3.atCenterOf(bed)))).orElse(null);
         if (blocker == null) return blockers;
         Mob guard = nearest(guards(level, player, bed), blocker);
         if (guard == null) return blockers;
