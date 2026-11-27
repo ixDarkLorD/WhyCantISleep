@@ -10,6 +10,6 @@ dependencies {
     // brings a second CoolCatLib. modLocalRuntime, since 1.21.1 is mapped and the jar must be remapped for dev runs.
     modLocalRuntime("net.ixdarklord.mcp_bridge:mcp_bridge-forge:${mcp_bridge_version}") { transitive = false }
     // Dev runs only: Simple Voice Chat, to try the optional integration (Modrinth's maven comes from the shared scripts),
-    // remapped like MCP Bridge. Its own version: see voicechat_forge_version in gradle.properties.
-    modLocalRuntime("maven.modrinth:simple-voice-chat:forge-${voicechat_forge_version}") { transitive = false }
+    // remapped like MCP Bridge.
+    modLocalRuntime("maven.modrinth:simple-voice-chat:forge-${voicechat_version}") { transitive = false }
 }
