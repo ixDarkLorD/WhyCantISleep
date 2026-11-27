@@ -1,6 +1,13 @@
 # Changelog
 This file is for listing all the changes to this project
 
+## v0.4.1 Beta | Unreleased
+### 🐛 Bug Fixes
+- The config screen on Forge shows its settings again instead of only a blurred background (fixed in CoolCatLib 9.0.2).
+
+### 🛠️ Changes
+- Now needs CoolCatLib 9.0.2 or newer.
+
 ## v0.4.0 Beta | Nov 17, 2026
 ### ✨ New Features
 - `/whycantisleep config` opens the mod's config screens, and `/whycantisleep config <name>` just one of them. Operators can reload the config files after editing them by hand with `/whycantisleep config reload`.
